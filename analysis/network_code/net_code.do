@@ -58,9 +58,33 @@
 	nwset				rain outcome, name(rainnet)
 	nwset,				detail
 
-	nwset 				rain outcome, name(rainnet) edgelist
-	
+	nwset 				outcome rain, edgelist
 
+	nwplot, 			lab layout(grid, columns(20))
+	nwplot, 			scatteropt(mfcolor(green) msymbol(D))
+	nwplot, 			scatteropt(mfcolor(green) msymbol(D)) lab
+	nwplot, 			lab layout(grid, columns(20))
+	nwplot, 			arrowfactor(4)
+	nwplot, 			arcbend(2)
+	nwplot, 			arcbend(2) lab
+	nwplot, 			arcbend(10) lab
+	nwplot, 			arcbend(20) lab
+	nwplot, 			arcstyle(automatic)
+	nwplot, 			arcstyle(curved)
+	nwplot, 			arcstyle(curved) lab
+	nwplot, 			arrowbarbfactor(10) arcstyle(curved) lab
+	nwplot, 			arrowbarbfactor(0.5) arcstyle(curved) lab
+	nwplot, 			arrowgap(0.5) arcstyle(curved) lab
+	nwplot, 			arrowgap(10) arcstyle(curved) lab
+	nwplot, 			arcsplines(10) arcstyle(curved) lab
+	nwplot, 			arcsplines(100) arcstyle(curved) lab
+	nwplot, 			arcsplines(100) arcstyle(curved) aspectratio(10) lab
+	nwplot, 			arcsplines(100) arcstyle(curved) aspectratio(100) lab
+	nwplot, 			arcsplines(100) arcstyle(curved) aspectratio(1) lab
+	nwplot, 			arcsplines(100) arcstyle(curved) aspectratio(0.1) lab
+	nwplot, 			arcsplines(100) arcstyle(curved) aspectratio(1) circle lab
+	nwplot, 			arcsplines(100) arcstyle(curved) aspectratio(1) nodefactor(2) lab
+	nwplot, 			arcsplines(100) arcstyle(curved) aspectratio(1) nodefactor(0.2) lab
 	
 ************************************************************************
 **# 7 - end matter
