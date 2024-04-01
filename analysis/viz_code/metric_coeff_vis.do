@@ -404,7 +404,7 @@ preserve
 	global			gheight	=	40
 
 	twoway 			scatter k1 k2 k3 obs, xlab(0(8)168) xsize(10) ysize(4) msize(vsmall vsmall vsmall)  ///
-						title("Ethiopia") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
+						title("Uganda") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
 						ylabel(1 "Quantity" ///
 						2 "Value" 3 "*{bf:Dependant Variable}*" ///
 						5 "CHIRPS" 6 "CPC" 7 "MERRA-2" 8 "ARC2" 9 "ERA5" 10 "TAMSAT" ///
