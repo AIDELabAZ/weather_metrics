@@ -120,7 +120,7 @@ preserve
 						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
 						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
 						(rbar ci_lo ci_up obs if b_sig == ., ///
-						barwidth(.2) color(black%50) yaxis(2) ) || ///
+						barwidth(.2) color(black%50) yaxis(2) xline(88, lcolor(maroon) lstyle(solid))) || ///
 						(rbar ci_lo ci_up obs if b_sig != ., ///
 						barwidth(.2) color(edkblue%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
@@ -180,7 +180,7 @@ preserve
 						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
 						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
 						(rbar ci_lo ci_up obs if b_sig == ., ///
-						barwidth(.2) color(black%50) yaxis(2) ) || ///
+						barwidth(.2) color(black%50) yaxis(2) xline(70, lcolor(maroon) lstyle(solid))) || ///
 						(rbar ci_lo ci_up obs if b_sig != ., ///
 						barwidth(.2) color(edkblue%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
@@ -240,7 +240,7 @@ preserve
 						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
 						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
 						(rbar ci_lo ci_up obs if b_sig == ., ///
-						barwidth(.2) color(black%50) yaxis(2) ) || ///
+						barwidth(.2) color(black%50) yaxis(2) xline(54, lcolor(maroon) lstyle(solid))) || ///
 						(rbar ci_lo ci_up obs if b_sig != ., ///
 						barwidth(.2) color(edkblue%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
@@ -300,7 +300,7 @@ preserve
 						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
 						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
 						(rbar ci_lo ci_up obs if b_sig == ., ///
-						barwidth(.2) color(black%50) yaxis(2) ) || ///
+						barwidth(.2) color(black%50) yaxis(2) xline(92, lcolor(maroon) lstyle(solid)) ) || ///
 						(rbar ci_lo ci_up obs if b_sig != ., ///
 						barwidth(.2) color(edkblue%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
@@ -360,7 +360,7 @@ preserve
 						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
 						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
 						(rbar ci_lo ci_up obs if b_sig == ., ///
-						barwidth(.2) color(black%50) yaxis(2) ) || ///
+						barwidth(.2) color(black%50) yaxis(2) xline(60, lcolor(maroon) lstyle(solid))) || ///
 						(rbar ci_lo ci_up obs if b_sig != ., ///
 						barwidth(.2) color(edkblue%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
@@ -420,7 +420,7 @@ preserve
 						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
 						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
 						(rbar ci_lo ci_up obs if b_sig == ., ///
-						barwidth(.2) color(black%50) yaxis(2) ) || ///
+						barwidth(.2) color(black%50) yaxis(2) xline(58, lcolor(maroon) lstyle(solid)) ) || ///
 						(rbar ci_lo ci_up obs if b_sig != ., ///
 						barwidth(.2) color(edkblue%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
