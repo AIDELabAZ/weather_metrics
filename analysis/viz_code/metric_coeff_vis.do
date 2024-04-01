@@ -373,7 +373,7 @@ restore
 
 *** uganda ***
 preserve
-	keep			if country == 
+	keep			if country == 7
 	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
