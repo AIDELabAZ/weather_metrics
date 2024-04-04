@@ -106,6 +106,8 @@
 						ylab(0(.1)1, labsize(small)) ///
 						ytitle("Share of Significant Point Estimates") ///
 						xscale(r(0 24) ex) ///
+						yline($bmax, lcolor(maroon) lstyle(solid) ) ///
+						yline($bmin, lcolor(maroon)  lstyle(solid) ) ///
 						xlabel(2 "Mean Daily Rain " 6 "Median Daily Rain " ///
 						10 "Variance of Daily Rain " 14 "Skew of Daily Rain " ///
 						18 "Total Seasonal Rain " 22 "Dev. in Total Rain " ///
