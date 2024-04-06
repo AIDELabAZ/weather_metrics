@@ -128,7 +128,8 @@ preserve
 						saving("$sfig/eth_all", replace)
 
 	graph export 	"$xfig\eth_all.png", width(1400) replace	
-						
+	graph export 	"$xfig\eth_all.eps", 			 replace
+	
 restore
 
 *** malawi ***
@@ -188,7 +189,8 @@ preserve
 						saving("$sfig/mwi_all", replace)
 
 	graph export 	"$xfig\mwi_all.png", width(1400) replace	
-						
+	graph export 	"$xfig\mwi_all.eps", 			 replace
+	
 restore
 
 *** niger ***
@@ -248,7 +250,8 @@ preserve
 						saving("$sfig/ner_all", replace)
 
 	graph export 	"$xfig\ner_all.png", width(1400) replace	
-						
+	graph export 	"$xfig\ner_all.eps", 			 replace
+	
 restore
 
 *** nigeria ***
@@ -308,7 +311,7 @@ preserve
 						saving("$sfig/nga_all", replace)
 
 	graph export 	"$xfig\nga_all.png", width(1400) replace	
-						
+	graph export 	"$xfig\nga_all.eps", 			 replace					
 restore
 
 *** tanzania ***
@@ -368,7 +371,8 @@ preserve
 						saving("$sfig/tza_all", replace)
 
 	graph export 	"$xfig\tza_all.png", width(1400) replace	
-						
+	graph export 	"$xfig\tza_all.eps", 			 replace
+	
 restore
 
 *** uganda ***
@@ -428,7 +432,7 @@ preserve
 						saving("$sfig/uga_all", replace)
 
 	graph export 	"$xfig\uga_all.png", width(1400) replace	
-						
+	graph export 	"$xfig\uga_all.eps", 			 replace					
 restore
 
 ************************************************************************
