@@ -85,7 +85,23 @@
 	nwplot, 			arcsplines(100) arcstyle(curved) aspectratio(1) circle lab
 	nwplot, 			arcsplines(100) arcstyle(curved) aspectratio(1) nodefactor(2) lab
 	nwplot, 			arcsplines(100) arcstyle(curved) aspectratio(1) nodefactor(0.2) lab
-	
+	nwplot, 			layout (grid, columns(5)) lab nodefactor(1) edgefactor(0.5) arrowfactor(0.5) arrowbarbfactor(.2) scheme(s1network)
+	nwplot, 			layout (mds) lab nodefactor(1) edgefactor(0.5) arrowfactor(0.5) arrowbarbfactor(.2) scheme(s1network)
+	nwplot, 			layout (grid, columns(4)) lab edgepatternpalette (dash) nodefactor(1) edgefactor(0.5) arrowfactor(0.5) arrowbarbfactor(.2) scheme(s1network)
+	nwplot, 			layout (grid, columns(4)) lab edgepatternpalette (dash_dot) nodefactor(1) edgefactor(0.5) arrowfactor(0.5) arrowbarbfactor(.2) scheme(s1network)
+	nwplot, 			layout (grid, columns(4)) lab edgepatternpalette (dash_dot) edgecolorpalette(styellow) ///
+						nodefactor(1) edgefactor(0.5) arrowfactor(0.5) arrowbarbfactor(.2)scheme(s1network)
+	nwplot, 			layout (grid, columns(4)) label(_nodelab) labelopt(mlabsize(small) ///
+						mlabcolor(red))edgepatternpalette (dash) nodefactor(1) edgefactor(0.5) arrowfactor(0.5) arrowbarbfactor(.2) scheme(s1network)
+	nwplot, 			layout (circle) label(_nodelab) labelopt(mlabsize(small) mlabcolor(red)) ///
+						edgepatternpalette (dash) nodefactor(1) edgefactor(0.5) arrowfactor(0.5) arrowbarbfactor(.2) scheme(s1network)
+	nwplot, 			layout (grid, columns(4)) label(_nodelab) labelopt(mlabsize(small) mlabcolor(red)) ///
+						edgepatternpalette (dash) nodefactor(1) edgefactor(0.5) arcstyle(curved) arrowfactor(0.5) arrowbarbfactor(.2) scheme(s1network) aspectratio (1.75)
+	nwplot, 			layout (circle) label(_nodelab) labelopt(mlabsize(vsmall) mlabcolor(red)) edgepatternpalette (dash) ///
+						edgecolorpalette (black) nodefactor(1) edgefactor(0.5) arcstyle(curved) arrowfactor(1) arrowbarbfactor(2) scheme(s1network)
+	nwplot, 			layout (grid, columns(5)) label(_nodelab) labelopt(mlabsize(vsmall) mlabcolor(red)) ///
+						edgepatternpalette (dash) edgecolorpalette (black) nodefactor(1) edgefactor(0.5) arcstyle(curved) ///
+						arrowfactor(1) arrowbarbfactor(2) scheme(s1network)
 ************************************************************************
 **# 7 - end matter
 ************************************************************************
