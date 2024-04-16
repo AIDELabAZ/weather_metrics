@@ -437,6 +437,306 @@
 	
 	
 ************************************************************************
+**## 2.2 - ethiopia median daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
+				(line median_season_ year if sat == 2, color(vermillion) ) ///
+				(line median_season_ year if sat == 3, color(sea)) ///
+				(line median_season_ year if sat == 4, color(turquoise)) ///
+				(line median_season_ year if sat == 5, color(reddish)) ///
+				(line median_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
+			
+	graph export 	"$xfig\eth_v02.png", width(1400) replace
+	
+************************************************************************
+**## 2.3 - ethiopia variance daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line sd_season_ year if sat == 1, lcolor(gray)) ///
+				(line sd_season_ year if sat == 2, color(vermillion) ) ///
+				(line sd_season_ year if sat == 3, color(sea)) ///
+				(line sd_season_ year if sat == 4, color(turquoise)) ///
+				(line sd_season_ year if sat == 5, color(reddish)) ///
+				(line sd_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Variance of Daily Rainfall (mm)") ylabel(1(1)10, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v03", replace)
+			
+	graph export 	"$xfig\eth_v03.png", width(1400) replace
+	
+************************************************************************
+**## 2.4 - ethiopia skew daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line skew_season_ year if sat == 1, lcolor(gray)) ///
+				(line skew_season_ year if sat == 2, color(vermillion) ) ///
+				(line skew_season_ year if sat == 3, color(sea)) ///
+				(line skew_season_ year if sat == 4, color(turquoise)) ///
+				(line skew_season_ year if sat == 5, color(reddish)) ///
+				(line skew_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Skew of Daily Rainfall (mm)") ylabel(0(0.05)0.75, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v04", replace)
+			
+	graph export 	"$xfig\eth_v04.png", width(1400) replace
+	
+************************************************************************
+**## 2.5 - ethiopia total daily rainfall for the growing season
+************************************************************************
+
+	sort		year
+	twoway 		(line total_season_ year if sat == 1, lcolor(gray)) ///
+				(line total_season_ year if sat == 2, color(vermillion) ) ///
+				(line total_season_ year if sat == 3, color(sea)) ///
+				(line total_season_ year if sat == 4, color(turquoise)) ///
+				(line total_season_ year if sat == 5, color(reddish)) ///
+				(line total_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)2000, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v05", replace)
+			
+	graph export 	"$xfig\eth_v05.png", width(1400) replace
+	
+************************************************************************
+**## 2.6 - ethiopia deviations in total daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray)) ///
+				(line dev_total_season_ year if sat == 2, color(vermillion) ) ///
+				(line dev_total_season_ year if sat == 3, color(sea)) ///
+				(line dev_total_season_ year if sat == 4, color(turquoise)) ///
+				(line dev_total_season_ year if sat == 5, color(reddish)) ///
+				(line dev_total_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Deviations in Total Daily Rainfall (mm)") ylabel(-500(100)500, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v06", replace)
+			
+	graph export 	"$xfig\eth_v06.png", width(1400) replace
+	
+************************************************************************
+**## 2.7 - ethiopia scaled deviations in total daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line scaled year if sat == 1, lcolor(gray)) ///
+				(line scaled year if sat == 2, color(vermillion) ) ///
+				(line scaled year if sat == 3, color(sea)) ///
+				(line scaled year if sat == 4, color(turquoise)) ///
+				(line scaled year if sat == 5, color(reddish)) ///
+				(line scaled year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v07", replace)
+			
+	graph export 	"$xfig\eth_v07.png", width(1400) replace
+	
+************************************************************************
+**## 2.1 - ethiopia median daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
+				(line median_season_ year if sat == 2, color(vermillion) ) ///
+				(line median_season_ year if sat == 3, color(sea)) ///
+				(line median_season_ year if sat == 4, color(turquoise)) ///
+				(line median_season_ year if sat == 5, color(reddish)) ///
+				(line median_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
+			
+	graph export 	"$xfig\eth_v02.png", width(1400) replace
+	
+************************************************************************
+**## 2.1 - ethiopia median daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
+				(line median_season_ year if sat == 2, color(vermillion) ) ///
+				(line median_season_ year if sat == 3, color(sea)) ///
+				(line median_season_ year if sat == 4, color(turquoise)) ///
+				(line median_season_ year if sat == 5, color(reddish)) ///
+				(line median_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
+			
+	graph export 	"$xfig\eth_v02.png", width(1400) replace
+	
+************************************************************************
+**## 2.1 - ethiopia median daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
+				(line median_season_ year if sat == 2, color(vermillion) ) ///
+				(line median_season_ year if sat == 3, color(sea)) ///
+				(line median_season_ year if sat == 4, color(turquoise)) ///
+				(line median_season_ year if sat == 5, color(reddish)) ///
+				(line median_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
+			
+	graph export 	"$xfig\eth_v02.png", width(1400) replace
+	
+************************************************************************
+**## 2.1 - ethiopia median daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
+				(line median_season_ year if sat == 2, color(vermillion) ) ///
+				(line median_season_ year if sat == 3, color(sea)) ///
+				(line median_season_ year if sat == 4, color(turquoise)) ///
+				(line median_season_ year if sat == 5, color(reddish)) ///
+				(line median_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
+			
+	graph export 	"$xfig\eth_v02.png", width(1400) replace
+	
+************************************************************************
+**## 2.1 - ethiopia median daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
+				(line median_season_ year if sat == 2, color(vermillion) ) ///
+				(line median_season_ year if sat == 3, color(sea)) ///
+				(line median_season_ year if sat == 4, color(turquoise)) ///
+				(line median_season_ year if sat == 5, color(reddish)) ///
+				(line median_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
+			
+	graph export 	"$xfig\eth_v02.png", width(1400) replace
+	
+************************************************************************
+**## 2.1 - ethiopia median daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
+				(line median_season_ year if sat == 2, color(vermillion) ) ///
+				(line median_season_ year if sat == 3, color(sea)) ///
+				(line median_season_ year if sat == 4, color(turquoise)) ///
+				(line median_season_ year if sat == 5, color(reddish)) ///
+				(line median_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
+			
+	graph export 	"$xfig\eth_v02.png", width(1400) replace
+	
+************************************************************************
+**## 2.1 - ethiopia median daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
+				(line median_season_ year if sat == 2, color(vermillion) ) ///
+				(line median_season_ year if sat == 3, color(sea)) ///
+				(line median_season_ year if sat == 4, color(turquoise)) ///
+				(line median_season_ year if sat == 5, color(reddish)) ///
+				(line median_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
+			
+	graph export 	"$xfig\eth_v02.png", width(1400) replace
+	
+************************************************************************
+**## 2.1 - ethiopia median daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
+				(line median_season_ year if sat == 2, color(vermillion) ) ///
+				(line median_season_ year if sat == 3, color(sea)) ///
+				(line median_season_ year if sat == 4, color(turquoise)) ///
+				(line median_season_ year if sat == 5, color(reddish)) ///
+				(line median_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
+			
+	graph export 	"$xfig\eth_v02.png", width(1400) replace
+	
+************************************************************************
+**## 2.1 - ethiopia median daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
+				(line median_season_ year if sat == 2, color(vermillion) ) ///
+				(line median_season_ year if sat == 3, color(sea)) ///
+				(line median_season_ year if sat == 4, color(turquoise)) ///
+				(line median_season_ year if sat == 5, color(reddish)) ///
+				(line median_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
+			
+	graph export 	"$xfig\eth_v02.png", width(1400) replace
+	
+************************************************************************
 **## 2.1 - ethiopia median daily rainfall
 ************************************************************************
 
