@@ -22,6 +22,8 @@
 	global	rootw 	= 	"$data/weather_data"
 	global	rooth 	= 	"$data/household_data"
 	global	export 	= 	"$data/results_data"
+	global	sfig	= 	"$data/results_data/figures"
+	global 	xfig    =   "$data/output/metric_paper/figures"
 	global	logout 	= 	"$data/regression_data/logs"
 
 * open log	
@@ -357,14 +359,9 @@
 			}	
 		}
 
-	
-************************************************************************
-**# 2 - append data sets
-************************************************************************
 
-	
 ************************************************************************
-**## 2.A - ethiopia
+**# 2 - ethiopia graphs
 ************************************************************************
 
 * open first weather file
@@ -379,8 +376,9 @@
 	
 	* merge weather data with household data
 		append		using "$export/ethiopia/`file'"
-				}						
-	
+				}	
+				
+* clean up data
 	replace 	household_id = household_id2 if household_id == ""
 	gen			sat = rf1_x3
 	replace		sat = rf2_x3 if sat == ""
@@ -405,27 +403,147 @@
 					dev_norain_ dev_percent_raindays_, by(year sat)
 	*** 210 observations
 	
+	gen			sat1 = 1 if sat == "rf1_x3"
+	replace		sat1 = 2 if sat == "rf2_x3"
+	replace		sat1 = 3 if sat == "rf3_x3"
+	replace		sat1 = 4 if sat == "rf4_x3"
+	replace		sat1 = 5 if sat == "rf5_x3"
+	replace		sat1 = 6 if sat == "rf6_x3"
+	label 		define sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" 4 "ARC2" 5 "ERA5" 6 "TAMSAT"
+	label 		values sat1 sat
+	drop		sat
+	rename		sat1 sat
+	order		sat, after(year)
+	
+************************************************************************
+**## 2.1 - ethiopia mean daily rainfall
+************************************************************************
+
 	sort		year
-	twoway 		(line mean_season_ year if sat == "rf1_x3") ///
-				(line mean_season_ year if sat == "rf2_x3") ///
-				(line mean_season_ year if sat == "rf3_x3") ///
-				(line mean_season_ year if sat == "rf4_x3") ///
-				(line mean_season_ year if sat == "rf5_x3") ///
-				(line mean_season_ year if sat == "rf6_x3") 
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray)) ///
+				(line mean_season_ year if sat == 2, color(vermillion) ) ///
+				(line mean_season_ year if sat == 3, color(sea)) ///
+				(line mean_season_ year if sat == 4, color(turquoise)) ///
+				(line mean_season_ year if sat == 5, color(reddish)) ///
+				(line mean_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)6, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT")) saving("$sfig/eth_v01", replace)
+			
+	graph export 	"$xfig\eth_v01.png", width(1400) replace
+	
 	
 ************************************************************************
-**# 3 - end matter, clean up to save
+**## 2.1 - ethiopia median daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
+				(line median_season_ year if sat == 2, color(vermillion) ) ///
+				(line median_season_ year if sat == 3, color(sea)) ///
+				(line median_season_ year if sat == 4, color(turquoise)) ///
+				(line median_season_ year if sat == 5, color(reddish)) ///
+				(line median_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
+			
+	graph export 	"$xfig\eth_v02.png", width(1400) replace
+	
+
+
+************************************************************************
+**# 2 - malawi graphs
+************************************************************************
+
+* open first weather file
+	use 		"$export/malawi/ihps_x3_rf1", clear
+
+* define each file in the above local
+	loc 		fileList : dir "$export/malawi" files "*_x3_rf*.dta"
+	display		`fileList'
+				
+* loop through each file
+	foreach 	file in `fileList' {	
+	
+	* merge weather data with household data
+		append		using "$export/malawi/`file'"
+				}	
+				
+* clean up data
+	replace 	y2_hhid = y3_hhid if y2_hhid == ""
+	egen		hhid = group(y2_hhid)
+	egen		hhid2 = group(case_id)
+	replace		hhid = hhid2 if hhid == .
+	drop		hhid2 y2_hhid case_id y3_hhid
+	
+	gen			sat = rf1_x3
+	replace		sat = rf2_x3 if sat == ""
+	replace		sat = rf3_x3 if sat == ""
+	replace		sat = rf4_x3 if sat == ""
+	replace		sat = rf5_x3 if sat == ""	
+	replace		sat = rf6_x3 if sat == ""
+	
+	drop		rf1_x3 rf2_x3 rf3_x3 rf4_x3 rf5_x3 rf6_x3
+	order		hhid
+	order		sat, after(year)
+	
+	duplicates	drop
+	*** 3.83 million observations
+	
+	duplicates drop hhid year sat, force
+	*** 2.5 million observations
+	
+	collapse 	(mean) mean_season_ median_season_ sd_season_ total_season_ ///
+					skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
+					dev_total_season_ z_total_season_ dev_raindays_ ///
+					dev_norain_ dev_percent_raindays_, by(year sat)
+	*** 204 observations
+	
+	gen			sat1 = 1 if sat == "rf1_x3"
+	replace		sat1 = 2 if sat == "rf2_x3"
+	replace		sat1 = 3 if sat == "rf3_x3"
+	replace		sat1 = 4 if sat == "rf4_x3"
+	replace		sat1 = 5 if sat == "rf5_x3"
+	replace		sat1 = 6 if sat == "rf6_x3"
+	label 		define sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" 4 "ARC2" 5 "ERA5" 6 "TAMSAT"
+	label 		values sat1 sat
+	drop		sat
+	rename		sat1 sat
+	order		sat, after(year)	
+
+	
+************************************************************************
+**## 3.1 - malawi mean daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray)) ///
+				(line mean_season_ year if sat == 2, color(vermillion) ) ///
+				(line mean_season_ year if sat == 3, color(sea)) ///
+				(line mean_season_ year if sat == 4, color(turquoise)) ///
+				(line mean_season_ year if sat == 5, color(reddish)) ///
+				(line mean_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)7, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT")) saving("$sfig/emwi_v01", replace)
+			
+	graph export 	"$xfig\mwi_v01.png", width(1400) replace
+	
+************************************************************************
+**# 8 - end matter, clean up to save
 ************************************************************************
 	
-* prepare for export
-	qui: compress
-	summarize 
-	sort household_id2
-	
-* save file
-	customsave 	, idvar(household_id2) filename("essy3_merged.dta") ///
-		path("`export'") dofile(ess3_build) user($user)
-		
+
 * close the log
 	log	close
 
