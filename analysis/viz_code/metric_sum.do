@@ -694,71 +694,10 @@
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
-				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
+				label(6 "TAMSAT"))  saving("$sfig/eth_v14", replace)
 			
-	graph export 	"$xfig\eth_v02.png", width(1400) replace
+	graph export 	"$xfig\eth_v14.png", width(1400) replace
 	
-************************************************************************
-**## 2.1 - ethiopia median daily rainfall
-************************************************************************
-
-	sort		year
-	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
-				(line median_season_ year if sat == 2, color(vermillion) ) ///
-				(line median_season_ year if sat == 3, color(sea)) ///
-				(line median_season_ year if sat == 4, color(turquoise)) ///
-				(line median_season_ year if sat == 5, color(reddish)) ///
-				(line median_season_ year if sat == 6, color(ananas) ///
-				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
-				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
-				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
-				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
-				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
-			
-	graph export 	"$xfig\eth_v02.png", width(1400) replace
-	
-************************************************************************
-**## 2.1 - ethiopia median daily rainfall
-************************************************************************
-
-	sort		year
-	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
-				(line median_season_ year if sat == 2, color(vermillion) ) ///
-				(line median_season_ year if sat == 3, color(sea)) ///
-				(line median_season_ year if sat == 4, color(turquoise)) ///
-				(line median_season_ year if sat == 5, color(reddish)) ///
-				(line median_season_ year if sat == 6, color(ananas) ///
-				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
-				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
-				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
-				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
-				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
-			
-	graph export 	"$xfig\eth_v02.png", width(1400) replace
-	
-************************************************************************
-**## 2.1 - ethiopia median daily rainfall
-************************************************************************
-
-	sort		year
-	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
-				(line median_season_ year if sat == 2, color(vermillion) ) ///
-				(line median_season_ year if sat == 3, color(sea)) ///
-				(line median_season_ year if sat == 4, color(turquoise)) ///
-				(line median_season_ year if sat == 5, color(reddish)) ///
-				(line median_season_ year if sat == 6, color(ananas) ///
-				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
-				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
-				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
-				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
-				label(6 "TAMSAT"))  saving("$sfig/eth_v02", replace)
-			
-	graph export 	"$xfig\eth_v02.png", width(1400) replace
-	
-
 
 ************************************************************************
 **# 3 - malawi graphs
@@ -841,6 +780,265 @@
 			
 	graph export 	"$xfig\mwi_v01.png", width(1400) replace
 
+************************************************************************
+**## 3.2 - malawi median daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
+				(line median_season_ year if sat == 2, color(vermillion) ) ///
+				(line median_season_ year if sat == 3, color(sea)) ///
+				(line median_season_ year if sat == 4, color(turquoise)) ///
+				(line median_season_ year if sat == 5, color(reddish)) ///
+				(line median_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/mwi_v02", replace)
+			
+	graph export 	"$xfig\mwi_v02.png", width(1400) replace
+	
+************************************************************************
+**## 3.3 - malawi variance daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line sd_season_ year if sat == 1, lcolor(gray)) ///
+				(line sd_season_ year if sat == 2, color(vermillion) ) ///
+				(line sd_season_ year if sat == 3, color(sea)) ///
+				(line sd_season_ year if sat == 4, color(turquoise)) ///
+				(line sd_season_ year if sat == 5, color(reddish)) ///
+				(line sd_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("Variance of Daily Rainfall (mm)") ylabel(1(1)10, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/mwi_v03", replace)
+			
+	graph export 	"$xfig\mwi_v03.png", width(1400) replace
+	
+************************************************************************
+**## 3.4 - malawi skew daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line skew_season_ year if sat == 1, lcolor(gray)) ///
+				(line skew_season_ year if sat == 2, color(vermillion) ) ///
+				(line skew_season_ year if sat == 3, color(sea)) ///
+				(line skew_season_ year if sat == 4, color(turquoise)) ///
+				(line skew_season_ year if sat == 5, color(reddish)) ///
+				(line skew_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("Skew of Daily Rainfall (mm)") ylabel(0(0.05)0.75, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/mwi_v04", replace)
+			
+	graph export 	"$xfig\mwi_v04.png", width(1400) replace
+	
+************************************************************************
+**## 3.5 - malawi total daily rainfall for the growing season
+************************************************************************
+
+	sort		year
+	twoway 		(line total_season_ year if sat == 1, lcolor(gray)) ///
+				(line total_season_ year if sat == 2, color(vermillion) ) ///
+				(line total_season_ year if sat == 3, color(sea)) ///
+				(line total_season_ year if sat == 4, color(turquoise)) ///
+				(line total_season_ year if sat == 5, color(reddish)) ///
+				(line total_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)2000, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/mwi_v05", replace)
+			
+	graph export 	"$xfig\mwi_v05.png", width(1400) replace
+	
+************************************************************************
+**## 3.6 - malawi deviations in total daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray)) ///
+				(line dev_total_season_ year if sat == 2, color(vermillion) ) ///
+				(line dev_total_season_ year if sat == 3, color(sea)) ///
+				(line dev_total_season_ year if sat == 4, color(turquoise)) ///
+				(line dev_total_season_ year if sat == 5, color(reddish)) ///
+				(line dev_total_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("Deviations in Total Daily Rainfall (mm)") ylabel(-500(100)500, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/mwi_v06", replace)
+			
+	graph export 	"$xfig\mwi_v06.png", width(1400) replace
+	
+************************************************************************
+**## 3.7 - malawi scaled deviations in total daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line z_total_season_ year if sat == 1, lcolor(gray)) ///
+				(line z_total_season_ year if sat == 2, color(vermillion) ) ///
+				(line z_total_season_ year if sat == 3, color(sea)) ///
+				(line z_total_season_ year if sat == 4, color(turquoise)) ///
+				(line z_total_season_ year if sat == 5, color(reddish)) ///
+				(line z_total_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-5(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/mwi_v07", replace)
+			
+	graph export 	"$xfig\mwi_v07.png", width(1400) replace
+	
+************************************************************************
+**## 3.8 - malawi rainfall days
+************************************************************************
+
+	sort		year
+	twoway 		(line raindays_ year if sat == 1, lcolor(gray)) ///
+				(line raindays_ year if sat == 2, color(vermillion) ) ///
+				(line raindays_ year if sat == 3, color(sea)) ///
+				(line raindays_ year if sat == 4, color(turquoise)) ///
+				(line raindays_ year if sat == 5, color(reddish)) ///
+				(line raindays_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("Rainfall Days") ylabel(0(30)300, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/mwi_v08", replace)
+			
+	graph export 	"$xfig\mwi_v08.png", width(1400) replace
+	
+************************************************************************
+**## 3.9 - malawi deviations in rainfall days
+************************************************************************
+
+	sort		year
+	twoway 		(line dev_raindays_ year if sat == 1, lcolor(gray)) ///
+				(line dev_raindays_ year if sat == 2, color(vermillion) ) ///
+				(line dev_raindays_ year if sat == 3, color(sea)) ///
+				(line dev_raindays_ year if sat == 4, color(turquoise)) ///
+				(line dev_raindays_ year if sat == 5, color(reddish)) ///
+				(line dev_raindays_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("Deviations in Rainfall Days") ylabel(-150(30)150, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/mwi_v09", replace)
+			
+	graph export 	"$xfig\mwi_v09.png", width(1400) replace
+	
+************************************************************************
+**## 3.10 - malawi no rainfall days
+************************************************************************
+
+	sort		year
+	twoway 		(line norain_ year if sat == 1, lcolor(gray)) ///
+				(line norain_ year if sat == 2, color(vermillion) ) ///
+				(line norain_ year if sat == 3, color(sea)) ///
+				(line norain_ year if sat == 4, color(turquoise)) ///
+				(line norain_ year if sat == 5, color(reddish)) ///
+				(line norain_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("No Rainfall Days") ylabel(0(30)300, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/mwi_v10", replace)
+			
+	graph export 	"$xfig\mwi_v10.png", width(1400) replace
+	
+************************************************************************
+**## 3.11 - malawi deviations in no rainfall days
+************************************************************************
+
+	sort		year
+	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray)) ///
+				(line dev_norain_ year if sat == 2, color(vermillion) ) ///
+				(line dev_norain_ year if sat == 3, color(sea)) ///
+				(line dev_norain_ year if sat == 4, color(turquoise)) ///
+				(line dev_norain_ year if sat == 5, color(reddish)) ///
+				(line dev_norain_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("Deviations in No Rainfall Days") ylabel(-120(30)120, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/mwi_v11", replace)
+			
+	graph export 	"$xfig\mwi_v11.png", width(1400) replace
+	
+************************************************************************
+**## 3.12 - malawi share of rainy days
+************************************************************************
+
+	sort		year
+	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray)) ///
+				(line percent_raindays_ year if sat == 2, color(vermillion) ) ///
+				(line percent_raindays_ year if sat == 3, color(sea)) ///
+				(line percent_raindays_ year if sat == 4, color(turquoise)) ///
+				(line percent_raindays_ year if sat == 5, color(reddish)) ///
+				(line percent_raindays_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("Share of Rainy Days") ylabel(0(1)5, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/mwi_v12", replace)
+			
+	graph export 	"$xfig\mwi_v12.png", width(1400) replace
+	
+************************************************************************
+**## 3.13 - malawi deviations in share of rainy days
+************************************************************************
+
+	sort		year
+	twoway 		(line dev_percent_raindays_ year if sat == 1, lcolor(gray)) ///
+				(line dev_percent_raindays_ year if sat == 2, color(vermillion) ) ///
+				(line dev_percent_raindays_ year if sat == 3, color(sea)) ///
+				(line dev_percent_raindays_ year if sat == 4, color(turquoise)) ///
+				(line dev_percent_raindays_ year if sat == 5, color(reddish)) ///
+				(line dev_percent_raindays_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("Deviations in Share of Rainy Days") ylabel(-1(0.2)1, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/mwi_v13", replace)
+			
+	graph export 	"$xfig\mwi_v13.png", width(1400) replace
+	
+************************************************************************
+**## 3.14 - malawi intra season dry spells
+************************************************************************
+
+	sort		year
+	twoway 		(line dry_ year if sat == 1, lcolor(gray)) ///
+				(line dry_ year if sat == 2, color(vermillion) ) ///
+				(line dry_ year if sat == 3, color(sea)) ///
+				(line dry_ year if sat == 4, color(turquoise)) ///
+				(line dry_ year if sat == 5, color(reddish)) ///
+				(line dry_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				ytitle("Intra-season Dry Spell") ylabel(0(5)50, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT"))  saving("$sfig/mwi_v14", replace)
+			
+	graph export 	"$xfig\mwi_v14.png", width(1400) replace
 	
 ************************************************************************
 **# 3 - niger graphs
