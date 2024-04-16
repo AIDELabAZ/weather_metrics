@@ -1,7 +1,9 @@
 * Project: WB Weather
-* Created on: Aug 2020
-* Created by: mcg
-* Stata v.16
+* Created on: April 2024
+* Created by: jdm
+* Edited by: jdm
+* Last edit: 16 April 2024
+* Stata v.18.0 
 
 * does
 	* merges weather data with Ethiopia ESS 3 data
@@ -71,7 +73,7 @@
 		
 					reshape long mean_season_ median_season_ sd_season_ total_season_ ///
 								skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
-								dev_total_season_ z_total_season_ dev_raindays_ ///
+								dev_total_season_ dev_total_season_ z_total_season_ dev_raindays_ ///
 								dev_norain_ dev_percent_raindays_, i(household_id*) j(year)
 		
 				* define file naming criteria
@@ -125,7 +127,7 @@
 		
 					reshape long mean_season_ median_season_ sd_season_ total_season_ ///
 								skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
-								dev_total_season_ z_total_season_ dev_raindays_ ///
+								dev_total_season_ dev_total_season_ z_total_season_ dev_raindays_ ///
 								dev_norain_ dev_percent_raindays_, i(*id) j(year)
 		
 				* define file naming criteria
@@ -179,7 +181,7 @@
 		
 					reshape long mean_season_ median_season_ sd_season_ total_season_ ///
 								skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
-								dev_total_season_ z_total_season_ dev_raindays_ ///
+								dev_total_season_ dev_total_season_  z_total_season_ dev_raindays_ ///
 								dev_norain_ dev_percent_raindays_, i(*hid*) j(year)
 		
 				* define file naming criteria
@@ -233,7 +235,7 @@
 		
 					reshape long mean_season_ median_season_ sd_season_ total_season_ ///
 								skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
-								dev_total_season_ z_total_season_ dev_raindays_ ///
+								dev_total_season_ dev_total_season_  z_total_season_ dev_raindays_ ///
 								dev_norain_ dev_percent_raindays_, i(hhid) j(year)
 		
 				* define file naming criteria
@@ -287,7 +289,7 @@
 		
 					reshape long mean_season_ median_season_ sd_season_ total_season_ ///
 								skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
-								dev_total_season_ z_total_season_ dev_raindays_ ///
+								dev_total_season_ dev_total_season_  z_total_season_ dev_raindays_ ///
 								dev_norain_ dev_percent_raindays_, i(*hhid) j(year)
 		
 				* define file naming criteria
@@ -341,7 +343,7 @@
 		
 					reshape long mean_season_ median_season_ sd_season_ total_season_ ///
 								skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
-								dev_total_season_ z_total_season_ dev_raindays_ ///
+								dev_total_season_ dev_total_season_  z_total_season_ dev_raindays_ ///
 								dev_norain_ dev_percent_raindays_, i(hhid) j(year)
 		
 				* define file naming criteria
