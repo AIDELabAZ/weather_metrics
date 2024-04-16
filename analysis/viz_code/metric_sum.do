@@ -427,7 +427,7 @@
 				(line mean_season_ year if sat == 5, color(reddish)) ///
 				(line mean_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)6, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -459,7 +459,7 @@
 
 
 ************************************************************************
-**# 2 - malawi graphs
+**# 3 - malawi graphs
 ************************************************************************
 
 * open first weather file
@@ -531,13 +531,320 @@
 				(line mean_season_ year if sat == 5, color(reddish)) ///
 				(line mean_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)7, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
-				label(6 "TAMSAT")) saving("$sfig/emwi_v01", replace)
+				label(6 "TAMSAT")) saving("$sfig/mwi_v01", replace)
 			
 	graph export 	"$xfig\mwi_v01.png", width(1400) replace
+
+	
+************************************************************************
+**# 3 - niger graphs
+************************************************************************
+
+* open first weather file
+	use 		"$export/niger/ecvmay1_x3_rf1", clear
+
+* define each file in the above local
+	loc 		fileList : dir "$export/niger" files "*_x3_rf*.dta"
+	display		`fileList'
+				
+* loop through each file
+	foreach 	file in `fileList' {	
+	
+	* merge weather data with household data
+		append		using "$export/niger/`file'"
+				}	
+				
+* clean up data
+	replace 	hid = hhid_y2 if hid == .
+	drop		hhid_y2
+	
+	gen			sat = rf1_x3
+	replace		sat = rf2_x3 if sat == ""
+	replace		sat = rf3_x3 if sat == ""
+	replace		sat = rf4_x3 if sat == ""
+	replace		sat = rf5_x3 if sat == ""	
+	replace		sat = rf6_x3 if sat == ""
+	
+	drop		rf1_x3 rf2_x3 rf3_x3 rf4_x3 rf5_x3 rf6_x3
+	order		sat, after(year)
+	
+	duplicates	drop
+	*** 1.64 million observations
+	
+	duplicates drop hid year sat, force
+	*** 1.63 million observations
+	
+	collapse 	(mean) mean_season_ median_season_ sd_season_ total_season_ ///
+					skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
+					dev_total_season_ z_total_season_ dev_raindays_ ///
+					dev_norain_ dev_percent_raindays_, by(year sat)
+	*** 210 observations
+	
+	gen			sat1 = 1 if sat == "rf1_x3"
+	replace		sat1 = 2 if sat == "rf2_x3"
+	replace		sat1 = 3 if sat == "rf3_x3"
+	replace		sat1 = 4 if sat == "rf4_x3"
+	replace		sat1 = 5 if sat == "rf5_x3"
+	replace		sat1 = 6 if sat == "rf6_x3"
+	label 		define sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" 4 "ARC2" 5 "ERA5" 6 "TAMSAT"
+	label 		values sat1 sat
+	drop		sat
+	rename		sat1 sat
+	order		sat, after(year)	
+
+************************************************************************
+**## 4.1 - niger mean daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray)) ///
+				(line mean_season_ year if sat == 2, color(vermillion) ) ///
+				(line mean_season_ year if sat == 3, color(sea)) ///
+				(line mean_season_ year if sat == 4, color(turquoise)) ///
+				(line mean_season_ year if sat == 5, color(reddish)) ///
+				(line mean_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT")) saving("$sfig/ngr_v01", replace)
+			
+	graph export 	"$xfig\ngr_v01.png", width(1400) replace
+	
+
+************************************************************************
+**# 5 - nigeria graphs
+************************************************************************
+
+* open first weather file
+	use 		"$export/nigeria/ghsy1_x3_rf1_n", clear
+
+* define each file in the above local
+	loc 		fileList : dir "$export/nigeria" files "*_x3_rf*.dta"
+	display		`fileList'
+				
+* loop through each file
+	foreach 	file in `fileList' {	
+	
+	* merge weather data with household data
+		append		using "$export/nigeria/`file'"
+				}	
+				
+* clean up data
+	gen			sat = rf1_x3
+	replace		sat = rf2_x3 if sat == ""
+	replace		sat = rf3_x3 if sat == ""
+	replace		sat = rf4_x3 if sat == ""
+	replace		sat = rf5_x3 if sat == ""	
+	replace		sat = rf6_x3 if sat == ""
+	
+	drop		rf1_x3 rf2_x3 rf3_x3 rf4_x3 rf5_x3 rf6_x3
+	order		sat, after(year)
+	
+	duplicates	drop
+	*** 2.08 million observations
+	
+	duplicates drop hhid year sat, force
+	*** 1.11 million observations
+	
+	collapse 	(mean) mean_season_ median_season_ sd_season_ total_season_ ///
+					skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
+					dev_total_season_ z_total_season_ dev_raindays_ ///
+					dev_norain_ dev_percent_raindays_, by(year sat)
+	*** 210 observations
+	
+	gen			sat1 = 1 if sat == "rf1_x3"
+	replace		sat1 = 2 if sat == "rf2_x3"
+	replace		sat1 = 3 if sat == "rf3_x3"
+	replace		sat1 = 4 if sat == "rf4_x3"
+	replace		sat1 = 5 if sat == "rf5_x3"
+	replace		sat1 = 6 if sat == "rf6_x3"
+	label 		define sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" 4 "ARC2" 5 "ERA5" 6 "TAMSAT"
+	label 		values sat1 sat
+	drop		sat
+	rename		sat1 sat
+	order		sat, after(year)	
+
+************************************************************************
+**## 5.1 - nigeria mean daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray)) ///
+				(line mean_season_ year if sat == 2, color(vermillion) ) ///
+				(line mean_season_ year if sat == 3, color(sea)) ///
+				(line mean_season_ year if sat == 4, color(turquoise)) ///
+				(line mean_season_ year if sat == 5, color(reddish)) ///
+				(line mean_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT")) saving("$sfig/nga_v01", replace)
+			
+	graph export 	"$xfig\nga_v01.png", width(1400) replace
+	
+
+************************************************************************
+**# 6 - tanzania graphs
+************************************************************************
+
+* open first weather file
+	use 		"$export/tanzania/npsy1_x3_rf1", clear
+
+* define each file in the above local
+	loc 		fileList : dir "$export/tanzania" files "*_x3_rf*.dta"
+	display		`fileList'
+				
+* loop through each file
+	foreach 	file in `fileList' {	
+	
+	* merge weather data with household data
+		append		using "$export/tanzania/`file'"
+				}	
+				
+* clean up data
+	replace 	hhid = y2_hhid if hhid == ""
+	replace 	hhid = y3_hhid if hhid == ""
+	replace 	hhid = y4_hhid if hhid == ""
+	drop		y2_hhid y3_hhid y4_hhid
+	
+	gen			sat = rf1_x3
+	replace		sat = rf2_x3 if sat == ""
+	replace		sat = rf3_x3 if sat == ""
+	replace		sat = rf4_x3 if sat == ""
+	replace		sat = rf5_x3 if sat == ""	
+	replace		sat = rf6_x3 if sat == ""
+	
+	drop		rf1_x3 rf2_x3 rf3_x3 rf4_x3 rf5_x3 rf6_x3
+	order		sat, after(year)
+	
+	duplicates	drop
+	*** 3.17 million observations
+	
+	duplicates drop hhid year sat, force
+	*** 2.93 million observations
+	
+	collapse 	(mean) mean_season_ median_season_ sd_season_ total_season_ ///
+					skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
+					dev_total_season_ z_total_season_ dev_raindays_ ///
+					dev_norain_ dev_percent_raindays_, by(year sat)
+	*** 204 observations
+	
+	gen			sat1 = 1 if sat == "rf1_x3"
+	replace		sat1 = 2 if sat == "rf2_x3"
+	replace		sat1 = 3 if sat == "rf3_x3"
+	replace		sat1 = 4 if sat == "rf4_x3"
+	replace		sat1 = 5 if sat == "rf5_x3"
+	replace		sat1 = 6 if sat == "rf6_x3"
+	label 		define sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" 4 "ARC2" 5 "ERA5" 6 "TAMSAT"
+	label 		values sat1 sat
+	drop		sat
+	rename		sat1 sat
+	order		sat, after(year)	
+
+************************************************************************
+**## 6.1 - tanzania mean daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray)) ///
+				(line mean_season_ year if sat == 2, color(vermillion) ) ///
+				(line mean_season_ year if sat == 3, color(sea)) ///
+				(line mean_season_ year if sat == 4, color(turquoise)) ///
+				(line mean_season_ year if sat == 5, color(reddish)) ///
+				(line mean_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT")) saving("$sfig/tza_v01", replace)
+			
+	graph export 	"$xfig\tza_v01.png", width(1400) replace
+	
+		
+
+************************************************************************
+**# 7 - uganda graphs
+************************************************************************
+
+* open first weather file
+	use 		"$export/uganda/unpsy1_x3_rf1_n", clear
+
+* define each file in the above local
+	loc 		fileList : dir "$export/uganda" files "*_x3_rf*.dta"
+	display		`fileList'
+				
+* loop through each file
+	foreach 	file in `fileList' {	
+	
+	* merge weather data with household data
+		append		using "$export/uganda/`file'"
+				}	
+				
+* clean up data
+	gen			sat = rf1_x3
+	replace		sat = rf2_x3 if sat == ""
+	replace		sat = rf3_x3 if sat == ""
+	replace		sat = rf4_x3 if sat == ""
+	replace		sat = rf5_x3 if sat == ""	
+	replace		sat = rf6_x3 if sat == ""
+	
+	drop		rf1_x3 rf2_x3 rf3_x3 rf4_x3 rf5_x3 rf6_x3
+	order		sat, after(year)
+	
+	duplicates	drop
+	*** 738955 observations
+	
+	duplicates drop hhid year sat, force
+	*** 681,450 observations
+	
+	collapse 	(mean) mean_season_ median_season_ sd_season_ total_season_ ///
+					skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
+					dev_total_season_ z_total_season_ dev_raindays_ ///
+					dev_norain_ dev_percent_raindays_, by(year sat)
+	*** 210 observations
+	
+	gen			sat1 = 1 if sat == "rf1_x3"
+	replace		sat1 = 2 if sat == "rf2_x3"
+	replace		sat1 = 3 if sat == "rf3_x3"
+	replace		sat1 = 4 if sat == "rf4_x3"
+	replace		sat1 = 5 if sat == "rf5_x3"
+	replace		sat1 = 6 if sat == "rf6_x3"
+	label 		define sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" 4 "ARC2" 5 "ERA5" 6 "TAMSAT"
+	label 		values sat1 sat
+	drop		sat
+	rename		sat1 sat
+	order		sat, after(year)	
+
+************************************************************************
+**## 7.1 - uganda mean daily rainfall
+************************************************************************
+
+	sort		year
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray)) ///
+				(line mean_season_ year if sat == 2, color(vermillion) ) ///
+				(line mean_season_ year if sat == 3, color(sea)) ///
+				(line mean_season_ year if sat == 4, color(turquoise)) ///
+				(line mean_season_ year if sat == 5, color(reddish)) ///
+				(line mean_season_ year if sat == 6, color(ananas) ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
+				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
+				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
+				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
+				label(6 "TAMSAT")) saving("$sfig/uga_v01", replace)
+			
+	graph export 	"$xfig\uga_v01.png", width(1400) replace
+	
+				
 	
 ************************************************************************
 **# 8 - end matter, clean up to save
