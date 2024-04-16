@@ -127,7 +127,7 @@
 		
 					reshape long mean_season_ median_season_ sd_season_ total_season_ ///
 								skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
-								dev_total_season_ dev_total_season_ z_total_season_ dev_raindays_ ///
+								dev_total_season_ z_total_season_ dev_raindays_ ///
 								dev_norain_ dev_percent_raindays_, i(*id) j(year)
 		
 				* define file naming criteria
@@ -181,7 +181,7 @@
 		
 					reshape long mean_season_ median_season_ sd_season_ total_season_ ///
 								skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
-								dev_total_season_ dev_total_season_  z_total_season_ dev_raindays_ ///
+								dev_total_season_  z_total_season_ dev_raindays_ ///
 								dev_norain_ dev_percent_raindays_, i(*hid*) j(year)
 		
 				* define file naming criteria
@@ -235,7 +235,7 @@
 		
 					reshape long mean_season_ median_season_ sd_season_ total_season_ ///
 								skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
-								dev_total_season_ dev_total_season_  z_total_season_ dev_raindays_ ///
+								dev_total_season_  z_total_season_ dev_raindays_ ///
 								dev_norain_ dev_percent_raindays_, i(hhid) j(year)
 		
 				* define file naming criteria
@@ -289,7 +289,7 @@
 		
 					reshape long mean_season_ median_season_ sd_season_ total_season_ ///
 								skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
-								dev_total_season_ dev_total_season_  z_total_season_ dev_raindays_ ///
+								dev_total_season_  z_total_season_ dev_raindays_ ///
 								dev_norain_ dev_percent_raindays_, i(*hhid) j(year)
 		
 				* define file naming criteria
@@ -343,7 +343,7 @@
 		
 					reshape long mean_season_ median_season_ sd_season_ total_season_ ///
 								skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
-								dev_total_season_ dev_total_season_  z_total_season_ dev_raindays_ ///
+								dev_total_season_  z_total_season_ dev_raindays_ ///
 								dev_norain_ dev_percent_raindays_, i(hhid) j(year)
 		
 				* define file naming criteria
