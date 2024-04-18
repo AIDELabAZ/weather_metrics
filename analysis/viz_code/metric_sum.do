@@ -201,7 +201,7 @@
 
 
 ************************************************************************
-**## 1.D - nigeria
+**## 1.E - nigeria
 ************************************************************************
 
 	* define local with all waves in it
@@ -255,7 +255,7 @@
 
 
 ************************************************************************
-**## 1.E - tanzania
+**## 1.F - tanzania
 ************************************************************************
 
 	* define local with all waves in it
@@ -309,7 +309,7 @@
 
 
 ************************************************************************
-**## 1.F - uganda
+**## 1.G - uganda
 ************************************************************************
 
 	* define local with all waves in it
@@ -361,7 +361,7 @@
 			}	
 		}
 
-
+					
 ************************************************************************
 **# 2 - ethiopia graphs
 ************************************************************************
@@ -1835,7 +1835,7 @@
 				(line mean_season_ year if sat == 5, color(reddish)) ///
 				(line mean_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)15, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2182,7 +2182,7 @@
 				(line mean_season_ year if sat == 5, color(reddish)) ///
 				(line mean_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)15, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2468,7 +2468,12 @@
 ************************************************************************
 **# 8 - end matter, clean up to save
 ************************************************************************
-	
+
+* mean daily rainfall
+	gr combine 		"$sfig/eth_v01.gph" "$sfig/mwi_v01.gph" "$sfig/ngr_v01.gph" "$sfig/nga_v01.gph" "$sfig/tza_v01.gph" "$sfig/uga_v01.gph",
+					col(3) iscale(.5) commonscheme
+	graph export 	"$xfig\all_v01.png", width(1400) replace
+	graph export 	"$xfig\all_v01.eps", 			 replace
 
 * close the log
 	log	close
