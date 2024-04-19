@@ -2470,11 +2470,75 @@
 ************************************************************************
 
 * mean daily rainfall
-	gr combine 		"$sfig/eth_v01.gph" "$sfig/mwi_v01.gph" "$sfig/ngr_v01.gph" "$sfig/nga_v01.gph" "$sfig/tza_v01.gph" "$sfig/uga_v01.gph",
-					col(3) iscale(.5) commonscheme
+	gr combine 		"$sfig/eth_v01.gph" "$sfig/mwi_v01.gph" "$sfig/ngr_v01.gph" "$sfig/nga_v01.gph" "$sfig/tza_v01.gph" "$sfig/uga_v01.gph", col(3) iscale(.49) commonscheme
 	graph export 	"$xfig\all_v01.png", width(1400) replace
 	graph export 	"$xfig\all_v01.eps", 			 replace
-
+	
+* median daily rainfall
+	gr combine 		"$sfig/eth_v02.gph" "$sfig/mwi_v02.gph" "$sfig/ngr_v02.gph" "$sfig/nga_v02.gph" "$sfig/tza_v02.gph" "$sfig/uga_v02.gph", col(3) iscale(.49) commonscheme
+	graph export 	"$xfig\all_v02.png", width(1400) replace
+	graph export 	"$xfig\all_v02.eps", 			 replace
+	
+* variance daily rainfall
+	gr combine 		"$sfig/eth_v03.gph" "$sfig/mwi_v03.gph" "$sfig/ngr_v03.gph" "$sfig/nga_v03.gph" "$sfig/tza_v03.gph" "$sfig/uga_v03.gph", col(3) iscale(.49) commonscheme
+	graph export 	"$xfig\all_v03.png", width(1400) replace
+	graph export 	"$xfig\all_v03.eps", 			 replace
+	
+* skew daily rainfall
+	gr combine 		"$sfig/eth_v04.gph" "$sfig/mwi_v04.gph" "$sfig/ngr_v04.gph" "$sfig/nga_v04.gph" "$sfig/tza_v04.gph" "$sfig/uga_v04.gph", col(3) iscale(.49) commonscheme
+	graph export 	"$xfig\all_v04.png", width(1400) replace
+	graph export 	"$xfig\all_v04.eps", 			 replace
+	
+* total rainfall
+	gr combine 		"$sfig/eth_v05.gph" "$sfig/mwi_v05.gph" "$sfig/ngr_v05.gph" "$sfig/nga_v05.gph" "$sfig/tza_v05.gph" "$sfig/uga_v05.gph", col(3) iscale(.49) commonscheme
+	graph export 	"$xfig\all_v05.png", width(1400) replace
+	graph export 	"$xfig\all_v05.eps", 			 replace
+	
+* deviations in total rainfall
+	gr combine 		"$sfig/eth_v06.gph" "$sfig/mwi_v06.gph" "$sfig/ngr_v06.gph" "$sfig/nga_v06.gph" "$sfig/tza_v06.gph" "$sfig/uga_v06.gph", col(3) iscale(.49) commonscheme
+	graph export 	"$xfig\all_v06.png", width(1400) replace
+	graph export 	"$xfig\all_v06.eps", 			 replace
+	
+* z-score of total rainfall
+	gr combine 		"$sfig/eth_v07.gph" "$sfig/mwi_v07.gph" "$sfig/ngr_v07.gph" "$sfig/nga_v07.gph" "$sfig/tza_v07.gph" "$sfig/uga_v07.gph", col(3) iscale(.49) commonscheme
+	graph export 	"$xfig\all_v07.png", width(1400) replace
+	graph export 	"$xfig\all_v07.eps", 			 replace
+	
+* rainfall days
+	gr combine 		"$sfig/eth_v08.gph" "$sfig/mwi_v08.gph" "$sfig/ngr_v08.gph" "$sfig/nga_v08.gph" "$sfig/tza_v08.gph" "$sfig/uga_v08.gph", col(3) iscale(.49) commonscheme
+	graph export 	"$xfig\all_v08.png", width(1400) replace
+	graph export 	"$xfig\all_v08.eps", 			 replace
+	
+* deviations in rainfall days
+	gr combine 		"$sfig/eth_v09.gph" "$sfig/mwi_v09.gph" "$sfig/ngr_v09.gph" "$sfig/nga_v09.gph" "$sfig/tza_v09.gph" "$sfig/uga_v09.gph", col(3) iscale(.49) commonscheme
+	graph export 	"$xfig\all_v09.png", width(1400) replace
+	graph export 	"$xfig\all_v09.eps", 			 replace
+	
+* no rainfall days
+	gr combine 		"$sfig/eth_v10.gph" "$sfig/mwi_v10.gph" "$sfig/ngr_v10.gph" "$sfig/nga_v10.gph" "$sfig/tza_v10.gph" "$sfig/uga_v10.gph", col(3) iscale(.49) commonscheme
+	graph export 	"$xfig\all_v10.png", width(1400) replace
+	graph export 	"$xfig\all_v10.eps", 			 replace
+	
+* deviations in no rainfall days
+	gr combine 		"$sfig/eth_v11.gph" "$sfig/mwi_v11.gph" "$sfig/ngr_v11.gph" "$sfig/nga_v11.gph" "$sfig/tza_v11.gph" "$sfig/uga_v11.gph", col(3) iscale(.49) commonscheme
+	graph export 	"$xfig\all_v11.png", width(1400) replace
+	graph export 	"$xfig\all_v11.eps", 			 replace
+	
+* share of rainfall days
+	gr combine 		"$sfig/eth_v12.gph" "$sfig/mwi_v12.gph" "$sfig/ngr_v12.gph" "$sfig/nga_v12.gph" "$sfig/tza_v12.gph" "$sfig/uga_v12.gph", col(3) iscale(.49) commonscheme
+	graph export 	"$xfig\all_v12.png", width(1400) replace
+	graph export 	"$xfig\all_v12.eps", 			 replace
+	
+* deviations in share of rainfall days
+	gr combine 		"$sfig/eth_v13.gph" "$sfig/mwi_v13.gph" "$sfig/ngr_v13.gph" "$sfig/nga_v13.gph" "$sfig/tza_v13.gph" "$sfig/uga_v13.gph", col(3) iscale(.49) commonscheme
+	graph export 	"$xfig\all_v13.png", width(1400) replace
+	graph export 	"$xfig\all_v13.eps", 			 replace
+	
+* dry spell
+	gr combine 		"$sfig/eth_v14.gph" "$sfig/mwi_v14.gph" "$sfig/ngr_v14.gph" "$sfig/nga_v14.gph" "$sfig/tza_v14.gph" "$sfig/uga_v14.gph", col(3) iscale(.49) commonscheme
+	graph export 	"$xfig\all_v14.png", width(1400) replace
+	graph export 	"$xfig\all_v14.eps", 			 replace
+	
 * close the log
 	log	close
 
