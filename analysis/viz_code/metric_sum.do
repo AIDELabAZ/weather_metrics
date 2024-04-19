@@ -2297,7 +2297,7 @@
 	graph export 	"$xfig\uga_v06.eps", 			 replace
 	
 ************************************************************************
-**## 7.7 - uganda scaled deviations in total daily rainfall
+**## 7.7 - uganda z-score in total daily rainfall
 ************************************************************************
 
 	sort		year
