@@ -429,7 +429,7 @@
 				(line mean_season_ year if sat == 5, color(reddish)) ///
 				(line mean_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)15, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -451,7 +451,7 @@
 				(line median_season_ year if sat == 5, color(reddish)) ///
 				(line median_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
+				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -472,7 +472,7 @@
 				(line sd_season_ year if sat == 5, color(reddish)) ///
 				(line sd_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)20, nogrid ///
+				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)14, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -493,7 +493,7 @@
 				(line skew_season_ year if sat == 5, color(reddish)) ///
 				(line skew_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Skew of Daily Rainfall (mm)") ylabel(0(0.05)0.75, nogrid ///
+				ytitle("Skew of Daily Rainfall (mm)") ylabel(0.2(0.05)0.7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -514,7 +514,7 @@
 				(line total_season_ year if sat == 5, color(reddish)) ///
 				(line total_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)2000, nogrid ///
+				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)1800, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -556,7 +556,7 @@
 				(line z_total_season_ year if sat == 5, color(reddish)) ///
 				(line z_total_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-5(1)5, nogrid ///
+				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-3(1)4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -577,7 +577,7 @@
 				(line raindays_ year if sat == 5, color(reddish)) ///
 				(line raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Rainfall Days") ylabel(0(30)300, nogrid ///
+				ytitle("Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -598,7 +598,7 @@
 				(line dev_raindays_ year if sat == 5, color(reddish)) ///
 				(line dev_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Deviations in Rainfall Days") ylabel(-150(30)150, nogrid ///
+				ytitle("Deviations in Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -619,7 +619,7 @@
 				(line norain_ year if sat == 5, color(reddish)) ///
 				(line norain_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("No Rainfall Days") ylabel(0(30)300, nogrid ///
+				ytitle("No Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -640,7 +640,7 @@
 				(line dev_norain_ year if sat == 5, color(reddish)) ///
 				(line dev_norain_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Deviations in No Rainfall Days") ylabel(-120(30)120, nogrid ///
+				ytitle("Deviations in No Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -661,7 +661,7 @@
 				(line percent_raindays_ year if sat == 5, color(reddish)) ///
 				(line percent_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Share of Rainy Days") ylabel(0(0.2)2, nogrid ///
+				ytitle("Share of Rainy Days") ylabel(0(0.1)1, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -682,7 +682,7 @@
 				(line dev_percent_raindays_ year if sat == 5, color(reddish)) ///
 				(line dev_percent_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Deviations in Share of Rainy Days") ylabel(-1(0.2)1, nogrid ///
+				ytitle("Deviations in Share of Rainy Days") ylabel(-0.4(0.1)0.4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -703,7 +703,7 @@
 				(line dry_ year if sat == 5, color(reddish)) ///
 				(line dry_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Intra-season Dry Spell") ylabel(0(5)75, nogrid ///
+				ytitle("Intra-season Dry Spell") ylabel(0(5)60, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -786,7 +786,7 @@
 				(line mean_season_ year if sat == 5, color(reddish)) ///
 				(line mean_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)15, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -807,7 +807,7 @@
 				(line median_season_ year if sat == 5, color(reddish)) ///
 				(line median_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
+				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -828,7 +828,7 @@
 				(line sd_season_ year if sat == 5, color(reddish)) ///
 				(line sd_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)20, nogrid ///
+				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)14, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -849,7 +849,7 @@
 				(line skew_season_ year if sat == 5, color(reddish)) ///
 				(line skew_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Skew of Daily Rainfall (mm)") ylabel(0(0.05)0.75, nogrid ///
+				ytitle("Skew of Daily Rainfall (mm)") ylabel(0.2(0.05)0.7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -870,7 +870,7 @@
 				(line total_season_ year if sat == 5, color(reddish)) ///
 				(line total_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)2000, nogrid ///
+				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)1800, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -912,7 +912,7 @@
 				(line z_total_season_ year if sat == 5, color(reddish)) ///
 				(line z_total_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-5(1)5, nogrid ///
+				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-3(1)4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -933,7 +933,7 @@
 				(line raindays_ year if sat == 5, color(reddish)) ///
 				(line raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Rainfall Days") ylabel(0(30)300, nogrid ///
+				ytitle("Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -954,7 +954,7 @@
 				(line dev_raindays_ year if sat == 5, color(reddish)) ///
 				(line dev_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Deviations in Rainfall Days") ylabel(-150(30)150, nogrid ///
+				ytitle("Deviations in Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -975,7 +975,7 @@
 				(line norain_ year if sat == 5, color(reddish)) ///
 				(line norain_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("No Rainfall Days") ylabel(0(30)300, nogrid ///
+				ytitle("No Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -996,7 +996,7 @@
 				(line dev_norain_ year if sat == 5, color(reddish)) ///
 				(line dev_norain_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Deviations in No Rainfall Days") ylabel(-120(30)120, nogrid ///
+				ytitle("Deviations in No Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1017,7 +1017,7 @@
 				(line percent_raindays_ year if sat == 5, color(reddish)) ///
 				(line percent_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Share of Rainy Days") ylabel(0(0.2)2, nogrid ///
+				ytitle("Share of Rainy Days") ylabel(0(0.1)1, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1038,7 +1038,7 @@
 				(line dev_percent_raindays_ year if sat == 5, color(reddish)) ///
 				(line dev_percent_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Deviations in Share of Rainy Days") ylabel(-1(0.2)1, nogrid ///
+				ytitle("Deviations in Share of Rainy Days") ylabel(-0.4(0.1)0.4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1059,7 +1059,7 @@
 				(line dry_ year if sat == 5, color(reddish)) ///
 				(line dry_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Intra-season Dry Spell") ylabel(0(5)75, nogrid ///
+				ytitle("Intra-season Dry Spell") ylabel(0(5)60, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1136,7 +1136,7 @@
 				(line mean_season_ year if sat == 5, color(reddish)) ///
 				(line mean_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)15, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1157,7 +1157,7 @@
 				(line median_season_ year if sat == 5, color(reddish)) ///
 				(line median_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
-				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
+				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1178,7 +1178,7 @@
 				(line sd_season_ year if sat == 5, color(reddish)) ///
 				(line sd_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
-				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)20, nogrid ///
+				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)14, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1199,7 +1199,7 @@
 				(line skew_season_ year if sat == 5, color(reddish)) ///
 				(line skew_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
-				ytitle("Skew of Daily Rainfall (mm)") ylabel(0(0.05)0.75, nogrid ///
+				ytitle("Skew of Daily Rainfall (mm)") ylabel(0.2(0.05)0.7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1220,7 +1220,7 @@
 				(line total_season_ year if sat == 5, color(reddish)) ///
 				(line total_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
-				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)2000, nogrid ///
+				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)1800, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1262,7 +1262,7 @@
 				(line z_total_season_ year if sat == 5, color(reddish)) ///
 				(line z_total_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
-				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-5(1)5, nogrid ///
+				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-3(1)4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1283,7 +1283,7 @@
 				(line raindays_ year if sat == 5, color(reddish)) ///
 				(line raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
-				ytitle("Rainfall Days") ylabel(0(30)300, nogrid ///
+				ytitle("Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1304,7 +1304,7 @@
 				(line dev_raindays_ year if sat == 5, color(reddish)) ///
 				(line dev_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
-				ytitle("Deviations in Rainfall Days") ylabel(-150(30)150, nogrid ///
+				ytitle("Deviations in Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1325,7 +1325,7 @@
 				(line norain_ year if sat == 5, color(reddish)) ///
 				(line norain_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
-				ytitle("No Rainfall Days") ylabel(0(30)300, nogrid ///
+				ytitle("No Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1346,7 +1346,7 @@
 				(line dev_norain_ year if sat == 5, color(reddish)) ///
 				(line dev_norain_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
-				ytitle("Deviations in No Rainfall Days") ylabel(-120(30)120, nogrid ///
+				ytitle("Deviations in No Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1367,7 +1367,7 @@
 				(line percent_raindays_ year if sat == 5, color(reddish)) ///
 				(line percent_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Share of Rainy Days") ylabel(0(0.2)2, nogrid ///
+				ytitle("Share of Rainy Days") ylabel(0(0.1)1, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1388,7 +1388,7 @@
 				(line dev_percent_raindays_ year if sat == 5, color(reddish)) ///
 				(line dev_percent_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
-				ytitle("Deviations in Share of Rainy Days") ylabel(-1(0.2)1, nogrid ///
+				ytitle("Deviations in Share of Rainy Days") ylabel(-0.4(0.1)0.4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1409,7 +1409,7 @@
 				(line dry_ year if sat == 5, color(reddish)) ///
 				(line dry_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
-				ytitle("Intra-season Dry Spell") ylabel(0(5)75, nogrid ///
+				ytitle("Intra-season Dry Spell") ylabel(0(5)60, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1483,7 +1483,7 @@
 				(line mean_season_ year if sat == 5, color(reddish)) ///
 				(line mean_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)15, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1504,7 +1504,7 @@
 				(line median_season_ year if sat == 5, color(reddish)) ///
 				(line median_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
+				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1525,7 +1525,7 @@
 				(line sd_season_ year if sat == 5, color(reddish)) ///
 				(line sd_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)20, nogrid ///
+				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)14, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1546,7 +1546,7 @@
 				(line skew_season_ year if sat == 5, color(reddish)) ///
 				(line skew_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("Skew of Daily Rainfall (mm)") ylabel(0(0.05)0.75, nogrid ///
+				ytitle("Skew of Daily Rainfall (mm)") ylabel(0.2(0.05)0.7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1567,7 +1567,7 @@
 				(line total_season_ year if sat == 5, color(reddish)) ///
 				(line total_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)2000, nogrid ///
+				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)1800, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1609,7 +1609,7 @@
 				(line z_total_season_ year if sat == 5, color(reddish)) ///
 				(line z_total_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-5(1)5, nogrid ///
+				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-3(1)4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1630,7 +1630,7 @@
 				(line raindays_ year if sat == 5, color(reddish)) ///
 				(line raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("Rainfall Days") ylabel(0(30)300, nogrid ///
+				ytitle("Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1651,7 +1651,7 @@
 				(line dev_raindays_ year if sat == 5, color(reddish)) ///
 				(line dev_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("Deviations in Rainfall Days") ylabel(-150(30)150, nogrid ///
+				ytitle("Deviations in Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1672,7 +1672,7 @@
 				(line norain_ year if sat == 5, color(reddish)) ///
 				(line norain_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("No Rainfall Days") ylabel(0(30)300, nogrid ///
+				ytitle("No Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1693,7 +1693,7 @@
 				(line dev_norain_ year if sat == 5, color(reddish)) ///
 				(line dev_norain_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("Deviations in No Rainfall Days") ylabel(-120(30)120, nogrid ///
+				ytitle("Deviations in No Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1714,7 +1714,7 @@
 				(line percent_raindays_ year if sat == 5, color(reddish)) ///
 				(line percent_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("Share of Rainy Days") ylabel(0(0.2)2, nogrid ///
+				ytitle("Share of Rainy Days") ylabel(0(0.1)1, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1735,7 +1735,7 @@
 				(line dev_percent_raindays_ year if sat == 5, color(reddish)) ///
 				(line dev_percent_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("Deviations in Share of Rainy Days") ylabel(-1(0.2)1, nogrid ///
+				ytitle("Deviations in Share of Rainy Days") ylabel(-0.4(0.1)0.4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1756,7 +1756,7 @@
 				(line dry_ year if sat == 5, color(reddish)) ///
 				(line dry_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("Intra-season Dry Spell") ylabel(0(5)75, nogrid ///
+				ytitle("Intra-season Dry Spell") ylabel(0(5)60, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1835,7 +1835,7 @@
 				(line mean_season_ year if sat == 5, color(reddish)) ///
 				(line mean_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)15, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1856,7 +1856,7 @@
 				(line median_season_ year if sat == 5, color(reddish)) ///
 				(line median_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
+				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1877,7 +1877,7 @@
 				(line sd_season_ year if sat == 5, color(reddish)) ///
 				(line sd_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)20, nogrid ///
+				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)14, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1898,7 +1898,7 @@
 				(line skew_season_ year if sat == 5, color(reddish)) ///
 				(line skew_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Skew of Daily Rainfall (mm)") ylabel(0(0.05)0.75, nogrid ///
+				ytitle("Skew of Daily Rainfall (mm)") ylabel(0.2(0.05)0.7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1919,7 +1919,7 @@
 				(line total_season_ year if sat == 5, color(reddish)) ///
 				(line total_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)2000, nogrid ///
+				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)1800, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1961,7 +1961,7 @@
 				(line z_total_season_ year if sat == 5, color(reddish)) ///
 				(line z_total_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-5(1)5, nogrid ///
+				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-3(1)4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1982,7 +1982,7 @@
 				(line raindays_ year if sat == 5, color(reddish)) ///
 				(line raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Rainfall Days") ylabel(0(30)300, nogrid ///
+				ytitle("Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2003,7 +2003,7 @@
 				(line dev_raindays_ year if sat == 5, color(reddish)) ///
 				(line dev_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Deviations in Rainfall Days") ylabel(-150(30)150, nogrid ///
+				ytitle("Deviations in Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2024,7 +2024,7 @@
 				(line norain_ year if sat == 5, color(reddish)) ///
 				(line norain_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("No Rainfall Days") ylabel(0(30)300, nogrid ///
+				ytitle("No Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2045,7 +2045,7 @@
 				(line dev_norain_ year if sat == 5, color(reddish)) ///
 				(line dev_norain_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Deviations in No Rainfall Days") ylabel(-120(30)120, nogrid ///
+				ytitle("Deviations in No Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2066,7 +2066,7 @@
 				(line percent_raindays_ year if sat == 5, color(reddish)) ///
 				(line percent_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Share of Rainy Days") ylabel(0(0.2)2, nogrid ///
+				ytitle("Share of Rainy Days") ylabel(0(0.1)1, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2087,7 +2087,7 @@
 				(line dev_percent_raindays_ year if sat == 5, color(reddish)) ///
 				(line dev_percent_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Deviations in Share of Rainy Days") ylabel(-1(0.2)1, nogrid ///
+				ytitle("Deviations in Share of Rainy Days") ylabel(-0.4(0.1)0.4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2108,7 +2108,7 @@
 				(line dry_ year if sat == 5, color(reddish)) ///
 				(line dry_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Intra-season Dry Spell") ylabel(0(5)75, nogrid ///
+				ytitle("Intra-season Dry Spell") ylabel(0(5)60, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2182,7 +2182,7 @@
 				(line mean_season_ year if sat == 5, color(reddish)) ///
 				(line mean_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)15, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2203,7 +2203,7 @@
 				(line median_season_ year if sat == 5, color(reddish)) ///
 				(line median_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)10, nogrid ///
+				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2224,7 +2224,7 @@
 				(line sd_season_ year if sat == 5, color(reddish)) ///
 				(line sd_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)20, nogrid ///
+				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)14, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2245,7 +2245,7 @@
 				(line skew_season_ year if sat == 5, color(reddish)) ///
 				(line skew_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Skew of Daily Rainfall (mm)") ylabel(0(0.05)0.75, nogrid ///
+				ytitle("Skew of Daily Rainfall (mm)") ylabel(0.2(0.05)0.7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2266,7 +2266,7 @@
 				(line total_season_ year if sat == 5, color(reddish)) ///
 				(line total_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)2000, nogrid ///
+				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)1800, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2308,7 +2308,7 @@
 				(line z_total_season_ year if sat == 5, color(reddish)) ///
 				(line z_total_season_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-5(1)5, nogrid ///
+				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-3(1)4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2329,7 +2329,7 @@
 				(line raindays_ year if sat == 5, color(reddish)) ///
 				(line raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Rainfall Days") ylabel(0(30)300, nogrid ///
+				ytitle("Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2350,7 +2350,7 @@
 				(line dev_raindays_ year if sat == 5, color(reddish)) ///
 				(line dev_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Deviations in Rainfall Days") ylabel(-150(30)150, nogrid ///
+				ytitle("Deviations in Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2371,7 +2371,7 @@
 				(line norain_ year if sat == 5, color(reddish)) ///
 				(line norain_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("No Rainfall Days") ylabel(0(30)300, nogrid ///
+				ytitle("No Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2392,7 +2392,7 @@
 				(line dev_norain_ year if sat == 5, color(reddish)) ///
 				(line dev_norain_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Deviations in No Rainfall Days") ylabel(-120(30)120, nogrid ///
+				ytitle("Deviations in No Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2413,7 +2413,7 @@
 				(line percent_raindays_ year if sat == 5, color(reddish)) ///
 				(line percent_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Share of Rainy Days") ylabel(0(0.2)2, nogrid ///
+				ytitle("Share of Rainy Days") ylabel(0(0.1)1, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2434,7 +2434,7 @@
 				(line dev_percent_raindays_ year if sat == 5, color(reddish)) ///
 				(line dev_percent_raindays_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Deviations in Share of Rainy Days") ylabel(-1(0.2)1, nogrid ///
+				ytitle("Deviations in Share of Rainy Days") ylabel(-0.4(0.1)0.4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2455,7 +2455,7 @@
 				(line dry_ year if sat == 5, color(reddish)) ///
 				(line dry_ year if sat == 6, color(ananas) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Intra-season Dry Spell") ylabel(0(5)75, nogrid ///
+				ytitle("Intra-season Dry Spell") ylabel(0(5)60, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
