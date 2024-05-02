@@ -73,7 +73,7 @@
 		
 					reshape long mean_season_ median_season_ sd_season_ total_season_ ///
 								skew_season_ norain_ raindays_ percent_raindays_ dry_ ///
-								dev_total_season_ dev_total_season_ z_total_season_ dev_raindays_ ///
+								dev_total_season_ z_total_season_ dev_raindays_ ///
 								dev_norain_ dev_percent_raindays_, i(household_id*) j(year)
 		
 				* define file naming criteria
@@ -422,14 +422,14 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line mean_season_ year if sat == 1, lcolor(gray)) ///
-				(line mean_season_ year if sat == 2, color(vermillion) ) ///
-				(line mean_season_ year if sat == 3, color(sea)) ///
-				(line mean_season_ year if sat == 4, color(turquoise)) ///
-				(line mean_season_ year if sat == 5, color(reddish)) ///
-				(line mean_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)6, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
