@@ -66,6 +66,10 @@
 	lab val			b_sign posneg
 	lab var			b_sign "Sign on weather variable"
 
+* rename satellites to actual name
+	lab	def			sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" 4 "ARC2" 5 "ERA5" ///
+						6 "TAMSAT" 7 "MERRA-2-T" 8 "ERA5-T" 9 "CPC-T", replace
+	
 
 ************************************************************************
 **# 2 - generate coef plots by rainfall variable and satellite
