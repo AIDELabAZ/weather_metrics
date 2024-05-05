@@ -444,12 +444,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
-				(line median_season_ year if sat == 2, color(vermillion) ) ///
-				(line median_season_ year if sat == 3, color(sea)) ///
-				(line median_season_ year if sat == 4, color(turquoise)) ///
-				(line median_season_ year if sat == 5, color(reddish)) ///
-				(line median_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
 				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -465,12 +465,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line sd_season_ year if sat == 1, lcolor(gray)) ///
-				(line sd_season_ year if sat == 2, color(vermillion) ) ///
-				(line sd_season_ year if sat == 3, color(sea)) ///
-				(line sd_season_ year if sat == 4, color(turquoise)) ///
-				(line sd_season_ year if sat == 5, color(reddish)) ///
-				(line sd_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
 				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)14, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -486,12 +486,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line skew_season_ year if sat == 1, lcolor(gray)) ///
-				(line skew_season_ year if sat == 2, color(vermillion) ) ///
-				(line skew_season_ year if sat == 3, color(sea)) ///
-				(line skew_season_ year if sat == 4, color(turquoise)) ///
-				(line skew_season_ year if sat == 5, color(reddish)) ///
-				(line skew_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
 				ytitle("Skew of Daily Rainfall (mm)") ylabel(0.2(0.05)0.7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -507,12 +507,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line total_season_ year if sat == 1, lcolor(gray)) ///
-				(line total_season_ year if sat == 2, color(vermillion) ) ///
-				(line total_season_ year if sat == 3, color(sea)) ///
-				(line total_season_ year if sat == 4, color(turquoise)) ///
-				(line total_season_ year if sat == 5, color(reddish)) ///
-				(line total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
 				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)1800, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -528,12 +528,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray)) ///
-				(line dev_total_season_ year if sat == 2, color(vermillion) ) ///
-				(line dev_total_season_ year if sat == 3, color(sea)) ///
-				(line dev_total_season_ year if sat == 4, color(turquoise)) ///
-				(line dev_total_season_ year if sat == 5, color(reddish)) ///
-				(line dev_total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
 				ytitle("Deviations in Total Daily Rainfall (mm)") ylabel(-500(100)750, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -549,12 +549,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line z_total_season_ year if sat == 1, lcolor(gray)) ///
-				(line z_total_season_ year if sat == 2, color(vermillion) ) ///
-				(line z_total_season_ year if sat == 3, color(sea)) ///
-				(line z_total_season_ year if sat == 4, color(turquoise)) ///
-				(line z_total_season_ year if sat == 5, color(reddish)) ///
-				(line z_total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
 				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-3(1)4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -570,12 +570,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line raindays_ year if sat == 1, lcolor(gray)) ///
-				(line raindays_ year if sat == 2, color(vermillion) ) ///
-				(line raindays_ year if sat == 3, color(sea)) ///
-				(line raindays_ year if sat == 4, color(turquoise)) ///
-				(line raindays_ year if sat == 5, color(reddish)) ///
-				(line raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
 				ytitle("Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -591,12 +591,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line dev_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line dev_raindays_ year if sat == 3, color(sea)) ///
-				(line dev_raindays_ year if sat == 4, color(turquoise)) ///
-				(line dev_raindays_ year if sat == 5, color(reddish)) ///
-				(line dev_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
 				ytitle("Deviations in Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -612,12 +612,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line norain_ year if sat == 1, lcolor(gray)) ///
-				(line norain_ year if sat == 2, color(vermillion) ) ///
-				(line norain_ year if sat == 3, color(sea)) ///
-				(line norain_ year if sat == 4, color(turquoise)) ///
-				(line norain_ year if sat == 5, color(reddish)) ///
-				(line norain_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
 				ytitle("No Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -633,12 +633,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray)) ///
-				(line dev_norain_ year if sat == 2, color(vermillion) ) ///
-				(line dev_norain_ year if sat == 3, color(sea)) ///
-				(line dev_norain_ year if sat == 4, color(turquoise)) ///
-				(line dev_norain_ year if sat == 5, color(reddish)) ///
-				(line dev_norain_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
 				ytitle("Deviations in No Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -654,14 +654,14 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line percent_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line percent_raindays_ year if sat == 3, color(sea)) ///
-				(line percent_raindays_ year if sat == 4, color(turquoise)) ///
-				(line percent_raindays_ year if sat == 5, color(reddish)) ///
-				(line percent_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Share of Rainy Days") ylabel(0(0.1)1, nogrid ///
+				ytitle("Share of Rainy Days (%)") ylabel(0(0.1)1, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -675,12 +675,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_percent_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line dev_percent_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line dev_percent_raindays_ year if sat == 3, color(sea)) ///
-				(line dev_percent_raindays_ year if sat == 4, color(turquoise)) ///
-				(line dev_percent_raindays_ year if sat == 5, color(reddish)) ///
-				(line dev_percent_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
 				ytitle("Deviations in Share of Rainy Days") ylabel(-0.4(0.1)0.4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -696,12 +696,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dry_ year if sat == 1, lcolor(gray)) ///
-				(line dry_ year if sat == 2, color(vermillion) ) ///
-				(line dry_ year if sat == 3, color(sea)) ///
-				(line dry_ year if sat == 4, color(turquoise)) ///
-				(line dry_ year if sat == 5, color(reddish)) ///
-				(line dry_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
 				ytitle("Intra-season Dry Spell") ylabel(0(5)60, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -779,12 +779,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line mean_season_ year if sat == 1, lcolor(gray)) ///
-				(line mean_season_ year if sat == 2, color(vermillion) ) ///
-				(line mean_season_ year if sat == 3, color(sea)) ///
-				(line mean_season_ year if sat == 4, color(turquoise)) ///
-				(line mean_season_ year if sat == 5, color(reddish)) ///
-				(line mean_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
 				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -800,12 +800,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
-				(line median_season_ year if sat == 2, color(vermillion) ) ///
-				(line median_season_ year if sat == 3, color(sea)) ///
-				(line median_season_ year if sat == 4, color(turquoise)) ///
-				(line median_season_ year if sat == 5, color(reddish)) ///
-				(line median_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
 				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -821,12 +821,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line sd_season_ year if sat == 1, lcolor(gray)) ///
-				(line sd_season_ year if sat == 2, color(vermillion) ) ///
-				(line sd_season_ year if sat == 3, color(sea)) ///
-				(line sd_season_ year if sat == 4, color(turquoise)) ///
-				(line sd_season_ year if sat == 5, color(reddish)) ///
-				(line sd_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
 				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)14, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -842,12 +842,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line skew_season_ year if sat == 1, lcolor(gray)) ///
-				(line skew_season_ year if sat == 2, color(vermillion) ) ///
-				(line skew_season_ year if sat == 3, color(sea)) ///
-				(line skew_season_ year if sat == 4, color(turquoise)) ///
-				(line skew_season_ year if sat == 5, color(reddish)) ///
-				(line skew_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
 				ytitle("Skew of Daily Rainfall (mm)") ylabel(0.2(0.05)0.7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -863,12 +863,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line total_season_ year if sat == 1, lcolor(gray)) ///
-				(line total_season_ year if sat == 2, color(vermillion) ) ///
-				(line total_season_ year if sat == 3, color(sea)) ///
-				(line total_season_ year if sat == 4, color(turquoise)) ///
-				(line total_season_ year if sat == 5, color(reddish)) ///
-				(line total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
 				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)1800, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -884,12 +884,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray)) ///
-				(line dev_total_season_ year if sat == 2, color(vermillion) ) ///
-				(line dev_total_season_ year if sat == 3, color(sea)) ///
-				(line dev_total_season_ year if sat == 4, color(turquoise)) ///
-				(line dev_total_season_ year if sat == 5, color(reddish)) ///
-				(line dev_total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
 				ytitle("Deviations in Total Daily Rainfall (mm)") ylabel(-500(100)750, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -905,12 +905,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line z_total_season_ year if sat == 1, lcolor(gray)) ///
-				(line z_total_season_ year if sat == 2, color(vermillion) ) ///
-				(line z_total_season_ year if sat == 3, color(sea)) ///
-				(line z_total_season_ year if sat == 4, color(turquoise)) ///
-				(line z_total_season_ year if sat == 5, color(reddish)) ///
-				(line z_total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
 				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-3(1)4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -926,12 +926,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line raindays_ year if sat == 1, lcolor(gray)) ///
-				(line raindays_ year if sat == 2, color(vermillion) ) ///
-				(line raindays_ year if sat == 3, color(sea)) ///
-				(line raindays_ year if sat == 4, color(turquoise)) ///
-				(line raindays_ year if sat == 5, color(reddish)) ///
-				(line raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
 				ytitle("Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -947,12 +947,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line dev_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line dev_raindays_ year if sat == 3, color(sea)) ///
-				(line dev_raindays_ year if sat == 4, color(turquoise)) ///
-				(line dev_raindays_ year if sat == 5, color(reddish)) ///
-				(line dev_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
 				ytitle("Deviations in Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -968,12 +968,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line norain_ year if sat == 1, lcolor(gray)) ///
-				(line norain_ year if sat == 2, color(vermillion) ) ///
-				(line norain_ year if sat == 3, color(sea)) ///
-				(line norain_ year if sat == 4, color(turquoise)) ///
-				(line norain_ year if sat == 5, color(reddish)) ///
-				(line norain_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
 				ytitle("No Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -989,12 +989,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray)) ///
-				(line dev_norain_ year if sat == 2, color(vermillion) ) ///
-				(line dev_norain_ year if sat == 3, color(sea)) ///
-				(line dev_norain_ year if sat == 4, color(turquoise)) ///
-				(line dev_norain_ year if sat == 5, color(reddish)) ///
-				(line dev_norain_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
 				ytitle("Deviations in No Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1010,14 +1010,14 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line percent_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line percent_raindays_ year if sat == 3, color(sea)) ///
-				(line percent_raindays_ year if sat == 4, color(turquoise)) ///
-				(line percent_raindays_ year if sat == 5, color(reddish)) ///
-				(line percent_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Share of Rainy Days") ylabel(0(0.1)1, nogrid ///
+				ytitle("Share of Rainy Days (%)") ylabel(0(0.1)1, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1031,12 +1031,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_percent_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line dev_percent_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line dev_percent_raindays_ year if sat == 3, color(sea)) ///
-				(line dev_percent_raindays_ year if sat == 4, color(turquoise)) ///
-				(line dev_percent_raindays_ year if sat == 5, color(reddish)) ///
-				(line dev_percent_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
 				ytitle("Deviations in Share of Rainy Days") ylabel(-0.4(0.1)0.4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1052,12 +1052,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dry_ year if sat == 1, lcolor(gray)) ///
-				(line dry_ year if sat == 2, color(vermillion) ) ///
-				(line dry_ year if sat == 3, color(sea)) ///
-				(line dry_ year if sat == 4, color(turquoise)) ///
-				(line dry_ year if sat == 5, color(reddish)) ///
-				(line dry_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
 				ytitle("Intra-season Dry Spell") ylabel(0(5)60, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1129,12 +1129,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line mean_season_ year if sat == 1, lcolor(gray)) ///
-				(line mean_season_ year if sat == 2, color(vermillion) ) ///
-				(line mean_season_ year if sat == 3, color(sea)) ///
-				(line mean_season_ year if sat == 4, color(turquoise)) ///
-				(line mean_season_ year if sat == 5, color(reddish)) ///
-				(line mean_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1150,12 +1150,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
-				(line median_season_ year if sat == 2, color(vermillion) ) ///
-				(line median_season_ year if sat == 3, color(sea)) ///
-				(line median_season_ year if sat == 4, color(turquoise)) ///
-				(line median_season_ year if sat == 5, color(reddish)) ///
-				(line median_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1171,12 +1171,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line sd_season_ year if sat == 1, lcolor(gray)) ///
-				(line sd_season_ year if sat == 2, color(vermillion) ) ///
-				(line sd_season_ year if sat == 3, color(sea)) ///
-				(line sd_season_ year if sat == 4, color(turquoise)) ///
-				(line sd_season_ year if sat == 5, color(reddish)) ///
-				(line sd_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)14, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1192,12 +1192,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line skew_season_ year if sat == 1, lcolor(gray)) ///
-				(line skew_season_ year if sat == 2, color(vermillion) ) ///
-				(line skew_season_ year if sat == 3, color(sea)) ///
-				(line skew_season_ year if sat == 4, color(turquoise)) ///
-				(line skew_season_ year if sat == 5, color(reddish)) ///
-				(line skew_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("Skew of Daily Rainfall (mm)") ylabel(0.2(0.05)0.7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1213,12 +1213,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line total_season_ year if sat == 1, lcolor(gray)) ///
-				(line total_season_ year if sat == 2, color(vermillion) ) ///
-				(line total_season_ year if sat == 3, color(sea)) ///
-				(line total_season_ year if sat == 4, color(turquoise)) ///
-				(line total_season_ year if sat == 5, color(reddish)) ///
-				(line total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)1800, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1234,12 +1234,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray)) ///
-				(line dev_total_season_ year if sat == 2, color(vermillion) ) ///
-				(line dev_total_season_ year if sat == 3, color(sea)) ///
-				(line dev_total_season_ year if sat == 4, color(turquoise)) ///
-				(line dev_total_season_ year if sat == 5, color(reddish)) ///
-				(line dev_total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("Deviations in Total Daily Rainfall (mm)") ylabel(-500(100)750, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1255,12 +1255,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line z_total_season_ year if sat == 1, lcolor(gray)) ///
-				(line z_total_season_ year if sat == 2, color(vermillion) ) ///
-				(line z_total_season_ year if sat == 3, color(sea)) ///
-				(line z_total_season_ year if sat == 4, color(turquoise)) ///
-				(line z_total_season_ year if sat == 5, color(reddish)) ///
-				(line z_total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-3(1)4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1276,12 +1276,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line raindays_ year if sat == 1, lcolor(gray)) ///
-				(line raindays_ year if sat == 2, color(vermillion) ) ///
-				(line raindays_ year if sat == 3, color(sea)) ///
-				(line raindays_ year if sat == 4, color(turquoise)) ///
-				(line raindays_ year if sat == 5, color(reddish)) ///
-				(line raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1297,12 +1297,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line dev_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line dev_raindays_ year if sat == 3, color(sea)) ///
-				(line dev_raindays_ year if sat == 4, color(turquoise)) ///
-				(line dev_raindays_ year if sat == 5, color(reddish)) ///
-				(line dev_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("Deviations in Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1318,12 +1318,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line norain_ year if sat == 1, lcolor(gray)) ///
-				(line norain_ year if sat == 2, color(vermillion) ) ///
-				(line norain_ year if sat == 3, color(sea)) ///
-				(line norain_ year if sat == 4, color(turquoise)) ///
-				(line norain_ year if sat == 5, color(reddish)) ///
-				(line norain_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("No Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1339,12 +1339,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray)) ///
-				(line dev_norain_ year if sat == 2, color(vermillion) ) ///
-				(line dev_norain_ year if sat == 3, color(sea)) ///
-				(line dev_norain_ year if sat == 4, color(turquoise)) ///
-				(line dev_norain_ year if sat == 5, color(reddish)) ///
-				(line dev_norain_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("Deviations in No Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1360,14 +1360,14 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line percent_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line percent_raindays_ year if sat == 3, color(sea)) ///
-				(line percent_raindays_ year if sat == 4, color(turquoise)) ///
-				(line percent_raindays_ year if sat == 5, color(reddish)) ///
-				(line percent_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Share of Rainy Days") ylabel(0(0.1)1, nogrid ///
+				ytitle("Share of Rainy Days (%)") ylabel(0(0.1)1, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1381,12 +1381,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_percent_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line dev_percent_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line dev_percent_raindays_ year if sat == 3, color(sea)) ///
-				(line dev_percent_raindays_ year if sat == 4, color(turquoise)) ///
-				(line dev_percent_raindays_ year if sat == 5, color(reddish)) ///
-				(line dev_percent_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("Deviations in Share of Rainy Days") ylabel(-0.4(0.1)0.4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1402,12 +1402,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dry_ year if sat == 1, lcolor(gray)) ///
-				(line dry_ year if sat == 2, color(vermillion) ) ///
-				(line dry_ year if sat == 3, color(sea)) ///
-				(line dry_ year if sat == 4, color(turquoise)) ///
-				(line dry_ year if sat == 5, color(reddish)) ///
-				(line dry_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("Intra-season Dry Spell") ylabel(0(5)60, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1476,12 +1476,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line mean_season_ year if sat == 1, lcolor(gray)) ///
-				(line mean_season_ year if sat == 2, color(vermillion) ) ///
-				(line mean_season_ year if sat == 3, color(sea)) ///
-				(line mean_season_ year if sat == 4, color(turquoise)) ///
-				(line mean_season_ year if sat == 5, color(reddish)) ///
-				(line mean_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
 				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1497,12 +1497,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
-				(line median_season_ year if sat == 2, color(vermillion) ) ///
-				(line median_season_ year if sat == 3, color(sea)) ///
-				(line median_season_ year if sat == 4, color(turquoise)) ///
-				(line median_season_ year if sat == 5, color(reddish)) ///
-				(line median_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
 				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1518,12 +1518,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line sd_season_ year if sat == 1, lcolor(gray)) ///
-				(line sd_season_ year if sat == 2, color(vermillion) ) ///
-				(line sd_season_ year if sat == 3, color(sea)) ///
-				(line sd_season_ year if sat == 4, color(turquoise)) ///
-				(line sd_season_ year if sat == 5, color(reddish)) ///
-				(line sd_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
 				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)14, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1539,12 +1539,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line skew_season_ year if sat == 1, lcolor(gray)) ///
-				(line skew_season_ year if sat == 2, color(vermillion) ) ///
-				(line skew_season_ year if sat == 3, color(sea)) ///
-				(line skew_season_ year if sat == 4, color(turquoise)) ///
-				(line skew_season_ year if sat == 5, color(reddish)) ///
-				(line skew_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
 				ytitle("Skew of Daily Rainfall (mm)") ylabel(0.2(0.05)0.7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1560,12 +1560,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line total_season_ year if sat == 1, lcolor(gray)) ///
-				(line total_season_ year if sat == 2, color(vermillion) ) ///
-				(line total_season_ year if sat == 3, color(sea)) ///
-				(line total_season_ year if sat == 4, color(turquoise)) ///
-				(line total_season_ year if sat == 5, color(reddish)) ///
-				(line total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
 				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)1800, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1581,12 +1581,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray)) ///
-				(line dev_total_season_ year if sat == 2, color(vermillion) ) ///
-				(line dev_total_season_ year if sat == 3, color(sea)) ///
-				(line dev_total_season_ year if sat == 4, color(turquoise)) ///
-				(line dev_total_season_ year if sat == 5, color(reddish)) ///
-				(line dev_total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
 				ytitle("Deviations in Total Daily Rainfall (mm)") ylabel(-500(100)750, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1602,12 +1602,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line z_total_season_ year if sat == 1, lcolor(gray)) ///
-				(line z_total_season_ year if sat == 2, color(vermillion) ) ///
-				(line z_total_season_ year if sat == 3, color(sea)) ///
-				(line z_total_season_ year if sat == 4, color(turquoise)) ///
-				(line z_total_season_ year if sat == 5, color(reddish)) ///
-				(line z_total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
 				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-3(1)4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1623,12 +1623,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line raindays_ year if sat == 1, lcolor(gray)) ///
-				(line raindays_ year if sat == 2, color(vermillion) ) ///
-				(line raindays_ year if sat == 3, color(sea)) ///
-				(line raindays_ year if sat == 4, color(turquoise)) ///
-				(line raindays_ year if sat == 5, color(reddish)) ///
-				(line raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
 				ytitle("Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1644,12 +1644,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line dev_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line dev_raindays_ year if sat == 3, color(sea)) ///
-				(line dev_raindays_ year if sat == 4, color(turquoise)) ///
-				(line dev_raindays_ year if sat == 5, color(reddish)) ///
-				(line dev_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
 				ytitle("Deviations in Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1665,12 +1665,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line norain_ year if sat == 1, lcolor(gray)) ///
-				(line norain_ year if sat == 2, color(vermillion) ) ///
-				(line norain_ year if sat == 3, color(sea)) ///
-				(line norain_ year if sat == 4, color(turquoise)) ///
-				(line norain_ year if sat == 5, color(reddish)) ///
-				(line norain_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
 				ytitle("No Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1686,12 +1686,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray)) ///
-				(line dev_norain_ year if sat == 2, color(vermillion) ) ///
-				(line dev_norain_ year if sat == 3, color(sea)) ///
-				(line dev_norain_ year if sat == 4, color(turquoise)) ///
-				(line dev_norain_ year if sat == 5, color(reddish)) ///
-				(line dev_norain_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
 				ytitle("Deviations in No Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1707,14 +1707,14 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line percent_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line percent_raindays_ year if sat == 3, color(sea)) ///
-				(line percent_raindays_ year if sat == 4, color(turquoise)) ///
-				(line percent_raindays_ year if sat == 5, color(reddish)) ///
-				(line percent_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
-				ytitle("Share of Rainy Days") ylabel(0(0.1)1, nogrid ///
+				ytitle("Share of Rainy Days (%)") ylabel(0(0.1)1, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1728,12 +1728,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_percent_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line dev_percent_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line dev_percent_raindays_ year if sat == 3, color(sea)) ///
-				(line dev_percent_raindays_ year if sat == 4, color(turquoise)) ///
-				(line dev_percent_raindays_ year if sat == 5, color(reddish)) ///
-				(line dev_percent_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Nigeria") ///
 				ytitle("Deviations in Share of Rainy Days") ylabel(-0.4(0.1)0.4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1828,12 +1828,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line mean_season_ year if sat == 1, lcolor(gray)) ///
-				(line mean_season_ year if sat == 2, color(vermillion) ) ///
-				(line mean_season_ year if sat == 3, color(sea)) ///
-				(line mean_season_ year if sat == 4, color(turquoise)) ///
-				(line mean_season_ year if sat == 5, color(reddish)) ///
-				(line mean_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
 				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1849,12 +1849,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
-				(line median_season_ year if sat == 2, color(vermillion) ) ///
-				(line median_season_ year if sat == 3, color(sea)) ///
-				(line median_season_ year if sat == 4, color(turquoise)) ///
-				(line median_season_ year if sat == 5, color(reddish)) ///
-				(line median_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
 				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1870,12 +1870,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line sd_season_ year if sat == 1, lcolor(gray)) ///
-				(line sd_season_ year if sat == 2, color(vermillion) ) ///
-				(line sd_season_ year if sat == 3, color(sea)) ///
-				(line sd_season_ year if sat == 4, color(turquoise)) ///
-				(line sd_season_ year if sat == 5, color(reddish)) ///
-				(line sd_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
 				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)14, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1891,12 +1891,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line skew_season_ year if sat == 1, lcolor(gray)) ///
-				(line skew_season_ year if sat == 2, color(vermillion) ) ///
-				(line skew_season_ year if sat == 3, color(sea)) ///
-				(line skew_season_ year if sat == 4, color(turquoise)) ///
-				(line skew_season_ year if sat == 5, color(reddish)) ///
-				(line skew_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
 				ytitle("Skew of Daily Rainfall (mm)") ylabel(0.2(0.05)0.7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1912,12 +1912,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line total_season_ year if sat == 1, lcolor(gray)) ///
-				(line total_season_ year if sat == 2, color(vermillion) ) ///
-				(line total_season_ year if sat == 3, color(sea)) ///
-				(line total_season_ year if sat == 4, color(turquoise)) ///
-				(line total_season_ year if sat == 5, color(reddish)) ///
-				(line total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
 				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)1800, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1933,12 +1933,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray)) ///
-				(line dev_total_season_ year if sat == 2, color(vermillion) ) ///
-				(line dev_total_season_ year if sat == 3, color(sea)) ///
-				(line dev_total_season_ year if sat == 4, color(turquoise)) ///
-				(line dev_total_season_ year if sat == 5, color(reddish)) ///
-				(line dev_total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
 				ytitle("Deviations in Total Daily Rainfall (mm)") ylabel(-500(100)750, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1954,12 +1954,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line z_total_season_ year if sat == 1, lcolor(gray)) ///
-				(line z_total_season_ year if sat == 2, color(vermillion) ) ///
-				(line z_total_season_ year if sat == 3, color(sea)) ///
-				(line z_total_season_ year if sat == 4, color(turquoise)) ///
-				(line z_total_season_ year if sat == 5, color(reddish)) ///
-				(line z_total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
 				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-3(1)4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1975,12 +1975,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line raindays_ year if sat == 1, lcolor(gray)) ///
-				(line raindays_ year if sat == 2, color(vermillion) ) ///
-				(line raindays_ year if sat == 3, color(sea)) ///
-				(line raindays_ year if sat == 4, color(turquoise)) ///
-				(line raindays_ year if sat == 5, color(reddish)) ///
-				(line raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
 				ytitle("Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -1996,12 +1996,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line dev_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line dev_raindays_ year if sat == 3, color(sea)) ///
-				(line dev_raindays_ year if sat == 4, color(turquoise)) ///
-				(line dev_raindays_ year if sat == 5, color(reddish)) ///
-				(line dev_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
 				ytitle("Deviations in Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2017,12 +2017,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line norain_ year if sat == 1, lcolor(gray)) ///
-				(line norain_ year if sat == 2, color(vermillion) ) ///
-				(line norain_ year if sat == 3, color(sea)) ///
-				(line norain_ year if sat == 4, color(turquoise)) ///
-				(line norain_ year if sat == 5, color(reddish)) ///
-				(line norain_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
 				ytitle("No Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2038,12 +2038,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray)) ///
-				(line dev_norain_ year if sat == 2, color(vermillion) ) ///
-				(line dev_norain_ year if sat == 3, color(sea)) ///
-				(line dev_norain_ year if sat == 4, color(turquoise)) ///
-				(line dev_norain_ year if sat == 5, color(reddish)) ///
-				(line dev_norain_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
 				ytitle("Deviations in No Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2059,14 +2059,14 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line percent_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line percent_raindays_ year if sat == 3, color(sea)) ///
-				(line percent_raindays_ year if sat == 4, color(turquoise)) ///
-				(line percent_raindays_ year if sat == 5, color(reddish)) ///
-				(line percent_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Share of Rainy Days") ylabel(0(0.1)1, nogrid ///
+				ytitle("Share of Rainy Days (%)") ylabel(0(0.1)1, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2080,12 +2080,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_percent_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line dev_percent_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line dev_percent_raindays_ year if sat == 3, color(sea)) ///
-				(line dev_percent_raindays_ year if sat == 4, color(turquoise)) ///
-				(line dev_percent_raindays_ year if sat == 5, color(reddish)) ///
-				(line dev_percent_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
 				ytitle("Deviations in Share of Rainy Days") ylabel(-0.4(0.1)0.4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2101,12 +2101,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dry_ year if sat == 1, lcolor(gray)) ///
-				(line dry_ year if sat == 2, color(vermillion) ) ///
-				(line dry_ year if sat == 3, color(sea)) ///
-				(line dry_ year if sat == 4, color(turquoise)) ///
-				(line dry_ year if sat == 5, color(reddish)) ///
-				(line dry_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
 				ytitle("Intra-season Dry Spell") ylabel(0(5)60, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2175,12 +2175,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line mean_season_ year if sat == 1, lcolor(gray)) ///
-				(line mean_season_ year if sat == 2, color(vermillion) ) ///
-				(line mean_season_ year if sat == 3, color(sea)) ///
-				(line mean_season_ year if sat == 4, color(turquoise)) ///
-				(line mean_season_ year if sat == 5, color(reddish)) ///
-				(line mean_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
 				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2196,12 +2196,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line median_season_ year if sat == 1, lcolor(gray)) ///
-				(line median_season_ year if sat == 2, color(vermillion) ) ///
-				(line median_season_ year if sat == 3, color(sea)) ///
-				(line median_season_ year if sat == 4, color(turquoise)) ///
-				(line median_season_ year if sat == 5, color(reddish)) ///
-				(line median_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
 				ytitle("Median Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2217,12 +2217,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line sd_season_ year if sat == 1, lcolor(gray)) ///
-				(line sd_season_ year if sat == 2, color(vermillion) ) ///
-				(line sd_season_ year if sat == 3, color(sea)) ///
-				(line sd_season_ year if sat == 4, color(turquoise)) ///
-				(line sd_season_ year if sat == 5, color(reddish)) ///
-				(line sd_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
 				ytitle("Variance of Daily Rainfall (mm)") ylabel(0(2)14, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2238,12 +2238,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line skew_season_ year if sat == 1, lcolor(gray)) ///
-				(line skew_season_ year if sat == 2, color(vermillion) ) ///
-				(line skew_season_ year if sat == 3, color(sea)) ///
-				(line skew_season_ year if sat == 4, color(turquoise)) ///
-				(line skew_season_ year if sat == 5, color(reddish)) ///
-				(line skew_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
 				ytitle("Skew of Daily Rainfall (mm)") ylabel(0.2(0.05)0.7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2259,12 +2259,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line total_season_ year if sat == 1, lcolor(gray)) ///
-				(line total_season_ year if sat == 2, color(vermillion) ) ///
-				(line total_season_ year if sat == 3, color(sea)) ///
-				(line total_season_ year if sat == 4, color(turquoise)) ///
-				(line total_season_ year if sat == 5, color(reddish)) ///
-				(line total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
 				ytitle("Total Daily Rainfall (mm)") ylabel(0(200)1800, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2280,12 +2280,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray)) ///
-				(line dev_total_season_ year if sat == 2, color(vermillion) ) ///
-				(line dev_total_season_ year if sat == 3, color(sea)) ///
-				(line dev_total_season_ year if sat == 4, color(turquoise)) ///
-				(line dev_total_season_ year if sat == 5, color(reddish)) ///
-				(line dev_total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
 				ytitle("Deviations in Total Daily Rainfall (mm)") ylabel(-500(100)750, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2301,12 +2301,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line z_total_season_ year if sat == 1, lcolor(gray)) ///
-				(line z_total_season_ year if sat == 2, color(vermillion) ) ///
-				(line z_total_season_ year if sat == 3, color(sea)) ///
-				(line z_total_season_ year if sat == 4, color(turquoise)) ///
-				(line z_total_season_ year if sat == 5, color(reddish)) ///
-				(line z_total_season_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
 				ytitle("Scaled Deviations in Total Daily Rainfall (mm)") ylabel(-3(1)4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2322,12 +2322,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line raindays_ year if sat == 1, lcolor(gray)) ///
-				(line raindays_ year if sat == 2, color(vermillion) ) ///
-				(line raindays_ year if sat == 3, color(sea)) ///
-				(line raindays_ year if sat == 4, color(turquoise)) ///
-				(line raindays_ year if sat == 5, color(reddish)) ///
-				(line raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
 				ytitle("Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2343,12 +2343,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line dev_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line dev_raindays_ year if sat == 3, color(sea)) ///
-				(line dev_raindays_ year if sat == 4, color(turquoise)) ///
-				(line dev_raindays_ year if sat == 5, color(reddish)) ///
-				(line dev_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
 				ytitle("Deviations in Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2364,12 +2364,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line norain_ year if sat == 1, lcolor(gray)) ///
-				(line norain_ year if sat == 2, color(vermillion) ) ///
-				(line norain_ year if sat == 3, color(sea)) ///
-				(line norain_ year if sat == 4, color(turquoise)) ///
-				(line norain_ year if sat == 5, color(reddish)) ///
-				(line norain_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
 				ytitle("No Rainfall Days") ylabel(0(30)240, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2385,12 +2385,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray)) ///
-				(line dev_norain_ year if sat == 2, color(vermillion) ) ///
-				(line dev_norain_ year if sat == 3, color(sea)) ///
-				(line dev_norain_ year if sat == 4, color(turquoise)) ///
-				(line dev_norain_ year if sat == 5, color(reddish)) ///
-				(line dev_norain_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
 				ytitle("Deviations in No Rainfall Days") ylabel(-90(30)90, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2406,14 +2406,14 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line percent_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line percent_raindays_ year if sat == 3, color(sea)) ///
-				(line percent_raindays_ year if sat == 4, color(turquoise)) ///
-				(line percent_raindays_ year if sat == 5, color(reddish)) ///
-				(line percent_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Share of Rainy Days") ylabel(0(0.1)1, nogrid ///
+				ytitle("Share of Rainy Days (%)") ylabel(0(0.1)1, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2427,12 +2427,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dev_percent_raindays_ year if sat == 1, lcolor(gray)) ///
-				(line dev_percent_raindays_ year if sat == 2, color(vermillion) ) ///
-				(line dev_percent_raindays_ year if sat == 3, color(sea)) ///
-				(line dev_percent_raindays_ year if sat == 4, color(turquoise)) ///
-				(line dev_percent_raindays_ year if sat == 5, color(reddish)) ///
-				(line dev_percent_raindays_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
 				ytitle("Deviations in Share of Rainy Days") ylabel(-0.4(0.1)0.4, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
@@ -2448,12 +2448,12 @@
 ************************************************************************
 
 	sort		year
-	twoway 		(line dry_ year if sat == 1, lcolor(gray)) ///
-				(line dry_ year if sat == 2, color(vermillion) ) ///
-				(line dry_ year if sat == 3, color(sea)) ///
-				(line dry_ year if sat == 4, color(turquoise)) ///
-				(line dry_ year if sat == 5, color(reddish)) ///
-				(line dry_ year if sat == 6, color(ananas) ///
+	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 3, color(sea) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
+				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
+				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
 				ytitle("Intra-season Dry Spell") ylabel(0(5)60, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
