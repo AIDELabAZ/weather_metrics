@@ -1162,6 +1162,178 @@ preserve
 						saving("$sfig/v14_all", replace)
 restore
 
+************************************************************************
+**# 3 - tables of sign and significance of coefficients
+************************************************************************
+	
+*** ethiopia ***
+preserve
+	keep			if country == 1
+	keep			if ext == 3
+	keep 			if regname == 3
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	gen 			obs = _n
+	
+*dropping non-significant coefficients 
+
+	tabulate 		sig, generate (significant)
+	drop 			significant1
+	rename 			significant2 significant
+	drop 			if significant == 0
+
+*tabulating number of significant rainfall metrics and satellites
+	tabulate 		varname sat
+
+*tabulating number of significant rainfall metrics and with their sign
+	tabulate 		varname b_sign
+
+*tabulating number of significant satellites and with their sign. 
+	tabulate 		sat b_sign 
+
+restore
+
+*** malawi ***
+preserve
+	keep			if country == 2
+	keep			if ext == 3
+	keep 			if regname == 3
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	gen 			obs = _n
+	
+*dropping non-significant coefficients 
+
+	tabulate 		sig, generate (significant)
+	drop 			significant1
+	rename 			significant2 significant
+	drop 			if significant == 0
+
+*tabulating number of significant rainfall metrics and satellites
+	tabulate 		varname sat
+
+*tabulating number of significant rainfall metrics and with their sign
+	tabulate 		varname b_sign
+
+*tabulating number of significant satellites and with their sign. 
+	tabulate 		sat b_sign 
+
+restore
+
+*** niger ***
+preserve
+	keep			if country == 3
+	keep			if ext == 3
+	keep 			if regname == 3
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	gen 			obs = _n
+	
+*dropping non-significant coefficients 
+
+	tabulate 		sig, generate (significant)
+	drop 			significant1
+	rename 			significant2 significant
+	drop 			if significant == 0
+
+*tabulating number of significant rainfall metrics and satellites
+	tabulate 		varname sat
+
+*tabulating number of significant rainfall metrics and with their sign
+	tabulate 		varname b_sign
+
+*tabulating number of significant satellites and with their sign. 
+	tabulate 		sat b_sign 
+
+restore
+
+*** nigeria ***
+preserve
+	keep			if country == 4
+	keep			if ext == 3
+	keep 			if regname == 3
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	gen 			obs = _n
+	
+*dropping non-significant coefficients 
+
+	tabulate 		sig, generate (significant)
+	drop 			significant1
+	rename 			significant2 significant
+	drop 			if significant == 0
+
+*tabulating number of significant rainfall metrics and satellites
+	tabulate 		varname sat
+
+*tabulating number of significant rainfall metrics and with their sign
+	tabulate 		varname b_sign
+
+*tabulating number of significant satellites and with their sign. 
+	tabulate 		sat b_sign 
+
+restore
+
+*** tanzania ***
+preserve
+	keep			if country == 5
+	keep			if ext == 3
+	keep 			if regname == 3
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	gen 			obs = _n
+	
+*dropping non-significant coefficients 
+
+	tabulate 		sig, generate (significant)
+	drop 			significant1
+	rename 			significant2 significant
+	drop 			if significant == 0
+
+*tabulating number of significant rainfall metrics and satellites
+	tabulate 		varname sat
+
+*tabulating number of significant rainfall metrics and with their sign
+	tabulate 		varname b_sign
+
+*tabulating number of significant satellites and with their sign. 
+	tabulate 		sat b_sign 
+
+restore
+
+*** uganda ***
+preserve
+	keep			if country == 6
+	keep			if ext == 3
+	keep 			if regname == 3
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	gen 			obs = _n
+	
+*dropping non-significant coefficients 
+
+	tabulate 		sig, generate (significant)
+	drop 			significant1
+	rename 			significant2 significant
+	drop 			if significant == 0
+
+*tabulating number of significant rainfall metrics and satellites
+	tabulate 		varname sat
+
+*tabulating number of significant rainfall metrics and with their sign
+	tabulate 		varname b_sign
+
+*tabulating number of significant satellites and with their sign. 
+	tabulate 		sat b_sign 
+
+restore
+
 /*
 	
 ************************************************************************
