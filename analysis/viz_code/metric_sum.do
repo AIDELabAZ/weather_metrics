@@ -429,7 +429,7 @@
 				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
 				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Ethiopia") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)6, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -786,7 +786,7 @@
 				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
 				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1136,7 +1136,7 @@
 				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
 				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)3, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -1835,7 +1835,7 @@
 				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
 				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Tanzania") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)8, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
@@ -2182,7 +2182,7 @@
 				(line mean_season_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
 				(line mean_season_ year if sat == 6, color(ananas*2) lwidth(thick) ///
 				xtitle("Year") xscale(r(1983(2)2017)) title("Uganda") ///
-				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)12, nogrid ///
+				ytitle("Mean Daily Rainfall (mm)") ylabel(0(1)7, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
 				label(3 "MERRA-2") label(4 "ARC2") label(5 "ERA5") ///
