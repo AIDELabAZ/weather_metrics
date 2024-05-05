@@ -1224,7 +1224,7 @@ restore
 
 *** niger ***
 preserve
-	keep			if country == 3
+	keep			if country == 4
 	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
@@ -1252,7 +1252,7 @@ restore
 
 *** nigeria ***
 preserve
-	keep			if country == 4
+	keep			if country == 5
 	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
@@ -1280,7 +1280,7 @@ restore
 
 *** tanzania ***
 preserve
-	keep			if country == 5
+	keep			if country == 6
 	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
@@ -1308,7 +1308,7 @@ restore
 
 *** uganda ***
 preserve
-	keep			if country == 6
+	keep			if country == 7
 	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
