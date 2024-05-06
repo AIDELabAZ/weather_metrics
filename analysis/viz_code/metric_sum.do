@@ -417,6 +417,9 @@
 	rename		sat1 sat
 	order		sat, after(year)
 	
+* change scale of percentage
+	replace		percent_raindays_ = percent_raindays_ * 100
+
 ************************************************************************
 **## 2.1 - ethiopia mean daily rainfall
 ************************************************************************
@@ -632,9 +635,6 @@
 **## 2.11 - ethiopia deviations in no rainfall days
 ************************************************************************
 
-* change scale of percentage
-	replace		percent_raindays_ = percent_raindays_ * 100
-
 	sort		year
 	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
 				(line dev_norain_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
@@ -778,6 +778,9 @@
 	drop		sat
 	rename		sat1 sat
 	order		sat, after(year)	
+
+* change scale of percentage
+	replace		percent_raindays_ = percent_raindays_ * 100
 
 	
 ************************************************************************
@@ -1014,8 +1017,6 @@
 ************************************************************************
 **## 3.12 - malawi share of rainy days
 ************************************************************************
-* change scale of percentage
-	replace		percent_raindays_ = percent_raindays_ * 100
 
 	sort		year
 	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1131,6 +1132,9 @@
 	drop		sat
 	rename		sat1 sat
 	order		sat, after(year)	
+
+* change scale of percentage
+	replace		percent_raindays_ = percent_raindays_ * 100
 
 ************************************************************************
 **## 4.1 - niger mean daily rainfall
@@ -1366,9 +1370,6 @@
 ************************************************************************
 **## 4.12 - niger share of rainy days
 ************************************************************************
-* change scale of percentage
-	replace		percent_raindays_ = percent_raindays_ * 100
-
 	sort		year
 	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
 				(line percent_raindays_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
@@ -1481,6 +1482,10 @@
 	rename		sat1 sat
 	order		sat, after(year)	
 
+* change scale of percentage
+	replace		percent_raindays_ = percent_raindays_ * 100
+
+	
 ************************************************************************
 **## 5.1 - nigeria mean daily rainfall
 ************************************************************************
@@ -1715,8 +1720,6 @@
 ************************************************************************
 **## 5.12 - nigeria share of rainy days
 ************************************************************************
-* change scale of percentage
-	replace		percent_raindays_ = percent_raindays_ * 100
 
 	sort		year
 	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1834,6 +1837,9 @@
 	drop		sat
 	rename		sat1 sat
 	order		sat, after(year)	
+
+* change scale of percentage
+	replace		percent_raindays_ = percent_raindays_ * 100
 
 ************************************************************************
 **## 6.1 - tanzania mean daily rainfall
@@ -2069,8 +2075,6 @@
 ************************************************************************
 **## 6.12 - tanzania share of rainy days
 ************************************************************************
-* change scale of percentage
-	replace		percent_raindays_ = percent_raindays_ * 100
 
 	sort		year
 	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2183,6 +2187,10 @@
 	drop		sat
 	rename		sat1 sat
 	order		sat, after(year)	
+
+* change scale of percentage
+	replace		percent_raindays_ = percent_raindays_ * 100
+
 
 ************************************************************************
 **## 7.1 - uganda mean daily rainfall
@@ -2418,9 +2426,6 @@
 ************************************************************************
 **## 7.12 - uganda share of rainy days
 ************************************************************************
-* change scale of percentage
-	replace		percent_raindays_ = percent_raindays_ * 100
-
 	sort		year
 	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
 				(line percent_raindays_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
