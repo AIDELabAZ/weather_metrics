@@ -655,10 +655,6 @@
 ************************************************************************
 **## 2.12 - ethiopia share of rainy days
 ************************************************************************
-
-* change scale of percentage
-	replace		percent_raindays_ = percent_raindays_ * 100
-
 	sort		year
 	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
 				(line percent_raindays_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
