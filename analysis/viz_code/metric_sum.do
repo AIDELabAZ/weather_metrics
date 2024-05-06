@@ -1376,7 +1376,7 @@
 				(line percent_raindays_ year if sat == 4, color(turquoise) lwidth(thick) ) ///
 				(line percent_raindays_ year if sat == 5, color(reddish) lwidth(medthick) ) ///
 				(line percent_raindays_ year if sat == 6, color(ananas*2) lwidth(thick) ///
-				xtitle("Year") xscale(r(1983(2)2017)) title("Malawi") ///
+				xtitle("Year") xscale(r(1983(2)2017)) title("Niger") ///
 				ytitle("Share of Rainy Days (%)") ylabel(0(10)100, nogrid ///
 				labsize(small)) xlabel(1983(4)2017, nogrid labsize(small))), ///
 				legend(pos(6) col(3) label(1 "CHIRPS") label(2 "CPC") ///
