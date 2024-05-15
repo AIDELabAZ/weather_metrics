@@ -50,7 +50,7 @@
 	replace 		p90 = 0 if pval > 0.10
 
 * keep HH Bilinear	
-	keep			if ext == 1
+	keep			if ext == 3
 	keep			if varname < 15
 	keep			if regname < 4
 
