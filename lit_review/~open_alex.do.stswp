@@ -27,8 +27,25 @@ global output_path "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofAriz
 * 1 - start PyStata
 * **********************************************************************
 // Import the stata_setup module
-python: import stata_setup  
+python: import stata_setup
 
 // Initialize PyStata
 python: stata_setup.init()
 
+// Optionally, configure the path to your Stata installation
+// python: stata_setup.config("/path/to/stata", "mp")
+
+// Now you can execute Python code
+python: print("Hello from Python!")
+
+// Import Python modules
+python: import numpy as np
+
+// Use Python modules
+python: x = np.random.randn(10)
+python: print(x)
+
+// Run Stata commands from Python
+python: import pystata
+python: pystata.stata.run("sysuse auto, clear")
+python: pystata.stata.run("summarize price weight")
