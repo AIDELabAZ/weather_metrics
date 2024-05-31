@@ -11,7 +11,7 @@
     * 
 
 * TO DO:
-    * 
+    * around line 74 needs to be changed to your email address 
 
 * **********************************************************************
 * 0 - setup
@@ -22,6 +22,13 @@ if `"`c(username)'"' == "jdmichler" {
     global code "C:/Users/jdmichler/git/AIDELabAZ/weather_metrics"
     global data "C:/Users/jdmichler/OneDrive - University of Arizona/weather_and_agriculture"
 }
+
+* Define root folder globals
+if `"`c(username)'"' == "annal" {
+    global code "C:/Users/aljosephson/git/weather_metrics"
+    global data "C:/Users/aljosephson/OneDrive - University of Arizona/weather_and_agriculture"
+}
+
 
 global export "$data/output/metric_paper/literature"
 
@@ -64,7 +71,7 @@ output_path = os.path.join(export_path, "OpenAlex_Search_Results.xlsx")
 os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
 # Base URL for the OpenAlex API with the specified parameters, including the mailto parameter
-base_url = "https://api.openalex.org/works?filter=default.search:((Weather)+AND+(Instrumental+Variable))+OR+((Rainfall)+AND+(Instrumental+Variable)),language:languages/en,primary_topic.domain.id:domains/2,primary_topic.field.id:fields/20&mailto=jdmichler@arizona.edu&per-page=200&cursor={}"
+base_url = "https://api.openalex.org/works?filter=default.search:((Weather)+AND+(Instrumental+Variable))+OR+((Rainfall)+AND+(Instrumental+Variable)),language:languages/en,primary_topic.domain.id:domains/2,primary_topic.field.id:fields/20&mailto=aljosephson@arizona.edu&per-page=200&cursor={}"
 
 all_works = []
 cursor = '*'
