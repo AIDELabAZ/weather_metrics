@@ -56,8 +56,8 @@ options.headless = True
 service = Service(chrome_driver_path)
 driver = webdriver.Chrome(service=service, options=options)
 
-# Read the Excel file
-input_path = r"C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\OpenAlex_Search_Results.xlsx"
+# Updated input path
+input_path = r"C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\OpenAlex_Search_Results_test.xlsx"
 try:
     print(f"Attempting to read the Excel file from: {input_path}")
     df = pd.read_excel(input_path)
@@ -107,34 +107,35 @@ def get_pdf_url_from_doi(doi_url):
 
 # Process each DOI
 for doi in dois:
+    # Ensure the DOI is correctly formatted
+    doi = doi.strip()  # Remove any leading/trailing whitespace
+    doi = doi.replace('https://doi.org/', '')  # Remove the https://doi.org/ prefix if present
+    if not doi.startswith("10."):
+        print(f"Skipping invalid DOI: {doi}")
+        continue
     doi_url = f"https://doi.org/{doi}"
     print(f"Processing DOI: {doi_url}")
     pdf_url = get_pdf_url_from_doi(doi_url)
     if pdf_url:
+        print(f"Found PDF URL: {pdf_url}")
         try:
+            # Ensure the PDF URL is absolute
             if not pdf_url.startswith('http'):
                 pdf_url = f"https://doi.org{pdf_url}"
             file_name = f"{doi.replace('/', '_')}.pdf"
             output_path = os.path.join(output_dir, file_name)
             download_pdf(pdf_url, output_path)
         except Exception as e:
-            print(f"Failed to download {doi}: {e}")
-    else:
-        # Use proxy for paywalled papers
-        proxy_url = f"http://ezproxy.library.arizona.edu/login?url={doi_url}"
-        print(f"Using proxy URL: {proxy_url}")
-        pdf_url = get_pdf_url_from_doi(proxy_url)
-        if pdf_url:
+            print(f"Failed to download {doi} directly: {e}")
+            # Use proxy URL to attempt download
+            proxy_url = f"http://ezproxy.library.arizona.edu/login?url={pdf_url}"
             try:
-                if not pdf_url.startswith('http'):
-                    pdf_url = f"https://doi.org{pdf_url}"
-                file_name = f"{doi.replace('/', '_')}.pdf"
-                output_path = os.path.join(output_dir, file_name)
-                download_pdf(pdf_url, output_path)
-            except Exception as e:
-                print(f"Failed to download with proxy {doi}: {e}")
-        else:
-            print(f"No PDF found for {doi}")
+                download_pdf(proxy_url, output_path)
+                print(f"Downloaded with proxy: {doi}")
+            except Exception as proxy_e:
+                print(f"Failed to download with proxy {doi}: {proxy_e}")
+    else:
+        print(f"No PDF found for {doi}")
 
 driver.quit()
 end
