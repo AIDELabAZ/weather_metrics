@@ -29,8 +29,13 @@ if `"`c(username)'"' == "annal" {
     global data "C:/Users/aljosephson/OneDrive - University of Arizona/weather_and_agriculture"
 }
 
+* Define root folder globals
+if `"`c(username)'"' == "KieranCDouglas" {
+    global code "/Users/kieran/Documents/GitHub/weather_metrics"
+    global data "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture"
+}
 
-global export "$data/output/metric_paper/literature"
+global export "$/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_project/output/metric_paper/literature"
 
 python:
 import os
