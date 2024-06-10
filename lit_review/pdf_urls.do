@@ -97,7 +97,7 @@ def get_pdf_url_from_doi(doi):
                 print(f"Constructed PDF URL for UChicago: {pdf_url}")
                 return pdf_url
             elif '10.1257' in doi:
-                pdf_url = f"https://www.aeaweb.org/articles/pdf/doi/{doi_suffix}"
+                pdf_url = f"https://pubs.aeaweb.org/doi/pdfplus/{doi_suffix}"
                 print(f"Constructed PDF URL for AEA: {pdf_url}")
                 return pdf_url
 
