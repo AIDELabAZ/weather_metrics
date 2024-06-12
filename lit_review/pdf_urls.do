@@ -17,8 +17,21 @@
 * **********************************************************************
 * 0 - setup
 * **********************************************************************
+
+global input "$data/output/metric_paper/literature"
 /*
 python
+
+# Set output path using Stata global for the ChromeDriver
+print("Setting environment variable STATA_DRIVER to:", "$driver")
+os.environ['STATA_DRIVER'] = "$driver"
+print("Environment variable STATA_DRIVER is set to:", os.environ['STATA_DRIVER'])
+
+# Set output path using Stata global for the input path
+print("Setting environment variable STATA_INPUT to:", "$input")
+os.environ['STATA_INPUT'] = "$input"
+print("Environment variable STATA_INPUT is set to:", os.environ['STATA_INPUT'])
+
 import subprocess
 import sys
 
@@ -48,8 +61,26 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
+# Set environment variables from Stata globals
+print("Setting environment variable STATA_DRIVER to:", "$driver")
+os.environ['STATA_DRIVER'] = "$driver"
+print("Environment variable STATA_DRIVER is set to:", os.environ['STATA_DRIVER'])
+
+print("Setting environment variable STATA_INPUT to:", "$input")
+os.environ['STATA_INPUT'] = "$input"
+print("Environment variable STATA_INPUT is set to:", os.environ['STATA_INPUT'])
+
+# Read the global variables from the environment
+driver_path = os.getenv('STATA_DRIVER')
+if not driver_path:
+    raise ValueError("Environment variable STATA_DRIVER is not set")
+
+input_path = os.getenv('STATA_INPUT')
+if not input_path:
+    raise ValueError("Environment variable STATA_INPUT is not set")
+
 # Path to the ChromeDriver
-chrome_driver_path = r'C:\Users\jdmichler\AppData\Local\Google\Chrome\chromedriver.exe'
+chrome_driver_path = driver_path
 
 # Configure Chrome options
 chrome_options = Options()
@@ -60,11 +91,12 @@ service = Service(chrome_driver_path)
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
 # Path to the input Excel file
-input_excel_path = r'C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\OpenAlex_Search_Results_test2.xlsx'
+input_excel_path = os.path.join(input_path, 'OpenAlex_Search_Results_test2.xlsx')
 
-# Read the Excel file to get the DOIs
+# Read the Excel file to get the DOIs and existing PDF URLs
 df_input = pd.read_excel(input_excel_path)
 doi_urls = df_input['doi'].dropna().unique()
+pdf_urls = df_input['primary_location_pdf_url']
 
 # Function to navigate to DOI and find PDF link
 def get_pdf_url_from_doi(doi):
@@ -125,47 +157,62 @@ def get_pdf_url_from_doi(doi):
         print(f"Error navigating to {doi_url}: {e}")
     return None
 
+# Function to save results to Excel
+def save_results(results, missing_dois, output_path, missing_output_path):
+    df_output = pd.DataFrame(results)
+    df_missing = pd.DataFrame(missing_dois, columns=['doi'])
+
+    # Append to the existing files if they exist
+    if os.path.exists(output_path):
+        df_existing = pd.read_excel(output_path)
+        df_output = pd.concat([df_existing, df_output], ignore_index=True)
+
+    if os.path.exists(missing_output_path):
+        df_existing_missing = pd.read_excel(missing_output_path)
+        df_missing = pd.concat([df_existing_missing, df_missing], ignore_index=True)
+
+    df_output.to_excel(output_path, index=False)
+    df_missing.to_excel(missing_output_path, index=False)
+
 # Lists to hold the results and missing DOIs
 results = []
 missing_dois = []
 
-# Get PDF URLs for all DOIs
-for doi in doi_urls:
-    print(f"Processing DOI: {doi}")
-    pdf_url = get_pdf_url_from_doi(doi)
-    if pdf_url is None:
-        missing_dois.append(doi)
-    results.append({'doi': doi, 'pdf_url': pdf_url})
-    print(f'PDF URL for {doi}: {pdf_url}')
+# Process DOIs in chunks
+chunk_size = 100
+num_chunks = len(doi_urls) // chunk_size + 1
+
+for i in range(num_chunks):
+    chunk_start = i * chunk_size
+    chunk_end = min((i + 1) * chunk_size, len(doi_urls))
+    chunk_dois = doi_urls[chunk_start:chunk_end]
+    chunk_pdf_urls = pdf_urls[chunk_start:chunk_end]
+
+    for doi, pdf_url in zip(chunk_dois, chunk_pdf_urls):
+        if pd.notna(pdf_url):
+            results.append({'doi': doi, 'pdf_url': pdf_url})
+        else:
+            print(f"Processing DOI: {doi}")
+            pdf_url = get_pdf_url_from_doi(doi)
+            if pdf_url is None:
+                missing_dois.append(doi)
+            results.append({'doi': doi, 'pdf_url': pdf_url})
+            print(f'PDF URL for {doi}: {pdf_url}')
+
+    # Save the results after processing each chunk
+    output_path = os.path.join(input_path, 'pdf_urls.xlsx')
+    missing_output_path = os.path.join(input_path, 'missing_url.xlsx')
+    save_results(results, missing_dois, output_path, missing_output_path)
 
 # Close the WebDriver
 driver.quit()
 
-# Convert results to a DataFrame
-df_output = pd.DataFrame(results)
-
-# Path to save the results
-output_path = r'C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\pdf_urls.xlsx'
-
-# Save the results to an Excel file, overwriting the old version
-df_output.to_excel(output_path, index=False)
-
-print(f'Results saved to {output_path}')
-
-# Convert missing DOIs to a DataFrame
-df_missing = pd.DataFrame(missing_dois, columns=['doi'])
-
-# Path to save the missing DOIs
-missing_output_path = r'C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\missing_url.xlsx'
-
-# Save the missing DOIs to an Excel file, overwriting the old version
-df_missing.to_excel(missing_output_path, index=False)
-
+print(f'Final results saved to {output_path}')
 print(f'Missing DOIs saved to {missing_output_path}')
 
 end
 
-
+/*
 * **********************************************************************
 * 2 - try getting urls for the pdfs using crossref
 * **********************************************************************
@@ -193,7 +240,7 @@ def get_full_text_link(metadata):
     return None
 
 # Path to the input Excel file
-input_excel_path = r'C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\OpenAlex_Search_Results.xlsx'
+input_excel_path = r'C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\OpenAlex_Search_Results_test2.xlsx'
 
 # Read the Excel file to get the DOIs
 df_input = pd.read_excel(input_excel_path)
