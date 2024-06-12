@@ -48,7 +48,7 @@ for package in packages:
         install(package)
 
 # Path to the ChromeDriver
-chrome_driver_path = r"C:\Users\jdmichler\AppData\Local\Google\Chrome\chromedriver.exe"  # Updated path to your chromedriver
+chrome_driver_path = r"/Users/kieran/Documents/RANDOM/ChromeTesting/chromedriver.app/Contents/MacOS/chromedriver"  # Updated path to your chromedriver
 
 # Initialize Chrome WebDriver
 options = Options()
@@ -57,7 +57,7 @@ service = Service(chrome_driver_path)
 driver = webdriver.Chrome(service=service, options=options)
 
 # Read the Excel file
-input_path = r"C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\OpenAlex_Search_Results.xlsx"
+input_path = r"C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\OpenAlex_Search_Results_test.xlsx"
 try:
     print(f"Attempting to read the Excel file from: {input_path}")
     df = pd.read_excel(input_path)
@@ -73,7 +73,7 @@ except Exception as e:
 dois = df['doi'].dropna().unique()
 
 # Directory to save PDFs
-output_dir = r"C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\output"
+output_dir = r"/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/output"
 os.makedirs(output_dir, exist_ok=True)
 
 # Function to download PDF from a URL
