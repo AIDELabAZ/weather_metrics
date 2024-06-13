@@ -68,11 +68,11 @@ export_path = os.getenv('STATA_EXPORT')
 if not export_path:
     raise ValueError("Environment variable STATA_EXPORT is not set")
 
-# Define the output path using the global variable
-output_path = os.path.join(export_path, "OpenAlex_Search_Results.xlsx")
+# Define the base output path using the global variable
+base_output_path = os.path.join(export_path, "OpenAlex_Search_Results")
 
 # Create the directory if it does not exist
-os.makedirs(os.path.dirname(output_path), exist_ok=True)
+os.makedirs(os.path.dirname(base_output_path), exist_ok=True)
 
 # Base URL for the OpenAlex API with the specified parameters, including the mailto parameter
 base_url = f"https://api.openalex.org/works?filter=default.search:((Weather)+AND+(Instrumental+Variable))+OR+((Rainfall)+AND+(Instrumental+Variable)),language:languages/en,primary_topic.domain.id:domains/2,primary_topic.field.id:fields/20&mailto={user_email}&per-page=200&cursor={{}}"
@@ -121,8 +121,16 @@ df = pd.json_normalize(all_works, sep='_')
 selected_columns = [col for col in df.columns if col.count('_') < 3] + ['primary_location_pdf_url']
 df = df[selected_columns]
 
-# Save the DataFrame to an Excel file
-df.to_excel(output_path, index=False)
+# Split the DataFrame into chunks of 850 rows each
+chunk_size = 850
+num_chunks = (len(df) + chunk_size - 1) // chunk_size
 
-print(f"Data saved to {output_path}")
+for i in range(num_chunks):
+    chunk = df.iloc[i*chunk_size:(i+1)*chunk_size]
+    output_path = f"{base_output_path}{i+1}.xlsx"
+    chunk.to_excel(output_path, index=False)
+    print(f"Data saved to {output_path}")
+
+print("All data saved to separate Excel files.")
+
 end

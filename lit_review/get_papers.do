@@ -18,7 +18,7 @@
 * **********************************************************************
 * 0 - setup
 * **********************************************************************
-/*
+
 python
 import subprocess
 import sys
@@ -31,21 +31,23 @@ def install(package):
 install("selenium")
 install("beautifulsoup4")
 install("pandas")
+install("PyPDF2")
 end
-*/
+
 * **********************************************************************
 * 1 - get urls for the pdfs
 * **********************************************************************
-/*
+
 python
 import requests
 import pandas as pd
 import os
 import urllib.request
+import PyPDF2
 
 # Constants
 API_KEY = '937c8b4d44a7e6083cfdbb9e3def3b39'
-INPUT_FILE_PATH = r'C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\OpenAlex_Search_Results_test2.xlsx'
+INPUT_FILE_PATH = r'C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\elsevier_urls1.xlsx'
 PDF_URL_FILE_PATH = r'C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\pdf_urls.xlsx'
 OUTPUT_DIR = r'C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\output'
 MISSING_DOI_FILE_PATH = r'C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\missing_url.xlsx'
@@ -68,22 +70,34 @@ def download_pdf(doi, output_dir, api_key):
     }
     response = requests.get(f'{ELSEVIER_URL}{clean_doi}', headers=headers)
     if response.status_code == 200:
-        with open(os.path.join(output_dir, f'{clean_doi.replace("/", "_")}.pdf'), 'wb') as f:
+        pdf_path = os.path.join(output_dir, f'{clean_doi.replace("/", "_")}.pdf')
+        with open(pdf_path, 'wb') as f:
             f.write(response.content)
-        return True
+        return pdf_path
     else:
         print(f"Failed to download {clean_doi}: {response.status_code}")
-        return False
+        return None
 
 # Function to download PDF using urllib
 def download_pdf_url(pdf_url, output_dir, doi):
     try:
+        pdf_path = os.path.join(output_dir, f'{doi.replace("/", "_")}.pdf')
         response = urllib.request.urlopen(pdf_url)
-        with open(os.path.join(output_dir, f'{doi.replace("/", "_")}.pdf'), 'wb') as f:
+        with open(pdf_path, 'wb') as f:
             f.write(response.read())
-        return True
+        return pdf_path
     except Exception as e:
         print(f"Failed to download {pdf_url}: {e}")
+        return None
+
+# Function to check if the PDF has more than one page
+def verify_pdf(pdf_path):
+    try:
+        with open(pdf_path, 'rb') as f:
+            reader = PyPDF2.PdfFileReader(f)
+            return reader.numPages > 1
+    except Exception as e:
+        print(f"Error verifying PDF {pdf_path}: {e}")
         return False
 
 def main():
@@ -111,8 +125,11 @@ def main():
     # Download PDFs from Elsevier
     for doi in df_elsevier['doi']:
         print(f"Attempting to download PDF for DOI: {doi}")
-        if not download_pdf(doi, OUTPUT_DIR, API_KEY):
-            print(f"Could not download PDF for DOI: {doi}")
+        pdf_path = download_pdf(doi, OUTPUT_DIR, API_KEY)
+        if pdf_path and verify_pdf(pdf_path):
+            print(f"Downloaded and verified PDF for DOI: {doi}")
+        else:
+            print(f"Could not download or verify PDF for DOI: {doi}")
 
     # Save missing DOIs to Excel
     df_other.to_excel(MISSING_DOI_FILE_PATH, index=False)
@@ -135,8 +152,11 @@ def main():
         doi = row['doi'] if 'doi' in row else 'unknown_doi'
         pdf_url = row['pdf_url']
         print(f"Attempting to download PDF from URL: {pdf_url}")
-        if not download_pdf_url(pdf_url, OUTPUT_DIR, doi):
-            print(f"Could not download PDF from URL: {pdf_url}")
+        pdf_path = download_pdf_url(pdf_url, OUTPUT_DIR, doi)
+        if pdf_path and verify_pdf(pdf_path):
+            print(f"Downloaded and verified PDF from URL: {pdf_url}")
+        else:
+            print(f"Could not download or verify PDF from URL: {pdf_url}")
             missing_pdfs.append({'doi': doi, 'pdf_url': pdf_url})
 
     # Save missing PDFs to Excel
@@ -149,79 +169,4 @@ if __name__ == '__main__':
     main()
 
 end
-*/
 
-* **********************************************************************
-* 2 - try getting urls for the pdfs using crossref
-* **********************************************************************
-python
-import requests
-import pandas as pd
-import os
-import time
-
-# Function to get metadata from CrossRef API
-def get_metadata_from_crossref(doi):
-    url = f'https://api.crossref.org/works/{doi}'
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
-
-# Function to extract the full text link from the CrossRef metadata
-def get_full_text_link(metadata):
-    if 'message' in metadata and 'link' in metadata['message']:
-        for link in metadata['message']['link']:
-            if 'pdf' in link['content-type'] or 'pdfft' in link['content-type'] or 'reader' in link['content-type']:
-                return link['URL']
-    return None
-
-# Path to the input Excel file
-input_excel_path = r'C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\OpenAlex_Search_Results.xlsx'
-
-# Read the Excel file to get the DOIs
-df_input = pd.read_excel(input_excel_path)
-doi_urls = df_input['doi'].dropna().unique()
-
-# Lists to hold the results and missing DOIs
-results = []
-missing_dois = []
-
-# Process each DOI
-for doi in doi_urls:
-    print(f"Processing DOI: {doi}")
-    metadata = get_metadata_from_crossref(doi)
-    if metadata:
-        pdf_url = get_full_text_link(metadata)
-        if pdf_url:
-            results.append({'doi': doi, 'pdf_url': pdf_url})
-        else:
-            print(f"No PDF link found in metadata for {doi}")
-            missing_dois.append({'doi': doi, 'reason': 'No PDF link in metadata'})
-    else:
-        print(f"Failed to retrieve metadata for {doi}")
-        missing_dois.append({'doi': doi, 'reason': 'Failed to retrieve metadata'})
-    time.sleep(1)  # Sleep for a second to avoid hitting API rate limits
-
-# Convert results to a DataFrame
-df_output = pd.DataFrame(results)
-
-# Path to save the results
-output_path = r'C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\pdf_urls.xlsx'
-
-# Save the results to an Excel file, overwriting the old version
-df_output.to_excel(output_path, index=False)
-print(f'Results saved to {output_path}')
-
-# Convert missing DOIs to a DataFrame
-df_missing = pd.DataFrame(missing_dois)
-
-# Path to save the missing DOIs
-missing_output_path = r'C:\Users\jdmichler\OneDrive - University of Arizona\weather_and_agriculture\output\metric_paper\literature\missing_urls.xlsx'
-
-# Save the missing DOIs to an Excel file, overwriting the old version
-df_missing.to_excel(missing_output_path, index=False)
-print(f'Missing DOIs saved to {missing_output_path}')
-
-end
