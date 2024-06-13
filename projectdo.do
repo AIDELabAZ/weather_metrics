@@ -45,18 +45,15 @@ if `"`c(username)'"' == "annal" {
     global data "C:/Users/aljosephson/OneDrive - University of Arizona/weather_and_agriculture"
 }
 
-if `"`c(username)'"' == "KieranCDouglas" {
-    global code "/Users/kieran/Documents/GitHub/weather_metrics"
-    global data "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture"
-}
-
 if `"`c(username)'"' == "Chandrakant Agme" {
     global 		code  	"C:/Users/Chandrakant Agme/Documents/GitHub/weather_metrics"
 	global 		data	"C:/Users/Chandrakant Agme/University of Arizona/Michler, Jeffrey David - (jdmichler) - weather_metrics"
 	 }	
-	if `"`c(username)'"' == "kieran" {
-        global 		code  	"/Users/kieran/Documents/GitHub/weather_metrics"
-		global 		data	"/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture"
+if `"`c(username)'"' == "kieran" {
+    global 		code  	"/Users/kieran/Documents/GitHub/weather_metrics"
+	global 		data	"/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture"
+	global 		email 	"kieran@arizona.edu"
+	global 		driver 	"/Users/kieran/Documents/RANDOM/ChromeTesting/chromedriver"
 	 }			
 * **********************************************************************
 * 0 (b) - Check if any required packages are installed:
