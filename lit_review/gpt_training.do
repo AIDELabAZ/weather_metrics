@@ -27,8 +27,7 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-kgFfZT6s4i6bbK6ivJ83T3BlbkFJ0cFc6wME3Nza
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def chatgpt_api(prompt, model="gpt-4-turbo", temperature=0.7, max_tokens=1000):
-    """
-    Calls the GPT API to extract information based on the prompt.
+    ""
 
     :param prompt: The prompt to guide GPT extraction.
     :param model: The GPT model to use.
@@ -48,9 +47,7 @@ def chatgpt_api(prompt, model="gpt-4-turbo", temperature=0.7, max_tokens=1000):
     return response.choices[0].message['content']
 
 def extract_text_from_pdf(pdf_path):
-    """
-    Extracts text from a PDF file.
-
+    ""
     :param pdf_path: Path to the PDF file.
     :return: Extracted text as a string.
     """
@@ -62,13 +59,11 @@ def extract_text_from_pdf(pdf_path):
     return text
 
 def extract_information_from_pdfs(pdf_paths, prompt, output_csv):
-    """
-    Extracts information from a list of PDFs and writes it to a CSV.
-
+    ""
     :param pdf_paths: List of paths to PDF files.
     :param prompt: The prompt to guide GPT extraction.
     :param output_csv: Path to the output CSV file.
-    """
+    ""
     data = []
     for pdf_path in pdf_paths:
         print(f"Processing {pdf_path}...")
