@@ -297,6 +297,89 @@ def main():
 if __name__ == "__main__":
     main()
 end
+
+python
+import os
+import openai
+import fitz  # PyMuPDF
+
+# Set your OpenAI API key
+openai.api_key = 'org-K90DnhnbnHzjiYNTk4QdJkTu'
+
+# Set your GPT model
+gpt_model = 'gpt-3.5-turbo'  # Use the ChatGPT model
+
+# Directory containing the PDF files
+pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training'
+
+def extract_text_from_pdf(pdf_path, num_pages=3):
+    """
+    Extract text from the first few pages of a PDF.
+    """
+    try:
+        doc = fitz.open(pdf_path)
+        text = ""
+        for page_num in range(min(num_pages, len(doc))):  # Scan up to num_pages pages
+            page = doc.load_page(page_num)
+            text += page.get_text()
+        return text
+    except Exception as e:
+        return f"Error reading {pdf_path}: {str(e)}"
+
+def gpt_identify_title(text):
+    """
+    Use GPT to identify the title from the extracted text.
+    """
+    try:
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant that extracts titles from academic papers."},
+            {"role": "user", "content": f"Extract the title of the academic paper from the following text:\n\n{text}\n\nTitle:"}
+        ]
+        print("Messages sent to GPT:", messages)  # Debug print
+
+        response = openai.ChatCompletion.create(
+            model=gpt_model,
+            messages=messages
+        )
+        print("API response:", response)  # Debug print
+
+        title = response['choices'][0]['message']['content'].strip()
+        return title
+    except Exception as e:
+        return f"Error with GPT API: {str(e)}"
+
+def main():
+    print(f"Interacting with GPT model: {gpt_model}")
+
+    # Ensure the directory exists
+    if not os.path.exists(pdf_dir):
+        print(f"Directory {pdf_dir} does not exist.")
+        return
+
+    # List all PDF files in the directory
+    pdf_files = [f for f in os.listdir(pdf_dir) if f.lower().endswith('.pdf')]
+
+    if not pdf_files:
+        print("No PDF files found.")
+        return
+
+    # Extract and print titles
+    for pdf_file in pdf_files:
+        pdf_path = os.path.join(pdf_dir, pdf_file)
+        text = extract_text_from_pdf(pdf_path)
+        if text.startswith("Error"):
+            print(text)  # Print the error message
+        else:
+            title = gpt_identify_title(text)
+            print(f"Title of '{pdf_file}': {title}")
+
+if __name__ == "__main__":
+    main()
+
+end
+
+
+
 * **********************************************************************
 * 1 - get pdfs
 * **********************************************************************
