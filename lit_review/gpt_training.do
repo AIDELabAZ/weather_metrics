@@ -41,7 +41,7 @@ end
 * **********************************************************************
 * 1 - api interface
 * **********************************************************************
-
+* key sk-proj-YvWMoI6yzYLDC3SRlsutT3BlbkFJTyIwCohWPRQj5F7LW0q5
 * troubleshooting
 python
 import os
@@ -51,7 +51,7 @@ from PyPDF2 import PdfReader
 from openai import OpenAI
 
 # Set your OpenAI API key
-client = OpenAI(api_key='sk-proj-XPUdanKkVXogbfqVkAbUT3BlbkFJnrBjHZM5cqRiHXQUcIm7')
+client = OpenAI(api_key='')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training'
