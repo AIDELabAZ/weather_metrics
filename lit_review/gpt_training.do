@@ -41,17 +41,23 @@ end
 * **********************************************************************
 * 1 - api interface
 * **********************************************************************
-* key sk-proj-YvWMoI6yzYLDC3SRlsutT3BlbkFJTyIwCohWPRQj5F7LW0q5
+
 * troubleshooting
+
 python
 import os
 import csv
 import pandas as pd
 from PyPDF2 import PdfReader
+import requests
+import logging
 from openai import OpenAI
 
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 # Set your OpenAI API key
-client = OpenAI(api_key='')
+client = OpenAI(api_key='sk-proj-YvWMoI6yzYLDC3SRlsutT3BlbkFJTyIwCohWPRQj5F7LW0q5')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training'
@@ -73,17 +79,30 @@ rainfall_methods = [
 # List of keywords to identify instrumental variables
 iv_keywords = ["instrument", "instrumental variable", "iv"]
 
-def extract_dois_from_excel(excel_path):
-    try:
-        df = pd.read_excel(excel_path)
-        if 'doi' in df.columns:
-            return df['doi'].tolist()
-        else:
-            print("Error: The 'doi' column was not found in the Excel file.")
-            return []
-    except Exception as e:
-        print(f"An error occurred while reading the Excel file: {str(e)}")
-        return []
+def search_doi(title, authors=None):
+    base_url = "https://api.crossref.org/works"
+    headers = {
+        "User-Agent": "MyApp/1.0 (mailto:your_email@example.com)"
+    }
+    query = title
+    if authors:
+        query += ' ' + ' '.join(authors)
+
+    params = {
+        "query": query,
+        "rows": 1
+    }
+    
+    response = requests.get(base_url, headers=headers, params=params)
+    
+    if response.status_code == 200:
+        data = response.json()
+        if data['message']['items']:
+            return data['message']['items'][0].get('DOI', None)
+    else:
+        logging.error(f"Error searching DOI: {response.status_code} {response.text}")
+    
+    return None
 
 def find_rainfall_method(text):
     for method in rainfall_methods:
@@ -94,16 +113,23 @@ def find_rainfall_method(text):
 def contains_iv_keywords(text):
     return any(keyword in text.lower() for keyword in iv_keywords)
 
-def extract_paper_info(pdf_path, doi):
+def extract_paper_info(pdf_path):
     try:
+        logging.info(f"Processing {pdf_path}")
         with open(pdf_path, 'rb') as file:
             reader = PdfReader(file)
             text = ""
             for page in reader.pages:
-                text += page.extract_text()
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text
         
-        # Check for IV-related keywords
+        if not text:
+            logging.warning(f"No text extracted from {pdf_path}. Skipping.")
+            return None
+        
         if not contains_iv_keywords(text):
+            logging.info(f"No IV keywords found in {pdf_path}. Skipping.")
             return None
 
         # Extract title
@@ -115,8 +141,15 @@ def extract_paper_info(pdf_path, doi):
             ]
         )
         title = title_response.choices[0].message.content.strip()
-        
-        # Determine IV usage
+        logging.info(f"Extracted title: {title}")
+
+        # Search for DOI using CrossRef API
+        doi = search_doi(title)
+        if not doi:
+            logging.warning(f"No DOI found for title: {title}")
+            return None
+
+        # Check for IV-related keywords
         iv_usage_response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -125,7 +158,8 @@ def extract_paper_info(pdf_path, doi):
             ]
         )
         iv_used = iv_usage_response.choices[0].message.content.strip().lower()
-        
+        logging.info(f"IV usage detected: {iv_used}")
+
         endogenous_variable = instrumental_variable = dependent_variable = control_variables = "N/A"
 
         if iv_used == 'yes':
@@ -138,18 +172,20 @@ def extract_paper_info(pdf_path, doi):
                 ]
             )
             iv_details = iv_details_response.choices[0].message.content.strip().split('\n')
+            logging.info(f"Extracted IV details: {iv_details}")
+
             endogenous_variable = extract_detail(iv_details, "Endogenous variable:")
             instrumental_variable = extract_detail(iv_details, "Instrumental variable:")
             dependent_variable = extract_detail(iv_details, "Dependent variable:")
             control_variables = extract_detail(iv_details, "Control variables:")
 
             if any(method in instrumental_variable.lower() for method in rainfall_methods):
-                # Confirm rainfall is used as an IV
                 return title, doi, iv_used, endogenous_variable, instrumental_variable, dependent_variable, control_variables
         
         return None
     except Exception as e:
-        return f"Error processing {pdf_path}: {str(e)}", "Error", doi, "Error", "Error", "Error", "Error", "Error"
+        logging.error(f"Error processing {pdf_path}: {str(e)}")
+        return None
 
 def extract_detail(details, label):
     for detail in details:
@@ -159,29 +195,29 @@ def extract_detail(details, label):
 
 def main():
     if not os.path.exists(pdf_dir):
-        print(f"Directory {pdf_dir} does not exist.")
+        logging.error(f"Directory {pdf_dir} does not exist.")
         return
 
     pdf_files = [f for f in os.listdir(pdf_dir) if f.lower().endswith('.pdf')]
 
     if not pdf_files:
-        print("No PDF files found.")
+        logging.error("No PDF files found.")
         return
-
-    dois = extract_dois_from_excel(doi_excel_path)
 
     with open(csv_output_path, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['Filename', 'Title', 'DOI', 'IV Used', 'Endogenous Variable', 'Instrumental Variable', 'Dependent Variable', 'Control Variables'])
 
-        for pdf_file, doi in zip(pdf_files, dois):
+        for pdf_file in pdf_files:
             pdf_path = os.path.join(pdf_dir, pdf_file)
-            result = extract_paper_info(pdf_path, doi)
+            result = extract_paper_info(pdf_path)
             if result is not None:
                 writer.writerow([pdf_file] + list(result))
-                print(f"Processed: {pdf_file}")
+                logging.info(f"Processed: {pdf_file}")
+            else:
+                logging.info(f"Skipping: {pdf_file}")
 
-    print(f"CSV file '{csv_output_path}' has been created.")
+    logging.info(f"CSV file '{csv_output_path}' has been created.")
 
 if __name__ == "__main__":
     main()
@@ -190,7 +226,6 @@ end
 
 
 ******
-this is the one, currently running into issues with incorrect doi and several missing values
 ******
 
 python
