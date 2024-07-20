@@ -42,28 +42,25 @@ end
 * 1 - api interface
 * **********************************************************************
 
-* troubleshooting
+* troubleshooting training small
 
 python
 import os
 import csv
-import pandas as pd
-from PyPDF2 import PdfReader
 import requests
 import logging
+import fitz  # PyMuPDF
 from openai import OpenAI
+import time
 
 # Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='sk-proj-YvWMoI6yzYLDC3SRlsutT3BlbkFJTyIwCohWPRQj5F7LW0q5')
+client = OpenAI(api_key='KEY')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training'
-
-# Excel file containing DOIs
-doi_excel_path = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/pdf_urls.xlsx'
 
 # Output CSV file path
 csv_output_path = os.path.join(pdf_dir, 'PDF_Analysis.csv')
@@ -73,7 +70,7 @@ rainfall_methods = [
     "total rainfall", "deviations in total rainfall", "scaled deviations in total rainfall",
     "mean total rainfall", "total monthly rainfall", "mean monthly rainfall", "rainfall months",
     "daily rainfall", "rainfall days", "no rainfall days", "log of rainfall", "rainfall index",
-    "rainfall"
+    "rainfall", "deviation", "average", "seasonal", "shocks", "other"
 ]
 
 # List of keywords to identify instrumental variables
@@ -116,82 +113,127 @@ def contains_iv_keywords(text):
 def extract_paper_info(pdf_path):
     try:
         logging.info(f"Processing {pdf_path}")
-        with open(pdf_path, 'rb') as file:
-            reader = PdfReader(file)
-            text = ""
-            for page in reader.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    text += page_text
-        
+        text = ""
+        doc = fitz.open(pdf_path)
+        for page in doc:
+            text += page.get_text()
+
+        logging.debug(f"Extracted text from {pdf_path}: {text[:500]}...")  # Log first 500 characters of extracted text
+
         if not text:
             logging.warning(f"No text extracted from {pdf_path}. Skipping.")
             return None
-        
-        if not contains_iv_keywords(text):
-            logging.info(f"No IV keywords found in {pdf_path}. Skipping.")
-            return None
 
         # Extract title
-        title_response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant that extracts titles from academic papers. Provide only the title, without any introductory phrases."},
-                {"role": "user", "content": f"Extract and provide only the title from this text of an academic paper's first page, without any prefixes or explanations: {text[:1000]}"}
-            ]
+        title = extract_with_retries(
+            lambda: client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                temperature=0,
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant that extracts titles from academic papers. Provide only the title, without any introductory phrases."},
+                    {"role": "user", "content": f"Extract and provide only the title from this text of an academic paper's first page, without any prefixes or explanations: {text[:2000]}"}
+                ]
+            ).choices[0].message.content.strip(),
+            pdf_path,
+            "title"
         )
-        title = title_response.choices[0].message.content.strip()
+        
         logging.info(f"Extracted title: {title}")
 
         # Search for DOI using CrossRef API
         doi = search_doi(title)
         if not doi:
             logging.warning(f"No DOI found for title: {title}")
-            return None
 
         # Check for IV-related keywords
-        iv_usage_response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are an expert in identifying instrumental variable (IV) usage in academic papers."},
-                {"role": "user", "content": f"Does this paper use instrumental variables (IV) in its analysis? Respond with only 'Yes' or 'No': {text[:4000]}"}
-            ]
+        iv_used = extract_with_retries(
+            lambda: client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                temperature=0,
+                messages=[
+                    {"role": "system", "content": "You are an expert in identifying instrumental variable (IV) usage in academic papers."},
+                    {"role": "user", "content": f"Does this paper use instrumental variables (IV) in its analysis? Respond with only 'Yes' or 'No': {text[:4000]}"}
+                ]
+            ).choices[0].message.content.strip().lower(),
+            pdf_path,
+            "IV usage"
         )
-        iv_used = iv_usage_response.choices[0].message.content.strip().lower()
+        
         logging.info(f"IV usage detected: {iv_used}")
 
-        endogenous_variable = instrumental_variable = dependent_variable = control_variables = "N/A"
+        iv_details = {
+            "Endogenous explanatory variable": "N/A",
+            "Instrumental variable": "N/A",
+            "Dependent variable": "N/A",
+            "Control variables": "N/A"
+        }
 
+        rainfall_as_iv = "no"
         if iv_used == 'yes':
             # Extract IV details
-            iv_details_response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are an expert in identifying variables in academic papers using instrumental variables."},
-                    {"role": "user", "content": f"Identify the following in the paper: 1) Endogenous variable, 2) Instrumental variable, 3) Dependent variable, 4) Control variables. Provide each on a new line with the label: {text[:6000]}"}
-                ]
+            iv_details_text = extract_with_retries(
+                lambda: client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    temperature=0,
+                    messages=[
+                        {"role": "system", "content": "You are an expert in identifying variables in academic papers using instrumental variables."},
+                        {"role": "user", "content": f"Identify the following in the paper: 1) Endogenous explanatory variable, 2) Instrumental variable, 3) Dependent variable, 4) Control variables. Provide each in one line with the label. Provide short and concise descriptions only. Endogenous explanatory variable:, Instrumental variable:, Dependent variable:, Control variables:. If any of these variables are not explicitly mentioned, please infer them from the context of the whole PDF: {text[:8000]}"}
+                    ]
+                ).choices[0].message.content.strip().split('\n'),
+                pdf_path,
+                "IV details"
             )
-            iv_details = iv_details_response.choices[0].message.content.strip().split('\n')
-            logging.info(f"Extracted IV details: {iv_details}")
 
-            endogenous_variable = extract_detail(iv_details, "Endogenous variable:")
-            instrumental_variable = extract_detail(iv_details, "Instrumental variable:")
-            dependent_variable = extract_detail(iv_details, "Dependent variable:")
-            control_variables = extract_detail(iv_details, "Control variables:")
+            for detail in iv_details_text:
+                if detail.startswith("Endogenous explanatory variable:"):
+                    iv_details["Endogenous explanatory variable"] = detail.replace("Endogenous explanatory variable:", "").strip()
+                elif detail.startswith("Instrumental variable:"):
+                    iv_details["Instrumental variable"] = detail.replace("Instrumental variable:", "").strip()
+                elif detail.startswith("Dependent variable:"):
+                    iv_details["Dependent variable"] = detail.replace("Dependent variable:", "").strip()
+                elif detail.startswith("Control variables:"):
+                    iv_details["Control variables"] = detail.replace("Control variables:", "").strip()
 
-            if any(method in instrumental_variable.lower() for method in rainfall_methods):
-                return title, doi, iv_used, endogenous_variable, instrumental_variable, dependent_variable, control_variables
+            # Extract the specific rainfall metric
+            if any(method in iv_details["Instrumental variable"].lower() for method in rainfall_methods):
+                specific_rainfall_metric = extract_with_retries(
+                    lambda: client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        temperature=0,
+                        messages=[
+                            {"role": "system", "content": "You are an expert in identifying specific metrics used for rainfall in academic papers."},
+                            {"role": "user", "content": f"Extract the specific metric or variable used for rainfall as an instrumental variable from this paper. Provide only the specific metric or variable used for the instrumental variable if it involves rainfall, without any introductory phrases: {text[:8000]}"}
+                        ]
+                    ).choices[0].message.content.strip(),
+                    pdf_path,
+                    "specific rainfall metric"
+                )
+                
+                # Verify the specific rainfall metric is not a general term
+                if any(method in specific_rainfall_metric.lower() for method in rainfall_methods):
+                    iv_details["Instrumental variable"] = specific_rainfall_metric.split(':')[-1].strip()
+                else:
+                    iv_details["Instrumental variable"] = "N/A"
+
+                rainfall_as_iv = "yes"
         
-        return None
+        return title, doi, iv_used, rainfall_as_iv, iv_details["Endogenous explanatory variable"], iv_details["Instrumental variable"], iv_details["Dependent variable"], iv_details["Control variables"]
+
     except Exception as e:
         logging.error(f"Error processing {pdf_path}: {str(e)}")
         return None
 
-def extract_detail(details, label):
-    for detail in details:
-        if detail.startswith(label):
-            return detail.replace(label, "").strip()
-    return "Not specified"
+def extract_with_retries(func, pdf_path, description, retries=5, delay=2):
+    for i in range(retries):
+        try:
+            result = func()
+            if result:
+                return result
+        except Exception as e:
+            logging.error(f"Error extracting {description} on attempt {i + 1} for {pdf_path}: {str(e)}")
+            time.sleep(delay)
+    logging.error(f"Failed to extract {description} after {retries} attempts for {pdf_path}")
+    return "N/A"
 
 def main():
     if not os.path.exists(pdf_dir):
@@ -204,9 +246,11 @@ def main():
         logging.error("No PDF files found.")
         return
 
+    logging.info(f"Found {len(pdf_files)} PDF files")
+
     with open(csv_output_path, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['Filename', 'Title', 'DOI', 'IV Used', 'Endogenous Variable', 'Instrumental Variable', 'Dependent Variable', 'Control Variables'])
+        writer.writerow(['Filename', 'Title', 'DOI', 'IV Used', 'Rainfall as IV', 'Endogenous Explanatory Variable', 'Instrumental Variable', 'Dependent Variable', 'Control Variables'])
 
         for pdf_file in pdf_files:
             pdf_path = os.path.join(pdf_dir, pdf_file)
@@ -215,6 +259,7 @@ def main():
                 writer.writerow([pdf_file] + list(result))
                 logging.info(f"Processed: {pdf_file}")
             else:
+                writer.writerow([pdf_file] + ["N/A"] * 8)  # Ensure row is added even if data extraction fails
                 logging.info(f"Skipping: {pdf_file}")
 
     logging.info(f"CSV file '{csv_output_path}' has been created.")
@@ -227,137 +272,103 @@ end
 
 ******
 ******
-
 python
-import os
-import csv
-import pandas as pd
-from PyPDF2 import PdfReader
-from openai import OpenAI
+# Define the function to extract text from PDF
+def extract_text_from_pdf(pdf_path):
+    ...
 
-# Set your OpenAI API key
-client = OpenAI(api_key='sk-proj-XPUdanKkVXogbfqVkAbUT3BlbkFJnrBjHZM5cqRiHXQUcIm7')
+# Define the function to analyze the paper
+def analyze_paper(paper_text):
+    ...
 
-# Directory containing the PDF files
-pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training'
+# Specify the PDF file path
+pdf_path = '...'
 
-# Excel file containing DOIs
-doi_excel_path = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/pdf_urls.xlsx'
+# Extract text from the PDF
+paper_text = extract_text_from_pdf(pdf_path)
 
-# Output CSV file path
-csv_output_path = os.path.join(pdf_dir, 'PDF_Analysis.csv')
+# Analyze the paper
+analysis_result = analyze_paper(paper_text)
 
-def extract_dois_from_excel(excel_path):
-    try:
-        df = pd.read_excel(excel_path)
-        if 'doi' in df.columns:
-            return df['doi'].tolist()
-        else:
-            print("Error: The 'doi' column was not found in the Excel file.")
-            return []
-    except Exception as e:
-        print(f"An error occurred while reading the Excel file: {str(e)}")
-        return []
-
-def extract_paper_info(pdf_path, doi):
-    try:
-        with open(pdf_path, 'rb') as file:
-            reader = PdfReader(file)
-            text = ""
-            for page in reader.pages:
-                text += page.extract_text()
-        
-        # Extract title
-        title_response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant that extracts titles from academic papers. Provide only the title, without any introductory phrases."},
-                {"role": "user", "content": f"Extract and provide only the title from this text of an academic paper's first page, without any prefixes or explanations: {text[:1000]}"}
-            ]
-        )
-        title = title_response.choices[0].message.content.strip()
-        
-        # Remove any remaining prefixes if present
-        prefixes_to_remove = ["The title of the academic paper is", "The title is", "Title:"]
-        for prefix in prefixes_to_remove:
-            if title.lower().startswith(prefix.lower()):
-                title = title[len(prefix):].strip()
-        
-        # Extract rainfall measurement method
-        rainfall_response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant that identifies rainfall measurement methods in academic papers. Respond with only the specific method, nothing else."},
-                {"role": "user", "content": f"What is the specific rainfall measurement method used in this academic paper? Provide only the method in 1-3 words, such as 'daily rainfall' or 'monthly precipitation': {text[:4000]}"}
-            ]
-        )
-        rainfall_measurement = rainfall_response.choices[0].message.content.strip()
-        
-        # Determine IV usage
-        iv_usage_response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are an expert in identifying instrumental variable (IV) usage in academic papers."},
-                {"role": "user", "content": f"Does this paper use instrumental variables (IV) in its analysis? Respond with only 'Yes' or 'No': {text[:4000]}"}
-            ]
-        )
-        iv_used = iv_usage_response.choices[0].message.content.strip()
-        
-        if iv_used.lower() == 'yes':
-            # Extract IV details
-            iv_details_response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are an expert in identifying variables in academic papers using instrumental variables."},
-                    {"role": "user", "content": f"Identify the following in the paper: 1) Endogenous variable, 2) Instrumental variable, 3) Dependent variable, 4) Control variables. Provide each on a new line with the label: {text[:6000]}"}
-                ]
-            )
-            iv_details = iv_details_response.choices[0].message.content.strip().split('\n')
-            endogenous_variable = extract_detail(iv_details, "Endogenous variable:")
-            instrumental_variable = extract_detail(iv_details, "Instrumental variable:")
-            dependent_variable = extract_detail(iv_details, "Dependent variable:")
-            control_variables = extract_detail(iv_details, "Control variables:")
-        else:
-            endogenous_variable = instrumental_variable = dependent_variable = control_variables = "N/A"
-        
-        return title, rainfall_measurement, doi, iv_used, endogenous_variable, instrumental_variable, dependent_variable, control_variables
-    except Exception as e:
-        return f"Error processing {pdf_path}: {str(e)}", "Error", doi, "Error", "Error", "Error", "Error", "Error"
-
-def extract_detail(details, label):
-    for detail in details:
-        if detail.startswith(label):
-            return detail.replace(label, "").strip()
-    return "Not specified"
-
-def main():
-    if not os.path.exists(pdf_dir):
-        print(f"Directory {pdf_dir} does not exist.")
-        return
-
-    pdf_files = [f for f in os.listdir(pdf_dir) if f.lower().endswith('.pdf')]
-
-    if not pdf_files:
-        print("No PDF files found.")
-        return
-
-    dois = extract_dois_from_excel(doi_excel_path)
-
-    with open(csv_output_path, 'w', newline='', encoding='utf-8') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(['Filename', 'Title', 'Rainfall Measurement Method', 'DOI', 'IV Used', 'Endogenous Variable', 'Instrumental Variable', 'Dependent Variable', 'Control Variables'])
-
-        for pdf_file, doi in zip(pdf_files, dois):
-            pdf_path = os.path.join(pdf_dir, pdf_file)
-            title, rainfall_measurement, doi, iv_used, endogenous_variable, instrumental_variable, dependent_variable, control_variables = extract_paper_info(pdf_path, doi)
-            writer.writerow([pdf_file, title, rainfall_measurement, doi, iv_used, endogenous_variable, instrumental_variable, dependent_variable, control_variables])
-            print(f"Processed: {pdf_file}")
-
-    print(f"CSV file '{csv_output_path}' has been created.")
-
-if __name__ == "__main__":
-    main()
+# Print the result
+print(analysis_result)
 end
+python
+import openai
+import fitz  # PyMuPDF
+
+# Replace 'your-api-key' with your actual OpenAI API key
+openai.api_key = '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'
+
+def extract_text_from_pdf(pdf_path):
+    # Open the PDF file
+    doc = fitz.open(pdf_path)
+    text = ""
+    # Iterate through each page
+    for page_num in range(len(doc)):
+        page = doc.load_page(page_num)
+        text += page.get_text()
+    return text
+
+def analyze_paper(paper_text):
+    # Define the prompt to send to the GPT model
+    prompt = f"""
+    Analyze the following research paper text and provide the following details in a structured format:
+    - Instrumental Variable used
+    - Rainfall Metric used
+    - Dependent Variable
+    - Outcome Variable
+    - Independent Variable
+
+    Research Paper Text:
+    {paper_text}
+
+    Provide the output in the following format:
+    | Instrumental Variable | Rainfall Metric Used | Dependent Variable | Outcome Variable | Independent Variable |
+    """
+
+    # Debugging print statement
+    print("Prompt Sent to GPT:")
+    print(prompt[:2000])  # Print the first 2000 characters of the prompt to ensure it's being created correctly
+
+    # Call the OpenAI GPT API
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        max_tokens=1500,
+        n=1,
+        stop=None,
+        temperature=0.5,
+    )
+
+    # Debugging print statements
+    print("API Response:")
+    print(response)
+
+    # Extract the text from the response
+    result = response.choices[0].text.strip() if response.choices else None
+
+    return result
+
+# Path to the PDF file
+pdf_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training/1-s2.0-S0305750X1930275X-main copy.pdf'
+
+# Extract text from the PDF
+paper_text = extract_text_from_pdf(pdf_path)
+
+# Debugging print statement
+print("Extracted Text from PDF:")
+print(paper_text[:1000])  # Print the first 1000 characters of the extracted text to check if extraction worked
+
+# Analyze the paper
+analysis_result = analyze_paper(paper_text)
+
+# Print the result
+print("Analysis Result:")
+print(analysis_result)
+
+end
+
 * **********************************************************************
 * 1 - get pdfs
 * **********************************************************************
