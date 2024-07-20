@@ -57,7 +57,7 @@ import time
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='KEY')
+client = OpenAI(api_key='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')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training'
