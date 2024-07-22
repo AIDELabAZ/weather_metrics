@@ -57,7 +57,7 @@ from openai import OpenAI
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='sk-proj-PYVbkeftqHiYAXX6vhJmT3BlbkFJ92bsPWJFYgYPYCOuGbpv')
+client = OpenAI(api_key='sk-proj-N9N0Zu3zt9JbOU20CIssT3BlbkFJ8H4K01TG20ewkTVIYNt3')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training'
@@ -184,7 +184,7 @@ def extract_paper_info(pdf_path):
                     temperature=0,
                     messages=[
                         {"role": "system", "content": "You are an expert in identifying variables in academic papers using instrumental variables."},
-                        {"role": "user", "content": f"Identify the following in the paper: 1) Endogenous variable, 2) Instrumental variable, 3) Dependent variable, 4) Control variables. Provide each in one line with the label. Provide short and concise descriptions only. Endogenous variable:, Instrumental variable:, Dependent variable:, Control variables:. If any of these variables are not explicitly mentioned, please infer them from the context: {text[:6000]}"}
+                        {"role": "user", "content": f"Identify the following in the paper: 1) Endogenous variable, 2) Instrumental variable, 3) Dependent variable, 4) Control variables. Provide each in one line with the label. Provide short and concise descriptions only. Read entire PDF and be sure to extract what metric or thing was used as the instrumental variable or other variables. Endogenous variable:, Instrumental variable:, Dependent variable:, Control variables:. If any of these variables are not explicitly mentioned, please infer them from the context: {text[:6000]}"}
                     ]
                 ).choices[0].message.content.strip().split('\n'),
                 pdf_path,
@@ -209,7 +209,7 @@ def extract_paper_info(pdf_path):
                         temperature=0,
                         messages=[
                             {"role": "system", "content": "You are an expert in identifying specific metrics used for rainfall in academic papers."},
-                            {"role": "user", "content": f"Extract the specific metric or variable used for rainfall as an instrumental variable from this paper. Provide only the specific metric or variable and not a general term like 'rainfall measurements': {text[:6000]}"}
+                            {"role": "user", "content": f"Can you read the entire PDF and tell me what the rainfall metric is that the authors used as an instrumental variable?  Please only give me the metric, I do not want a sentence giving context. Please make sure that the specific metric is given, I do not want it to just say things like 'rainfall measurements'. Do not write things like 'The specific rainfall metric used as an instrumental variable in the study is': {text[:6000]}"}
                         ]
                     ).choices[0].message.content.strip(),
                     pdf_path,
