@@ -55,13 +55,13 @@ from openai import OpenAI
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='sk-proj-suQZfMsXyLR71c8rXhj6T3BlbkFJxNLNgMHcgKnmpuqlu9Wp')
+client = OpenAI(api_key='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')
 
 # Directory containing the PDF files
-pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training'
+pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training_small'
 
 # Output CSV file path
-csv_output_path = os.path.join(pdf_dir, 'PDF_Analysis.csv')
+csv_output_path = os.path.join(pdf_dir, 'PDF_Analysis_small.csv')
 
 # List of rainfall measurement methods and additional keywords
 rainfall_methods = [
@@ -74,6 +74,11 @@ rainfall_methods = [
 # List of keywords to identify instrumental variables
 iv_keywords = ["instrument", "instrumental variable", "iv"]
 
+def exponential_backoff(retries):
+    delay = 2 ** retries
+    logging.info(f"Rate limit exceeded. Retrying in {delay} seconds...")
+    time.sleep(delay)
+
 def search_doi(title, authors=None):
     base_url = "https://api.crossref.org/works"
     headers = {
@@ -82,22 +87,18 @@ def search_doi(title, authors=None):
     query = title
     if authors:
         query += ' ' + ' '.join(authors)
-
     params = {
         "query": query,
         "rows": 1
     }
-    
     response = requests.get(base_url, headers=headers, params=params)
-    
-    if response.status_code == 200:
-        data = response.json()
-        if data['message']['items']:
-            return data['message']['items'][0].get('DOI', None)
+    response.raise_for_status()  # This will raise an HTTPError for bad responses
+    data = response.json()
+    if data['message']['items']:
+        return data['message']['items'][0].get('DOI', None)
     else:
         logging.error(f"Error searching DOI: {response.status_code} {response.text}")
-    
-    return None
+        return None
 
 def extract_text_from_pdf(pdf_path):
     try:
@@ -120,15 +121,31 @@ def find_rainfall_method(text):
 def contains_iv_keywords(text):
     return any(keyword in text.lower() for keyword in iv_keywords)
 
+def extract_with_retries(func, pdf_path, description, retries=5, delay=2):
+    for i in range(retries):
+        try:
+            result = func()
+            if result:
+                return result
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                exponential_backoff(i)
+            else:
+                logging.error(f"Error extracting {description} on attempt {i + 1} for {pdf_path}: {str(e)}")
+                time.sleep(delay)
+        except Exception as e:
+            logging.error(f"Error extracting {description} on attempt {i + 1} for {pdf_path}: {str(e)}")
+            time.sleep(delay)
+    logging.error(f"Failed to extract {description} after {retries} attempts for {pdf_path}")
+    return "N/A"
+
 def extract_paper_info(pdf_path):
     try:
         logging.info(f"Processing {pdf_path}")
         text = extract_text_from_pdf(pdf_path)
-
         if not text:
             logging.warning(f"No text extracted from {pdf_path}. Skipping.")
             return None
-
         # Extract title
         title = extract_with_retries(
             lambda: client.chat.completions.create(
@@ -142,14 +159,11 @@ def extract_paper_info(pdf_path):
             pdf_path,
             "title"
         )
-        
         logging.info(f"Extracted title: {title}")
-
         # Search for DOI using CrossRef API
         doi = search_doi(title)
         if not doi:
             logging.warning(f"No DOI found for title: {title}")
-
         # Check for IV-related keywords
         iv_used = extract_with_retries(
             lambda: client.chat.completions.create(
@@ -163,16 +177,13 @@ def extract_paper_info(pdf_path):
             pdf_path,
             "IV usage"
         )
-        
         logging.info(f"IV usage detected: {iv_used}")
-
         explanatory_details = {
             "Explanatory variable": "N/A",
             "Instrumental variable": "N/A",
             "Dependent variable": "N/A",
             "Control variables": "N/A"
         }
-
         rainfall_as_iv = "no"
         if iv_used == 'yes':
             # Extract IV details
@@ -188,7 +199,6 @@ def extract_paper_info(pdf_path):
                 pdf_path,
                 "explanatory details"
             )
-
             for detail in explanatory_details_text:
                 if detail.startswith("Explanatory variable:"):
                     explanatory_details["Explanatory variable"] = detail.replace("Explanatory variable:", "").strip()
@@ -198,7 +208,6 @@ def extract_paper_info(pdf_path):
                     explanatory_details["Dependent variable"] = detail.replace("Dependent variable:", "").strip()
                 elif detail.startswith("Control variables:"):
                     explanatory_details["Control variables"] = detail.replace("Control variables:", "").strip()
-
             # Extract the specific rainfall metric
             if any(method in explanatory_details["Instrumental variable"].lower() for method in rainfall_methods):
                 specific_rainfall_metric = extract_with_retries(
@@ -213,15 +222,12 @@ def extract_paper_info(pdf_path):
                     pdf_path,
                     "specific rainfall metric"
                 )
-                
                 # Verify the specific rainfall metric is not a general term
                 if any(method in specific_rainfall_metric.lower() for method in rainfall_methods):
                     explanatory_details["Instrumental variable"] = specific_rainfall_metric
                 else:
                     explanatory_details["Instrumental variable"] = "N/A"
-
                 rainfall_as_iv = "yes"
-
         else:
             # Extract non-IV related variables
             explanatory_details_text = extract_with_retries(
@@ -236,7 +242,6 @@ def extract_paper_info(pdf_path):
                 pdf_path,
                 "explanatory details without IV"
             )
-
             for detail in explanatory_details_text:
                 if detail.startswith("Explanatory variable:"):
                     explanatory_details["Explanatory variable"] = detail.replace("Explanatory variable:", "").strip()
@@ -244,42 +249,23 @@ def extract_paper_info(pdf_path):
                     explanatory_details["Dependent variable"] = detail.replace("Dependent variable:", "").strip()
                 elif detail.startswith("Control variables:"):
                     explanatory_details["Control variables"] = detail.replace("Control variables:", "").strip()
-
         return title, doi, iv_used, rainfall_as_iv, explanatory_details["Explanatory variable"], explanatory_details["Instrumental variable"], explanatory_details["Dependent variable"], explanatory_details["Control variables"]
-
     except Exception as e:
         logging.error(f"Error processing {pdf_path}: {str(e)}")
         return None
-
-def extract_with_retries(func, pdf_path, description, retries=5, delay=2):
-    for i in range(retries):
-        try:
-            result = func()
-            if result:
-                return result
-        except Exception as e:
-            logging.error(f"Error extracting {description} on attempt {i + 1} for {pdf_path}: {str(e)}")
-            time.sleep(delay)
-    logging.error(f"Failed to extract {description} after {retries} attempts for {pdf_path}")
-    return "N/A"
 
 def main():
     if not os.path.exists(pdf_dir):
         logging.error(f"Directory {pdf_dir} does not exist.")
         return
-
     pdf_files = [f for f in os.listdir(pdf_dir) if f.lower().endswith('.pdf')]
-
     if not pdf_files:
         logging.error("No PDF files found.")
         return
-
     logging.info(f"Found {len(pdf_files)} PDF files")
-
     with open(csv_output_path, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['Filename', 'Title', 'DOI', 'IV Used', 'Rainfall as IV', 'Explanatory Variable', 'Instrumental Variable', 'Dependent Variable', 'Control Variables'])
-
         for pdf_file in pdf_files:
             pdf_path = os.path.join(pdf_dir, pdf_file)
             result = extract_paper_info(pdf_path)
@@ -289,12 +275,10 @@ def main():
             else:
                 writer.writerow([pdf_file] + ["N/A"] * 8)  # Ensure row is added even if data extraction fails
                 logging.info(f"Skipping: {pdf_file}")
-
     logging.info(f"CSV file '{csv_output_path}' has been created.")
 
 if __name__ == "__main__":
     main()
-
 end
 
 * **********************************************************************
@@ -314,7 +298,7 @@ from openai import OpenAI
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='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')
+client = OpenAI(api_key='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')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training_large'
@@ -571,7 +555,7 @@ from openai import OpenAI
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='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')
+client = OpenAI(api_key='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')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training_all'
