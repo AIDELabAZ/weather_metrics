@@ -37,6 +37,7 @@ install("pandas")
 install("openpyxl")
 install("PyPDF2")
 end
+
 */
 * **********************************************************************
 * 1 - using a small training set to troubleshoot for consistency (n=16)
@@ -55,7 +56,7 @@ from openai import OpenAI
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='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')
+client = OpenAI(api_key='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')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training_small'
@@ -298,7 +299,7 @@ from openai import OpenAI
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='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')
+client = OpenAI(api_key='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')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training_large'
@@ -555,7 +556,7 @@ from openai import OpenAI
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='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')
+client = OpenAI(api_key='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')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training_all'
@@ -605,7 +606,7 @@ def extract_text_from_pdf(pdf_path):
         doc = fitz.open(pdf_path)
         for page in doc:
             text += page.get_text()
-        logging.debug(f"Extracted text from {pdf_path}: {text[:500]}...")  # Log first 500 characters of extracted text
+        logging.debug(f"Extracted text from {pdf_path}: {text[:2000]}...")  # Log first 500 characters of extracted text
         return text
     except Exception as e:
         logging.error(f"Error extracting text from {pdf_path}: {str(e)}")
