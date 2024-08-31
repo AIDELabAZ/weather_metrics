@@ -55,7 +55,7 @@ from openai import OpenAI
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='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')
+client = OpenAI(api_key='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')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training_small'
@@ -63,13 +63,6 @@ pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weat
 # Output CSV file path
 csv_output_path = os.path.join(pdf_dir, 'PDF_Analysis_small.csv')
 
-# List of rainfall measurement methods and additional keywords
-rainfall_methods = [
-    "total rainfall", "deviations in total rainfall", "scaled deviations in total rainfall",
-    "mean total rainfall", "total monthly rainfall", "mean monthly rainfall", "rainfall months",
-    "daily rainfall", "rainfall days", "no rainfall days", "log of rainfall", "rainfall index",
-    "rainfall", "deviation", "average", "seasonal", "shocks", "average annual precipitation"
-]
 
 # List of keywords to identify instrumental variables
 iv_keywords = ["instrument", "instrumental variable", "iv"]
@@ -105,7 +98,7 @@ def extract_text_from_pdf(pdf_path):
         doc = fitz.open(pdf_path)
         for page in doc:
             text += page.get_text()
-        logging.debug(f"Extracted text from {pdf_path}: {text[:2000]}...")  # Log first 500 characters of extracted text
+        logging.debug(f"Extracted text from {pdf_path}: {text[:3000]}...")  # Log first 500 characters of extracted text
         return text
     except Exception as e:
         logging.error(f"Error extracting text from {pdf_path}: {str(e)}")
@@ -116,9 +109,6 @@ def find_rainfall_method(text):
         if method in text.lower():
             return method
     return "N/A"
-
-def contains_iv_keywords(text):
-    return any(keyword in text.lower() for keyword in iv_keywords)
 
 def extract_paper_info(pdf_path):
     try:
@@ -132,10 +122,10 @@ def extract_paper_info(pdf_path):
         # Extract title
         title = extract_with_retries(
             lambda: client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4",
                 temperature=0,
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant that extracts titles from academic papers. Provide only the title, without any introductory phrases."},
+                    {"role": "system", "content": "You are a research assistant that extracts titles from academic papers. Provide only the title of the paper without any other words or information."},
                     {"role": "user", "content": f"Extract and provide only the title from this text of an academic paper's first page, without any prefixes or explanations: {text[:1000]}"}
                 ]
             ).choices[0].message.content.strip(),
@@ -153,7 +143,7 @@ def extract_paper_info(pdf_path):
         # Check for IV-related keywords
         iv_used = extract_with_retries(
             lambda: client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo",
                 temperature=0,
                 messages=[
                     {"role": "system", "content": "You are an expert in identifying instrumental variable (IV) usage in academic papers."},
@@ -178,7 +168,7 @@ def extract_paper_info(pdf_path):
             # Extract IV details
             explanatory_details_text = extract_with_retries(
                 lambda: client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4-turbo",
                     temperature=0,
                     messages=[
                         {"role": "system", "content": "You are an expert in identifying variables in academic papers."},
@@ -203,11 +193,11 @@ def extract_paper_info(pdf_path):
             if any(method in explanatory_details["Instrumental variable"].lower() for method in rainfall_methods):
                 specific_rainfall_metric = extract_with_retries(
                     lambda: client.chat.completions.create(
-                        model="gpt-3.5-turbo",
+                        model="gpt-4-turbo",
                         temperature=0,
                         messages=[
-                            {"role": "system", "content": "You are an expert in identifying specific metrics used for rainfall in academic papers that use instrumental variables."},
-                            {"role": "user", "content": f"Read the entire PDF and tell me what the rainfall metric or measurement is that the authors used as an instrumental variable. Many of these papers use rainfall data as an instrumental variable, but how are they measuring it, or what exactly do they mean by rainfall data? I am looking for something more specific than just rainfall. Only output the name of the metric without any additional words or sentences in less than or equal to 8 words. Please read the ENTIRE PDF, and of the multiple mentions of rainfall, deduce which one includes the actual metric by which it is measured. Sometimes the specific metric used by researchers is stated later in the paper like in the methods, data, regression outputs, or discussion section, so please make sure to read every word of the paper thoroughly to find how the authors accounted for rainfall. : {text[:6000]}"}
+                            {"role": "system", "content": "You are an expert in identifying how rainfall was represented in instrumental variables regression for a variety of academic papers."},
+                            {"role": "user", "content": f"Read the entire PDF carefully and identify the exact metric used to represent rainfall in the regression model. Please only provide the rainfall metric without writing any additional words. Please cross check with the tables presented to ensure that you are reporting the correct rainfall metric. The metric will never just say 'rainfall', there will always be more information regarding the way it was represented in the regression, though not always explicitly mentioned. : {text[:6000]}"}
                         ]
                     ).choices[0].message.content.strip(),
                     pdf_path,
@@ -226,7 +216,7 @@ def extract_paper_info(pdf_path):
             # Extract non-IV related variables
             explanatory_details_text = extract_with_retries(
                 lambda: client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4-turbo",
                     temperature=0,
                     messages=[
                         {"role": "system", "content": "You are an expert in identifying variables in academic papers."},
@@ -390,7 +380,7 @@ def extract_paper_info(pdf_path):
         # Extract title
         title = extract_with_retries(
             lambda: client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo",
                 temperature=0,
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant that extracts titles from academic papers. Provide only the title, without any introductory phrases."},
@@ -411,7 +401,7 @@ def extract_paper_info(pdf_path):
         # Check for IV-related keywords
         iv_used = extract_with_retries(
             lambda: client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo",
                 temperature=0,
                 messages=[
                     {"role": "system", "content": "You are an expert in identifying instrumental variable (IV) usage in academic papers."},
@@ -436,7 +426,7 @@ def extract_paper_info(pdf_path):
             # Extract IV details
             explanatory_details_text = extract_with_retries(
                 lambda: client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4-turbo",
                     temperature=0,
                     messages=[
                         {"role": "system", "content": "You are an expert in identifying variables in academic papers."},
@@ -461,7 +451,7 @@ def extract_paper_info(pdf_path):
             if any(method in explanatory_details["Instrumental variable"].lower() for method in rainfall_methods):
                 specific_rainfall_metric = extract_with_retries(
                     lambda: client.chat.completions.create(
-                        model="gpt-3.5-turbo",
+                        model="gpt-4-turbo",
                         temperature=0,
                         messages=[
                             {"role": "system", "content": "You are an expert in identifying specific metrics used for rainfall in academic papers that use instrumental variables."},
@@ -484,7 +474,7 @@ def extract_paper_info(pdf_path):
             # Extract non-IV related variables
             explanatory_details_text = extract_with_retries(
                 lambda: client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4-turbo",
                     temperature=0,
                     messages=[
                         {"role": "system", "content": "You are an expert in identifying variables in academic papers."},
@@ -648,7 +638,7 @@ def extract_paper_info(pdf_path):
         # Extract title
         title = extract_with_retries(
             lambda: client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo",
                 temperature=0,
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant that extracts titles from academic papers. Provide only the title, without any introductory phrases."},
@@ -669,7 +659,7 @@ def extract_paper_info(pdf_path):
         # Check for IV-related keywords
         iv_used = extract_with_retries(
             lambda: client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo",
                 temperature=0,
                 messages=[
                     {"role": "system", "content": "You are an expert in identifying instrumental variable (IV) usage in academic papers."},
@@ -694,7 +684,7 @@ def extract_paper_info(pdf_path):
             # Extract IV details
             explanatory_details_text = extract_with_retries(
                 lambda: client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4-turbo",
                     temperature=0,
                     messages=[
                         {"role": "system", "content": "You are an expert in identifying variables in academic papers."},
@@ -719,7 +709,7 @@ def extract_paper_info(pdf_path):
             if any(method in explanatory_details["Instrumental variable"].lower() for method in rainfall_methods):
                 specific_rainfall_metric = extract_with_retries(
                     lambda: client.chat.completions.create(
-                        model="gpt-3.5-turbo",
+                        model="gpt-4-turbo",
                         temperature=0,
                         messages=[
                             {"role": "system", "content": "You are an expert in identifying specific metrics used for rainfall in academic papers that use instrumental variables."},
@@ -742,7 +732,7 @@ def extract_paper_info(pdf_path):
             # Extract non-IV related variables
             explanatory_details_text = extract_with_retries(
                 lambda: client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4-turbo",
                     temperature=0,
                     messages=[
                         {"role": "system", "content": "You are an expert in identifying variables in academic papers."},
