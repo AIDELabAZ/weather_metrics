@@ -66,6 +66,9 @@ csv_output_path = os.path.join(pdf_dir, 'PDF_Analysis_small.csv')
 # List of sections to focus on
 focus_sections = ["abstract", "introduction", "methods", "methodology", "results", "conclusion", "tables"]
 
+# Keywords for pre-screening IV usage
+iv_keywords = ["instrumental variable", "IV", "regression", "2SLS", "exogenous", "endogenous"]
+
 def search_doi(title, authors=None):
     base_url = "https://api.crossref.org/works"
     headers = {"User-Agent": "MyApp/1.0 (mailto:your_email@example.com)"}
@@ -91,7 +94,7 @@ def extract_text_from_pdf(pdf_path):
         doc = fitz.open(pdf_path)
         for page in doc:
             text += page.get_text()
-        logging.debug(f"Extracted text from {pdf_path}: {text[:3000]}...")  # Log first 3000 characters of extracted text
+        logging.debug(f"Extracted text from {pdf_path}: {text[:5000]}...")
         if not text.strip():
             logging.error(f"Extracted text is empty for {pdf_path}")
         return text
@@ -107,6 +110,11 @@ def extract_relevant_sections(text):
             relevant_text += text[start_idx:start_idx + 10000]  # Extract a chunk of text after the section title
     return relevant_text if relevant_text else text
 
+def keyword_screening(text):
+    """Check if any of the IV-related keywords are present in the text."""
+    text_lower = text.lower()
+    return any(keyword in text_lower for keyword in iv_keywords)
+
 def extract_paper_info(pdf_path):
     try:
         logging.info(f"Processing {pdf_path}")
@@ -118,6 +126,9 @@ def extract_paper_info(pdf_path):
 
         # Focus on relevant sections to reduce noise
         relevant_text = extract_relevant_sections(text)
+
+        # Check for IV-related keywords before proceeding
+        iv_likely = keyword_screening(relevant_text)
 
         # Extract title
         title = extract_with_retries(
@@ -144,6 +155,10 @@ def extract_paper_info(pdf_path):
         if not doi:
             logging.warning(f"No DOI found for title: {title}")
 
+        if not iv_likely:
+            logging.info(f"No IV-related keywords found for {pdf_path}, skipping detailed IV extraction.")
+            return [title, doi, "No", "No", "N/A", "N/A", "N/A", "N/A"]
+
         # Check for IV-related keywords
         iv_used = extract_with_retries(
             lambda: client.chat.completions.create(
@@ -159,7 +174,7 @@ def extract_paper_info(pdf_path):
         )
         
         if iv_used == "n/a":
-            iv_used = "no"
+            iv_used = "No"
 
         logging.info(f"IV usage detected: {iv_used}")
 
@@ -170,7 +185,7 @@ def extract_paper_info(pdf_path):
             "Control variables": "N/A"
         }
 
-        rainfall_as_iv = "no"
+        rainfall_as_iv = "No"
         if iv_used == 'yes':
             # Extract IV details
             explanatory_details_text = extract_with_retries(
