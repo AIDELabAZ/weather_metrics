@@ -55,7 +55,7 @@ from openai import OpenAI
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='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')
+client = OpenAI(api_key='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')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training_small'
@@ -63,24 +63,17 @@ pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weat
 # Output CSV file path
 csv_output_path = os.path.join(pdf_dir, 'PDF_Analysis_small.csv')
 
-
-# List of keywords to identify instrumental variables
-iv_keywords = ["instrument", "instrumental variable", "iv"]
+# List of sections to focus on
+focus_sections = ["abstract", "introduction", "methods", "methodology", "results", "conclusion", "tables"]
 
 def search_doi(title, authors=None):
     base_url = "https://api.crossref.org/works"
-    headers = {
-        "User-Agent": "MyApp/1.0 (mailto:your_email@example.com)"
-    }
+    headers = {"User-Agent": "MyApp/1.0 (mailto:your_email@example.com)"}
     query = title
     if authors:
         query += ' ' + ' '.join(authors)
 
-    params = {
-        "query": query,
-        "rows": 1
-    }
-    
+    params = {"query": query, "rows": 1}
     response = requests.get(base_url, headers=headers, params=params)
     
     if response.status_code == 200:
@@ -98,17 +91,21 @@ def extract_text_from_pdf(pdf_path):
         doc = fitz.open(pdf_path)
         for page in doc:
             text += page.get_text()
-        logging.debug(f"Extracted text from {pdf_path}: {text[:3000]}...")  # Log first 500 characters of extracted text
+        logging.debug(f"Extracted text from {pdf_path}: {text[:3000]}...")  # Log first 3000 characters of extracted text
+        if not text.strip():
+            logging.error(f"Extracted text is empty for {pdf_path}")
         return text
     except Exception as e:
         logging.error(f"Error extracting text from {pdf_path}: {str(e)}")
         return None
 
-def find_rainfall_method(text):
-    for method in rainfall_methods:
-        if method in text.lower():
-            return method
-    return "N/A"
+def extract_relevant_sections(text):
+    relevant_text = ""
+    for section in focus_sections:
+        start_idx = text.lower().find(section)
+        if start_idx != -1:
+            relevant_text += text[start_idx:start_idx + 10000]  # Extract a chunk of text after the section title
+    return relevant_text if relevant_text else text
 
 def extract_paper_info(pdf_path):
     try:
@@ -119,20 +116,27 @@ def extract_paper_info(pdf_path):
             logging.warning(f"No text extracted from {pdf_path}. Skipping.")
             return None
 
+        # Focus on relevant sections to reduce noise
+        relevant_text = extract_relevant_sections(text)
+
         # Extract title
         title = extract_with_retries(
             lambda: client.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4-turbo",
                 temperature=0,
                 messages=[
                     {"role": "system", "content": "You are a research assistant that extracts titles from academic papers. Provide only the title of the paper without any other words or information."},
-                    {"role": "user", "content": f"Extract and provide only the title from this text of an academic paper's first page, without any prefixes or explanations: {text[:1000]}"}
+                    {"role": "user", "content": f"Extract and provide only the title from this text of an academic paper, without any prefixes or explanations: {relevant_text[:1000]}"}
                 ]
             ).choices[0].message.content.strip(),
             pdf_path,
             "title"
         )
         
+        if not title or title == "N/A":
+            logging.warning(f"No title found for {pdf_path}")
+            return ["N/A"] * 8
+
         logging.info(f"Extracted title: {title}")
 
         # Search for DOI using CrossRef API
@@ -147,13 +151,16 @@ def extract_paper_info(pdf_path):
                 temperature=0,
                 messages=[
                     {"role": "system", "content": "You are an expert in identifying instrumental variable (IV) usage in academic papers."},
-                    {"role": "user", "content": f"Does this paper use instrumental variables (IV) in its analysis? Respond with only 'Yes' or 'No': {text[:4000]}"}
+                    {"role": "user", "content": f"Does this paper use instrumental variables (IV) in its analysis? Respond with only 'Yes' or 'No': {relevant_text[:4000]}"}
                 ]
             ).choices[0].message.content.strip().lower(),
             pdf_path,
             "IV usage"
         )
         
+        if iv_used == "n/a":
+            iv_used = "no"
+
         logging.info(f"IV usage detected: {iv_used}")
 
         explanatory_details = {
@@ -172,7 +179,7 @@ def extract_paper_info(pdf_path):
                     temperature=0,
                     messages=[
                         {"role": "system", "content": "You are an expert in identifying variables in academic papers."},
-                        {"role": "user", "content": f"Identify the following in the paper in 8 words or less: 1) Explanatory variable, 2) Instrumental variable, 3) Dependent variable, 4) Control variables. Provide each in one line with the label. Provide short and concise descriptions only. Read entire PDF and be sure to extract what metric or thing was used as the instrumental variable or other variables. Explanatory variable:, Instrumental variable:, Dependent variable:, Control variables:. If any of these variables are not explicitly mentioned, please infer them from the context: {text[:6000]}"}
+                        {"role": "user", "content": f"Identify the following in the paper in 8 words or less: 1) Explanatory variable, 2) Instrumental variable, 3) Dependent variable, 4) Control variables. Provide each in one line with the label. Provide short and concise descriptions only. Read entire PDF and be sure to extract what metric or thing was used as the instrumental variable or other variables. For control variables look for terms like 'controlled for' or 'potential confounders' in addition to closely reading the section in which the authors discuss their model. Explanatory variable:, Instrumental variable:, Dependent variable:, Control variables:. {relevant_text[:4000]}"}
                     ]
                 ).choices[0].message.content.strip().split('\n'),
                 pdf_path,
@@ -190,27 +197,25 @@ def extract_paper_info(pdf_path):
                     explanatory_details["Control variables"] = detail.replace("Control variables:", "").strip()
 
             # Extract the specific rainfall metric
-            if any(method in explanatory_details["Instrumental variable"].lower() for method in rainfall_methods):
-                specific_rainfall_metric = extract_with_retries(
-                    lambda: client.chat.completions.create(
-                        model="gpt-4-turbo",
-                        temperature=0,
-                        messages=[
-                            {"role": "system", "content": "You are an expert in identifying how rainfall was represented in instrumental variables regression for a variety of academic papers."},
-                            {"role": "user", "content": f"Read the entire PDF carefully and identify the exact metric used to represent rainfall in the regression model. Please only provide the rainfall metric without writing any additional words. Please cross check with the tables presented to ensure that you are reporting the correct rainfall metric. The metric will never just say 'rainfall', there will always be more information regarding the way it was represented in the regression, though not always explicitly mentioned. : {text[:6000]}"}
-                        ]
-                    ).choices[0].message.content.strip(),
-                    pdf_path,
-                    "specific rainfall metric"
-                )
+            specific_rainfall_metric = extract_with_retries(
+                lambda: client.chat.completions.create(
+                    model="gpt-4-turbo",
+                    temperature=0,
+                    messages=[
+                        {"role": "system", "content": "You are an expert in identifying how rainfall was represented in instrumental variables regression for a variety of academic papers."},
+                        {"role": "user", "content": f"Read the entire PDF carefully and identify the exact metric used to represent rainfall in the regression model. Please only provide the rainfall metric without writing any additional words. Please cross-check with the tables presented to ensure that you are reporting the correct rainfall metric. The metric will never just say 'rainfall', there will always be more information regarding the way it was represented in the regression, though not always explicitly mentioned. : {relevant_text[:4000]}"}
+                    ]
+                ).choices[0].message.content.strip(),
+                pdf_path,
+                "specific rainfall metric"
+            )
                 
-                # Verify the specific rainfall metric is not a general term
-                if any(method in specific_rainfall_metric.lower() for method in rainfall_methods):
-                    explanatory_details["Instrumental variable"] = specific_rainfall_metric
-                else:
-                    explanatory_details["Instrumental variable"] = "N/A"
-
+            # Verify the specific rainfall metric is not a general term
+            if specific_rainfall_metric and specific_rainfall_metric != "N/A":
+                explanatory_details["Instrumental variable"] = specific_rainfall_metric
                 rainfall_as_iv = "yes"
+            else:
+                logging.warning(f"Specific rainfall metric not found for {pdf_path}")
 
         else:
             # Extract non-IV related variables
@@ -220,7 +225,7 @@ def extract_paper_info(pdf_path):
                     temperature=0,
                     messages=[
                         {"role": "system", "content": "You are an expert in identifying variables in academic papers."},
-                        {"role": "user", "content": f"Identify the following in the paper in 8 words or less: 1) Explanatory variable, 2) Dependent variable, 3) Control variables. Provide each in one line with the label. Use terms like 'independent variable', 'predictor', or 'x' synonymously with 'explanatory variable'. Provide short and concise descriptions only. If any of these variables are not explicitly mentioned, please infer them from the context: {text[:6000]}"}
+                        {"role": "user", "content": f"Identify the following in the paper in 8 words or less: 1) Explanatory variable, 2) Dependent variable, 3) Control variables. Provide each in one line with the label. Use terms like 'dependent variable', 'outcome variable', 'response variable' for the dependent variable, and 'covariates', 'control variables', or 'confounders' for control variables. A good place to find these things might be in the data or methods section of the papers. Provide short and concise descriptions only. If any of these variables are not explicitly mentioned, please infer them from the context: {relevant_text[:5000]}"}
                     ]
                 ).choices[0].message.content.strip().split('\n'),
                 pdf_path,
@@ -235,17 +240,17 @@ def extract_paper_info(pdf_path):
                 elif detail.startswith("Control variables:"):
                     explanatory_details["Control variables"] = detail.replace("Control variables:", "").strip()
 
-        return title, doi, iv_used, rainfall_as_iv, explanatory_details["Explanatory variable"], explanatory_details["Instrumental variable"], explanatory_details["Dependent variable"], explanatory_details["Control variables"]
+        return [title, doi, iv_used, rainfall_as_iv, explanatory_details["Explanatory variable"], explanatory_details["Instrumental variable"], explanatory_details["Dependent variable"], explanatory_details["Control variables"]]
 
     except Exception as e:
         logging.error(f"Error processing {pdf_path}: {str(e)}")
         return None
 
-def extract_with_retries(func, pdf_path, description, retries=5, delay=2):
+def extract_with_retries(func, pdf_path, description, retries=3, delay=1):
     for i in range(retries):
         try:
             result = func()
-            if result:
+            if result and result != "N/A":
                 return result
         except Exception as e:
             logging.error(f"Error extracting {description} on attempt {i + 1} for {pdf_path}: {str(e)}")
@@ -284,6 +289,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 end
 
 * **********************************************************************
