@@ -14,7 +14,7 @@
 	* access to all data and code
 
 * TO DO:
-	* complete
+	* add run time 
 
 
 * **********************************************************************
@@ -33,16 +33,36 @@
 * **********************************************************************
 
 * Define root folder globals
-    if `"`c(username)'"' == "jdmichler" {
-        global 		code  	"C:/Users/jdmichler/git/AIDELabAZ/weather_and_agriculture"
-		global 		data	"G:/My Drive/weather_project"
-	}
 
+if `"`c(username)'"' == "jdmichler" {
+        global 		code  	"C:/Users/jdmichler/git/AIDELabAZ/weather_and_agriculture"
+		global 		data	"C:/Users/jdmichler/OneDrive - University of Arizona/weather_and_agriculture"
+    }
+if `"`c(username)'"' == "annal" {
+        global 		code  	"C:/Users/aljosephson/git/weather_and_agriculture"
+		global 		data	"C:/Users/aljosephson/OneDrive - University of Arizona/weather_and_agriculture"
+    }	
+if `"`c(username)'"' == "rodrigoguerra" {
+        global 		code  	"/Users/rodrigoguerra/Library/CloudStorage/OneDrive-UniversityofArizona/Documents/GitHub/weather_and_agriculture"
+		global 		data	"/Users/rodrigoguerra/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture" 
+    }
+if `"`c(username)'"' == "fvkrysbackpackpc" {
+        global 		code  	"/Users/fvkrysbackpackpc/Documents/GitHub/weather_and_agriculture"
+		global 		data	"/Users/fvkrysbackpackpc/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture"	
+    }
+if `"`c(username)'"' == "yetfl" {
+        global 		code  	"C:/Users/yetfl/OneDrive/Desktop/GitHub/weather_and_agriculture"
+		global 		data	"C:/Users/yetfl/OneDrive - University of Arizona/weather_and_agriculture"
+    }
+if `"`c(username)'"' == "rbrnhm" {
+        global 		code  	"C:/Users/rbrnhm/GitHub/weather_and_agriculture"
+		global 		data	"C:/Users/rbrnhm/OneDrive - University of Arizona/weather_and_agriculture"
+    }	
 	 if `"`c(username)'"' == "Chandrakant Agme" {
         global 		code  	"C:/Users/Chandrakant Agme/Documents/GitHub/weather_metrics"
 		global 		data	"C:/Users/Chandrakant Agme/University of Arizona/Michler, Jeffrey David - (jdmichler) - weather_metrics"
 	 }	
-		
+
 * **********************************************************************
 * 0 (b) - Check if any required packages are installed:
 * **********************************************************************
@@ -74,6 +94,10 @@ if $pack == 1 {
 				}
 			}
 		}
+
+	* install -weather- package
+		net install WeatherConfig, ///
+		from(https://jdavidm.github.io/) replace
 
 	* install -xfill and dm89_1 - packages
 		net install xfill, 	replace from(https://www.sealedenvelope.com/)
@@ -115,29 +139,12 @@ if $pack == 1 {
 	do 			"$code/nigeria/household_code/nga_hh_masterdo.do"
 	do 			"$code/tanzania/household_code/tza_hh_masterdo.do"
 	do 			"$code/uganda/household_code/uga_hh_masterdo.do"
-
-
-
-* **********************************************************************
-* 3 - build cross-country household panel data set
-* **********************************************************************
-
-	do			"$code/analysis/reg_code/panel_build.do"
-
+*/
 
 * **********************************************************************
-* 4 - run regression .do files
+* 2 - run analysis .do files
 * **********************************************************************
-
-	do			"$code/analysis/reg_code/regressions.do"
-	do			"$code/analysis/reg_code/regressions-linear-combo.do"
-	do			"$code/analysis/reg_code/regressions-multi-combo.do"
-
-
-* **********************************************************************
-* 5 - run analysis .do files
-* **********************************************************************
-
+/*
 	do			"$code/analysis/viz_code/sum_table.do"
 	do			"$code/analysis/viz_code/sum_vis.do"
 	do			"$code/analysis/viz_code/r2_vis.do"
@@ -145,3 +152,4 @@ if $pack == 1 {
 	do			"$code/analysis/viz_code/coeff_vis.do"
 	do			"$code/analysis/viz_code/coeff_lc_vis.do"
 	do			"$code/analysis/viz_code/coeff_mc_vis.do"
+*/
