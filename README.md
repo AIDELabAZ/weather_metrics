@@ -1,8 +1,8 @@
-# Estimating the Impact of Weather on Agriculture
+# Variable Selection in Economic Applications of Remotely Sensed Weather Data: Evidence from the LSMS-ISA
 
-This README describes the directory structure & should enable users to replicate all cleaning code used in the populated pre-analysis plan "[Estimating the Impact of Weather on Agriculture][3]." The main project site is on [OSF][1]. Because the weather data contains confidential information, it is not publically available. This means the weather code will not function, as that data is held by the World Bank. Without the weather data, the results cannot be replicated from raw data to final analysis. Contact Drs. Jeffrey D. Michler or Anna Josephson and they can share an intermediate - de-identified - version of the weather data for use in replicating the results. 
+This repository contains code for replicating the statistical analysis in Agme, C., Josephson, A., Michler, J.D., Kilic, T., and Murray, S. (2024). "Variable Selection in Economic Applications of Remotely Sensed Weather Data: Evidence from the LSMS-ISA." *Unpublished*.
 
-This README was last updated on 25 May 2022. 
+This README was last updated on 3 September 2024. 
 
  ## Index
 
@@ -14,13 +14,18 @@ This README was last updated on 25 May 2022.
 ## Project Team
 
 Contributors:
-* Jeffrey D. Michler [jdmichler@arizona.edu] (Conceptualizaiton, Supervision, Visualization, Writing)
-* Anna Josephson [aljosephson@arizona.edu] (Conceptualizaiton, Supervision, Visualization, Writing)
+* Jeffrey D. Michler [jdmichler@arizona.edu] (Conceptualizaiton, Analysis, Supervision, Visualization, Writing)
+* Anna Josephson [aljosephson@arizona.edu] (Conceptualizaiton, Analysis, Supervision, Visualization, Writing)
 * Talip Kilic (Conceptualization, Resources, Writing)
 * Siobhan Murray (Conceptualization, Writing)
+* Chandrakant Agme (Analysis, Visualization, Writing)
+* Kieran Douglas (Analysis, Data curation)
 * Brian McGreal (Data curation)
 * Alison Conley (Data curation)
 * Emil Kee-Tui (Data curation)
+* Reece Branham (Data curation)
+* Rodrigo Guerra Su (Data curation)
+* Jacob Taylor (Data curation)
 
 ## Data cleaning
 
@@ -30,15 +35,23 @@ The code in this repository is primarily for replicating the cleaning of the hou
 
 #### Stata req's
 
-  * The data processing and analysis requires a number of user-written
-    Stata programs:
-    1. `weather_command`
-    2. `blindschemes`
-    3. `estout`
-    4. `customsave`
-    5. `winsor2`
-    6. `mdesc`
-    7. `distinct`
+  * The data processing and analysis requires a number of user-written Stata programs. From SSC:
+    1. `blindschemes`
+    3. `mdesc`
+    4. `estout`
+    5. `distinct`
+    6. `winsor2`
+    7. `unique`
+    8. `palettes`
+    9. `catplot`
+    10. `colrspace`
+    11. `carryforward`
+    12. `missings`
+    13. `coefplot`
+
+From software author webpages
+    1. `WeatherConfig`
+    2. `xfill`
 
 #### Folder structure
 
@@ -47,7 +60,7 @@ The [OSF project page][1] provides more details on the data cleaning.
 For the household cleaning code to run, the public use microdata must be downloaded from the [World Bank Microdata Library][2]. Furthermore, the data needs to be placed in the following folder structure:<br>
 
 ```stata
-weather_and_agriculture
+weather_metric
 ├────household_data      
 │    └──country          /* one dir for each country */
 │       ├──wave          /* one dir for each wave */
@@ -64,6 +77,7 @@ weather_and_agriculture
 │    ├──country          /* one dir for each country */
 │    └──logs
 └────results_data        /* overall analysis */
+     ├─country          /* one dir for each country */
      ├──tables
      ├──figures
      └──logs
