@@ -22,7 +22,7 @@
 * **********************************************************************
 
 * set $pack to 0 to skip package installation
-	global 			pack 	1
+	global 			pack 	0
 		
 * Specify Stata version in use
     global stataVersion 18.0    // set Stata version
@@ -34,33 +34,33 @@
 
 * Define root folder globals
 
-if `"`c(username)'"' == "jdmichler" {
-        global 		code  	"C:/Users/jdmichler/git/AIDELabAZ/weather_and_agriculture"
-		global 		data	"C:/Users/jdmichler/OneDrive - University of Arizona/weather_and_agriculture"
-    }
+    if `"`c(username)'"' == "jdmichler" {
+        global 		code  	"C:/Users/jdmichler/git/AIDELabAZ/weather_metrics"
+		global 		data	"C:/Users/jdmichler/OneDrive - University of Arizona/weather_project"
+	}
 if `"`c(username)'"' == "annal" {
-        global 		code  	"C:/Users/aljosephson/git/weather_and_agriculture"
+        global 		code  	"C:/Users/aljosephson/git/weather_metrics"
 		global 		data	"C:/Users/aljosephson/OneDrive - University of Arizona/weather_and_agriculture"
     }	
 if `"`c(username)'"' == "rodrigoguerra" {
-        global 		code  	"/Users/rodrigoguerra/Library/CloudStorage/OneDrive-UniversityofArizona/Documents/GitHub/weather_and_agriculture"
+        global 		code  	"/Users/rodrigoguerra/Library/CloudStorage/OneDrive-UniversityofArizona/Documents/GitHub/weather_metrics"
 		global 		data	"/Users/rodrigoguerra/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture" 
     }
 if `"`c(username)'"' == "fvkrysbackpackpc" {
-        global 		code  	"/Users/fvkrysbackpackpc/Documents/GitHub/weather_and_agriculture"
+        global 		code  	"/Users/fvkrysbackpackpc/Documents/GitHub/weather_metrics"
 		global 		data	"/Users/fvkrysbackpackpc/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture"	
     }
 if `"`c(username)'"' == "yetfl" {
-        global 		code  	"C:/Users/yetfl/OneDrive/Desktop/GitHub/weather_and_agriculture"
+        global 		code  	"C:/Users/yetfl/OneDrive/Desktop/GitHub/weather_metrics"
 		global 		data	"C:/Users/yetfl/OneDrive - University of Arizona/weather_and_agriculture"
     }
 if `"`c(username)'"' == "rbrnhm" {
-        global 		code  	"C:/Users/rbrnhm/GitHub/weather_and_agriculture"
+        global 		code  	"C:/Users/rbrnhm/GitHub/weather_metrics"
 		global 		data	"C:/Users/rbrnhm/OneDrive - University of Arizona/weather_and_agriculture"
     }	
 	 if `"`c(username)'"' == "Chandrakant Agme" {
         global 		code  	"C:/Users/Chandrakant Agme/Documents/GitHub/weather_metrics"
-		global 		data	"C:/Users/Chandrakant Agme/University of Arizona/Michler, Jeffrey David - (jdmichler) - weather_metrics"
+		global 		data	"C:/Users/Chandrakant Agme/University of Arizona/Michler, Jeffrey David - (jdmichler) - weather_project"
 	 }	
 
 * **********************************************************************
@@ -94,13 +94,13 @@ if $pack == 1 {
 				}
 			}
 		}
-
 	* install -weather- package
 		net install WeatherConfig, ///
 		from(https://jdavidm.github.io/) replace
 
-	* install -xfill and dm89_1 - packages
+	* install -xfill and nwcommands packages
 		net install xfill, 	replace from(https://www.sealedenvelope.com/)
+		net from "https://raw.githubusercontent.com/ThomasGrund/nwcommands/master"
 		
 	* update all ado files
 		ado update, update
