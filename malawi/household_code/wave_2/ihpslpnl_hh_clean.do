@@ -1,7 +1,9 @@
 * Project: WB Weather
 * Created on: May 2020
 * Created by: jdm
-* Stata v.16
+* Edited on: 20 June 2024
+* Edited by: jdm
+* Stata v.18
 
 * does
 	* cleans WB data set for IHPS long panel
@@ -9,7 +11,6 @@
 
 * assumes
 	* Extracted and "cleaned" World Bank Malawi data (provided by Talip Kilic)
-	* customsave.ado
 
 * TO DO:
 	* complete
@@ -34,7 +35,7 @@
 * **********************************************************************
 
 * load data
-	use 		"`root'/ihpslpnl_hh.dta", clear
+	use 		"`root'/ihpslpnl_hh_new.dta", clear
 
 * keep only the variables we need
 	keep 		y2_hhid case_id region district urbanR2 ta ea_id urbanR1 ///
@@ -49,7 +50,8 @@
 				rsmz_pesticide* ds_fert* ds_insecticide* ds_herbicide* ///
 				ds_fungicide* ds_pesticide* dsmz_fert* dsmz_insecticide* ///
 				dsmz_herbicide* dsmz_fungicide* dsmz_pesticide* ///
-				rs_irrigation* rsmz_irrigation* ds_irrigation* dsmz_irrigation*
+				rs_irrigation* rsmz_irrigation* ds_irrigation* dsmz_irrigation* ///
+				rs_fert_inorgkg rsmz_fert_kg 
 
 * generate indicator variables for herbicide and fungicide
 	gen 		rs_herb = 1 if rs_herbicideany == 1 | rs_fungicideany == 1
@@ -94,9 +96,6 @@
 	rename		ssa_aez09 aez
 	
 	drop		dist_road - fsrad3_lcmaj srtm_1k - _geo
-	
-* destring unique household indicator
-	destring 	case_id, replace
 
 	
 * **********************************************************************
@@ -108,8 +107,7 @@
 	summarize 
 	
 * save data
-	customsave	, idvar(y2_hhid) filename(hhfinal_ihpslpnl.dta) ///
-				path("`export'") dofile(ihpslpnl_hh_clean) user($user)
+	save		"`export'/hhfinal_ihpslpnl.dta", replace
 
 * close the log
 	log			close
