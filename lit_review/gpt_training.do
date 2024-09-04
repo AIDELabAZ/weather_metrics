@@ -1,14 +1,14 @@
 * Project: WB Weather - metric 
 * Created on: June 2024
 * Created by: kcd
-* Last edited by: 02/08/2024
+* Last edited by: 09/04/2024
 * Edited by: kcd on mac
 * Stata v.18.0
 
 * does
-    * Imports pdfs and feeds them to GPT via API. Reads them and outputs a CSV with relevant information
+    * Imports pdfs and feeds them to chatgpt via api. reads them and outputs a csv with relevant information
 * assumes
-    * ChatGPT account
+    * ChatGPT pro account with sufficient funding
 	* pip install openai pymupdf pandas openpyxl in terminal
 	* 
 
@@ -16,7 +16,7 @@
     * everything
 	
 * notes
-	* as of now, the api key is deactivated after every push. each new session requires a newly generated api key until we can figure this out. this may also be an issue that is not resolvable and well have to leave a not for people to put in their own key or something. 
+	* as of now, the api key is deactivated after every push. each new session requires a newly generated api key until we can figure this out. this may also be an issue that is not 		resolvable and well have to leave a not for people to put in their own key or something. 
 
 * **********************************************************************
 * 0 - setup
@@ -40,8 +40,315 @@ end
 
 */
 * **********************************************************************
-* 1 - using a small training set to troubleshoot for consistency (n=16)
+* 00 - training mini (troubleshooting)
 * **********************************************************************
+*/
+
+* the following code uses gpt-4-turbo model for analysis which is far more accurate than past models but significantly more expensive to run 
+* it is training on 2 pdfs for the sake of cost, output is really good and we dont even need to use the api for doi crossreference yet
+python
+import openai
+import os
+import csv
+import re
+from PyPDF2 import PdfReader
+
+def extract_text_from_pdf(pdf_file):
+    """Extracts text from the title page, methods, and data sections of a PDF file."""
+    pdf_reader = PdfReader(pdf_file)
+    full_text = ""
+    title_text = ""
+    methods_text = ""
+    data_text = ""
+
+    # Extract text from the title page (assumed to be the first page)
+    if len(pdf_reader.pages) > 0:
+        title_text = pdf_reader.pages[0].extract_text()
+
+    # Extract text from all pages
+    for page in pdf_reader.pages:
+        full_text += page.extract_text()
+
+    # Define patterns to identify methods and data sections
+    methods_pattern = r"(?i)(methods?|methodology).*?(?=(results|discussion|conclusion|references))"
+    data_pattern = r"(?i)(data|dataset).*?(?=(methods|methodology|results|discussion|conclusion|references))"
+
+    # Extract methods and data sections
+    methods_match = re.search(methods_pattern, full_text, re.DOTALL)
+    data_match = re.search(data_pattern, full_text, re.DOTALL)
+
+    if methods_match:
+        methods_text = methods_match.group(0)
+    if data_match:
+        data_text = data_match.group(0)
+
+    # Combine the extracted sections
+    extracted_text = title_text + "\n" + methods_text + "\n" + data_text
+    return extracted_text
+
+def get_paper_info(text, api_key):
+    """Uses OpenAI to extract structured information from text."""
+    client = openai.OpenAI(api_key=api_key)
+    response = client.chat.completions.create(
+        model="gpt-4-turbo",
+        messages=[
+            {"role": "system", "content": "You are an assistant that extracts specific details from academic papers, especially regarding the use of different rainfall metrics used as instrumental variables."},
+            {"role": "user", "content": f"Please extract the following details from the text and format your response as follows:\n\
+                Paper title: [title]\n\
+                DOI: [doi]\n\
+                Instrumental variable used: [yes/no]\n\
+                Instrumental variable rainfall: [yes/no]\n\
+                Rainfall metric: [metric]\n\
+                Rainfall data source: [source]\n\
+                Explanatory variable(s): [list]\n\
+                Outcome variable(s): [list]\n\
+                Control variable(s): [list]\n\
+                Text: {text}"}
+        ]
+    )
+    
+    return response.choices[0].message.content
+
+def parse_paper_info(info):
+    """Parses the extracted paper info into structured data."""
+    details = {
+        "Paper Title": "",
+        "DOI": "",
+        "Instrumental Variable Used": "",
+        "Instrumental Variable Rainfall": "",
+        "Rainfall Metric": "",
+        "Rainfall Data Source": "",
+        "Explanatory Variable(s)": "",
+        "Outcome Variable(s)": "",
+        "Control Variable(s)": ""
+    }
+    
+    lines = info.split("\n")
+    for line in lines:
+        if ":" in line:
+            key, value = line.split(":", 1)
+            key = key.strip()
+            value = value.strip()
+            if key == "Paper title":
+                details["Paper Title"] = value
+            elif key == "DOI":
+                details["DOI"] = value
+            elif key == "Instrumental variable used":
+                details["Instrumental Variable Used"] = value
+            elif key == "Instrumental variable rainfall":
+                details["Instrumental Variable Rainfall"] = value
+            elif key == "Rainfall metric":
+                details["Rainfall Metric"] = value
+            elif key == "Rainfall data source":
+                details["Rainfall Data Source"] = value
+            elif key == "Explanatory variable(s)":
+                details["Explanatory Variable(s)"] = value
+            elif key == "Outcome variable(s)":
+                details["Outcome Variable(s)"] = value
+            elif key == "Control variable(s)":
+                details["Control Variable(s)"] = value
+    
+    return details
+
+def process_pdfs_in_directory(directory, api_key):
+    """Processes all PDFs in the given directory."""
+    results = []
+    for filename in os.listdir(directory):
+        if filename.endswith('.pdf'):
+            with open(os.path.join(directory, filename), 'rb') as pdf_file:
+                text = extract_text_from_pdf(pdf_file)
+                paper_info = get_paper_info(text, api_key)
+                parsed_info = parse_paper_info(paper_info)
+                parsed_info["File Name"] = filename
+                results.append(parsed_info)
+    return results
+
+def save_results_to_csv(results, output_file):
+    """Saves the extracted results to a CSV file."""
+    fieldnames = [
+        "File Name", "Paper Title", "DOI", "Instrumental Variable Used", 
+        "Instrumental Variable Rainfall", "Rainfall Metric", 
+        "Rainfall Data Source", "Explanatory Variable(s)", 
+        "Outcome Variable(s)", "Control Variable(s)"
+    ]
+    
+    with open(output_file, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        
+        writer.writeheader()
+        for result in results:
+            writer.writerow(result)
+
+if __name__ == "__main__":
+    # Define the directory containing the PDFs
+    pdf_directory = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/mini'
+    
+    # Your OpenAI API key
+    api_key = 'KEY'
+    
+    # Process the PDFs
+    results = process_pdfs_in_directory(pdf_directory, api_key)
+    
+    # Save the results to a CSV file in the same directory as the PDFs
+    output_file = os.path.join(pdf_directory, 'extracted_paper_info.csv')
+    save_results_to_csv(results, output_file)
+    print(f"Results saved to {output_file}")
+end
+
+* the following code attempts to reduce cost by excluding sections of the pdfs as to reduce token usage. as of now it is not very good.
+
+python
+import openai
+import os
+import csv
+from PyPDF2 import PdfReader
+import re
+
+def extract_targeted_text_from_pdf(pdf_file):
+    """Extracts targeted text from a PDF file using PdfReader."""
+    pdf_reader = PdfReader(pdf_file)
+    text = ""
+    for page in pdf_reader.pages[:10]:  # Adjust the page limit if needed
+        page_text = page.extract_text()
+        # Add logic to extract only relevant sections, e.g., using keywords
+        if any(keyword in page_text.lower() for keyword in ["introduction", "methodology", "results"]):
+            text += page_text
+    return text[:50000]  # Adjust character limit if needed
+
+def count_tokens(text):
+    """Counts the number of tokens in a text."""
+    return len(re.findall(r'\w+', text))
+
+def truncate_text(text, max_tokens):
+    """Truncates text to a specified maximum number of tokens."""
+    current_token_count = count_tokens(text)
+    if current_token_count <= max_tokens:
+        return text
+    words = text.split()
+    while current_token_count > max_tokens:
+        words = words[:-1]
+        current_token_count = count_tokens(' '.join(words))
+    return ' '.join(words)
+
+def get_paper_info(text, api_key):
+    """Uses OpenAI to extract structured information from text."""
+    client = openai.OpenAI(api_key=api_key)
+    
+    # Truncate the text to fit within token limits
+    truncated_text = truncate_text(text, 4000)  # Limit to 4000 tokens
+    
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "Extract specific details from academic papers."},
+            {"role": "user", "content": f"Please extract the following details from the text and format your response as follows:\n\
+                Paper title: [title]\n\
+                DOI: [doi]\n\
+                Instrumental variable used: [yes/no]\n\
+                Instrumental variable rainfall: [yes/no]\n\
+                Rainfall metric: [metric]\n\
+                Source: [source]\n\
+                Explanatory vars: [list]\n\
+                Outcome vars: [list]\n\
+                Control vars: [list]\n\n\
+                Text: {truncated_text}"}
+        ],
+        max_tokens=500  # Limit the response tokens
+    )
+    
+    return response.choices[0].message.content
+
+def parse_paper_info(info):
+    """Parses the extracted paper info into structured data."""
+    details = {
+        "Paper Title": "",
+        "DOI": "",
+        "Instrumental Variable Used": "",
+        "Instrumental Variable Rainfall": "",
+        "Rainfall Metric": "",
+        "Rainfall Data Source": "",
+        "Explanatory Variable(s)": "",
+        "Outcome Variable(s)": "",
+        "Control Variable(s)": ""
+    }
+    
+    lines = info.split("\n")
+    for line in lines:
+        if ":" in line:
+            key, value = line.split(":", 1)
+            key = key.strip()
+            value = value.strip()
+            if key == "Paper title":
+                details["Paper Title"] = value
+            elif key == "DOI":
+                details["DOI"] = value
+            elif key == "Instrumental variable used":
+                details["Instrumental Variable Used"] = value
+            elif key == "Instrumental variable rainfall":
+                details["Instrumental Variable Rainfall"] = value
+            elif key == "Rainfall metric":
+                details["Rainfall Metric"] = value
+            elif key == "Source":
+                details["Rainfall Data Source"] = value
+            elif key == "Explanatory vars":
+                details["Explanatory Variable(s)"] = value
+            elif key == "Outcome vars":
+                details["Outcome Variable(s)"] = value
+            elif key == "Control vars":
+                details["Control Variable(s)"] = value
+    
+    return details
+
+def process_pdfs_in_directory(directory, api_key):
+    """Processes all PDFs in the given directory."""
+    results = []
+    for filename in os.listdir(directory):
+        if filename.endswith('.pdf'):
+            with open(os.path.join(directory, filename), 'rb') as pdf_file:
+                text = extract_targeted_text_from_pdf(pdf_file)
+                paper_info = get_paper_info(text, api_key)
+                parsed_info = parse_paper_info(paper_info)
+                parsed_info["File Name"] = filename
+                results.append(parsed_info)
+    return results
+
+def save_results_to_csv(results, output_file):
+    """Saves the extracted results to a CSV file."""
+    fieldnames = [
+        "File Name", "Paper Title", "DOI", "Instrumental Variable Used", 
+        "Instrumental Variable Rainfall", "Rainfall Metric", 
+        "Rainfall Data Source", "Explanatory Variable(s)", 
+        "Outcome Variable(s)", "Control Variable(s)"
+    ]
+    
+    with open(output_file, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        
+        writer.writeheader()
+        for result in results:
+            writer.writerow(result)
+
+if __name__ == "__main__":
+    # Define the directory containing the PDFs
+    pdf_directory = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/mini'
+    
+    # Your OpenAI API key
+    api_key = 'KEY'
+    
+    # Process the PDFs
+    results = process_pdfs_in_directory(pdf_directory, api_key)
+    
+    # Save the results to a CSV file in the same directory as the PDFs
+    output_file = os.path.join(pdf_directory, 'extracted_paper_info.csv')
+    save_results_to_csv(results, output_file)
+    print(f"Results saved to {output_file}")
+end
+
+
+* **********************************************************************
+* 1 - using a small training set to troubleshoot for consistency (n=15)
+* **********************************************************************
+
 python
 import os
 import csv
@@ -55,7 +362,7 @@ from openai import OpenAI
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='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')
+client = OpenAI(api_key='KEY')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training_small'
@@ -65,9 +372,6 @@ csv_output_path = os.path.join(pdf_dir, 'PDF_Analysis_small.csv')
 
 # List of sections to focus on
 focus_sections = ["abstract", "introduction", "methods", "methodology", "results", "conclusion", "tables"]
-
-# Keywords for pre-screening IV usage
-iv_keywords = ["instrumental variable", "IV", "regression", "2SLS", "exogenous", "endogenous"]
 
 def search_doi(title, authors=None):
     base_url = "https://api.crossref.org/works"
@@ -94,7 +398,7 @@ def extract_text_from_pdf(pdf_path):
         doc = fitz.open(pdf_path)
         for page in doc:
             text += page.get_text()
-        logging.debug(f"Extracted text from {pdf_path}: {text[:5000]}...")
+        logging.debug(f"Extracted text from {pdf_path}: {text[:5000]}...")  # Log first 3000 characters of extracted text
         if not text.strip():
             logging.error(f"Extracted text is empty for {pdf_path}")
         return text
@@ -110,11 +414,6 @@ def extract_relevant_sections(text):
             relevant_text += text[start_idx:start_idx + 10000]  # Extract a chunk of text after the section title
     return relevant_text if relevant_text else text
 
-def keyword_screening(text):
-    """Check if any of the IV-related keywords are present in the text."""
-    text_lower = text.lower()
-    return any(keyword in text_lower for keyword in iv_keywords)
-
 def extract_paper_info(pdf_path):
     try:
         logging.info(f"Processing {pdf_path}")
@@ -126,9 +425,6 @@ def extract_paper_info(pdf_path):
 
         # Focus on relevant sections to reduce noise
         relevant_text = extract_relevant_sections(text)
-
-        # Check for IV-related keywords before proceeding
-        iv_likely = keyword_screening(relevant_text)
 
         # Extract title
         title = extract_with_retries(
@@ -154,10 +450,6 @@ def extract_paper_info(pdf_path):
         doi = search_doi(title)
         if not doi:
             logging.warning(f"No DOI found for title: {title}")
-
-        if not iv_likely:
-            logging.info(f"No IV-related keywords found for {pdf_path}, skipping detailed IV extraction.")
-            return [title, doi, "No", "No", "N/A", "N/A", "N/A", "N/A"]
 
         # Check for IV-related keywords
         iv_used = extract_with_retries(
@@ -324,7 +616,7 @@ from openai import OpenAI
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='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')
+client = OpenAI(api_key='KEY')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training_large'
@@ -582,7 +874,7 @@ from openai import OpenAI
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Set your OpenAI API key
-client = OpenAI(api_key='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')
+client = OpenAI(api_key='KEY')
 
 # Directory containing the PDF files
 pdf_dir = r'/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture/output/metric_paper/literature/training_all'
