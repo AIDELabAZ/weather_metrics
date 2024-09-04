@@ -33,35 +33,26 @@
 * **********************************************************************
 
 * Define root folder globals
-
-    if `"`c(username)'"' == "jdmichler" {
-        global 		code  	"C:/Users/jdmichler/git/AIDELabAZ/weather_metrics"
-		global 		data	"C:/Users/jdmichler/OneDrive - University of Arizona/weather_project"
-	}
+if `"`c(username)'"' == "jdmichler" {
+    global code "C:/Users/jdmichler/git/AIDELabAZ/weather_metrics"
+    global data "C:/Users/jdmichler/OneDrive - University of Arizona/weather_and_agriculture"
+	global email "jdmichler@arizona.edu"
+	global driver "C:\Users\jdmichler\AppData\Local\Google\Chrome\chromedriver.exe"
+}
 if `"`c(username)'"' == "annal" {
-        global 		code  	"C:/Users/aljosephson/git/weather_metrics"
-		global 		data	"C:/Users/aljosephson/OneDrive - University of Arizona/weather_and_agriculture"
-    }	
-if `"`c(username)'"' == "rodrigoguerra" {
-        global 		code  	"/Users/rodrigoguerra/Library/CloudStorage/OneDrive-UniversityofArizona/Documents/GitHub/weather_metrics"
-		global 		data	"/Users/rodrigoguerra/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture" 
-    }
-if `"`c(username)'"' == "fvkrysbackpackpc" {
-        global 		code  	"/Users/fvkrysbackpackpc/Documents/GitHub/weather_metrics"
-		global 		data	"/Users/fvkrysbackpackpc/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture"	
-    }
-if `"`c(username)'"' == "yetfl" {
-        global 		code  	"C:/Users/yetfl/OneDrive/Desktop/GitHub/weather_metrics"
-		global 		data	"C:/Users/yetfl/OneDrive - University of Arizona/weather_and_agriculture"
-    }
-if `"`c(username)'"' == "rbrnhm" {
-        global 		code  	"C:/Users/rbrnhm/GitHub/weather_metrics"
-		global 		data	"C:/Users/rbrnhm/OneDrive - University of Arizona/weather_and_agriculture"
-    }	
-	 if `"`c(username)'"' == "Chandrakant Agme" {
-        global 		code  	"C:/Users/Chandrakant Agme/Documents/GitHub/weather_metrics"
-		global 		data	"C:/Users/Chandrakant Agme/University of Arizona/Michler, Jeffrey David - (jdmichler) - weather_project"
+    global code "C:/Users/aljosephson/git/weather_metrics"
+    global data "C:/Users/aljosephson/OneDrive - University of Arizona/weather_and_agriculture"
+}
+if `"`c(username)'"' == "Chandrakant Agme" {
+    global 		code  	"C:/Users/Chandrakant Agme/Documents/GitHub/weather_metrics"
+	global 		data	"C:/Users/Chandrakant Agme/University of Arizona/Michler, Jeffrey David - (jdmichler) - weather_metrics"
 	 }	
+if `"`c(username)'"' == "kieran" {
+    global 		code  	"/Users/kieran/Documents/GitHub/weather_metrics"
+	global 		data	"/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_and_agriculture"
+	global 		email 	"kieran@arizona.edu"
+	global 		driver 	"/Users/kieran/Documents/RANDOM/ChromeTesting/chromedriver"
+	 }			
 
 * **********************************************************************
 * 0 (b) - Check if any required packages are installed:
