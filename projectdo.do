@@ -43,7 +43,7 @@
     }	
 	 if `"`c(username)'"' == "Chandrakant Agme" {
         global 		code  	"C:/Users/Chandrakant Agme/Documents/GitHub/weather_metrics"
-		global 		data	"C:/Users/Chandrakant Agme/University of Arizona/Michler, Jeffrey David - (jdmichler) -weather_and_agriculture"
+		global 		data	"C:/Users/Chandrakant Agme/University of Arizona/Michler, Jeffrey David - (jdmichler) - weather_and_agriculture"
 	 }	
 
 * **********************************************************************
@@ -99,14 +99,14 @@ if $pack == 1 {
 
 /*	this code requires access to the weather data sets, which are confidential
 	and held by the World Bank. They are not publically available
-
+*/
 	do 			"$code/ethiopia/weather_code/eth_ess_masterdo.do"
 	do 			"$code/malawi/weather_code/mwi_ihs_masterdo.do"
 	do 			"$code/niger/weather_code/ngr_ecvma_masterdo.do"
 	do 			"$code/nigeria/weather_code/nga_ghs_masterdo.do"
 	do 			"$code/tanzania/weather_code/tza_nps_masterdo.do"
 	do 			"$code/uganda/weather_code/uga_unps_masterdo.do"
-*/
+
 
 * **********************************************************************
 * 2 - run household data cleaning .do files and merge with weather data
@@ -115,24 +115,27 @@ if $pack == 1 {
 /*	this code requires a user to have downloaded the publically available 
 	household data sets and placed them into the folder structure detailed
 	in the readme file accompanying this repo.
-
+*/
 	do 			"$code/ethiopia/household_code/eth_hh_masterdo.do"
 	do 			"$code/malawi/household_code/mwi_hh_masterdo.do"
 	do 			"$code/niger/household_code/ngr_hh_masterdo.do"
 	do 			"$code/nigeria/household_code/nga_hh_masterdo.do"
 	do 			"$code/tanzania/household_code/tza_hh_masterdo.do"
 	do 			"$code/uganda/household_code/uga_hh_masterdo.do"
-*/
+
 
 * **********************************************************************
-* 2 - run analysis .do files
+* 3 - build panel and run regressions .do files
 * **********************************************************************
-/*
-	do			"$code/analysis/viz_code/sum_table.do"
-	do			"$code/analysis/viz_code/sum_vis.do"
-	do			"$code/analysis/viz_code/r2_vis.do"
-	do			"$code/analysis/viz_code/pval_vis.do"
-	do			"$code/analysis/viz_code/coeff_vis.do"
-	do			"$code/analysis/viz_code/coeff_lc_vis.do"
-	do			"$code/analysis/viz_code/coeff_mc_vis.do"
-*/
+
+	do			"$code/analysis/panel_build.do"
+	do			"$code/analysis/regressions.do"
+
+* **********************************************************************
+* 4 - run analysis .do files
+* **********************************************************************
+
+	do			"$code/analysis/viz_code/metric_sum.do"
+	do			"$code/analysis/viz_code/metric_pval.do"
+	do			"$code/analysis/viz_code/metric_coeff_vis.do"
+

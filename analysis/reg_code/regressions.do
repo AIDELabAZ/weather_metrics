@@ -1,17 +1,18 @@
-* Project: WB Weather
+* Project: WB Weather - metric
 * Created on: September 2020
 * Created by: jdm
-* Stata v.16.1
+* Edited on: 23 May 2024
+* Edited by: jdm
+* Stata v.18
 
 * does
-	* NOTE IT TAKES 3.5 HOURS TO RUN ALL REGRESSIONS
+	* NOTE IT TAKES 22 MIN TO RUN ALL REGRESSIONS
 	* loads multi country data set
 	* runs rainfall and temperature regressions
 	* outputs results file for analysis
 
 * assumes
 	* cleaned, merged (weather), and appended (waves) data
-	* customsave.ado
 
 * TO DO:
 	* complete
@@ -22,13 +23,13 @@
 * **********************************************************************
 
 * define paths
-	loc		source	= 	"$data/regression_data"
-	loc		results = 	"$data/results_data"
-	loc		logout 	= 	"$data/regression_data/logs"
+	global		source	 	"$data/regression_data"
+	global		results   	"$data/results_data"
+	global		logout 	 	"$data/regression_data/logs"
 
 * open log	
-	cap log close
-	log 	using 		"`logout'/regressions", append
+	cap log 	close
+	log 		using 		"$logout/regressions", append
 
 	
 * **********************************************************************
@@ -36,7 +37,7 @@
 * **********************************************************************
 
 * read in data file
-	use			"`source'/lsms_panel.dta", clear
+	use			"$source/lsms_panel.dta", clear
 
 	
 * **********************************************************************
@@ -50,9 +51,9 @@
 
 * create file to post results to
 	tempname 	reg_results
-	postfile 	`reg_results' country str3 sat str2 ext str2 depvar str4 regname str3 varname ///
-					betarain serain adjustedr loglike dfr ///
-					using "`results'/reg_results.dta", replace
+	postfile 	`reg_results' country str3 sat str2 depvar str4 regname str3 varname ///
+					betarain serain adjustedr loglike dfr obs ///
+					using "$results/reg_results.dta", replace
 					
 * define loop through levels of the data type variable	
 levelsof 	country		, local(levels)
@@ -65,92 +66,91 @@ foreach l of local levels {
 		foreach 	v of varlist `weather' { 
 
 		* define locals for naming conventions
-			loc 	sat = 	substr("`v'", 5, 3)
-			loc 	ext = 	substr("`v'", 9, 2)
 			loc 	varn = 	substr("`v'", 1, 3)
+			loc 	sat = 	substr("`v'", 5, 3)
 
 		* 2.1: Value of Harvest
 		
 		* weather
 			reg 		lntf_yld `v' if country == `l', vce(cluster hhid)
-			post 		`reg_results' (`l') ("`sat'") ("`ext'") ("tf") ("reg1") ///
+			post 		`reg_results' (`l') ("`sat'") ("tf") ("reg1") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)')
 
 		* weather and fe	
 			xtreg 		lntf_yld `v' i.year if country == `l', fe vce(cluster hhid)
-			post 		`reg_results' (`l') ("`sat'") ("`ext'") ("tf") ("reg2") ///
+			post 		`reg_results' (`l') ("`sat'") ("tf") ("reg2") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)')
 
 		* weather and inputs and fe
 			xtreg 		lntf_yld `v' `inputstf' i.year if country == `l', fe vce(cluster hhid)
-			post 		`reg_results' (`l') ("`sat'") ("`ext'") ("tf") ("reg3") ///
+			post 		`reg_results' (`l') ("`sat'") ("tf") ("reg3") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)')
 			
 		* weather and squared weather
 			reg 		lntf_yld c.`v'##c.`v' if country == `l', vce(cluster hhid)
-			post 		`reg_results' (`l') ("`sat'") ("`ext'") ("tf") ("reg4") ///
+			post 		`reg_results' (`l') ("`sat'") ("tf") ("reg4") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)')
 		
 		* weather and squared weather and fe
 			xtreg 		lntf_yld c.`v'##c.`v' i.year if country == `l', fe vce(cluster hhid)
-			post 		`reg_results' (`l') ("`sat'") ("`ext'") ("tf") ("reg5") ///
+			post 		`reg_results' (`l') ("`sat'") ("tf") ("reg5") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)')
 		
 		* weather and squared weather and inputs and fe
 			xtreg 		lntf_yld c.`v'##c.`v' `inputstf' i.year if country == `l', fe vce(cluster hhid)
-			post 		`reg_results' (`l') ("`sat'") ("`ext'") ("tf") ("reg6") ///
+			post 		`reg_results' (`l') ("`sat'") ("tf") ("reg6") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)')
 
 		* 2.2: Quantity of Maize
 		
 		* weather
 			reg 		lncp_yld `v' if country == `l', vce(cluster hhid)
-			post 		`reg_results' (`l') ("`sat'") ("`ext'") ("cp") ("reg1") ///
+			post 		`reg_results' (`l') ("`sat'") ("cp") ("reg1") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)')
 
 		* weather and fe	
 			xtreg 		lncp_yld `v' i.year if country == `l', fe vce(cluster hhid)
-			post 		`reg_results' (`l') ("`sat'") ("`ext'") ("cp") ("reg2") ///
+			post 		`reg_results' (`l') ("`sat'") ("cp") ("reg2") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)')
 
 		* weather and inputs and fe
 			xtreg 		lncp_yld `v' `inputscp' i.year if country == `l', fe vce(cluster hhid)
-			post 		`reg_results' (`l') ("`sat'") ("`ext'") ("cp") ("reg3") ///
+			post 		`reg_results' (`l') ("`sat'") ("cp") ("reg3") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)')
 			
 		* weather and squared weather
 			reg 		lncp_yld c.`v'##c.`v' if country == `l', vce(cluster hhid)
-			post 		`reg_results' (`l') ("`sat'") ("`ext'") ("cp") ("reg4") ///
+			post 		`reg_results' (`l') ("`sat'") ("cp") ("reg4") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)')
 		
 		* weather and squared weather and fe
 			xtreg 		lncp_yld c.`v'##c.`v' i.year if country == `l', fe vce(cluster hhid)
-			post 		`reg_results' (`l') ("`sat'") ("`ext'") ("cp") ("reg5") ///
+			post 		`reg_results' (`l') ("`sat'") ("cp") ("reg5") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)')
 		
 		* weather and squared weather and inputs and fe
 			xtreg 		lncp_yld c.`v'##c.`v' `inputscp' i.year if country == `l', fe vce(cluster hhid)
-			post 		`reg_results' (`l') ("`sat'") ("`ext'") ("cp") ("reg6") ///
+			post 		`reg_results' (`l') ("`sat'") ("cp") ("reg6") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)')
 
 	}
 }
 
 * close the post file and open the data file
 	postclose	`reg_results' 
-	use 		"`results'/reg_results", clear
+	use 		"$results/reg_results", clear
 
 * drop the cross section FE results
 	drop if		loglike == .
@@ -184,9 +184,10 @@ foreach l of local levels {
 	lab var		adjustedr "Adjusted R^2"
 	lab var		loglike "Log likelihood"
 	lab var		dfr "Degrees of freedom"
+	lab var		obs "Number of observations"
 
 * create unique id variable
-	egen 		reg_id = group(country sat ext depvar regname varname)
+	egen 		reg_id = group(country sat depvar regname varname)
 	lab var 	reg_id "unique regression id"
 	
 * create variable to record the name of the rainfall variable
@@ -250,42 +251,20 @@ foreach l of local levels {
 
 * order and label the varaiable
 	order 		aux_sat, after(sat)
-	lab def		sat 	1 "Rainfall 1" ///
-						2 "Rainfall 2" ///
-						3 "Rainfall 3" ///
-						4 "Rainfall 4" ///
-						5 "Rainfall 5" ///
-						6 "Rainfall 6" ///
-						7 "Temperature 1" ///
-						8 "Temperature 2" ///
-						9 "Temperature 3" 
+	lab def		sat 	1 "ARC2" ///
+						2 "CHIRPS" ///
+						3 "CPC RF" ///
+						4 "ERA5 RF" ///
+						5 "MERRA-2 RF" ///
+						6 "TAMSAT" ///
+						7 "CPC TP" ///
+						8 "ERA5 TP" ///
+						9 "MERRA-2 TP" 
 	lab val		aux_sat sat	
 	lab var		aux_sat "Satellite source"
 	drop 		sat
 	rename 		aux_sat sat
 
-* create variable to record the extraction method
-	sort 		ext
-	egen 		aux_ext = group(ext)
-	replace		aux_ext = 11 if aux_ext == 1
-	replace		aux_ext = aux_ext - 1
-	
-* order and label the varaiable
-	order 		aux_ext, after(ext)
-	lab def		ext 	1 "Extraction 1" ///
-						2 "Extraction 2" ///
-						3 "Extraction 3" ///
-						4 "Extraction 4" ///
-						5 "Extraction 5" ///
-						6 "Extraction 6" ///
-						7 "Extraction 7" ///
-						8 "Extraction 8" ///
-						9 "Extraction 9" ///
-						10 "Extraction 10"
-	lab val		aux_ext ext
-	lab var		aux_ext "Extraction method"
-	drop 		ext
-	rename 		aux_ext ext
 
 * create variable to record the dependent variable
 	sort 		depvar
@@ -328,13 +307,32 @@ foreach l of local levels {
 
 order	reg_id
 	
+*generate different betas based on signficance
+	gen 			b_sig = beta
+	replace 		b_sig = . if pval > .05
+	lab var 		b_sig "p < 0.05"
+	
+	gen 			b_ns = beta
+	replace 		b_ns= . if p <= .05
+	lab var 		b_ns "n.s."
+	
+* generate significance dummy
+	gen				sig = 1 if b_sig != .
+	replace			sig = 0 if b_ns != .
+	lab	def			yesno 0 "Not Significant" 1 "Significant"
+	lab val			sig yesno
+	lab var			sig "Weather variable is significant"
+	
+* generate sign dummy
+	gen 			b_sign = 1 if b_sig > 0 & b_sig != .
+	replace 		b_sign = 0 if b_sig < 0 & b_sig != .
+	lab	def			posneg 0 "Negative" 1 "Positive"
+	lab val			b_sign posneg
+	lab var			b_sign "Sign on weather variable"
+	
 * save complete results
-	loc		results = 	"$data/results_data"
-	
 	compress
-	
-	customsave 	, idvarname(reg_id) filename("lsms_complete_results.dta") ///
-		path("`results'") dofile(regression) user($user)
+	save 		"$results/lsms_complete_results.dta", replace
 
 * close the log
 	log	close
