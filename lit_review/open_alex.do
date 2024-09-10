@@ -1,7 +1,8 @@
 * Project: WB Weather - metric 
 * Created on: Jan 2024
 * Created by: cda
-* Last edited by: KD 5/30
+* Edited by: jdm
+* Edited on: 10 Sept 2024
 * Stata v.18.0
 
 * does
@@ -17,8 +18,10 @@
 * 0 - setup
 * **********************************************************************
 
-global export "$data/output/metric_paper/literature"
+* set relative path for output in stata
+	global 			export "$data/openalex"
 
+* set up relative paths in python
 python:
 import os
 
@@ -51,7 +54,7 @@ end
 
 
 * **********************************************************************
-* 1 - python script
+* 1 - access openalex via api and search database
 * **********************************************************************
 
 python
@@ -134,3 +137,42 @@ for i in range(num_chunks):
 print("All data saved to separate Excel files.")
 
 end
+
+* **********************************************************************
+* 2 - combine output into single file
+* **********************************************************************
+
+python
+import pandas as pd
+import os
+
+# List of Excel files to combine
+file_names = [
+    'OpenAlex_Search_Results1.xlsx',
+    'OpenAlex_Search_Results2.xlsx',
+    'OpenAlex_Search_Results3.xlsx',
+    'OpenAlex_Search_Results4.xlsx',
+    'OpenAlex_Search_Results5.xlsx'
+]
+
+# Initialize an empty list to hold dataframes
+dfs = []
+
+# Load each file and append its dataframe to the list
+for file_name in file_names:
+    file_path = os.path.join(export_path, file_name)
+    df = pd.read_excel(file_path)
+    dfs.append(df)
+
+# Concatenate all the dataframes into a single dataframe
+combined_df = pd.concat(dfs, ignore_index=True)
+
+# Define the output file path for the combined result
+output_file = os.path.join(export_path, 'OpenAlex_Search_Results_Complete.xlsx')
+
+# Save the combined dataframe to a new Excel file
+combined_df.to_excel(output_file, index=False)
+
+print(f"Combined file saved to {output_file}")
+end
+

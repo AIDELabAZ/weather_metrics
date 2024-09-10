@@ -1,9 +1,9 @@
 * Project: WB Weather - metric 
 * Created on: June 2024
 * Created by: jdm
-* Last edited by: 10 June 2024
+* Edited on: 10 Sept 24
 * Edited by: jdm
-* Stata v.18.0
+* Stata v.18.5
 
 * does
     * gets urls to the pdfs for each paper from OpenAlex
@@ -19,19 +19,26 @@
 * 0 - setup
 * **********************************************************************
 
-global input "$data/output/metric_paper/literature"
+* set relative path for output in stata
+	global 			input  "$data/openalex"
+	global 			export "$data/openalex/pdf_url"
 
 python
 
-# Set output path using Stata global for the ChromeDriver
+# Set path using Stata global for the ChromeDriver
 print("Setting environment variable STATA_DRIVER to:", "$driver")
 os.environ['STATA_DRIVER'] = "$driver"
 print("Environment variable STATA_DRIVER is set to:", os.environ['STATA_DRIVER'])
 
-# Set output path using Stata global for the input path
+# Set path using Stata global for the input path
 print("Setting environment variable STATA_INPUT to:", "$input")
 os.environ['STATA_INPUT'] = "$input"
 print("Environment variable STATA_INPUT is set to:", os.environ['STATA_INPUT'])
+
+# Set path using Stata global for the output path
+print("Setting environment variable STATA_INPUT to:", "$input")
+os.environ['STATA_OUTPUT'] = "$output"
+print("Environment variable STATA_INPUT is set to:", os.environ['STATA_OUTPUT'])
 
 import subprocess
 import sys
