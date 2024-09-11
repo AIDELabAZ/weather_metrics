@@ -37,8 +37,8 @@ clear
 * **********************************************************************
 
 * do each of the file converters
-	do "`root'/wave_1/mwi_ihs3_converter.do"	//	convert wave 1 .csv to .dta
-	do "`root'/wave_2/mwi_ihps_converter.do"	//	convert wave 2 .csv to .dta
+*	do "`root'/wave_1/mwi_ihs3_converter.do"	//	convert wave 1 .csv to .dta
+*	do "`root'/wave_2/mwi_ihps_converter.do"	//	convert wave 2 .csv to .dta
 	do "`root'/wave_3/mwi_ihs4_converter.do"	//	convert wave 3 .csv to .dta
 	do "`root'/wave_4/mwi_ihs4p_converter.do"	//	convert wave 4 .csv to .dta
 	do "`root'/wave_5/mwi_ihs5_converter.do"	//	convert wave 5 .csv to .dta

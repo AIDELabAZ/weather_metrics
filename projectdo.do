@@ -4,6 +4,7 @@
 * Stata v.18.0
 
 * does
+	* take 8.5 hours to run, most (8 hrs) cleaning weather data
 	* establishes an identical workspace between users
 	* sets globals that define absolute paths
 	* serves as the starting point to find any do-file, dataset or output
@@ -14,7 +15,7 @@
 	* access to all data and code
 
 * TO DO:
-	* add run time 
+	* done
 
 
 * **********************************************************************
@@ -99,14 +100,14 @@ if $pack == 1 {
 
 /*	this code requires access to the weather data sets, which are confidential
 	and held by the World Bank. They are not publically available
-*/
+
 	do 			"$code/ethiopia/weather_code/eth_ess_masterdo.do"
 	do 			"$code/malawi/weather_code/mwi_ihs_masterdo.do"
 	do 			"$code/niger/weather_code/ngr_ecvma_masterdo.do"
 	do 			"$code/nigeria/weather_code/nga_ghs_masterdo.do"
 	do 			"$code/tanzania/weather_code/tza_nps_masterdo.do"
 	do 			"$code/uganda/weather_code/uga_unps_masterdo.do"
-
+*/
 
 * **********************************************************************
 * 2 - run household data cleaning .do files and merge with weather data
@@ -115,22 +116,22 @@ if $pack == 1 {
 /*	this code requires a user to have downloaded the publically available 
 	household data sets and placed them into the folder structure detailed
 	in the readme file accompanying this repo.
-*/
+
 	do 			"$code/ethiopia/household_code/eth_hh_masterdo.do"
 	do 			"$code/malawi/household_code/mwi_hh_masterdo.do"
 	do 			"$code/niger/household_code/ngr_hh_masterdo.do"
 	do 			"$code/nigeria/household_code/nga_hh_masterdo.do"
 	do 			"$code/tanzania/household_code/tza_hh_masterdo.do"
 	do 			"$code/uganda/household_code/uga_hh_masterdo.do"
-
+*/
 
 * **********************************************************************
 * 3 - build panel and run regressions .do files
 * **********************************************************************
-
-	do			"$code/analysis/panel_build.do"
-	do			"$code/analysis/regressions.do"
-
+/*
+	do			"$code/analysis/reg_code/panel_build.do"
+	do			"$code/analysis/reg_code/regressions.do"
+*/
 * **********************************************************************
 * 4 - run analysis .do files
 * **********************************************************************

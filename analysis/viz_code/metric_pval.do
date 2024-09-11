@@ -2,7 +2,7 @@
 * Created on: April 2024
 * Created by: jdm
 * Edited by: jdm
-* Last edit: 4 April 2024
+* Last edit: 11 Sepl 2024
 * Stata v.18.0 
 
 * does
@@ -14,6 +14,7 @@
 	* grc1leg2.ado
 
 * TO DO:
+	* redo code to reflect new data structure
 	* p-value charts by country
 
 	

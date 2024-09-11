@@ -144,6 +144,8 @@ foreach l of local levels {
 			post 		`reg_results' (`l') ("`sat'") ("cp") ("reg6") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
 						(`=e(ll)') (`=e(df_r)') (`=e(N)')
+						
+		display `l'
 
 	}
 }

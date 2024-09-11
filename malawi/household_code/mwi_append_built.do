@@ -349,7 +349,7 @@
 * drop unnecessary variables and reorder remaining
 	drop		region district urban strata cluster ea_id spid ///
 					y2_hhid y3_hhid hhid hh_x02 hh_x04 intmonth ///
-					intyear qx_type ta lpid
+					intyear qx_type ta lpid HHID
 			
 * drop observations missing output
 	drop 		if tf_hrv == . & cp_hrv == .

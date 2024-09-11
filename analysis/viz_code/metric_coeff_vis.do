@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: September 2019
 * Created by: jdm
-* Edited by: cda
-* Last edit:  1 April 2023
+* Edited by: jdm
+* Last edit:  11 Sep 2024
 * Stata v.18.0 
 
 * does
@@ -16,7 +16,7 @@
 	* tabout.ado
 
 * TO DO:
-	* complete
+	* redo code to reflect new data structure
 
 	
 ************************************************************************

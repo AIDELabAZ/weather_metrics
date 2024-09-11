@@ -2,18 +2,20 @@
 * Created on: April 2024
 * Created by: jdm
 * Edited by: jdm
-* Last edit: 16 April 2024
+* Last edit: 11 Sep 2024
 * Stata v.18.0 
 
 * does
-	* merges weather data with Ethiopia ESS 3 data
+	* produces summary graphs of weather values
+	* produces summary table of measure inputs by country and year
 
 * assumes
-	* cleaned ESS 3 data
-	* processed wave 3 weather data
+	* cleaned weather data
+	* cleaned household data
 
 * TO DO:
-	* done
+	* redo loops in section 1 to reflect new weather folder structure
+	* create summary tables
 
 	
 * **********************************************************************
