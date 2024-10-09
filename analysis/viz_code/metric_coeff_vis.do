@@ -78,12 +78,12 @@
 *** ethiopia ***
 preserve
 	keep			if country == 1
-	keep			if ext == 3
+	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	*gen 			obs = _n
 
 * stack values of the specification indicators
 	gen 			k1 		= 	depvar
