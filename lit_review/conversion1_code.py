@@ -2,11 +2,12 @@ import pandas as pd
 import jsonlines
 import os
 import chardet
+import pprint
 
 # Declare input and output files
 input_csv = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training1_data.csv'
 output_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data'
-output_filename = 'training1_jsonldata.jsonl'
+output_filename = 'training1_chatformat.jsonl'
 
 # Combine the folder path and file name to create the full output path
 output_jsonl = os.path.join(output_folder, output_filename)
@@ -46,7 +47,7 @@ with jsonlines.open(output_jsonl, mode='w') as writer:
 
         # Instrumental Variable
         inst_origin = str(row.get('instrument origin', '')).strip()
-        inst_section = str(row.get('instrument section', '')).strip()  # Ensure correct column name
+        inst_section = str(row.get('instrument section', '')).strip()
         if inst_origin:
             origin_texts += f"Instrumental Variable (Section: {inst_section}): {inst_origin}\n"
 
@@ -62,8 +63,8 @@ with jsonlines.open(output_jsonl, mode='w') as writer:
         if data_origin:
             origin_texts += f"Data Source (Section: {data_section}): {data_origin}\n"
 
-        # Construct the prompt
-        prompt = f"""Extract the following information from the text:
+        # Construct the user message
+        user_message = f"""Extract the following information from the text:
 
 {origin_texts}
 
@@ -74,36 +75,31 @@ Information to extract:
 - Rainfall Metric
 - Data Source
 """
-        # Construct the completion
-        completion = f"""Dependent Variables: {row.get('dependent variables', '').strip()}
+
+        # Construct the assistant message (completion)
+        assistant_message = f"""Dependent Variables: {row.get('dependent variables', '').strip()}
 Endogenous Variables: {row.get('endogenous variable(s)', '').strip()}
 Instrumental Variables: {row.get('instrumental variable(s)', '').strip()}
 Rainfall Metric: {row.get('rainfall metric', '').strip()}
 Data Source: {row.get('rainfall data source', '').strip()}
 """
-        # Create the JSON object
+
+        # Create the JSON object in chat format
         json_obj = {
-            "prompt": prompt,
-            "completion": completion
+            "messages": [
+                {"role": "system", "content": "You are an AI that extracts specific data from text."},
+                {"role": "user", "content": user_message},
+                {"role": "assistant", "content": assistant_message}
+            ]
         }
 
         # Write the JSON object to the JSONL file
         writer.write(json_obj)
-####################################################################################################
-### display contents of json to check conversion
-####################################################################################################
-import jsonlines
-import pprint
 
-# Specify the path to your JSONL file
-jsonl_file = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training1_jsonldata.jsonl'
-
-# Open and read the JSONL file
-with jsonlines.open(jsonl_file) as reader:
+# Now print the contents of the JSONL file to verify conversion
+print("\n--- Displaying contents of the generated JSONL file ---\n")
+with jsonlines.open(output_jsonl) as reader:
     for obj in reader:
-        print("Prompt:")
-        print(obj['prompt'])
-        print("\nCompletion:")
-        print(obj['completion'])
+        print("\nMessages:")
+        pprint.pprint(obj['messages'])
         print("-" * 80)
-
