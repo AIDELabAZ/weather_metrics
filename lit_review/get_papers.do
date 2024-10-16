@@ -6,7 +6,7 @@
 * Stata v.18.0
 
 * does
-    * usings Elsevier API to get papers on ScienceDirect
+    * Elsevier API: 937c8b4d44a7e6083cfdbb9e3def3b39
 	* Wiley API: 4215866f-1350-400b-a8bf-69262b8b2dce
 	
 * assumes
@@ -35,8 +35,72 @@ install("PyPDF2")
 end
 
 * **********************************************************************
-* 1 - get urls for the pdfs
+* 1 - get pdfs from Elsevier
 * **********************************************************************
+
+python
+import pandas as pd
+import requests
+import os
+import re
+
+# 1. Load data from the Excel file
+excel_file = r"C:\Users\jdmichler\OneDrive - University of Arizona\weather_iv_lit\openalex\OpenAlex_Search_Results_Complete.xlsx"
+df = pd.read_excel(excel_file)
+
+# 5. Define the folder to save the PDFs
+output_folder = r"C:\Users\jdmichler\OneDrive - University of Arizona\weather_iv_lit\papers"
+os.makedirs(output_folder, exist_ok=True)
+
+# 2. Extract the DOI for each paper
+dois = df['ids_doi']
+
+# Your Elsevier API key
+api_key = '937c8b4d44a7e6083cfdbb9e3def3b39'
+
+for doi in dois:
+    if isinstance(doi, str) and doi.startswith('https://doi.org/10.1016'):
+        # 3. Check if the paper is published by Elsevier
+        doi_suffix = doi.replace('https://doi.org/', '')
+        
+        # 4. Access the Elsevier API to download the PDF
+        url = f'https://api.elsevier.com/content/article/doi/{doi_suffix}'
+        headers = {
+            'X-ELS-APIKey': api_key,
+            'Accept': 'application/pdf'
+        }
+
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            # Clean the DOI to create a valid filename
+            safe_filename = re.sub(r'[^\w\-_\. ]', '_', doi_suffix) + '.pdf'
+            filepath = os.path.join(output_folder, safe_filename)
+            
+            # Save the PDF to the specified folder
+            with open(filepath, 'wb') as f:
+                f.write(response.content)
+            print(f"Downloaded: {safe_filename}")
+        else:
+            print(f"Failed to download {doi}. HTTP Status Code: {response.status_code}")
+end
+
+
+* **********************************************************************
+* 2 - get urls for the pdfs
+* **********************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
 
 python
 import requests
