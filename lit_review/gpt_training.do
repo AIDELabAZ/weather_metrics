@@ -410,7 +410,6 @@ client = OpenAI(api_key='sk-proj-3pzSPq5CURulS0h_xlpCmnx1IMSbHo2iPFS2Z-jmvI6rBPD
 # Path to the folder containing the PDFs
 pdf_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_small'
 
-# Function to extract text from PDF
 def extract_text_from_pdf(pdf_path):
     text = ''
     with open(pdf_path, 'rb') as f:
@@ -420,33 +419,24 @@ def extract_text_from_pdf(pdf_path):
             text += page.extract_text()
     return text
 
-# Function to split text into paragraphs
 def split_into_paragraphs(text):
     text = text.replace('\n\n', '\n')
     paragraphs = text.split('\n')
     return [para.strip() for para in paragraphs if para.strip()]
 
-# Function to check if paragraph contains information of interest
 def analyze_paragraph(paragraph):
-    prompt = f"""You are an assistant that extracts specific information from academic papers.
-
-Given the following paragraph:
-
-\"\"\"
-{paragraph}
-\"\"\"
-
-Answer the following questions:
-
-1. Does this paragraph mention the specific instrumental variable used and how it was quantified in the regression? If yes, provide the details.
-2. If the instrumental variable used was rainfall, does the paragraph mention the specific source of the data? If yes, provide the details.
-3. Does this paragraph mention the specific explanatory/independent variable that was instrumented for? If yes, provide the details.
-4. Does this paragraph mention the outcome/dependent variable of interest? If yes, provide the details.
-
-If the paragraph does not contain the information, just reply 'No'."""
+    prompt = ("You are an assistant that extracts specific information from academic papers. "
+              "Given the following paragraph:\n\n"
+              f"\"\"\"\n{paragraph}\n\"\"\"\n\n"
+              "Answer the following questions:\n\n"
+              "1. Does this paragraph mention the specific instrumental variable used and how it was quantified in the regression? If yes, provide the details.\n"
+              "2. If the instrumental variable used was rainfall, does the paragraph mention the specific source of the data? If yes, provide the details.\n"
+              "3. Does this paragraph mention the specific explanatory/independent variable that was instrumented for? If yes, provide the details.\n"
+              "4. Does this paragraph mention the outcome/dependent variable of interest? If yes, provide the details.\n\n"
+              "If the paragraph does not contain the information, just reply 'No'.")
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",  # or another appropriate model
+        model="gpt-4",  # or another appropriate model
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
@@ -454,29 +444,30 @@ If the paragraph does not contain the information, just reply 'No'."""
         max_tokens=500,
         temperature=0
     )
-    answer = response.choices[0].message.content.strip()
-    return answer
+    return response.choices[0].message.content.strip()
 
-# Keywords to filter paragraphs
 keywords = [
     'instrumental variable', 'IV', 'regression', 'rainfall',
     'dependent variable', 'independent variable', 'explanatory variable',
     'outcome variable', 'instrumented'
 ]
 
-# Main script
-for filename in os.listdir(pdf_folder):
-    if filename.endswith('.pdf'):
-        pdf_path = os.path.join(pdf_folder, filename)
-        print(f"Processing {filename}...")
-        text = extract_text_from_pdf(pdf_path)
-        paragraphs = split_into_paragraphs(text)
-        for paragraph in paragraphs:
-            if any(keyword.lower() in paragraph.lower() for keyword in keywords):
-                result = analyze_paragraph(paragraph)
-                if 'No' not in result:
-                    print(f"Paragraph:\n{paragraph}\n")
-                    print(f"Analysis:\n{result}\n")
+def process_pdfs():
+    for filename in os.listdir(pdf_folder):
+        if filename.endswith('.pdf'):
+            pdf_path = os.path.join(pdf_folder, filename)
+            print(f"Processing {filename}...")
+            text = extract_text_from_pdf(pdf_path)
+            paragraphs = split_into_paragraphs(text)
+            for paragraph in paragraphs:
+                if any(keyword.lower() in paragraph.lower() for keyword in keywords):
+                    result = analyze_paragraph(paragraph)
+                    if 'No' not in result:
+                        print(f"Paragraph:\n{paragraph}\n")
+                        print(f"Analysis:\n{result}\n")
+
+# Run the main process
+process_pdfs()
 end
 
 *** with limits

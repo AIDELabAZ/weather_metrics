@@ -1,130 +1,185 @@
-import pandas as pd
-import jsonlines
+import csv
+import json
 import os
-import chardet
-import pprint
+import random
 
-# Declare input and output files
-input_csv = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training2_data.csv'
-output_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data'
-train_filename = 'training_train.jsonl'
-validation_filename = 'training_validation.jsonl'
+def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path, validation_split=0.2):
+    # Check if the input CSV file exists
+    if not os.path.isfile(csv_input_path):
+        print(f"Input CSV file not found at {csv_input_path}")
+        return
 
-# Combine the folder path and file names to create the full output paths
-output_train_jsonl = os.path.join(output_folder, train_filename)
-output_validation_jsonl = os.path.join(output_folder, validation_filename)
+    data_entries = []
 
-# Create the output folder if it doesn't exist
-os.makedirs(output_folder, exist_ok=True)
+    # Try reading the CSV file with different encodings
+    encodings_to_try = ['utf-8-sig', 'utf-16', 'utf-16-le', 'utf-16-be', 'cp1252', 'latin1']
+    for encoding in encodings_to_try:
+        try:
+            with open(csv_input_path, 'r', encoding=encoding) as csvfile:
+                reader = csv.DictReader(csvfile)
+                first_row = next(reader)
+                csvfile.seek(0)
+                reader = csv.DictReader(csvfile)
+                print(f"Successfully read the CSV file using encoding: {encoding}")
 
-# Detect the file encoding
-with open(input_csv, 'rb') as f:
-    result = chardet.detect(f.read(100000))
-    detected_encoding = result['encoding']
-    print(f"Detected encoding: {detected_encoding}")
+                # Process the CSV data inside the with block
+                for row in reader:
+                    # Extract the context sections from the row
+                    dependent_origin = row.get('dependent origin', '')
+                    endogenous_origin = row.get('endogenous origin', '')
+                    instrument_origin = row.get('instrument origin', '')
+                    rainfall_metric_origin = row.get('rainfall metric origin', '')
+                    data_source_origin = row.get('data source origin', '')
 
-# Read the CSV file into a DataFrame with the detected encoding
-df = pd.read_csv(input_csv, encoding=detected_encoding)
+                    # Construct the messages for chat format
+                    messages = [
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are an AI assistant that extracts specific information from academic papers. "
+                                "Answer the user's questions using the information from the provided texts. If the information is not available, respond with 'NA.'"
+                            )
+                        },
+                        {
+                            "role": "user",
+                            "content": (
+                                "Based on the following academic texts, please answer the questions below.\n\n"
+                                "Dependent Origin:\n"
+                                f"{dependent_origin}\n\n"
+                                "Endogenous Origin:\n"
+                                f"{endogenous_origin}\n\n"
+                                "Instrument Origin:\n"
+                                f"{instrument_origin}\n\n"
+                                "Rainfall Metric Origin:\n"
+                                f"{rainfall_metric_origin}\n\n"
+                                "Data Source Origin:\n"
+                                f"{data_source_origin}\n\n"
+                                "Questions:\n"
+                                "1. What is the file name of the paper?\n"
+                                "2. What is the title of the paper?\n"
+                                "3. What is the DOI (Digital Object Identifier) of the paper?\n"
+                                "4. What dependent variables are analyzed in this paper?\n"
+                                "5. What are the endogenous variable(s) considered in this paper?\n"
+                                "6. Did the study use an instrumental variable in the analysis?\n"
+                                "7. What instrumental variable(s) were used in the study?\n"
+                                "8. Was rainfall used as an instrumental variable in the study?\n"
+                                "9. How exactly was rainfall quantified or measured as an instrument in this paper?\n"
+                                "10. What is the source of the rainfall data used in the study?\n"
+                            ).strip()
+                        },
+                        {
+                            "role": "assistant",
+                            "content": (
+                                f"1. File Name: {row.get('File Name', 'NA.')}\n"
+                                f"2. Paper Title: {row.get('paper title', 'NA.')}\n"
+                                f"3. DOI: {row.get('doi', 'NA.')}\n"
+                                f"4. Dependent Variables: {row.get('dependent variables', 'NA.')}\n"
+                                f"5. Endogenous Variable(s): {row.get('endogenous variable(s)', 'NA.')}\n"
+                                f"6. Instrumental Variable Used: {row.get('instrumental variable used', 'NA.')}\n"
+                                f"7. Instrumental Variable(s): {row.get('instrumental variable(s)', 'NA.')}\n"
+                                f"8. Instrumental Variable Rainfall: {row.get('instrumental variable rainfall', 'NA.')}\n"
+                                f"9. Rainfall Metric: {row.get('rainfall metric', 'NA.')}\n"
+                                f"10. Rainfall Data Source: {row.get('rainfall data source', 'NA.')}\n"
+                            ).strip()
+                        }
+                    ]
 
-# Replace NaN with empty strings
-df = df.fillna('')
+                    # Create the data entry
+                    data_entry = {
+                        "messages": messages
+                    }
 
-# Shuffle the DataFrame
-df_shuffled = df.sample(frac=1, random_state=42).reset_index(drop=True)
+                    # Append the data entry to the list
+                    data_entries.append(data_entry)
 
-# Split the DataFrame into 80% training and 20% validation
-split_ratio = 0.8
-split_index = int(len(df_shuffled) * split_ratio)
-train_df = df_shuffled.iloc[:split_index]
-validation_df = df_shuffled.iloc[split_index:]
-
-print(f"Total samples: {len(df_shuffled)}")
-print(f"Training samples: {len(train_df)}")
-print(f"Validation samples: {len(validation_df)}")
-
-def create_jsonl(df, output_path):
-    with jsonlines.open(output_path, mode='w') as writer:
-        for index, row in df.iterrows():
-            # Extract origin texts and sections
-            origin_texts = ''
-
-            # Dependent Variable
-            dep_origin = str(row.get('dependent origin', '')).strip()
-            dep_section = str(row.get('dependent section', '')).strip()
-            if dep_origin:
-                origin_texts += f"Dependent Variable (Section: {dep_section}): {dep_origin}\n"
-
-            # Endogenous Variable
-            endo_origin = str(row.get('endogenous origin', '')).strip()
-            endo_section = str(row.get('endogenous section', '')).strip()
-            if endo_origin:
-                origin_texts += f"Endogenous Variable (Section: {endo_section}): {endo_origin}\n"
-
-            # Instrumental Variable
-            inst_origin = str(row.get('instrument origin', '')).strip()
-            inst_section = str(row.get('instrument section', '')).strip()
-            if inst_origin:
-                origin_texts += f"Instrumental Variable (Section: {inst_section}): {inst_origin}\n"
-
-            # Rainfall Metric
-            metric_origin = str(row.get('rainfall metric origin', '')).strip()
-            metric_section = str(row.get('metric section', '')).strip()
-            if metric_origin:
-                origin_texts += f"Rainfall Metric (Section: {metric_section}): {metric_origin}\n"
-
-            # Data Source
-            data_origin = str(row.get('data source origin', '')).strip()
-            data_section = str(row.get('data source section', '')).strip()
-            if data_origin:
-                origin_texts += f"Data Source (Section: {data_section}): {data_origin}\n"
-
-            # Construct the user message
-            user_message = f"""Extract the following information from the text:
-
-{origin_texts}
-
-Information to extract:
-- Dependent Variables
-- Endogenous Variables
-- Instrumental Variables
-- Rainfall Metric
-- Data Source
-"""
-
-            # Construct the assistant message (completion)
-            assistant_message = f"""Dependent Variables: {row.get('dependent variables', '').strip()}
-Endogenous Variables: {row.get('endogenous variable(s)', '').strip()}
-Instrumental Variables: {row.get('instrumental variable(s)', '').strip()}
-Rainfall Metric: {row.get('rainfall metric', '').strip()}
-Data Source: {row.get('rainfall data source', '').strip()}
-"""
-
-            # Create the JSON object in chat format
-            json_obj = {
-                "messages": [
-                    {"role": "system", "content": "You are an AI that extracts specific data from text."},
-                    {"role": "user", "content": user_message},
-                    {"role": "assistant", "content": assistant_message}
-                ]
-            }
-
-            # Write the JSON object to the JSONL file
-            writer.write(json_obj)
-
-# Create JSONL files for training and validation
-create_jsonl(train_df, output_train_jsonl)
-create_jsonl(validation_df, output_validation_jsonl)
-
-# Optionally, print the first few entries of each JSONL file to verify
-def print_jsonl_contents(file_path, num_entries=3):
-    print(f"\n--- Displaying first {num_entries} entries of {file_path} ---\n")
-    with jsonlines.open(file_path) as reader:
-        for i, obj in enumerate(reader):
-            if i >= num_entries:
+                # Break out of the encoding detection loop after successful processing
                 break
-            print("\nMessages:")
-            pprint.pprint(obj['messages'])
-            print("-" * 80)
 
-print_jsonl_contents(output_train_jsonl)
-print_jsonl_contents(output_validation_jsonl)
+        except UnicodeError as e:
+            print(f"Failed to read with encoding {encoding}: {e}")
+            continue
+        except Exception as e:
+            print(f"An unexpected error occurred with encoding {encoding}: {e}")
+            continue
+    else:
+        print("Unable to read the CSV file with the tried encodings.")
+        return
+
+    # Preview data entries before shuffling and splitting
+    print("\nPreview of the first 3 data entries before writing to files:\n")
+    for i, entry in enumerate(data_entries[:3]):
+        print(f"Entry {i+1}:")
+        print(json.dumps(entry, indent=4, ensure_ascii=False))
+        print('-' * 80)
+
+    # Shuffle the data entries
+    random.shuffle(data_entries)
+
+    # Calculate the split index
+    total_entries = len(data_entries)
+    validation_size = int(total_entries * validation_split)
+    training_size = total_entries - validation_size
+
+    # Split the data
+    training_data = data_entries[:training_size]
+    validation_data = data_entries[training_size:]
+
+    # Ensure the output directory exists
+    training_output_dir = os.path.dirname(training_output_path)
+    validation_output_dir = os.path.dirname(validation_output_path)
+    os.makedirs(training_output_dir, exist_ok=True)
+    os.makedirs(validation_output_dir, exist_ok=True)
+
+    # Write training data to JSONL file
+    with open(training_output_path, 'w', encoding='utf-8') as train_file:
+        for entry in training_data:
+            json_line = json.dumps(entry, ensure_ascii=False)
+            train_file.write(json_line + '\n')
+
+    # Write validation data to JSONL file
+    with open(validation_output_path, 'w', encoding='utf-8') as val_file:
+        for entry in validation_data:
+            json_line = json.dumps(entry, ensure_ascii=False)
+            val_file.write(json_line + '\n')
+
+    print(f"Training data has been written to {training_output_path}")
+    print(f"Validation data has been written to {validation_output_path}")
+
+# Add the preview function
+def preview_jsonl_file(file_path, num_entries=3):
+    """
+    Prints a preview of the first few entries in a JSONL file.
+
+    Args:
+        file_path (str): The path to the JSONL file.
+        num_entries (int): The number of entries to preview.
+    """
+    print(f"\nPreviewing the first {num_entries} entries of {file_path}:\n")
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for i in range(num_entries):
+                line = f.readline()
+                if not line:
+                    break
+                data = json.loads(line)
+                print(f"Entry {i+1}:")
+                print(json.dumps(data, indent=4, ensure_ascii=False))
+                print('-' * 80)
+    except Exception as e:
+        print(f"An error occurred while previewing the file: {e}")
+
+# Example usage:
+csv_input_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training2_data.csv'  # Replace with your CSV file path
+
+# Output paths
+training_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data.jsonl'
+validation_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/validation_data.jsonl'
+
+# Call the function to prepare data
+prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path)
+
+# Preview the training data
+preview_jsonl_file(training_output_path, num_entries=3)
+
+# Preview the validation data
+preview_jsonl_file(validation_output_path, num_entries=3)
