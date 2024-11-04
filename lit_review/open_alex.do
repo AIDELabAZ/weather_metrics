@@ -74,8 +74,9 @@ if not export_path:
 # Define the base output path using the global variable
 base_output_path = os.path.join(export_path, "OpenAlex_Search_Results")
 
-# Create the directory if it does not exist
-os.makedirs(os.path.dirname(base_output_path), exist_ok=True)
+# Directory to save downloaded PDFs
+pdf_save_dir = r"C:\Users\jdmichler\OneDrive - University of Arizona\weather_iv_lit\papers"
+os.makedirs(pdf_save_dir, exist_ok=True)
 
 # Base URL for the OpenAlex API with the specified parameters, including the mailto parameter
 base_url = f"https://api.openalex.org/works?filter=default.search:((Weather)+AND+(Instrumental+Variable))+OR+((Rainfall)+AND+(Instrumental+Variable)),language:languages/en,primary_topic.domain.id:domains/2,primary_topic.field.id:fields/20&mailto={user_email}&per-page=200&cursor={{}}"
@@ -84,6 +85,22 @@ all_works = []
 cursor = '*'
 total_results = 0
 request_count = 0
+
+def download_pdf(pdf_url, save_dir, title):
+    """Attempts to download a PDF from the given URL to the specified directory."""
+    if not pdf_url.endswith(".pdf"):
+        return "no"
+    try:
+        pdf_path = os.path.join(save_dir, title.replace(" ", "_") + ".pdf")
+        response = requests.get(pdf_url, stream=True)
+        response.raise_for_status()
+        with open(pdf_path, "wb") as pdf_file:
+            for chunk in response.iter_content(chunk_size=1024):
+                pdf_file.write(chunk)
+        return "yes"
+    except Exception as e:
+        print(f"Failed to download PDF: {pdf_url}. Error: {e}")
+        return "no"
 
 while cursor:
     url = base_url.format(cursor)
@@ -97,7 +114,16 @@ while cursor:
             for work in results:
                 primary_location = work.get('primary_location') or {}
                 pdf_url = primary_location.get('pdf_url', '')
+                
+                # Attempt to download PDF if a valid URL exists
+                downloaded = "no"
+                if pdf_url:
+                    title = work.get("title", "unnamed_paper")
+                    downloaded = download_pdf(pdf_url, pdf_save_dir, title)
+                
+                # Add download status and PDF URL to work dictionary
                 work['primary_location_pdf_url'] = pdf_url
+                work['downloaded'] = downloaded
                 all_works.append(work)
             total_results += len(results)
         
@@ -121,7 +147,7 @@ print(f"Total works retrieved: {total_results}")
 df = pd.json_normalize(all_works, sep='_')
 
 # Select only relevant columns (example columns, adjust as necessary)
-selected_columns = [col for col in df.columns if col.count('_') < 3] + ['primary_location_pdf_url']
+selected_columns = [col for col in df.columns if col.count('_') < 3] + ['primary_location_pdf_url', 'downloaded']
 df = df[selected_columns]
 
 # Split the DataFrame into chunks of 850 rows each
