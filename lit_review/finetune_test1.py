@@ -4,10 +4,10 @@ import pandas as pd
 from openai import OpenAI
 
 # Initialize the OpenAI client
-client = OpenAI(api_key='')
+client = OpenAI(api_key='')  # replace with your api key
 
 # Fine-tuned model ID
-fine_tuned_model_id = 'ft:gpt-4o-mini-2024-07-18:aide-lab:minitry:ALgsKbV1'  # Replace with your model ID
+fine_tuned_model_id = ''  # Replace with your model ID
 
 # Function to extract text from a PDF
 def extract_text_from_pdf(pdf_path):

@@ -169,7 +169,7 @@ def preview_jsonl_file(file_path, num_entries=3):
         print(f"An error occurred while previewing the file: {e}")
 
 # Example usage:
-csv_input_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training2_data.csv'  # Replace with your CSV file path
+csv_input_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data.csv'  # Replace with your CSV file path
 
 # Output paths
 training_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data.jsonl'
@@ -179,7 +179,7 @@ validation_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-University
 prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path)
 
 # Preview the training data
-preview_jsonl_file(training_output_path, num_entries=3)
+preview_jsonl_file(training_output_path, num_entries=30)
 
 # Preview the validation data
-preview_jsonl_file(validation_output_path, num_entries=3)
+preview_jsonl_file(validation_output_path, num_entries=30)
