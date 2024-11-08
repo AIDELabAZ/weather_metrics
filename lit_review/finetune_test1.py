@@ -6,7 +6,7 @@ import re
 
 # Initialize the OpenAI client
 client = OpenAI(
-    api_key=''
+    api_key='replace'
 )
 
 # Fine-tuned model ID
