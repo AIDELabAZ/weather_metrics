@@ -1,11 +1,13 @@
 import os
 import csv
-import openai
+import json
+import time
+from openai import OpenAI
 from PyPDF2 import PdfReader
 
 # 1. Define paths, keys, and prompts
-OPENAI_API_KEY = "YOUR_API_KEY_HERE"
-CUSTOM_GPT_MODEL_ID = "YOUR_CUSTOM_GPT_MODEL_ID_HERE"
+OPENAI_API_KEY = "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"
+ASSISTANT_ID = "asst_owUoWG8gcMHWHT0jIRIUB0Ah"
 PDF_FOLDER_PATH = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_garrett"
 OUTPUT_FOLDER_PATH = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_output"
 OUTPUT_CSV_PATH = os.path.join(OUTPUT_FOLDER_PATH, "customgpt_output.csv")
@@ -22,8 +24,9 @@ EXTRACTION_PROMPTS = {
     "Rainfall Data Source": "What is the source of the rainfall data used in the study? If rainfall is used as an instrumental variable, the data must come from a specific source (e.g., a satellite or organization). Please find the origin of the rainfall data that was used. Please only provide the source of the rainfall data."
 }
 
-# Set up OpenAI API
-openai.api_key = OPENAI_API_KEY
+# Set up OpenAI client
+client = OpenAI(api_key=OPENAI_API_KEY)
+
 
 # 2. Functions for generating section summaries
 def extract_text_from_pdf(pdf_path):
@@ -34,11 +37,13 @@ def extract_text_from_pdf(pdf_path):
             text += page.extract_text()
     return text
 
+
 def split_into_sections(text):
     sections = []
     current_section = ""
     for line in text.split('\n'):
-        if any(header in line.lower() for header in ['abstract', 'introduction', 'method', 'data', 'result', 'discussion', 'conclusion']):
+        if any(header in line.lower() for header in
+               ['abstract', 'introduction', 'method', 'data', 'result', 'discussion', 'conclusion']):
             if current_section:
                 sections.append(current_section)
             current_section = line + "\n"
@@ -48,37 +53,59 @@ def split_into_sections(text):
         sections.append(current_section)
     return sections
 
+
 def summarize_section(section_text):
-    summary_prompt = f"Summarize the following section of an academic paper, focusing on key points and main ideas:\n\n{section_text[:4000]}"
-    response = openai.ChatCompletion.create(
-        model=CUSTOM_GPT_MODEL_ID,
-        messages=[
-            {"role": "system", "content": "You are an AI assistant specialized in summarizing academic papers."},
-            {"role": "user", "content": summary_prompt}
-        ]
+    thread = client.beta.threads.create()
+    message = client.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content=f"Summarize the following section of an academic paper, focusing on key points and main ideas:\n\n{section_text[:4000]}"
     )
-    return response.choices[0].message['content'].strip()
+
+    run = client.beta.threads.runs.create(
+        thread_id=thread.id,
+        assistant_id=ASSISTANT_ID
+    )
+
+    while run.status != 'completed':
+        run = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+        time.sleep(1)
+
+    messages = client.beta.threads.messages.list(thread_id=thread.id)
+    return messages.data[0].content[0].text.value
+
 
 def generate_paper_summary(pdf_text):
     sections = split_into_sections(pdf_text)
     section_summaries = [summarize_section(section) for section in sections]
     return "\n\n".join(section_summaries)
 
+
 # 3. Function for running extraction prompts
 def extract_information(text, prompt):
-    response = openai.ChatCompletion.create(
-        model=CUSTOM_GPT_MODEL_ID,
-        messages=[
-            {"role": "system", "content": "You are an AI assistant specialized in extracting specific information from academic paper summaries."},
-            {"role": "user", "content": f"{prompt}\n\nHere's the paper summary:\n{text[:4000]}"}
-        ]
+    thread = client.beta.threads.create()
+    message = client.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content=f"{prompt}\n\nHere's the paper summary:\n{text[:4000]}"
     )
-    return response.choices[0].message['content'].strip()
+
+    run = client.beta.threads.runs.create(
+        thread_id=thread.id,
+        assistant_id=ASSISTANT_ID
+    )
+
+    while run.status != 'completed':
+        run = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+        time.sleep(1)
+
+    messages = client.beta.threads.messages.list(thread_id=thread.id)
+    return messages.data[0].content[0].text.value
+
 
 # 4. Main function to process PDFs and generate CSV
 def process_pdfs():
     results = []
-
     for filename in os.listdir(PDF_FOLDER_PATH):
         if filename.endswith('.pdf'):
             pdf_path = os.path.join(PDF_FOLDER_PATH, filename)
@@ -92,7 +119,6 @@ def process_pdfs():
             paper_data = {"Filename": filename}
             for key, prompt in EXTRACTION_PROMPTS.items():
                 paper_data[key] = extract_information(paper_summary, prompt)
-
             results.append(paper_data)
 
     # Ensure output directory exists
@@ -105,10 +131,10 @@ def process_pdfs():
             dict_writer = csv.DictWriter(output_file, keys)
             dict_writer.writeheader()
             dict_writer.writerows(results)
-
         print(f"Results have been written to {OUTPUT_CSV_PATH}")
     else:
         print("No results to write.")
+
 
 # Run the main function
 if __name__ == "__main__":
