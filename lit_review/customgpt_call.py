@@ -8,13 +8,13 @@ import tiktoken
 
 # Set up OpenAI client
 client = OpenAI(
-    api_key='apikey')
+    api_key='key')
 
 # Define the Assistant ID
 ASSISTANT_ID = "asst_owUoWG8gcMHWHT0jIRIUB0Ah"  # Replace with your actual Assistant ID
 
 # Paths to PDF folder and output folder
-PDF_FOLDER_PATH = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_mini"
+PDF_FOLDER_PATH = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_small"
 OUTPUT_FOLDER_PATH = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_output"
 OUTPUT_CSV_PATH = os.path.join(OUTPUT_FOLDER_PATH, "customgpt_output.csv")
 
@@ -27,7 +27,7 @@ EXTRACTION_PROMPTS = {
     "Instrumental Variable Used": "Answer only 'Yes' or 'No': Did the authors use an instrumental variable in the analysis?",
     "Instrumental Variable": "Provide only the name of the instrumental variable used in the paper, without any additional text or explanations.",
     "Instrumental Variable Rainfall": "Answer only 'Yes' or 'No': Was rainfall used as an instrumental variable in the paper?",
-    "Rainfall Metric": "Provide only the specific metric used for rainfall as an instrumental variable (e.g., 'log deviations in weekly rainfall'), without any additional text or explanations.",
+    "Rainfall Metric": "Provide the specific rainfall metric used (e.g., 'yearly rainfall deviations' or 'log monthly total rainfall') without any additional unnecesary text. Do not respond exclusively with broad terms like 'rainfall', 'precipitation', or 'rainfall and humidity' alone, unless they are part of something like 'rainfall deviations (from long term average)' or 'unexpected rainfall shocks defined as the deviation from the long run precipitation trend' for example. Ensure that the rainfall metric you find is actually used in an instrumental variables regression and not just passively mentioned. For example, in the excerpt 'by using exogenous variations in rainfall and humidity. For the instrumental variable estimation method to adequately address this issue, the instruments used are required to be correlated with the suspected endogenous variable', the rainfall metric I would want you to provide me is 'exogenous variations in rainfall'.",
     "Rainfall Data Source": "Provide only the specific organization, satellite, or device used to collect the rainfall data in this study. For example, 'NOAA', 'TRMM satellite', or 'local weather stations'. If not explicitly stated, respond with 'Not specified'."
 }
 

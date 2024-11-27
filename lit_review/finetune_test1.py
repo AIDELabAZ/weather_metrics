@@ -6,32 +6,32 @@ import re
 
 # Initialize the OpenAI client
 client = OpenAI(
-    api_key='replace'
+    api_key='key'
 )
 
 # Fine-tuned model ID
-fine_tuned_model_id = 'ft:gpt-4o-mini-2024-07-18:aide-lab:mini:APzwn45U'
+fine_tuned_model_id = 'ft:gpt-4o-mini-2024-07-18:aide-lab:full:AV1z6mPf'
 
 # List of questions to ask with dependencies
 questions = [
-    {"key": "Paper Title", "question": "What is the title of the paper?"},
+    {"key": "Paper Title", "question": "What is the title of the paper? Please only provide the paper title as listed without any extra words."},
     {"key": "DOI",
      "question": "What is the DOI (Digital Object Identifier) of the paper? Please provide just the DOI without any other text."},
     {
         "key": "Dependent Variables",
-        "question": "List the dependent variable analyzed in this paper without numbering or additional text."
+        "question": "List the dependent (outcome) variable analyzed in this paper, only listing the variable names without the title of the question, additional words, or numbers. Example: Text: 'Similar to the literature on the impact of wealth on fertility rate (Black et al., 2013; Dettling and Kearney, 2014; Lovenheim and Mumford, 2013), we regress a reduced form econometric specification for the impact of unanticipated economic shocks on contraceptives use in Equation 2. In this regard, we directly exploit exogenous variations in seasonal precipitation pattern to identify the impact of unanticipated economic shocks on contraceptives use in Uganda:' Variable: 'contraceptive demand' "
     },
     {
         "key": "Endogenous Variable(s)",
-        "question": "What are the endogenous variable considered in this paper? These are sometimes referred to as explanatory variable and I am interested in specific variable used. Please provide just the endogenous or explanatory variable. There will sometimes be more than one, in which case you may list them seperated by commas."
+        "question": "What is/are the endogenous (explanatory/independent) variable(s) used in this paper? I am interested in specific variable used, please provide just the name of the variable without the title of the question, additional words, or numbers. There will sometimes be more than one, in which case you may list them seperated by commas. Example: Text: 'We use district-level data on farmersí suicides in two major states during the years 1998 to 2004 to es- timate the e§ects of transitory economic shocks and structural change in agriculture on the incidence of suicides in farm house- holds.' Variable: 'economic distress (poverty and economic shocks)' "
     },
     {
         "key": "Instrumental Variable Used",
-        "question": "Did the paper use an instrumental variable in the analysis? Please answer with 'Yes' or 'No'. Sometimes the paper will discuss using some instrumental variable but not actually use it in their statistical analysis, please differentiate between mentions and uses."
+        "question": "Did the paper use an instrumental variable in the analysis? Please answer with 'Yes' or 'No'. Sometimes the paper will discuss using some instrumental variable but not actually use it in their statistical analysis, please differentiate between mentions of IV use and actual uses."
     },
     {
         "key": "Instrumental Variable(s)",
-        "question": "What instrumental variable was used in the paper? Sometimes the paper will discuss using some instrumental variable but not actually use it in their statistical analysis, please differentiate between mentions and uses. Please provide only the instrumental variable used without any additional text."
+        "question": "What instrumental variable was used in the paper? Please only list the variable name without the title of the question, additonal words, or numbers. Sometimes the paper will discuss using some instrumental variable but not actually use it in their statistical analysis, please differentiate between mentions and uses. Please provide only the instrumental variable used without any additional text. Example: Test: 'This study uses rainfall variation as an instrumental variable for rice production to esti- mate the impact of poverty on different types of crime across British colonies in South and South East Asia.' Variable: 'annual absolute rainfall deviation' "
     },
     {
         "key": "Instrumental Variable Rainfall",
@@ -40,7 +40,7 @@ questions = [
     {
         "key": "Rainfall Metric",
         "question": (
-            "Provide the specific metric used (e.g., 'yearly rainfall deviations' or 'log monthly total rainfall')."
+            "Provide the specific rainfall metric used (e.g., 'yearly rainfall deviations' or 'log monthly total rainfall') by looking for the most likely option given the context of the entire text without any additional words or numbers. Example: Text: 'To address such concerns, instead of using weather shocks or short-term changes in rainfall, we use the long-term change in precipitation, as measured by the deviation of actual rainfall from historical levels. ' Variable: 'rainfall deviations measured as actual deviations from historical averages' "
             "Do not respond with broad terms like 'rainfall', 'precipitation', or 'rainfall and humidity' on their own, unless they are part of something like 'rainfall deviations (from long term average)' or 'unexpected rainfall shocks defined as the deviation from the long run precipitation trend' for example. "
             "How exactly was rainfall represented as an instrument in this paper?"
             "Ensure that this metric is actually used in an instrumental variables regression and not just passively mentioned. "
@@ -51,10 +51,10 @@ questions = [
     {
         "key": "Rainfall Data Source",
         "question": (
-            "What is the source of the rainfall data used in the study? "
+            "What is the source of the rainfall data used in the study? Please give me the source of the rainfall data without any additional words or numbers. Example: Text: 'For exposure to climatic disruptions, rainfall data was obtained using Africa Rainfall Climatology version 2 (ARC2) from the National Oceanic and Atmospheric Administration (NOAA), and average minimum and maximum temperature were calculated using ECMWF ERA INTERIM reanalysis model data;5' Data source: 'africa rainfall climatology version 2 (arc2)' "
             "If rainfall is used as an instrumental variable, the data must come from a specific source (e.g., a satellite or organization). "
             "Please find the origin of the rainfall data that was used. "
-            "Please only provide the source of the rainfall data."
+            "Please only provide the source of the rainfall data, without the title of the question or any additional words."
         ),
         "dependency": {"key": "Instrumental Variable Rainfall", "value": "Yes"}
     }
@@ -115,8 +115,8 @@ def query_model_single(text, question, enforce_binary=False, specific_metric=Fal
                 {
                     "role": "system",
                     "content": (
-                        "You are an AI assistant that extracts specific information from academic papers based on provided texts. "
-                        "Answer the user's question using the information from the provided text. If the information is not available, respond with 'NA.'"
+                        "You are an AI assistant that extracts specific information related to the use of rainfall as an instrumental variable from academic papers based on provided texts."
+                        "Answer the user's question using the information from the provided text. If the information is not available, respond with 'NA.' Only reply with the information requested, do not provide any additional words like 'variable:'"
                     )
                 },
                 {"role": "user", "content": user_query}
@@ -202,7 +202,7 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
 # Example usage
 pdf_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_garrett'
 output_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_output'
-output_csv = os.path.join(output_folder, 'output.csv')
+output_csv = os.path.join(output_folder, 'output_raw.csv')
 os.makedirs(output_folder, exist_ok=True)
 
 process_pdfs_conditional_queries(pdf_folder, output_csv)

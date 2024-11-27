@@ -71,15 +71,15 @@ def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_ou
                             "role": "assistant",
                             "content": (
                                 f"1. File Name: {row.get('File Name', 'NA.')}\n"
-                                f"2. Paper Title: {row.get('paper title', 'NA.')}\n"
-                                f"3. DOI: {row.get('doi', 'NA.')}\n"
-                                f"4. Dependent Variables: {row.get('dependent variables', 'NA.')}\n"
-                                f"5. Endogenous Variable(s): {row.get('endogenous variable(s)', 'NA.')}\n"
-                                f"6. Instrumental Variable Used: {row.get('instrumental variable used', 'NA.')}\n"
-                                f"7. Instrumental Variable(s): {row.get('instrumental variable(s)', 'NA.')}\n"
-                                f"8. Instrumental Variable Rainfall: {row.get('instrumental variable rainfall', 'NA.')}\n"
-                                f"9. Rainfall Metric: {row.get('rainfall metric', 'NA.')}\n"
-                                f"10. Rainfall Data Source: {row.get('rainfall data source', 'NA.')}\n"
+                                f"2. paper title: {row.get('paper title', 'NA.')}\n"
+                                f"3. doi: {row.get('doi', 'NA.')}\n"
+                                f"4. dependent variables: {row.get('dependent variables', 'NA.')}\n"
+                                f"5. endogenous variable(s): {row.get('endogenous variable(s)', 'NA.')}\n"
+                                f"6. instrumental variable used: {row.get('instrumental variable used', 'NA.')}\n"
+                                f"7. instrumental variable(s): {row.get('instrumental variable(s)', 'NA.')}\n"
+                                f"8. instrumental variable rainfall: {row.get('instrumental variable rainfall', 'NA.')}\n"
+                                f"9. rainfall metric: {row.get('rainfall metric', 'NA.')}\n"
+                                f"10. rainfall data source: {row.get('rainfall data source', 'NA.')}\n"
                             ).strip()
                         }
                     ]
@@ -172,8 +172,8 @@ def preview_jsonl_file(file_path, num_entries=3):
 csv_input_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data.csv'  # Replace with your CSV file path
 
 # Output paths
-training_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data.jsonl'
-validation_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/validation_data.jsonl'
+training_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data_clean.jsonl'
+validation_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/validation_data_clean.jsonl'
 
 # Call the function to prepare data
 prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path)
