@@ -75,9 +75,9 @@ def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_ou
                                 f"3. DOI: {row.get('DOI', 'NA.')}\n"
                                 f"4. Dependent Variable(s): {row.get('Dependent Variable(s)', 'NA.')}\n"
                                 f"5. Endogenous Variable(s): {row.get('Endogenous Variable(s)', 'NA.')}\n"
-                                f"6. Instrumental Variable Used (y/n): {row.get('Instrumental Variable Used (y/n)', 'NA.')}\n"
+                                f"6. IV Binary: {row.get('IV Binary', 'NA.')}\n"
                                 f"7. Instrumental Variable(s): {row.get('Instrumental Variable(s)', 'NA.')}\n"
-                                f"8. Rainfall Instrument Used (y/n): {row.get('Rainfall Instrument Used (y/n)', 'NA.')}\n"
+                                f"8. Rainfall Binary: {row.get('Rainfall Binary', 'NA.')}\n"
                                 f"9. Rainfall Metric: {row.get('Rainfall Metric', 'NA.')}\n"
                                 f"10. Rainfall Data Source: {row.get('Rainfall Data Source', 'NA.')}\n"
                             ).strip()
@@ -169,11 +169,11 @@ def preview_jsonl_file(file_path, num_entries=3):
         print(f"An error occurred while previewing the file: {e}")
 
 # Example usage:
-csv_input_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data.csv'  # Replace with your CSV file path
+csv_input_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data_full.csv'  # Replace with your CSV file path
 
 # Output paths
-training_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data_clean.jsonl'
-validation_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/validation_data_clean.jsonl'
+training_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data.jsonl'
+validation_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/validation_data.jsonl'
 
 # Call the function to prepare data
 prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path)
@@ -183,4 +183,3 @@ preview_jsonl_file(training_output_path, num_entries=30)
 
 # Preview the validation data
 preview_jsonl_file(validation_output_path, num_entries=30)
-
