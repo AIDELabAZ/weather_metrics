@@ -25,11 +25,11 @@ def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_ou
                 # Process the CSV data inside the with block
                 for row in reader:
                     # Extract the context sections from the row
-                    dependent_origin = row.get('dependent origin', '')
-                    endogenous_origin = row.get('endogenous origin', '')
-                    instrument_origin = row.get('instrument origin', '')
-                    rainfall_metric_origin = row.get('rainfall metric origin', '')
-                    data_source_origin = row.get('data source origin', '')
+                    dependent_origin = row.get('Dependent Origin', '')
+                    endogenous_origin = row.get('Endogenous Origin', '')
+                    instrument_origin = row.get('Instrument Origin', '')
+                    rainfall_metric_origin = row.get('Rainfall Metric Origin', '')
+                    data_source_origin = row.get('Data Source Origin', '')
 
                     # Construct the messages for chat format
                     messages = [
@@ -71,15 +71,15 @@ def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_ou
                             "role": "assistant",
                             "content": (
                                 f"1. File Name: {row.get('File Name', 'NA.')}\n"
-                                f"2. paper title: {row.get('paper title', 'NA.')}\n"
-                                f"3. doi: {row.get('doi', 'NA.')}\n"
-                                f"4. dependent variables: {row.get('dependent variables', 'NA.')}\n"
-                                f"5. endogenous variable(s): {row.get('endogenous variable(s)', 'NA.')}\n"
-                                f"6. instrumental variable used: {row.get('instrumental variable used', 'NA.')}\n"
-                                f"7. instrumental variable(s): {row.get('instrumental variable(s)', 'NA.')}\n"
-                                f"8. instrumental variable rainfall: {row.get('instrumental variable rainfall', 'NA.')}\n"
-                                f"9. rainfall metric: {row.get('rainfall metric', 'NA.')}\n"
-                                f"10. rainfall data source: {row.get('rainfall data source', 'NA.')}\n"
+                                f"2. Paper Title: {row.get('Paper Title', 'NA.')}\n"
+                                f"3. DOI: {row.get('DOI', 'NA.')}\n"
+                                f"4. Dependent Variable(s): {row.get('Dependent Variable(s)', 'NA.')}\n"
+                                f"5. Endogenous Variable(s): {row.get('Endogenous Variable(s)', 'NA.')}\n"
+                                f"6. Instrumental Variable Used (y/n): {row.get('Instrumental Variable Used (y/n)', 'NA.')}\n"
+                                f"7. Instrumental Variable(s): {row.get('Instrumental Variable(s)', 'NA.')}\n"
+                                f"8. Rainfall Instrument Used (y/n): {row.get('Rainfall Instrument Used (y/n)', 'NA.')}\n"
+                                f"9. Rainfall Metric: {row.get('Rainfall Metric', 'NA.')}\n"
+                                f"10. Rainfall Data Source: {row.get('Rainfall Data Source', 'NA.')}\n"
                             ).strip()
                         }
                     ]
@@ -183,3 +183,4 @@ preview_jsonl_file(training_output_path, num_entries=30)
 
 # Preview the validation data
 preview_jsonl_file(validation_output_path, num_entries=30)
+

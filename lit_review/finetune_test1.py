@@ -6,11 +6,11 @@ import re
 
 # Initialize the OpenAI client
 client = OpenAI(
-    api_key='key'
+    api_key='gg'
 )
 
 # Fine-tuned model ID
-fine_tuned_model_id = 'ft:gpt-4o-mini-2024-07-18:aide-lab:full:AV1z6mPf'
+fine_tuned_model_id = 'ft:gpt-4o-mini-2024-07-18:aide-lab:rawmodel:AYGVVA3h'
 
 # List of questions to ask with dependencies
 questions = [
@@ -200,9 +200,11 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
 
 
 # Example usage
-pdf_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_garrett'
+pdf_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_michler'
 output_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_output'
 output_csv = os.path.join(output_folder, 'output_raw.csv')
 os.makedirs(output_folder, exist_ok=True)
 
 process_pdfs_conditional_queries(pdf_folder, output_csv)
+
+# current output has a ton of weird stuff like titling each cell "variable: xyz" or whatever. also have not checked for performance, and rainfall iv is not always binary response
