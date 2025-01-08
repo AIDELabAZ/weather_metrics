@@ -44,25 +44,25 @@
 ************************************************************************
 
 *generate different betas based on signficance
-	gen 			b_sig = beta
+	replace 		b_sig = beta
 	replace 		b_sig = . if pval > .05
 	lab var 		b_sig "p < 0.05"
 	
-	gen 			b_ns = beta
+	replace 		b_ns = beta
 	replace 		b_ns= . if p <= .05
 	lab var 		b_ns "n.s."
 	
 * generate significance dummy
-	gen				sig = 1 if b_sig != .
+	replace			sig = 1 if b_sig != .
 	replace			sig = 0 if b_ns != .
-	lab	def			yesno 0 "Not Significant" 1 "Significant"
+	lab	def			yesno 0 "Not Significant" 1 "Significant", replace
 	lab val			sig yesno
 	lab var			sig "Weather variable is significant"
 	
 * generate sign dummy
-	gen 			b_sign = 1 if b_sig > 0 & b_sig != .
+	replace 		b_sign = 1 if b_sig > 0 & b_sig != .
 	replace 		b_sign = 0 if b_sig < 0 & b_sig != .
-	lab	def			posneg 0 "Negative" 1 "Positive"
+	lab	def			posneg 0 "Negative" 1 "Positive", replace
 	lab val			b_sign posneg
 	lab var			b_sign "Sign on weather variable"
 
@@ -78,12 +78,11 @@
 *** ethiopia ***
 preserve
 	keep			if country == 1
-	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	*gen 			obs = _n
+	replace 		obs = _n
 
 * stack values of the specification indicators
 	gen 			k1 		= 	depvar
@@ -139,12 +138,11 @@ restore
 *** malawi ***
 preserve
 	keep			if country == 2
-	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 		obs = _n
 
 * stack values of the specification indicators
 	gen 			k1 		= 	depvar
@@ -200,12 +198,11 @@ restore
 *** niger ***
 preserve
 	keep			if country == 4
-	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 		obs = _n
 
 * stack values of the specification indicators
 	gen 			k1 		= 	depvar
@@ -261,12 +258,11 @@ restore
 *** nigeria ***
 preserve
 	keep			if country == 5
-	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 		obs = _n
 
 * stack values of the specification indicators
 	gen 			k1 		= 	depvar
@@ -321,12 +317,11 @@ restore
 *** tanzania ***
 preserve
 	keep			if country == 6
-	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 		obs = _n
 
 * stack values of the specification indicators
 	gen 			k1 		= 	depvar
@@ -382,12 +377,11 @@ restore
 *** uganda ***
 preserve
 	keep			if country == 7
-	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 		obs = _n
 
 * stack values of the specification indicators
 	gen 			k1 		= 	depvar
