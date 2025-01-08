@@ -114,9 +114,9 @@
 						34 "Dev. in Rainy Days " 38 "No Rain Days " ///
 						42 "Dev. in No Rain Days " 46 "% Rainy Days " ///
 						50 "Dev. in % Rainy Days " 54 "Longest Dry Spell ", ///
-						angle(45) notick) xtitle("")), ///
+						angle(45) notick labsize(small)) xtitle("")), ///
 						legend(pos(12) col(5) order(1 2 3 4) label(1 "Weather Only") ///
-						label(2 "Weather + FE") label(3 "Weather + FE + Inputs") label(4 "95% C.I."))  ///
+						label(2 "Weather + FE") label(3 "Weather + FE + Inputs") label(4 "95% C.I.") size(vsmall))  ///
 						saving("$sfig/pval_metric", replace)
 						
 	graph export 	"$xfig/pval_metric.pdf", as(pdf) replace
