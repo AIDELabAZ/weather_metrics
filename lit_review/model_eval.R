@@ -1,9 +1,9 @@
 ############################################
-# Model evaluation code 
+# model evaluation code 
 ############################################
 
 ############################################
-# 1. Load necessary libraries
+# load necessary libraries
 ############################################
 install.packages("caret")
 install.packages("tidyverse")
@@ -13,18 +13,24 @@ library(tidyverse)
 library(readxl)
 
 ############################################
-# 2. Read in CSV files anbd clean
+# read in csv files and clean
 ############################################
-# Adjust the file paths as needed
+# load data
 human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data_full.csv")
 model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_output/output.csv")
 
+# clean the 'ptitle' column to lowercase and convert encoding to UTF-8
 human_data_clean <- human_data %>% 
   rename(
     filename = `File Name`,
     doi = DOI,
     iv_bin = `IV Binary`,
-    rain_bin = `Rainfall Binary`
+    rain_bin = `Rainfall Binary`,
+    ptitle = `Paper Title`
+  ) %>% 
+  mutate(
+    ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"), 
+    ptitle = tolower(ptitle)  
   )
 
 model_data_clean <- model_data %>% 
@@ -32,53 +38,58 @@ model_data_clean <- model_data %>%
     filename = `File Name`,
     doi = DOI,
     iv_bin = `IV Binary`,
-    rain_bin = `Rainfall Binary`)
-############################################
-# 3. Merge datasets on a common identifier
-############################################
-# Suppose both CSVs have a column named 'paper_id' to match records
-merged_data <- merge(human_data_clean, model_data_clean, by = "doi", suffixes = c("_human", "_model"))
+    rain_bin = `Rainfall Binary`,
+    ptitle = `Paper Title`) %>% 
+  mutate(
+    ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"),  
+    ptitle = tolower(ptitle)  
+  )
+
+# about 80% of the data are successfully merging after case conversion
 
 ############################################
-# 4. Check and/or convert columns to 0/1 or factor
+# merge datasets on a common identifier
 ############################################
-# Example columns: 'hasIV_human', 'hasIV_model', 'isRainfall_human', 'isRainfall_model'
-# Make sure these columns are consistent. E.g., if they're "Yes"/"No", convert to 1/0 or factor.
+# common identifier performance is dependent on how similarly the model and human coded, currently the best option seems to be paper title (ptitle)
+merged_data <- merge(human_data_clean, model_data_clean, by = "ptitle", suffixes = c("_human", "_model"))
 
-# Let's assume they're numeric 0/1. Convert them to factor for confusionMatrix:
+############################################
+# check and/or convert columns to 0/1 or factor
+############################################
+# convert to factor for confusionMatrix:
 merged_data$hasIV_human      <- factor(merged_data$iv_bin_human, levels = c(0, 1))
 merged_data$hasIV_model      <- factor(merged_data$iv_bin_model, levels = c(0, 1))
 merged_data$isRainfall_human <- factor(merged_data$rain_bin_human, levels = c(0, 1))
 merged_data$isRainfall_model <- factor(merged_data$rain_bin_model, levels = c(0, 1))
 
-# Convert both columns to factors with the same levels
+# convert columns to factors with the same levels
 merged_data$iv_bin_model <- factor(merged_data$iv_bin_model, levels = c("0", "1"))
 merged_data$iv_bin_human <- factor(merged_data$iv_bin_human, levels = c("0", "1"))
 
 
 ############################################
-# 5. Confusion Matrices for Performance
+# confusion matrices for performance
 ############################################
 
-### (A) For 'hasIV' comparison
-
+### confusion matrix for hasiv
+### currently working with 78.68% identification accuracy. good recall with 92% of true positives identified. 
+### poor performance on identifying true negative cases (specificity) with 41.67% true negatives identified.
+### positive predictive power is significantly better than negative predictive power (model is better at finding what is vs what is not)
 cm_hasIV <- confusionMatrix(
-  data      = merged_data$iv_bin_model,      # Predictions
-  reference = merged_data$iv_bin_human,      # Ground truth
-  positive  = "1"                          # Which factor level is considered "positive"?
+  data      = merged_data$iv_bin_model,      
+  reference = merged_data$iv_bin_human,      
+  positive  = "1"                         
 )
 
 cat("\nConfusion Matrix for hasIV:\n")
 print(cm_hasIV)
 
-# This object includes metrics like Accuracy, Kappa, Sensitivity, Specificity, etc.
-# You can access them by cm_hasIV$overall and cm_hasIV$byClass
-
-### (B) For 'isRainfall' comparison
-
+### confusion matrix for israinfall
+### 68.6% accuracy, better than a coin flip i guess.
+### similarly, 81.58% true positive rate with 62.65% true negative rate
 cm_isRainfall <- confusionMatrix(
-  data      = merged_data$isRainfall_model,  # Predictions
-  reference = merged_data$isRainfall_human,  # Ground truth
+  data      = merged_data$isRainfall_model, 
+  reference = merged_data$isRainfall_human,  
   positive  = "1"
 )
 
