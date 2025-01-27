@@ -1163,12 +1163,12 @@ restore
 *** ethiopia ***
 preserve
 	keep			if country == 1
-	keep			if ext == 3
+	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 			obs = _n
 	
 *dropping non-significant coefficients 
 
@@ -1178,7 +1178,8 @@ preserve
 	drop 			if significant == 0
 
 *tabulating number of significant rainfall metrics and satellites
-	tabulate 		varname sat
+	tabulate 		varname sat if b_sign == 0
+	tabulate 		varname sat if b_sign == 1
 
 *tabulating number of significant rainfall metrics and with their sign
 	tabulate 		varname b_sign
@@ -1191,12 +1192,12 @@ restore
 *** malawi ***
 preserve
 	keep			if country == 2
-	keep			if ext == 3
+	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 			obs = _n
 	
 *dropping non-significant coefficients 
 
@@ -1206,8 +1207,9 @@ preserve
 	drop 			if significant == 0
 
 *tabulating number of significant rainfall metrics and satellites
-	tabulate 		varname sat
-
+	tabulate 		varname sat if b_sign == 0
+	tabulate 		varname sat if b_sign == 1
+	
 *tabulating number of significant rainfall metrics and with their sign
 	tabulate 		varname b_sign
 
@@ -1219,12 +1221,12 @@ restore
 *** niger ***
 preserve
 	keep			if country == 4
-	keep			if ext == 3
+	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace			obs = _n
 	
 *dropping non-significant coefficients 
 
@@ -1234,7 +1236,8 @@ preserve
 	drop 			if significant == 0
 
 *tabulating number of significant rainfall metrics and satellites
-	tabulate 		varname sat
+	tabulate 		varname sat if b_sign == 0
+	tabulate 		varname sat if b_sign == 1
 
 *tabulating number of significant rainfall metrics and with their sign
 	tabulate 		varname b_sign
@@ -1247,12 +1250,12 @@ restore
 *** nigeria ***
 preserve
 	keep			if country == 5
-	keep			if ext == 3
+	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 			obs = _n
 	
 *dropping non-significant coefficients 
 
@@ -1262,7 +1265,8 @@ preserve
 	drop 			if significant == 0
 
 *tabulating number of significant rainfall metrics and satellites
-	tabulate 		varname sat
+	tabulate 		varname sat if b_sign == 0
+	tabulate 		varname sat if b_sign == 1
 
 *tabulating number of significant rainfall metrics and with their sign
 	tabulate 		varname b_sign
@@ -1275,12 +1279,12 @@ restore
 *** tanzania ***
 preserve
 	keep			if country == 6
-	keep			if ext == 3
+	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 			obs = _n
 	
 *dropping non-significant coefficients 
 
@@ -1290,7 +1294,8 @@ preserve
 	drop 			if significant == 0
 
 *tabulating number of significant rainfall metrics and satellites
-	tabulate 		varname sat
+	tabulate 		varname sat if b_sign == 0
+	tabulate 		varname sat if b_sign == 1
 
 *tabulating number of significant rainfall metrics and with their sign
 	tabulate 		varname b_sign
@@ -1303,12 +1308,12 @@ restore
 *** uganda ***
 preserve
 	keep			if country == 7
-	keep			if ext == 3
+	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 		obs = _n
 	
 *dropping non-significant coefficients 
 
@@ -1318,8 +1323,9 @@ preserve
 	drop 			if significant == 0
 
 *tabulating number of significant rainfall metrics and satellites
-	tabulate 		varname sat
-
+	tabulate 		varname sat if b_sign == 0
+	tabulate 		varname sat if b_sign == 1
+	
 *tabulating number of significant rainfall metrics and with their sign
 	tabulate 		varname b_sign
 
