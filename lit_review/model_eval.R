@@ -16,17 +16,13 @@ library(readxl)
 # read in csv files and clean
 ############################################
 # load data
-human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data_full.csv")
+human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data.csv")
 model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_output/output.csv")
 
 # clean the 'ptitle' column to lowercase and convert encoding to UTF-8
 human_data_clean <- human_data %>% 
   rename(
-    filename = `File Name`,
-    doi = DOI,
-    iv_bin = `IV Binary`,
-    rain_bin = `Rainfall Binary`,
-    ptitle = `Paper Title`
+    ptitle = `paper title`
   ) %>% 
   mutate(
     ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"), 
