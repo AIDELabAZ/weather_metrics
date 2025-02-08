@@ -68,8 +68,8 @@ merged_data$iv_bin_human <- factor(merged_data$iv_bin_human, levels = c("0", "1"
 ############################################
 
 ### confusion matrix for hasiv
-### currently working with 78.68% identification accuracy. good recall with 92% of true positives identified. 
-### poor performance on identifying true negative cases (specificity) with 41.67% true negatives identified.
+### currently working with 80.18% identification accuracy. good recall with 89.66% of true positives identified. 
+### poor performance on identifying true negative cases (specificity) with 41.86% true negatives identified (stays consistent with increased n).
 ### positive predictive power is significantly better than negative predictive power (model is better at finding what is vs what is not)
 cm_hasIV <- confusionMatrix(
   data      = merged_data$iv_bin_model,      
@@ -81,8 +81,8 @@ cat("\nConfusion Matrix for hasIV:\n")
 print(cm_hasIV)
 
 ### confusion matrix for israinfall
-### 68.6% accuracy, better than a coin flip i guess.
-### similarly, 81.58% true positive rate with 62.65% true negative rate
+### 73.37% accuracy, up from mid 60s with about hals as many obs
+### 89.33% true positive rate with 63.71% true negative rate. getting significantly better with increased n.
 cm_isRainfall <- confusionMatrix(
   data      = merged_data$isRainfall_model, 
   reference = merged_data$isRainfall_human,  
