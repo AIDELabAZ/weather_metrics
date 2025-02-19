@@ -2,7 +2,7 @@
 * Created on: Jan 2024
 * Created by: cda
 * Edited by: jdm
-* Edited on: 10 Sept 2024
+* Edited on: 19 Feb 25
 * Stata v.18.0
 
 * does
@@ -74,10 +74,6 @@ if not export_path:
 # Define the base output path using the global variable
 base_output_path = os.path.join(export_path, "OpenAlex_Search_Results")
 
-# Directory to save downloaded PDFs
-pdf_save_dir = r"C:\Users\jdmichler\OneDrive - University of Arizona\weather_iv_lit\papers"
-os.makedirs(pdf_save_dir, exist_ok=True)
-
 # Base URL for the OpenAlex API with the specified parameters, including the mailto parameter
 base_url = f"https://api.openalex.org/works?filter=default.search:((Weather)+AND+(Instrumental+Variable))+OR+((Rainfall)+AND+(Instrumental+Variable)),language:languages/en,primary_topic.domain.id:domains/2,primary_topic.field.id:fields/20&mailto={user_email}&per-page=200&cursor={{}}"
 
@@ -86,44 +82,38 @@ cursor = '*'
 total_results = 0
 request_count = 0
 
-def download_pdf(pdf_url, save_dir, title):
-    """Attempts to download a PDF from the given URL to the specified directory."""
-    if not pdf_url.endswith(".pdf"):
-        return "no"
-    try:
-        pdf_path = os.path.join(save_dir, title.replace(" ", "_") + ".pdf")
-        response = requests.get(pdf_url, stream=True)
-        response.raise_for_status()
-        with open(pdf_path, "wb") as pdf_file:
-            for chunk in response.iter_content(chunk_size=1024):
-                pdf_file.write(chunk)
-        return "yes"
-    except Exception as e:
-        print(f"Failed to download PDF: {pdf_url}. Error: {e}")
-        return "no"
+# Set a timeout for requests (in seconds)
+REQUEST_TIMEOUT = 30
+
+def fetch_data(url):
+    """Fetch data from the API with retries and timeout handling."""
+    retries = 3
+    for attempt in range(retries):
+        try:
+            response = requests.get(url, timeout=REQUEST_TIMEOUT)
+            response.raise_for_status()  # Raise an error for bad status codes
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Attempt {attempt + 1} failed: {e}")
+            if attempt < retries - 1:
+                time.sleep(5)  # Wait before retrying
+            else:
+                raise  # Raise the exception if all retries fail
 
 while cursor:
     url = base_url.format(cursor)
-    response = requests.get(url)
-    request_count += 1
+    try:
+        data = fetch_data(url)
+        request_count += 1
 
-    if response.status_code == 200:
-        data = response.json()
         results = data.get("results", [])
-        if results is not None:
+        if results:
             for work in results:
                 primary_location = work.get('primary_location') or {}
                 pdf_url = primary_location.get('pdf_url', '')
                 
-                # Attempt to download PDF if a valid URL exists
-                downloaded = "no"
-                if pdf_url:
-                    title = work.get("title", "unnamed_paper")
-                    downloaded = download_pdf(pdf_url, pdf_save_dir, title)
-                
-                # Add download status and PDF URL to work dictionary
+                # Add PDF URL to work dictionary
                 work['primary_location_pdf_url'] = pdf_url
-                work['downloaded'] = downloaded
                 all_works.append(work)
             total_results += len(results)
         
@@ -136,9 +126,10 @@ while cursor:
         
         # Sleep to avoid rate limiting (10 requests per second)
         if request_count % 10 == 0:
-            time.sleep(1)
-    else:
-        print(f"Failed to retrieve data: {response.status_code}")
+            time.sleep(2)  # Increased sleep time to 2 seconds
+        
+    except Exception as e:
+        print(f"Failed to retrieve data: {e}")
         break
 
 print(f"Total works retrieved: {total_results}")
@@ -147,7 +138,7 @@ print(f"Total works retrieved: {total_results}")
 df = pd.json_normalize(all_works, sep='_')
 
 # Select only relevant columns (example columns, adjust as necessary)
-selected_columns = [col for col in df.columns if col.count('_') < 3] + ['primary_location_pdf_url', 'downloaded']
+selected_columns = [col for col in df.columns if col.count('_') < 3] + ['primary_location_pdf_url']
 df = df[selected_columns]
 
 # Split the DataFrame into chunks of 850 rows each
@@ -161,7 +152,6 @@ for i in range(num_chunks):
     print(f"Data saved to {output_path}")
 
 print("All data saved to separate Excel files.")
-
 end
 
 * **********************************************************************
