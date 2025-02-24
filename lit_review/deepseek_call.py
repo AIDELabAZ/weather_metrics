@@ -2,18 +2,18 @@ import os
 import csv
 import re
 import time
+import random
 import hashlib
-import requests
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from pathlib import Path
 from tqdm import tqdm
 import pdfplumber
 import tiktoken
+from openai import OpenAI
 
 # Configuration
-DEEPSEEK_API_KEY = "your_api_key_here"
-DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
+DEEPSEEK_API_KEY = "sk-c999193bd25c447b9a8d71a3af8f2ed5"
 MODEL_NAME = "deepseek-chat"
 MAX_TOKENS = 3500
 MAX_WORKERS = 5
@@ -21,9 +21,9 @@ RETRY_ATTEMPTS = 3
 BASE_DELAY = 1
 
 # Path configuration
-PDF_FOLDER = Path("/path/to/your/pdf/folder")
-OUTPUT_FOLDER = Path("/path/to/output/folder")
-OUTPUT_CSV = OUTPUT_FOLDER / "extracted_data.csv"
+PDF_FOLDER = Path("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_large")
+OUTPUT_FOLDER = Path("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_output")
+OUTPUT_CSV = OUTPUT_FOLDER / "deepseek_out.csv"
 
 # Natural language prompts from original code
 PROMPT_COMPONENTS = {
@@ -75,15 +75,14 @@ Rainfall Source: [source]
 Paper Content:
 {text}"""
 
-# Initialize tokenizer
+# Initialize tokenizer and OpenAI client
 tokenizer = tiktoken.get_encoding("cl100k_base")
-
+client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url="https://api.deepseek.com")
 
 def get_file_hash(file_path):
     """Generate MD5 hash of file contents"""
     with open(file_path, "rb") as f:
         return hashlib.md5(f.read()).hexdigest()
-
 
 @lru_cache(maxsize=100)
 def extract_text_from_pdf(pdf_path):
@@ -96,40 +95,34 @@ def extract_text_from_pdf(pdf_path):
                 text += page_text + "\n"
     return text.strip()
 
-
 def truncate_text(text, max_tokens=MAX_TOKENS):
     """Truncate text to token limit"""
     tokens = tokenizer.encode(text)
     return tokenizer.decode(tokens[:max_tokens])
 
-
 def deepseek_api_request(prompt):
-    """Send request to DeepSeek API with retry logic"""
-    headers = {
-        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "model": MODEL_NAME,
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.1,
-        "max_tokens": 1000
-    }
-
+    """Send request to DeepSeek API with retry logic and exponential backoff"""
     for attempt in range(RETRY_ATTEMPTS):
         try:
-            response = requests.post(DEEPSEEK_API_URL, json=payload, headers=headers)
-            response.raise_for_status()
-            return response.json()['choices'][0]['message']['content']
-        except requests.exceptions.RequestException as e:
-            if attempt < RETRY_ATTEMPTS - 1:
-                sleep_time = BASE_DELAY * (2 ** attempt)
-                time.sleep(sleep_time)
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant"},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.1,
+                max_tokens=1000
+            )
+            if response.choices and response.choices[0].message:
+                return response.choices[0].message.content
             else:
-                print(f"API request failed after {RETRY_ATTEMPTS} attempts: {str(e)}")
-                return None
-
+                print(f"Empty response from API on attempt {attempt + 1}")
+        except Exception as e:
+            print(f"Error on attempt {attempt + 1}: {str(e)}")
+            if attempt < RETRY_ATTEMPTS - 1:
+                sleep_time = BASE_DELAY * (2 ** attempt) + random.uniform(0, 1)
+                time.sleep(sleep_time)
+    return None
 
 def parse_response(response):
     """Parse the structured response from DeepSeek"""
@@ -170,9 +163,9 @@ def parse_response(response):
 
     return result
 
-
 def process_single_pdf(pdf_path):
     """Process a single PDF file"""
+    print(f"Processing: {pdf_path.name}")
     try:
         # Check cache first
         file_hash = get_file_hash(pdf_path)
@@ -193,10 +186,16 @@ def process_single_pdf(pdf_path):
         # Get API response
         response = deepseek_api_request(prompt)
         if not response:
+            print(f"Failed to process: {pdf_path.name}")
             return None
 
-        # Parse and prepare data
-        data = parse_response(response)
+        # Validate API response
+        if response and response.strip():
+            data = parse_response(response)
+        else:
+            print(f"Empty or invalid response for {pdf_path.name}")
+            return None
+
         data["Filename"] = pdf_path.name
         data["File Hash"] = file_hash
 
@@ -205,7 +204,6 @@ def process_single_pdf(pdf_path):
     except Exception as e:
         print(f"Error processing {pdf_path.name}: {str(e)}")
         return None
-
 
 def process_pdfs():
     """Main processing function with parallel execution"""
@@ -249,7 +247,6 @@ def process_pdfs():
         print(f"Successfully processed {len(results)} files. Results saved to {OUTPUT_CSV}")
     else:
         print("No valid results to save")
-
 
 if __name__ == "__main__":
     start_time = time.time()
