@@ -6,7 +6,7 @@ import re
 
 # Initialize the OpenAI client
 client = OpenAI(
-    api_key='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'
+    api_key='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'
 )
 
 # Fine-tuned model ID
