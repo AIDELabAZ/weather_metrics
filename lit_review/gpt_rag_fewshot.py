@@ -5,7 +5,7 @@ from openai import OpenAI
 import re
 
 client = OpenAI(
-    api_key='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'
+    api_key='key'
 )
 
 # List of questions to ask with dependencies
