@@ -1,7 +1,9 @@
 import os
 import csv
+import re
 import fitz  # PyMuPDF
 from openai import OpenAI
+from typing import Dict, List, Optional
 
 # Initialize OpenAI client
 client = OpenAI(api_key="key")
@@ -10,99 +12,218 @@ client = OpenAI(api_key="key")
 input_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_large"
 output_csv = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt_rag_zeroshot_output.csv"
 
+# Enhanced DOI regex with validation
+DOI_REGEX = re.compile(
+    r'\b(10[.][0-9]{4,}(?:[.][0-9]+)*/[-._;()/:A-Za-z0-9]+)\b',
+    re.IGNORECASE
+)
+
+# Optimized questions with precise instructions
 questions = [
-    {"key": "Paper Title", "question": "Extract the exact title from the first page. Exclude section headers or author names."},
-    {"key": "DOI", "question": "Provide the DOI (Digital Object Identifier) for this paper."},
-    {"key": "Dependent Variables", "question": "List dependent variable from this paper."},
-    {"key": "Endogenous Variable(s)", "question": "List endogenous (explanatory) variable from this paper."},
-    {"key": "Instrumental Variable Used", "question": "Was an instrumental variable used in this paper? Do not include any additional words or sentences. 1 if yes, 0 if no."},
-    {"key": "Instrumental Variable(s)", "question": "What was the instrumental variable USED in the paper? Exclude additional words/sentences, only provide precise answers."},
-    {"key": "Instrumental Variable Rainfall", "question": "Was rainfall (or some way of representing rain) USED as an instrumental variable in this paper? 1 if yes, 0 if no."},
-    {"key": "Rainfall Metric", "question": '''If rainfall was used as an IV, what descriptive metric appears in TEXT (not equations)? Please only provide responses if they describe some type of rainfall. Examples of acceptable format: "log deviations in anual rainfall" or "average weekly rainfall".'''},
-    {"key": "Rainfall Data Source", "question": "If rainfall data was used in this paper, what was the source of the rainfall data used? Exclude general terms and only cite the source, no additional words or sentences."}
+    {
+        "key": "Paper Title",
+        "question": '''Extract the exact title from page 1. Ignore headers, author names, and conference info. Return only the main title in title case.'''
+    },
+    {
+        "key": "DOI",
+        "question": '''What was the DOI for this paper?'''
+    },
+    {
+        "key": "Dependent Variable",
+        "question": '''What was the PRIMARY outcome measures or dependent variable of interest?
+        Only provide the name of the variable without additional text or numbers.'''
+    },
+    {
+        "key": "Endogenous Variable",
+        "question": '''What were the endogenous/explanatory variable(s) used?
+        Only provide the name of the variable without additional text or numbers.'''
+    },
+    {
+        "key": "Instrumental Variable Used",
+        "question": '''Was an Instrumental Variable EXPLICITLY used? 
+        Return 1 (yes) or 0 (no) ONLY'''
+    },
+    {
+        "key": "Instrumental Variable",
+        "question": '''Which specific Instrumental Variable was explicitly used in this paper?"
+        Only provide the name of the variable without additional text or numbers.'''
+    },
+    {
+        "key": "Instrumental Variable Rainfall",
+        "question": '''If an Instrumental Variable was used, was it some version of rainfall?
+        Return 1 (yes) or 0 (no) ONLY'''
+    },
+    {
+        "key": "Rainfall Metric",
+        "question": '''If rainfall was used as an Instrumental Variable, extract the EXACT metric:
+        Return exact text from the abstract or methodology section
+        Only provide the name of the variable without additional text.
+        Ensure that the full name is returned, avoid using broad terms like simply "Rainfall" or "Rain".'''
+    },
+    {
+        "key": "Rainfall Data Source",
+        "question": '''If rainfall data used, what was the source? This should be an organization or a specific data collection method.
+        Return exact name from data section'''
+    }
 ]
 
-# Extract text from PDF
-def extract_text_from_pdf(pdf_path):
-    extracted_text = []
+
+def extract_text_from_pdf(pdf_path: str) -> Dict[str, str]:
+    """Improved text extraction focusing on key sections"""
+    text = []
+    first_page = ""
+    metadata = ""
+
     with fitz.open(pdf_path) as doc:
-        for page in doc:
-            extracted_text.append(page.get_text("text"))
-    return "\n".join(extracted_text)
+        metadata = str(doc.metadata)
 
-# Query model with context and question
-def query_model(context, question):
+        # Prioritize first 3 and last 2 pages
+        for page_num in [0, 1, 2, -2, -1]:
+            try:
+                page = doc[page_num]
+                blocks = page.get_text("blocks", flags=fitz.TEXT_PRESERVE_WHITESPACE)
+                blocks.sort(key=lambda b: (b[1], b[0]))  # Vertical then horizontal
+                page_text = "\n".join([b[4].strip() for b in blocks if b[6] == 0])
+
+                if page_num == 0:
+                    first_page = page_text
+                text.append(page_text)
+            except IndexError:
+                continue
+
+    return {
+        "metadata": metadata,
+        "first_page": first_page,
+        "main_text": "\n".join(text)
+    }
+
+
+def validate_doi(doi: str) -> bool:
+    """Robust DOI validation"""
+    if not doi or len(doi) < 10:
+        return False
+    if not doi.startswith('10.'):
+        return False
+    parts = doi.split('/')
+    return len(parts) >= 2 and '.' in parts[0]
+
+
+def extract_doi(context: Dict) -> Optional[str]:
+    """Multi-layered DOI extraction"""
+    # Check metadata first
+    if meta_doi := DOI_REGEX.search(context["metadata"]):
+        return meta_doi.group(0)
+
+    # Check first page text
+    text = context["first_page"] + context["main_text"]
+    for match in DOI_REGEX.finditer(text):
+        if validate_doi(match.group(0)):
+            return match.group(0)
+    return None
+
+
+def validate_iv_response(answer: str) -> str:
+    """Strict IV validation"""
+    answer = answer.lower().strip()
+    if any(kw in answer for kw in ["n/a", "none", "not mentioned"]):
+        return "n/a"
+    if any(kw in answer for kw in ["yes", "1", "iv", "instrument"]):
+        return "1"
+    if any(kw in answer for kw in ["no", "0", "not used"]):
+        return "0"
+    return "n/a"
+
+
+def query_model(context: str, question: Dict) -> str:
+    """Structured query with validation"""
     try:
-        prompt = f"""STRICT TECHNICAL EXTRACTION:
-
-{question['question']}
-
-CONTEXT:
-{context}
-
-RULES:
-1. Answer ONLY with requested information and no additional words or sentences.
-2. Only respond with text descriptions; there should be no equations or undefined variables from equations.
-3. There should only be one dependent and one endogenous variable.
-4. If you find that rainfall was not used as an instrumental variable in the paper, rainfall metric will always be n/a."""
+        system_msg = '''You are a research assistant who specializes in extracting specific information from academic papers. The project you are working on is related to instrumental variable selection. Follow these rules:
+        1. Answer ONLY with requested information
+        2. Do not number responses
+        3. Format outputs without any additional text or numbers
+        4. Be specific about how rainfall was represented if used as an Instrumental Variable'''
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.1,
-            max_tokens=150,
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": f"{question['question']}\n\nCONTEXT:\n{context[:10000]}"}
+            ],
+            temperature=0.3,
+            max_tokens=300
         )
 
-        # Extract and clean answer
         answer = response.choices[0].message.content.strip()
 
-        # Enforce binary responses for specific questions
-        if question['key'] in ["Instrumental Variable Used", "Instrumental Variable Rainfall"]:
-            if answer.lower() in ["1", "yes"]:
-                return "1"
-            elif answer.lower() in ["0", "no"]:
-                return "0"
-            else:
-                return "n/a"  # Default to NA if response is ambiguous
+        # Special handling for different question types
+        if question["key"] == "DOI":
+            return extract_doi(context) or "n/a"
 
-        # Return cleaned answer for all other questions
-        return answer
+        if question["key"] in ["Instrumental Variable Used", "Instrumental Variable Rainfall"]:
+            return validate_iv_response(answer)
+
+        if question["key"] in ["Dependent Variable", "Endogenous Variable", "Instrumental Variable"]:
+            if not answer or len(answer) < 4:
+                return "n/a"
+            return "\n".join([f"{i + 1}. {line}" for i, line in enumerate(answer.split("\n")[:3])])
+
+        return answer if answer else "n/a"
 
     except Exception as e:
-        print(f"Error querying model: {str(e)}")
+        print(f"Query error: {str(e)}")
         return "n/a"
 
-# Process a single PDF file
-def process_pdf(pdf_path):
-    raw_text = extract_text_from_pdf(pdf_path)
-    results = {"Filename": os.path.basename(pdf_path)}
-    print(f"\nProcessing {results['Filename']}...")
 
+def process_pdf(pdf_path: str) -> Dict:
+    """Processing pipeline with enhanced validation"""
+    text_data = extract_text_from_pdf(pdf_path)
+    results = {"Filename": os.path.basename(pdf_path)}
+
+    # DOI extraction pipeline
+    results["DOI"] = extract_doi(text_data) or "n/a"
+
+    # Process other questions
     for question in questions:
-        print(f"Querying: {question['question']}")
-        answer = query_model(raw_text, question)
-        print(f"Answer: {answer}")
-        results[question["key"]] = answer  # Only store the clean answer
+        if question["key"] == "DOI":
+            continue
+
+        context = text_data["main_text"]
+        results[question["key"]] = query_model(context, question)
+
+    # Post-processing validation
+    if results["Instrumental Variable Rainfall"] == "1":
+        if results["Rainfall Metric"] == "n/a":
+            results["Rainfall Metric"] = query_model(text_data["main_text"],
+                                                     next(q for q in questions if q["key"] == "Rainfall Metric"))
+    else:
+        results["Rainfall Metric"] = "n/a"
+        results["Rainfall Data Source"] = "n/a"
 
     return results
 
-# Main function to process all PDFs and save output to CSV
+
 def main():
+    """Main processing loop with error handling"""
     all_results = []
 
     for filename in os.listdir(input_folder):
         if filename.endswith(".pdf"):
             pdf_path = os.path.join(input_folder, filename)
             try:
-                all_results.append(process_pdf(pdf_path))
+                print(f"Processing {filename}...")
+                result = process_pdf(pdf_path)
+                all_results.append(result)
             except Exception as e:
                 print(f"Error processing {filename}: {str(e)}")
+                all_results.append({"Filename": filename, "error": str(e)})
 
-    # Write results to CSV
+    # Write results
+    fieldnames = ["Filename"] + [q["key"] for q in questions] + ["error"]
     with open(output_csv, mode="w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["Filename"] + [q["key"] for q in questions])
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(all_results)
+
 
 if __name__ == "__main__":
     main()
