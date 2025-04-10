@@ -3,7 +3,6 @@ import json
 import os
 import random
 
-
 def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path, validation_split=0.2):
     if not os.path.isfile(csv_input_path):
         print(f"Input CSV file not found at {csv_input_path}")
@@ -140,8 +139,8 @@ def preview_jsonl_file(file_path, num_entries=3):
         print(f"An error occurred while previewing the file: {e}")
 
 
-# Example usage:
-csv_input_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data.csv'
+# paths:
+csv_input_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/training_data.csv'
 training_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training.jsonl'
 validation_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/validation.jsonl'
 
