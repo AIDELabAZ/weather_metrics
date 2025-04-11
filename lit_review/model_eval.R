@@ -16,8 +16,8 @@ library(readxl)
 # read in csv files and clean
 ############################################
 # load data
-human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_data/training_data.csv")
-model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune1/finetune1_output/output.csv")
+human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/training_data_nodup.csv")
+model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/finetune_output.csv")
 
 # clean the 'ptitle' column to lowercase and convert encoding to UTF-8
 human_data_clean <- human_data %>% 
@@ -33,13 +33,15 @@ model_data_clean <- model_data %>%
   rename(
     filename = `File Name`,
     doi = DOI,
-    iv_bin = `IV Binary`,
-    rain_bin = `Rainfall Binary`,
-    ptitle = `Paper Title`) %>% 
+    iv_bin = `Instrumental Variable Used`,
+    rain_bin = `Instrumental Variable Rainfall`,
+    ptitle = `Paper Title`
+  ) %>% 
   mutate(
     ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"),  
-    ptitle = tolower(ptitle)  
+    ptitle = tolower(ptitle),
   )
+
 
 # about 76.4% of the data are successfully merging after case conversion
 
