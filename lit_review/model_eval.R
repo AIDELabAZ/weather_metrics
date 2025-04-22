@@ -43,6 +43,27 @@ model_data_clean <- model_data %>%
   )
 
 
+# Strip whitespace
+human_data_clean$ptitle <- trimws(human_data_clean$ptitle)
+model_data_clean$ptitle <- trimws(model_data_clean$ptitle)
+
+# Remove or standardize punctuation
+library(stringr)
+human_data_clean$ptitle <- str_replace_all(human_data_clean$ptitle, "[[:punct:]]", "")
+model_data_clean$ptitle <- str_replace_all(model_data_clean$ptitle, "[[:punct:]]", "")
+
+# Check for duplicates and unique counts
+cat("Unique titles in human_data:", n_distinct(human_data_clean$ptitle), "\n")
+cat("Unique titles in model_data:", n_distinct(model_data_clean$ptitle), "\n")
+cat("Duplicates in human_data:", sum(duplicated(human_data_clean$ptitle)), "\n")
+cat("Duplicates in model_data:", sum(duplicated(model_data_clean$ptitle)), "\n")
+
+# Find non-overlapping titles
+missing_in_model <- setdiff(human_data_clean$ptitle, model_data_clean$ptitle)
+missing_in_human <- setdiff(model_data_clean$ptitle, human_data_clean$ptitle)
+cat("Titles in human_data not in model_data:", length(missing_in_model), "\n")
+cat("Titles in model_data not in human_data:", length(missing_in_human), "\n")
+
 # about 76.4% of the data are successfully merging after case conversion
 
 ############################################
