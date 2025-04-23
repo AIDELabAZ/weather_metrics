@@ -1,5 +1,5 @@
 ############################################
-# model evaluation code 
+# model evaluation code
 ############################################
 
 ############################################
@@ -16,68 +16,66 @@ library(readxl)
 # read in csv files and clean
 ############################################
 # load data
-human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/training_data_nodup.csv")
+human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/removed_15.csv")
 model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/finetune_output.csv")
 
 # clean the 'ptitle' column to lowercase and convert encoding to UTF-8
-human_data_clean <- human_data %>% 
+human_data_clean <- human_data %>%
   rename(
     ptitle = `paper title`
-  ) %>% 
+  ) %>%
   mutate(
-    ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"), 
-    ptitle = tolower(ptitle)  
+    ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"),
+    ptitle = tolower(ptitle),
+    filename = iconv(filename, to = "UTF-8", sub = "byte"),
+    filename = tolower(filename)
   )
 
-model_data_clean <- model_data %>% 
+model_data_clean <- model_data %>%
   rename(
     filename = `File Name`,
     doi = DOI,
     iv_bin = `Instrumental Variable Used`,
     rain_bin = `Instrumental Variable Rainfall`,
     ptitle = `Paper Title`
-  ) %>% 
+  ) %>%
   mutate(
-    ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"),  
+    ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"),
     ptitle = tolower(ptitle),
+    filename = iconv(filename, to = "UTF-8", sub = "byte"),
+    filename = tolower(filename)
   )
 
+# Clean filenames in BOTH datasets
+clean_filenames <- function(df) {
+  df %>%
+    mutate(
+      filename = filename %>%
+        # Remove .pdf and .pdf extensions
+        str_remove_all("\\.pdf$") %>%
+        # Standardize copy numbers
+        str_replace_all(" copy( \\d+)?$", "") %>%
+        # Clean special characters
+        iconv(to = "ASCII//TRANSLIT", sub = "") %>%
+        # Normalize whitespace
+        str_squish()
+    )
+}
 
-# Strip whitespace
-human_data_clean$ptitle <- trimws(human_data_clean$ptitle)
-model_data_clean$ptitle <- trimws(model_data_clean$ptitle)
-
-# Remove or standardize punctuation
-library(stringr)
-human_data_clean$ptitle <- str_replace_all(human_data_clean$ptitle, "[[:punct:]]", "")
-model_data_clean$ptitle <- str_replace_all(model_data_clean$ptitle, "[[:punct:]]", "")
-
-# Check for duplicates and unique counts
-cat("Unique titles in human_data:", n_distinct(human_data_clean$ptitle), "\n")
-cat("Unique titles in model_data:", n_distinct(model_data_clean$ptitle), "\n")
-cat("Duplicates in human_data:", sum(duplicated(human_data_clean$ptitle)), "\n")
-cat("Duplicates in model_data:", sum(duplicated(model_data_clean$ptitle)), "\n")
-
-# Find non-overlapping titles
-missing_in_model <- setdiff(human_data_clean$ptitle, model_data_clean$ptitle)
-missing_in_human <- setdiff(model_data_clean$ptitle, human_data_clean$ptitle)
-cat("Titles in human_data not in model_data:", length(missing_in_model), "\n")
-cat("Titles in model_data not in human_data:", length(missing_in_human), "\n")
-
-# about 76.4% of the data are successfully merging after case conversion
+human_data_clean <- human_data_clean %>% clean_filenames()
+model_data_clean <- model_data_clean %>% clean_filenames()
 
 ############################################
 # merge datasets on a common identifier
 ############################################
-# common identifier performance is dependent on how similarly the model and human coded, currently the best option seems to be paper title (ptitle)
-merged_data <- merge(human_data_clean, model_data_clean, by = "ptitle", suffixes = c("_human", "_model"))
+merged_data <- merge(human_data_clean, model_data_clean, by = "filename", suffixes = c("_human", "_model"))
 
 ############################################
 # check and/or convert columns to 0/1 or factor
 ############################################
 # convert to factor for confusionMatrix:
-merged_data$hasIV_human      <- factor(merged_data$iv_bin_human, levels = c(0, 1))
-merged_data$hasIV_model      <- factor(merged_data$iv_bin_model, levels = c(0, 1))
+merged_data$hasIV_human <- factor(merged_data$iv_bin_human, levels = c(0, 1))
+merged_data$hasIV_model <- factor(merged_data$iv_bin_model, levels = c(0, 1))
 merged_data$isRainfall_human <- factor(merged_data$rain_bin_human, levels = c(0, 1))
 merged_data$isRainfall_model <- factor(merged_data$rain_bin_model, levels = c(0, 1))
 
@@ -91,13 +89,13 @@ merged_data$iv_bin_human <- factor(merged_data$iv_bin_human, levels = c("0", "1"
 ############################################
 
 ### confusion matrix for hasiv
-### currently working with 80.08% identification accuracy. good recall with 90% of true positives identified. 
+### currently working with 80.08% identification accuracy. good recall with 90% of true positives identified.
 ### poor performance on identifying true negative cases (specificity) with 36.96% true negatives identified (stays consistent with increased n).
 ### positive predictive power is significantly better than negative predictive power (model is better at finding what is vs what is not)
 cm_hasIV <- confusionMatrix(
-  data      = merged_data$iv_bin_model,      
-  reference = merged_data$iv_bin_human,      
-  positive  = "1"                         
+  data = merged_data$iv_bin_model,
+  reference = merged_data$iv_bin_human,
+  positive = "1"
 )
 
 cat("\nConfusion Matrix for hasIV:\n")
@@ -107,9 +105,9 @@ print(cm_hasIV)
 ### 72.49% accuracy, up from mid 60s with about hals as many obs
 ### 89.77% true positive rate with 61.7% true negative rate. getting significantly better with increased n.
 cm_isRainfall <- confusionMatrix(
-  data      = merged_data$isRainfall_model, 
-  reference = merged_data$isRainfall_human,  
-  positive  = "1"
+  data = merged_data$isRainfall_model,
+  reference = merged_data$isRainfall_human,
+  positive = "1"
 )
 
 cat("\nConfusion Matrix for isRainfall:\n")

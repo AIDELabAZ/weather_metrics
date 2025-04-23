@@ -25,6 +25,8 @@ train_df.to_csv(train_output_path, index=False)
 test_filenames = test_df["filename"]
 test_output_path = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/test_filenames.txt"
 test_filenames.to_csv(test_output_path, index=False, header=False)
+# Save removed rows (15%)
+test_df.to_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/removed_15.csv", index=False)
 
 # Verification output
 print(f"""Split complete:

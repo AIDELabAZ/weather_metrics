@@ -10,7 +10,7 @@ client = OpenAI(
 )
 
 # Fine-tuned model ID
-fine_tuned_model_id = 'ft:gpt-4o-mini-2024-07-18:aide-lab:full:BKyLSBVD'
+fine_tuned_model_id = 'ft:gpt-4o-mini-2024-07-18:aide-lab:prop:BPDvtlka'
 
 # List of questions to ask with dependencies
 questions = [
