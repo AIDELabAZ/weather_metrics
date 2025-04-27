@@ -22,7 +22,8 @@ model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-Universityof
 # clean the 'ptitle' column to lowercase and convert encoding to UTF-8
 human_data_clean <- human_data %>%
   rename(
-    ptitle = `paper title`
+    ptitle = `paper title`,
+    rainmet = `rainfall metric`
   ) %>%
   mutate(
     ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"),
@@ -37,7 +38,8 @@ model_data_clean <- model_data %>%
     doi = DOI,
     iv_bin = `Instrumental Variable Used`,
     rain_bin = `Instrumental Variable Rainfall`,
-    ptitle = `Paper Title`
+    ptitle = `Paper Title`,
+    rainmet = `Rainfall Metric`
   ) %>%
   mutate(
     ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"),
@@ -113,3 +115,49 @@ cm_isRainfall <- confusionMatrix(
 cat("\nConfusion Matrix for isRainfall:\n")
 print(cm_isRainfall)
 
+############################################
+# similarity matching for rainmet column
+###########################################
+
+############################################
+# BERT semantic similarity for rainmet (Python/reticulate)
+############################################
+
+# Set up Python environment
+library(reticulate)
+virtualenv_create("bert_env")  # Create isolated environment
+use_virtualenv("bert_env")      # Activate environment
+
+# Install required Python packages
+py_install(c("torch", "transformers", "sentence-transformers"))
+
+# Python code for BERT similarity
+py_run_string("
+from sentence_transformers import SentenceTransformer, util
+import numpy as np
+
+def bert_similarity(texts1, texts2):
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    emb1 = model.encode(texts1, convert_to_tensor=True)
+    emb2 = model.encode(texts2, convert_to_tensor=True)
+    return util.pytorch_cos_sim(emb1, emb2).cpu().numpy()
+")
+
+# Extract rainmet columns
+rainmet_human <- merged_data$rainmet_human
+rainmet_model <- merged_data$rainmet_model
+
+# Calculate similarities
+similarity_matrix <- py$bert_similarity(rainmet_human, rainmet_model)
+merged_data$rainmet_similarity <- diag(similarity_matrix)
+
+# Calculate metrics
+similarity_metrics <- list(
+  mean = mean(merged_data$rainmet_similarity, na.rm = TRUE),
+  median = median(merged_data$rainmet_similarity, na.rm = TRUE),
+  sd = sd(merged_data$rainmet_similarity, na.rm = TRUE)
+)
+
+# Print results
+cat("\nBERT Semantic Similarity (Python/reticulate):\n")
+print(similarity_metrics)
