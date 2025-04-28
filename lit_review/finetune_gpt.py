@@ -1,3 +1,9 @@
+###
+## This script calls on the fine-tuned model via API and feeds it sections of PDFs that were determined through keyword identification
+## The model reads the sections it is fed and a set of queries are run, model outputs are compiled and extracted as a CSV
+## Data come from the 15% out of training removed_15 folder and are output as finetune_output
+###
+
 import fitz  # PyMuPDF
 import os
 import pandas as pd
@@ -6,11 +12,11 @@ import re
 
 # Initialize the OpenAI client
 client = OpenAI(
-    api_key='key'
+    api_key=''
 )
 
 # Fine-tuned model ID
-fine_tuned_model_id = 'ft:gpt-4o-mini-2024-07-18:aide-lab:prop:BPDvtlka'
+fine_tuned_model_id = 'ft:gpt-4o-mini-2024-07-18:aide-lab:test427:BRBNF6RP'
 
 # List of questions to ask with dependencies
 questions = [

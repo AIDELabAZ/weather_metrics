@@ -1,3 +1,9 @@
+###
+## This script splits the 85% training/validation data to 70:15, training:validation
+## Data are formatted as JSON files including prompt, source, and desired output for training
+## JSON files are extracted as training.json and validation.json for fine tuning
+###
+
 import csv
 import json
 import os

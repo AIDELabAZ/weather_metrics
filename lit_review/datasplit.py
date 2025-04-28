@@ -1,3 +1,9 @@
+###
+## This script reads in a CSV containing all data and splits it into 85:15 training/validation:test CSVs
+## Split is randomly determined, data are extracted to train_85 and removed_15
+## A txt file is also generated with filenames for the removed_15 data
+###
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -14,7 +20,7 @@ train_size = total_rows - test_size
 train_df, test_df = train_test_split(
     df,
     test_size=test_size,
-   # random_state=42  # For reproducibility
+    random_state=42
 )
 
 # Save training data (85%)

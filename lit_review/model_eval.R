@@ -1,16 +1,17 @@
 ############################################
 # model evaluation code
 ############################################
-
+### This script reads in the model output CSV and the human validated csv for the 15% of data excluded from training
+### The files are cleaned, normalized, and merged by a common identifier (filename)
+### ConfusionMatrix used to evaluate binary identification performance
+### BERT-similarity used to generate non-binary performance 
 ############################################
 # load necessary libraries
 ############################################
-install.packages("caret")
-install.packages("tidyverse")
-install.packages("readxl")
-library(caret)
 library(tidyverse)
+library(caret)
 library(readxl)
+library(reticulate)
 
 ############################################
 # read in csv files and clean
@@ -31,7 +32,9 @@ human_data_clean <- human_data %>%
     filename = iconv(filename, to = "UTF-8", sub = "byte"),
     filename = tolower(filename),
     rainmet = iconv(rainmet, to = "UTF-8", sub = "byte"),
-    rainmet = tolower(rainmet)
+    rainmet = tolower(rainmet),
+    doi = iconv(doi, to = "UTF-8", sub = "byte"),
+    doi = tolower(doi)
   )
 
 model_data_clean <- model_data %>%
@@ -49,20 +52,18 @@ model_data_clean <- model_data %>%
     filename = iconv(filename, to = "UTF-8", sub = "byte"),
     filename = tolower(filename),
     rainmet = iconv(rainmet, to = "UTF-8", sub = "byte"),
-    rainmet = tolower(rainmet)
+    rainmet = tolower(rainmet),
+    doi = iconv(doi, to = "UTF-8", sub = "byte"),
+    doi = tolower(doi)
   )
 
 clean_filenames <- function(df) {
   df %>%
     mutate(
       filename = filename %>%
-        # Remove .pdf and .pdf extensions
         str_remove_all("\\.pdf$") %>%
-        # Standardize copy numbers
         str_replace_all(" copy( \\d+)?$", "") %>%
-        # Clean special characters
         iconv(to = "ASCII//TRANSLIT", sub = "") %>%
-        # Normalize whitespace
         str_squish()
     )
 }
@@ -73,10 +74,13 @@ model_data_clean <- model_data_clean %>% clean_filenames()
 ############################################
 # merge datasets on a common identifier
 ############################################
-merged_data <- merge(human_data_clean, model_data_clean, by = "filename", suffixes = c("_human", "_model"))
+merged_data <- human_data_clean %>%
+  inner_join(
+    model_data_clean,
+    by = c("filename"),
+    suffix = c("_human", "_model")
+  )
 
-## getting terrible merge rate suddenly have to explore this
-# check and/or convert columns to 0/1 or factor
 ############################################
 # convert to factor for confusionMatrix:
 merged_data$hasIV_human <- factor(merged_data$iv_bin_human, levels = c(0, 1))
@@ -92,11 +96,7 @@ merged_data$iv_bin_human <- factor(merged_data$iv_bin_human, levels = c("0", "1"
 ############################################
 # confusion matrices for performance
 ############################################
-
 ### confusion matrix for hasiv
-### currently working with 80.08% identification accuracy. good recall with 90% of true positives identified.
-### poor performance on identifying true negative cases (specificity) with 36.96% true negatives identified (stays consistent with increased n).
-### positive predictive power is significantly better than negative predictive power (model is better at finding what is vs what is not)
 cm_hasIV <- confusionMatrix(
   data = merged_data$iv_bin_model,
   reference = merged_data$iv_bin_human,
@@ -107,8 +107,6 @@ cat("\nConfusion Matrix for hasIV:\n")
 print(cm_hasIV)
 
 ### confusion matrix for israinfall
-### 72.49% accuracy, up from mid 60s with about hals as many obs
-### 89.77% true positive rate with 61.7% true negative rate. getting significantly better with increased n.
 cm_isRainfall <- confusionMatrix(
   data = merged_data$isRainfall_model,
   reference = merged_data$isRainfall_human,
@@ -118,18 +116,13 @@ cm_isRainfall <- confusionMatrix(
 cat("\nConfusion Matrix for isRainfall:\n")
 print(cm_isRainfall)
 
-############################################
-# similarity matching for rainmet column
-###########################################
 
 ############################################
 # BERT semantic similarity for rainmet (Python/reticulate)
 ############################################
-
 # Set up Python environment
-library(reticulate)
-virtualenv_create("bert_env")  # Create isolated environment
-use_virtualenv("bert_env")      # Activate environment
+virtualenv_create("bert_env")  
+use_virtualenv("bert_env")      
 
 # Install required Python packages
 py_install(c("torch", "transformers", "sentence-transformers"))
