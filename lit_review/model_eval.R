@@ -29,7 +29,9 @@ human_data_clean <- human_data %>%
     ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"),
     ptitle = tolower(ptitle),
     filename = iconv(filename, to = "UTF-8", sub = "byte"),
-    filename = tolower(filename)
+    filename = tolower(filename),
+    rainmet = iconv(rainmet, to = "UTF-8", sub = "byte"),
+    rainmet = tolower(rainmet)
   )
 
 model_data_clean <- model_data %>%
@@ -45,10 +47,11 @@ model_data_clean <- model_data %>%
     ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"),
     ptitle = tolower(ptitle),
     filename = iconv(filename, to = "UTF-8", sub = "byte"),
-    filename = tolower(filename)
+    filename = tolower(filename),
+    rainmet = iconv(rainmet, to = "UTF-8", sub = "byte"),
+    rainmet = tolower(rainmet)
   )
 
-# Clean filenames in BOTH datasets
 clean_filenames <- function(df) {
   df %>%
     mutate(
@@ -72,7 +75,7 @@ model_data_clean <- model_data_clean %>% clean_filenames()
 ############################################
 merged_data <- merge(human_data_clean, model_data_clean, by = "filename", suffixes = c("_human", "_model"))
 
-############################################
+## getting terrible merge rate suddenly have to explore this
 # check and/or convert columns to 0/1 or factor
 ############################################
 # convert to factor for confusionMatrix:
