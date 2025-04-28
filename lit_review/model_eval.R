@@ -24,7 +24,10 @@ model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-Universityof
 human_data_clean <- human_data %>%
   rename(
     ptitle = `paper title`,
-    rainmet = `rainfall metric`
+    rainmet = `rainfall metric`,
+    endog = `endogenous variable(s)`,
+    depen = `dependent variables`,
+    iv = `instrumental variable(s)`
   ) %>%
   mutate(
     ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"),
@@ -34,7 +37,13 @@ human_data_clean <- human_data %>%
     rainmet = iconv(rainmet, to = "UTF-8", sub = "byte"),
     rainmet = tolower(rainmet),
     doi = iconv(doi, to = "UTF-8", sub = "byte"),
-    doi = tolower(doi)
+    doi = tolower(doi),
+    endog = iconv(endog, to = "UTF-8", sub = "byte"),
+    endog = tolower(endog),
+    depen = iconv(depen, to = "UTF-8", sub = "byte"),
+    depen = tolower(depen),
+    iv = iconv(iv, to = "UTF-8", sub = "byte"),
+    iv = tolower(iv)
   )
 
 model_data_clean <- model_data %>%
@@ -44,7 +53,10 @@ model_data_clean <- model_data %>%
     iv_bin = `Instrumental Variable Used`,
     rain_bin = `Instrumental Variable Rainfall`,
     ptitle = `Paper Title`,
-    rainmet = `Rainfall Metric`
+    rainmet = `Rainfall Metric`,
+    endog = `Endogenous Variable(s)`,
+    depen = `Dependent Variables`,
+    iv = `Instrumental Variable(s)`
   ) %>%
   mutate(
     ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"),
@@ -54,7 +66,13 @@ model_data_clean <- model_data %>%
     rainmet = iconv(rainmet, to = "UTF-8", sub = "byte"),
     rainmet = tolower(rainmet),
     doi = iconv(doi, to = "UTF-8", sub = "byte"),
-    doi = tolower(doi)
+    doi = tolower(doi),
+    endog = iconv(endog, to = "UTF-8", sub = "byte"),
+    endog = tolower(endog),
+    depen = iconv(depen, to = "UTF-8", sub = "byte"),
+    depen = tolower(depen),
+    iv = iconv(iv, to = "UTF-8", sub = "byte"),
+    iv = tolower(iv)
   )
 
 clean_filenames <- function(df) {
@@ -139,6 +157,7 @@ def bert_similarity(texts1, texts2):
     return util.pytorch_cos_sim(emb1, emb2).cpu().numpy()
 ")
 
+### rainmet similarity
 # Extract rainmet columns
 rainmet_human <- merged_data$rainmet_human
 rainmet_model <- merged_data$rainmet_model
@@ -157,3 +176,110 @@ similarity_metrics <- list(
 # Print results
 cat("\nBERT Semantic Similarity (Python/reticulate):\n")
 print(similarity_metrics)
+# mean = 37.72%, median = 49.11%, sd = 26.79%
+
+### endogenous similarity
+# Extract rainmet columns
+endog_human <- merged_data$endog_human
+endog_model <- merged_data$endog_model
+
+# Calculate similarities
+similarity_matrix <- py$bert_similarity(endog_human, endog_model)
+merged_data$endog_similarity <- diag(similarity_matrix)
+
+# Calculate metrics
+similarity_metrics <- list(
+  mean = mean(merged_data$endog_similarity, na.rm = TRUE),
+  median = median(merged_data$endog_similarity, na.rm = TRUE),
+  sd = sd(merged_data$endog_similarity, na.rm = TRUE)
+)
+
+# Print results
+cat("\nBERT Semantic Similarity (Python/reticulate):\n")
+print(similarity_metrics)
+# mean = 43.36%, median = 40.36%, sd = 31.69%
+
+### doi similarity
+# Extract rainmet columns
+doi_human <- merged_data$doi_human
+doi_model <- merged_data$doi_model
+
+# Calculate similarities
+similarity_matrix <- py$bert_similarity(doi_human, doi_model)
+merged_data$doi_similarity <- diag(similarity_matrix)
+
+# Calculate metrics
+similarity_metrics <- list(
+  mean = mean(merged_data$doi_similarity, na.rm = TRUE),
+  median = median(merged_data$doi_similarity, na.rm = TRUE),
+  sd = sd(merged_data$doi_similarity, na.rm = TRUE)
+)
+
+# Print results
+cat("\nBERT Semantic Similarity (Python/reticulate):\n")
+print(similarity_metrics)
+# mean = 70.82%, median = 73.48%, sd = 30.86%
+
+### dependent similarity
+# Extract rainmet columns
+depen_human <- merged_data$depen_human
+depen_model <- merged_data$depen_model
+
+# Calculate similarities
+similarity_matrix <- py$bert_similarity(depen_human, depen_model)
+merged_data$depen_similarity <- diag(similarity_matrix)
+
+# Calculate metrics
+similarity_metrics <- list(
+  mean = mean(merged_data$depen_similarity, na.rm = TRUE),
+  median = median(merged_data$depen_similarity, na.rm = TRUE),
+  sd = sd(merged_data$depen_similarity, na.rm = TRUE)
+)
+
+# Print results
+cat("\nBERT Semantic Similarity (Python/reticulate):\n")
+print(similarity_metrics)
+# mean = 55.48%, median = 62.65%, sd = 31.29%
+
+### title similarity
+# Extract rainmet columns
+ptitle_human <- merged_data$ptitle_human
+ptitle_model <- merged_data$ptitle_model
+
+# Calculate similarities
+similarity_matrix <- py$bert_similarity(ptitle_human, ptitle_model)
+merged_data$ptitle_similarity <- diag(similarity_matrix)
+
+# Calculate metrics
+similarity_metrics <- list(
+  mean = mean(merged_data$ptitle_similarity, na.rm = TRUE),
+  median = median(merged_data$ptitle_similarity, na.rm = TRUE),
+  sd = sd(merged_data$ptitle_similarity, na.rm = TRUE)
+)
+
+# Print results
+cat("\nBERT Semantic Similarity (Python/reticulate):\n")
+print(similarity_metrics)
+# mean = 93.88%, median = 99.99%, sd = 18.71%
+
+### iv similarity
+# Extract rainmet columns
+iv_human <- merged_data$iv_human
+iv_model <- merged_data$iv_model
+
+# Calculate similarities
+similarity_matrix <- py$bert_similarity(iv_human, iv_model)
+merged_data$iv_similarity <- diag(similarity_matrix)
+
+# Calculate metrics
+similarity_metrics <- list(
+  mean = mean(merged_data$iv_similarity, na.rm = TRUE),
+  median = median(merged_data$iv_similarity, na.rm = TRUE),
+  sd = sd(merged_data$iv_similarity, na.rm = TRUE)
+)
+
+# Print results
+cat("\nBERT Semantic Similarity (Python/reticulate):\n")
+print(similarity_metrics)
+# mean = 32.93%, median = 14.52%, sd = 33.92%
+
