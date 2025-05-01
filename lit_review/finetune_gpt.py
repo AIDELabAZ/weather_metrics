@@ -1,9 +1,3 @@
-###
-## This script calls on the fine-tuned model via API and feeds it sections of PDFs that were determined through keyword identification
-## The model reads the sections it is fed and a set of queries are run, model outputs are compiled and extracted as a CSV
-## Data come from the 15% out of training removed_15 folder and are output as finetune_output
-###
-
 import fitz  # PyMuPDF
 import os
 import pandas as pd
@@ -11,14 +5,12 @@ from openai import OpenAI
 import re
 
 # Initialize the OpenAI client
-client = OpenAI(
-    api_key=''
-)
+client = OpenAI(api_key='')
 
 # Fine-tuned model ID
 fine_tuned_model_id = 'ft:gpt-4o-mini-2024-07-18:aide-lab:test427:BRBNF6RP'
 
-# List of questions to ask with dependencies
+# List of questions with full dependency chain
 questions = [
     {"key": "Paper Title",
      "question": "What is the title of the paper? Please only provide the paper title as listed without any extra words."},
@@ -31,9 +23,11 @@ questions = [
     {"key": "Instrumental Variable Used",
      "question": "Did the paper use an instrumental variable in the analysis? Please answer with '1' for yes, '0' for no, or 'n/a' if not applicable or unclear."},
     {"key": "Instrumental Variable(s)",
-     "question": "What instrumental variable was used in the paper? Please only list the variable name without the title of the question, additional words, or numbers. Sometimes the paper will discuss using some instrumental variable but not actually use it in their statistical analysis, please differentiate between mentions and uses. Please provide only the instrumental variable used without any additional text."},
+     "question": "What instrumental variable was used in the paper? Please only list the variable name without the title of the question, additional words, or numbers. Sometimes the paper will discuss using some instrumental variable but not actually use it in their statistical analysis, please differentiate between mentions and uses. Please provide only the instrumental variable used without any additional text.",
+     "dependency": {"key": "Instrumental Variable Used", "value": "1"}},
     {"key": "Instrumental Variable Rainfall",
-     "question": "Was rainfall used as an instrumental variable in the paper? Please answer with '1' for yes, '0' for no, or 'n/a' if not applicable or unclear."},
+     "question": "Was rainfall used as an instrumental variable in the paper? Please answer with '1' for yes, '0' for no, or 'n/a' if not applicable or unclear.",
+     "dependency": {"key": "Instrumental Variable Used", "value": "1"}},
     {"key": "Rainfall Metric",
      "question": "Provide the specific rainfall metric used (e.g., 'yearly rainfall deviations' or 'log monthly total rainfall') by looking for the most likely option given the context of the entire text without any additional words or numbers. Do not respond with broad terms like 'rainfall', 'precipitation', or 'rainfall and humidity' on their own, unless they are part of something like 'rainfall deviations (from long term average)' or 'unexpected rainfall shocks defined as the deviation from the long run precipitation trend' for example. How exactly was rainfall represented as an instrument in this paper? Ensure that this metric is actually used in an instrumental variables regression and not just passively mentioned.",
      "dependency": {"key": "Instrumental Variable Rainfall", "value": "1"}},
@@ -131,60 +125,32 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
             temp_answers = {}
 
             for q in questions:
-                # Query for Instrumental Variable Used first
-                if q['key'] == "Instrumental Variable Used":
-                    print(f"Querying: {q['question']}")
-                    answer = query_model_single(text_to_analyze, q['question'], enforce_binary=True)
-                    info_dict[q['key']] = answer
-                    temp_answers[q['key']] = answer
-                    print(f"Answer: {answer}")
-
-                    # If no IV is used, set related fields accordingly
-                    if answer == "0":
-                        info_dict['Instrumental Variable(s)'] = 'n/a'
-                        info_dict['Instrumental Variable Rainfall'] = '0'
-                        info_dict['Rainfall Metric'] = 'n/a'
-                        info_dict['Rainfall Data Source'] = 'n/a'
-                        continue
-
-                # Query for Instrumental Variable Rainfall only if IV Used is 1
-                elif q['key'] == "Instrumental Variable Rainfall":
-                    if info_dict['Instrumental Variable Used'] == "1":
-                        print(f"Querying: {q['question']}")
-                        answer = query_model_single(text_to_analyze, q['question'], enforce_binary=True)
-                        info_dict[q['key']] = answer
-                        temp_answers[q['key']] = answer
-                        print(f"Answer: {answer}")
-
-                        # If IV Rainfall is 0, set related fields accordingly
-                        if answer == "0":
-                            info_dict['Rainfall Metric'] = 'n/a'
-                            info_dict['Rainfall Data Source'] = 'n/a'
-                    else:
-                        info_dict[q['key']] = '0'
-                        temp_answers[q['key']] = '0'
-
-                # Process other questions normally
-                elif q.get('dependency'):
+                # Universal dependency check for all questions
+                if q.get('dependency'):
                     dep_key = q['dependency']['key']
                     dep_value = q['dependency']['value']
                     current_answer = temp_answers.get(dep_key, info_dict.get(dep_key, None))
 
                     if current_answer != dep_value:
-                        print(
-                            f"Skipping '{q['key']}' because '{dep_key}' is '{current_answer}' instead of '{dep_value}'. Setting as 'n/a'")
-                        info_dict[q['key']] = 'n/a'
+                        print(f"Skipping '{q['key']}' due to unmet dependency")
+                        info_dict[q['key']] = '0' if q['key'] == "Instrumental Variable Rainfall" else 'n/a'
+                        temp_answers[q['key']] = info_dict[q['key']]
                         continue
 
+                # Special handling for binary questions
                 enforce_binary = q['key'] in ["Instrumental Variable Used", "Instrumental Variable Rainfall"]
                 specific_metric = (q['key'] == "Rainfall Metric")
 
                 print(f"Querying: {q['question']}")
-                answer = query_model_single(text_to_analyze, q['question'], enforce_binary=enforce_binary,
+                answer = query_model_single(text_to_analyze, q['question'],
+                                            enforce_binary=enforce_binary,
                                             specific_metric=specific_metric)
 
+                # Post-processing
                 if q['key'] == "Dependent Variables" and answer != "n/a":
                     answer = clean_dependent_variables(answer)
+                if enforce_binary:
+                    answer = normalize_yes_no(answer)
 
                 info_dict[q['key']] = answer
                 temp_answers[q['key']] = answer

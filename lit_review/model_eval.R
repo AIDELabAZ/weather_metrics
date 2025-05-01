@@ -30,6 +30,7 @@ human_data_clean <- human_data %>%
     iv = `instrumental variable(s)`
   ) %>%
   mutate(
+    filename_human = filename,  # Preserve original human filename
     ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"),
     ptitle = tolower(ptitle),
     filename = iconv(filename, to = "UTF-8", sub = "byte"),
@@ -59,6 +60,7 @@ model_data_clean <- model_data %>%
     iv = `Instrumental Variable(s)`
   ) %>%
   mutate(
+    filename_model = filename,  # Preserve original model filename
     ptitle = iconv(ptitle, to = "UTF-8", sub = "byte"),
     ptitle = tolower(ptitle),
     filename = iconv(filename, to = "UTF-8", sub = "byte"),
@@ -95,9 +97,12 @@ model_data_clean <- model_data_clean %>% clean_filenames()
 merged_data <- human_data_clean %>%
   inner_join(
     model_data_clean,
-    by = c("filename"),
+    by = "filename",
     suffix = c("_human", "_model")
-  )
+  ) %>%
+  rename(filename_merged = filename)  # Rename joined filename column
+
+write_csv(merged_data, "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/merged_data.csv")  # [2][3]
 
 ############################################
 # convert to factor for confusionMatrix:
