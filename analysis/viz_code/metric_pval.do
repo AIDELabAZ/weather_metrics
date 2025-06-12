@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: April 2024
 * Created by: jdm
-* Edited by: jdm
-* Last edit: 4 April 2024
+* Edited by: cda
+* Last edit: 12 june 2025
 * Stata v.18.0 
 
 * does
@@ -10,12 +10,96 @@
 	* makes visualziations of results 
 
 * assumes
+	* you have the txt sankeymatic_20250610_101847_source.txt file
 	* you have results file 
 	* grc1leg2.ado
 
 * TO DO:
+	* sankey from the papers
 	* p-value charts by country
 
+***********************************************************************
+**************************** sankey ***********************************
+***********************************************************************	
+	
+************************************************************************
+**# 0 - setup
+************************************************************************
+
+* install required packages	
+	ssc 	install sankey, replace
+	ssc 	install palettes, replace
+	ssc 	install colrspace, replace
+	ssc 	install graphfunctions, replace
+	ssc 	install schemepack, replace
+	set 	scheme white_tableau
+
+* open required dataset and clean 
+	import 	delimited "$root/sankeymatic_20250610_101847_source.txt", delimiter("[]", collapse)
+	drop 	if v2 == .
+	rename 	v1 weather
+	rename 	v2 value
+	rename 	v3 outcome
+
+* encode variable order and label them
+	gen 		weather2 = .
+
+	replace 	weather2 = 1 	if weather == "Total Rainfall "
+	replace 	weather2 = 2 	if weather == "Deviations in Total Rainfall "
+	replace 	weather2 = 3	if weather == "Mean Total Rainfall "
+	replace 	weather2 = 4	if weather == "Total Monthly Rainfall "
+	replace 	weather2 = 5 	if weather == "Mean Monthly Rainfall "
+	replace 	weather2 = 6 	if weather == "Rainfall Months "
+	replace 	weather2 = 7 	if weather == "Daily Rainfall "
+	replace 	weather2 = 8 	if weather == "Variance of Daily Rainfall "
+	replace 	weather2 = 9 	if weather == "Rainfall Days "
+	replace 	weather2 = 10 	if weather == "No Rainfall Days "
+	replace 	weather2 = 11 	if weather == "Log of Annual Rainfall "
+	replace 	weather2 = 12 	if weather == "Rainfall Index " 
+
+	gen 		outcome2 = .
+
+	replace 	outcome2 = 13 	if outcome == " Agricultural Productivity"
+	replace 	outcome2 = 14 	if outcome == " Capital"
+	replace 	outcome2 = 15 	if outcome == " Conflict"
+	replace 	outcome2 = 16 	if outcome == " Consumption"
+	replace 	outcome2 = 17 	if outcome == " Crime"
+	replace 	outcome2 = 18 	if outcome == " Democratic Change"
+	replace 	outcome2 = 19 	if outcome == " Education"
+	replace 	outcome2 = 20 	if outcome == " Food Security"
+	replace 	outcome2 = 21 	if outcome == " Government Size"
+	replace 	outcome2 = 22 	if outcome == " Growth"
+	replace 	outcome2 = 23 	if outcome == " Health & Nutrition"
+	replace 	outcome2 = 24 	if outcome == " Income"
+	replace 	outcome2 = 25 	if outcome == " Insurance"
+	replace 	outcome2 = 26 	if outcome == " Justice"
+	replace 	outcome2 = 27 	if outcome == " Migration"
+	replace 	outcome2 = 28 	if outcome == " Poverty"
+	replace 	outcome2 = 29 	if outcome == " Social"
+	replace 	outcome2 = 30 	if outcome == " Technology Adoption"
+	replace 	outcome2 = 31 	if outcome == " Weather"
+
+	lab de 		labels 1 "Total Rainfall " 2 "Deviations in Total Rainfall " 3 "Mean Total Rainfall " ///
+					4 "Total Monthly Rainfall " 5 "Mean Monthly Rainfall " 6 "Rainfall Months " ///
+					7 "Daily Rainfall " 8 "Variance of Daily Rainfall " 9 "Rainfall Days " ///
+					10 "No Rainfall Days " 11 "Log of Annual Rainfall " 12 "Rainfall Index " ///
+					13 " Agricultural Productivity" 14 " Capital" 15 "Conflict" 16 " Consumption" ///
+					17 " Crime" 18 "Democratic Change" 19 "Education" 20 "Food Security" 21 "Government Size" ///
+					22 "Growth" 23 "Health & Nutrition" 24 "Income" 25 "Insurance" 26 "Justice" 27 "Migration" ///
+					28 "Poverty" 29 "Social" 30 "Technology Adoption" 31 "Weather", replace
+
+	lab val 	weather2 labels
+	lab val 	outcome2 labels
+
+* create the sankey	
+	sankey value, 	from(weather2) to(outcome2) alpha(50) labs(2) laba(0) labpos(0) ///
+					labg(0) boxwidth(2) offset(5)  noval showtot graphregion(margin(vlarge)) ///
+					ctitles("Rainfall" "Outcome") ctg(10) cts(3) xsize(60) ysize(75) smooth(2) ///
+					vals(1.5) sort1(name, reverse) sort2(order, reverse) palette(CET C6)
+	
+***********************************************************************
+************************** p- value ***********************************
+***********************************************************************	
 	
 ************************************************************************
 **# 0 - setup
