@@ -91,6 +91,10 @@
 	lab val 	weather2 labels
 	lab val 	outcome2 labels
 
+************************************************************************
+**# 1 - generate sankey graphs 
+************************************************************************	
+	
 * create the sankey	
 	sankey value, 	from(weather2) to(outcome2) alpha(50) labs(2) laba(0) labpos(0) ///
 					labg(0) boxwidth(2) offset(5)  noval showtot graphregion(margin(vlarge)) ///
