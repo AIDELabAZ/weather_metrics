@@ -165,7 +165,7 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
 
 
 # Example usage
-pdf_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/pdf_test_15'
+pdf_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/pdf_test_20'
 output_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output'
 output_csv = os.path.join(output_folder, 'finetune_output.csv')
 os.makedirs(output_folder, exist_ok=True)

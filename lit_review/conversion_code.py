@@ -1,5 +1,5 @@
 ###
-## This script splits the 85% training/validation data to 70:15, training:validation
+## This script splits the 80% training/validation data to  of total, training:validation
 ## Data are formatted as JSON files including prompt, source, and desired output for training
 ## JSON files are extracted as training.json and validation.json for fine tuning
 ###
@@ -9,7 +9,7 @@ import json
 import os
 import random
 
-def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path, validation_split=0.2):
+def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path, validation_split=0.1):
     if not os.path.isfile(csv_input_path):
         print(f"Input CSV file not found at {csv_input_path}")
         return
@@ -146,7 +146,7 @@ def preview_jsonl_file(file_path, num_entries=3):
 
 
 # paths:
-csv_input_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/train_85.csv'
+csv_input_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/train_80.csv'
 training_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/training.jsonl'
 validation_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/validation.jsonl'
 

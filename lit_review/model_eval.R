@@ -1,7 +1,7 @@
 ############################################
 # model evaluation code
 ############################################
-### This script reads in the model output CSV and the human validated csv for the 15% of data excluded from training
+### This script reads in the model output CSV and the human validated csv for the 20% of data excluded from training
 ### The files are cleaned, normalized, and merged by a common identifier (filename)
 ### ConfusionMatrix used to evaluate binary identification performance
 ### BERT-similarity used to generate non-binary performance 
@@ -17,7 +17,7 @@ library(reticulate)
 # read in csv files and clean
 ############################################
 # load data
-human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/removed_15.csv")
+human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/removed_20.csv")
 model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/finetune_output.csv")
 
 # clean the 'ptitle' column to lowercase and convert encoding to UTF-8
