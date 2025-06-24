@@ -78,7 +78,8 @@ def move_test_pdfs(test_filenames_path, pdf_source_folder, test_pdf_dest):
 
 # Usage remains the same
 move_test_pdfs(
-    "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/test_filenames.txt",
+    "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/test_filenames.txt",
     "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_all",
-    "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/pdf_test_10"
+    "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/pdf_test_20"
 )
+
