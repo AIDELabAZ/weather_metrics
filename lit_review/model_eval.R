@@ -17,7 +17,7 @@ library(reticulate)
 # read in csv files and clean
 ############################################
 # load data
-human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/removed_20.csv")
+human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/removed_20.csv")
 model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/finetune_output.csv")
 
 # clean the 'ptitle' column to lowercase and convert encoding to UTF-8
@@ -102,7 +102,7 @@ merged_data <- human_data_clean %>%
   ) %>%
   rename(filename_merged = filename)  # Rename joined filename column
 
-write_csv(merged_data, "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune1_data/merged_data.csv")  # [2][3]
+write_csv(merged_data, "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/merged_data.csv")  # [2][3]
 
 ############################################
 # convert to factor for confusionMatrix:
