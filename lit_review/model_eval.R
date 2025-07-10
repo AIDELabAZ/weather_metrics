@@ -3,7 +3,7 @@
 ############################################
 ### This script reads in the model output CSV and the human validated csv for the 20% of data excluded from training
 ### The files are cleaned, normalized, and merged by a common identifier (filename)
-### ConfusionMatrix used to evaluate binary identification performance
+### Matrix generation for evaluation of binary identification performance
 ### BERT-similarity used to generate non-binary performance 
 ############################################
 # load necessary libraries
