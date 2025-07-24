@@ -8,7 +8,7 @@ import re
 client = OpenAI(api_key='')
 
 # Fine-tuned model ID
-fine_tuned_model_id = 'ft:gpt-4o-mini-2024-07-18:aide-lab:test427:BRBNF6RP'
+fine_tuned_model_id = 'ft:gpt-4o-mini-2024-07-18:aide-lab:updatedtraining:BwcN8cO3'
 
 # List of questions with full dependency chain
 questions = [
@@ -164,7 +164,7 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
     print(f"Data saved to {output_csv}")
 
 
-# Example usage
+# pathnames
 pdf_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/pdf_test_20'
 output_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output'
 output_csv = os.path.join(output_folder, 'finetune_output.csv')

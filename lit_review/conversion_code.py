@@ -9,7 +9,7 @@ import json
 import os
 import random
 
-def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path, validation_split=0.1):
+def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path, validation_split=0.125):
     if not os.path.isfile(csv_input_path):
         print(f"Input CSV file not found at {csv_input_path}")
         return
