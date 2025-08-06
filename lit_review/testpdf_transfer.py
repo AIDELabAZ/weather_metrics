@@ -1,6 +1,6 @@
 ###
-## This script matches filenames from the 10% test CSV to those of the PDFs in the full PDF folder
-## Matched PDF files are copied to a new folder callede pdf_test_10
+## This script matches filenames from the 20% test CSV to those of the PDFs in the full PDF folder
+## Matched PDF files are copied to a new folder callede pdf_test_20
 ###
 
 import os
