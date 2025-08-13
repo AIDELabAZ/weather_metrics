@@ -5,10 +5,10 @@ from openai import OpenAI
 import re
 
 # Initialize the OpenAI client
-client = OpenAI(api_key='')
+client = OpenAI(api_key='key')
 
 # Fine-tuned model ID
-fine_tuned_model_id = 'ft:gpt-4o-mini-2024-07-18:aide-lab:aug7:C21HA1px'
+fine_tuned_model_id = 'ft:gpt-4.1-mini-2025-04-14:aide-lab:41mini:C25jTwZ8'
 
 # List of questions with full dependency chain
 questions = [
