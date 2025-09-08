@@ -9,7 +9,13 @@ import json
 import os
 import random
 
-def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path, validation_split=0.125):
+def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path, validation_split=0.125, seed=42):
+    """
+    Builds RFT-ready JSONL:
+      {"messages": [{"role":"user","content":"..."}], "reference_answer": "1. File Name: ...\n2. Paper Title: ...\n..."}
+    - Ensures the last message is NOT assistant.
+    - Keeps your original Q&A wording in reference_answer for the grader.
+    """
     if not os.path.isfile(csv_input_path):
         print(f"Input CSV file not found at {csv_input_path}")
         return
@@ -26,9 +32,9 @@ def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_ou
 
     for encoding in encodings_to_try:
         try:
-            with open(csv_input_path, 'r', encoding=encoding) as csvfile:
+            with open(csv_input_path, 'r', encoding=encoding, newline='') as csvfile:
                 reader = csv.DictReader(csvfile)
-                headers = reader.fieldnames
+                headers = reader.fieldnames or []
 
                 missing_columns = [col for col in required_columns if col not in headers]
                 if missing_columns:
@@ -38,72 +44,73 @@ def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_ou
                 print(f"Successfully read the CSV file using encoding: {encoding}")
 
                 for row in reader:
+                    # Keep your original rule: skip rows missing core identifiers
                     if not row.get('paper title') or not row.get('doi'):
-                        print(
-                            f"Skipping row due to missing critical information: {row.get('filename', 'Unknown file')}")
+                        print(f"Skipping row due to missing critical information: {row.get('filename', 'Unknown file')}")
                         continue
 
-                    messages = [
-                        {
-                            "role": "system",
-                            "content": "You are an AI assistant that extracts specific information from academic papers. Answer the user's questions using the information from the provided texts. If the information is not available, respond with 'NA.'"
-                        },
-                        {
-                            "role": "user",
-                            "content": (
-                                "Based on the following academic texts, please answer the questions below.\n\n"
-                                f"Dependent Origin:\n{row.get('dependent origin', '')}\n\n"
-                                f"Endogenous Origin:\n{row.get('endogenous origin', '')}\n\n"
-                                f"Instrument Origin:\n{row.get('instrument origin', '')}\n\n"
-                                f"Rainfall Metric Origin:\n{row.get('rainfall metric origin', '')}\n\n"
-                                f"Data Source Origin:\n{row.get('data source origin', '')}\n\n"
-                                "Questions:\n"
-                                "1. What is the file name of the paper?\n"
-                                "2. What is the title of the paper?\n"
-                                "3. What is the DOI (Digital Object Identifier) of the paper?\n"
-                                "4. What dependent variables are analyzed in this paper?\n"
-                                "5. What are the endogenous variable(s) considered in this paper?\n"
-                                "6. Did the study use an instrumental variable in the analysis?\n"
-                                "7. What instrumental variable(s) were used in the study?\n"
-                                "8. Was rainfall used as an instrumental variable in the study?\n"
-                                "9. How exactly was rainfall quantified or measured as an instrument in this paper?\n"
-                                "10. What is the source of the rainfall data used in the study?\n"
-                            ).strip()
-                        },
-                        {
-                            "role": "assistant",
-                            "content": (
-                                f"1. File Name: {row.get('filename', 'NA.')}\n"
-                                f"2. Paper Title: {row.get('paper title', 'NA.')}\n"
-                                f"3. DOI: {row.get('doi', 'NA.')}\n"
-                                f"4. Dependent Variable(s): {row.get('dependent variables', 'NA.')}\n"
-                                f"5. Endogenous Variable(s): {row.get('endogenous variable(s)', 'NA.')}\n"
-                                f"6. IV Binary: {row.get('instrumental variable used', 'NA.')}\n"
-                                f"7. Instrumental Variable(s): {row.get('instrumental variable(s)', 'NA.')}\n"
-                                f"8. Rainfall Binary: {row.get('instrumental variable rainfall', 'NA.')}\n"
-                                f"9. Rainfall Metric: {row.get('rainfall metric', 'NA.')}\n"
-                                f"10. Rainfall Data Source: {row.get('rainfall data source', 'NA.')}\n"
-                            ).strip()
-                        }
-                    ]
+                    # ---- Single USER message (fold system guidance in here) ----
+                    user_content = (
+                        "You are an AI assistant that extracts specific information from academic papers. "
+                        "Answer the user's questions using the information from the provided texts. "
+                        "If the information is not available, respond with 'NA.'\n\n"
+                        "Based on the following academic texts, please answer the questions below.\n\n"
+                        f"Dependent Origin:\n{row.get('dependent origin', '')}\n\n"
+                        f"Endogenous Origin:\n{row.get('endogenous origin', '')}\n\n"
+                        f"Instrument Origin:\n{row.get('instrument origin', '')}\n\n"
+                        f"Rainfall Metric Origin:\n{row.get('rainfall metric origin', '')}\n\n"
+                        f"Data Source Origin:\n{row.get('data source origin', '')}\n\n"
+                        "Questions:\n"
+                        "1. What is the file name of the paper?\n"
+                        "2. What is the title of the paper?\n"
+                        "3. What is the DOI (Digital Object Identifier) of the paper?\n"
+                        "4. What dependent variables are analyzed in this paper?\n"
+                        "5. What are the endogenous variable(s) considered in this paper?\n"
+                        "6. Did the study use an instrumental variable in the analysis?\n"
+                        "7. What instrumental variable(s) were used in the study?\n"
+                        "8. Was rainfall used as an instrumental variable in the study?\n"
+                        "9. How exactly was rainfall quantified or measured as an instrument in this paper?\n"
+                        "10. What is the source of the rainfall data used in the study?\n"
+                    ).strip()
 
-                    data_entries.append({"messages": messages})
+                    messages = [{"role": "user", "content": user_content}]
 
-                break
+                    # ---- Gold answers moved to reference_answer (exactly your old assistant content) ----
+                    reference_answer = (
+                        f"1. File Name: {row.get('filename', 'NA.')}\n"
+                        f"2. Paper Title: {row.get('paper title', 'NA.')}\n"
+                        f"3. DOI: {row.get('doi', 'NA.')}\n"
+                        f"4. Dependent Variable(s): {row.get('dependent variables', 'NA.')}\n"
+                        f"5. Endogenous Variable(s): {row.get('endogenous variable(s)', 'NA.')}\n"
+                        f"6. IV Binary: {row.get('instrumental variable used', 'NA.')}\n"
+                        f"7. Instrumental Variable(s): {row.get('instrumental variable(s)', 'NA.')}\n"
+                        f"8. Rainfall Binary: {row.get('instrumental variable rainfall', 'NA.')}\n"
+                        f"9. Rainfall Metric: {row.get('rainfall metric', 'NA.')}\n"
+                        f"10. Rainfall Data Source: {row.get('rainfall data source', 'NA.')}\n"
+                    ).strip()
+
+                    data_entries.append({"messages": messages, "reference_answer": reference_answer})
+
+                break  # stop trying other encodings if we succeeded
+
         except UnicodeError as e:
             print(f"Failed to read with encoding {encoding}: {e}")
         except Exception as e:
             print(f"An unexpected error occurred with encoding {encoding}: {e}")
+
     else:
         print("Unable to read the CSV file with the tried encodings.")
         return
 
+    # Preview a few samples before writing
     print("\nPreview of the first 3 data entries before writing to files:\n")
     for i, entry in enumerate(data_entries[:3]):
         print(f"Entry {i + 1}:")
         print(json.dumps(entry, indent=4, ensure_ascii=False))
         print('-' * 80)
 
+    # Shuffle & split
+    random.seed(seed)
     random.shuffle(data_entries)
     total_entries = len(data_entries)
     validation_size = int(total_entries * validation_split)
@@ -112,9 +119,11 @@ def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_ou
     training_data = data_entries[:training_size]
     validation_data = data_entries[training_size:]
 
+    # Ensure output dirs exist
     os.makedirs(os.path.dirname(training_output_path), exist_ok=True)
     os.makedirs(os.path.dirname(validation_output_path), exist_ok=True)
 
+    # Write JSONL
     with open(training_output_path, 'w', encoding='utf-8') as train_file:
         for entry in training_data:
             json.dump(entry, train_file, ensure_ascii=False)
@@ -127,6 +136,28 @@ def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_ou
 
     print(f"Training data has been written to {training_output_path}")
     print(f"Validation data has been written to {validation_output_path}")
+
+    # Optional: quick lint so you catch format issues early
+    lint_jsonl(training_output_path)
+    lint_jsonl(validation_output_path)
+
+
+def lint_jsonl(path, max_checks=50):
+    """Basic RFT format lint: last message not assistant; has reference_answer; messages non-empty."""
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            for i, line in enumerate(f, 1):
+                if i > max_checks:
+                    break
+                obj = json.loads(line)
+                msgs = obj.get("messages", [])
+                assert isinstance(msgs, list) and len(msgs) >= 1, f"{path} item {i}: messages missing/empty"
+                assert msgs[-1].get("role") != "assistant", f"{path} item {i}: last message is assistant"
+                assert "reference_answer" in obj, f"{path} item {i}: missing reference_answer"
+                assert isinstance(obj["reference_answer"], str) and obj["reference_answer"].strip(), f"{path} item {i}: empty reference_answer"
+        print(f"Lint OK (checked first {min(i, max_checks)} items): {path}")
+    except Exception as e:
+        print(f"Lint FAILED for {path}: {e}")
 
 
 def preview_jsonl_file(file_path, num_entries=3):

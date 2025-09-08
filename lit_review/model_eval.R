@@ -17,8 +17,8 @@ library(reticulate)
 # read in csv files and clean
 ############################################
 # load data
-human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/removed_20.csv")
-model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/finetune_output.csv")
+human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/removed_20.csv", na = c("n/a", "NA", ""))
+model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/finetune_output.csv", na = c("n/a", "NA", ""))
 
 # clean the 'ptitle' column to lowercase and convert encoding to UTF-8
 human_data_clean <- human_data %>%
@@ -44,7 +44,9 @@ human_data_clean <- human_data %>%
     depen = iconv(depen, to = "UTF-8", sub = "byte"),
     depen = tolower(depen),
     iv = iconv(iv, to = "UTF-8", sub = "byte"),
-    iv = tolower(iv)
+    iv = tolower(iv),
+    iv_bin = as.numeric(iv_bin),
+    rain_bin = as.numeric(rain_bin)
   )
 
 model_data_clean <- model_data %>%
@@ -74,7 +76,9 @@ model_data_clean <- model_data %>%
     depen = iconv(depen, to = "UTF-8", sub = "byte"),
     depen = tolower(depen),
     iv = iconv(iv, to = "UTF-8", sub = "byte"),
-    iv = tolower(iv)
+    iv = tolower(iv),
+    iv_bin = as.numeric(iv_bin),
+    rain_bin = as.numeric(rain_bin)
   )
 
 clean_filenames <- function(df) {
@@ -90,6 +94,16 @@ clean_filenames <- function(df) {
 
 human_data_clean <- human_data_clean %>% clean_filenames()
 model_data_clean <- model_data_clean %>% clean_filenames()
+
+###
+# NA deal
+###
+model_data_clean <- model_data_clean %>%
+  mutate(rain_bin = ifelse(is.na(rain_bin), 0, rain_bin),
+         iv_bin = ifelse(is.na(iv_bin), 0, iv_bin))
+human_data_clean <- human_data_clean %>%
+  mutate(rain_bin = ifelse(is.na(rain_bin), 0, rain_bin),
+         iv_bin = ifelse(is.na(iv_bin), 0, iv_bin))
 
 ############################################
 # merge datasets on a common identifier
