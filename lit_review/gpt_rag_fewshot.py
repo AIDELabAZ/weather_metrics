@@ -22,7 +22,7 @@ KEYWORDS = [
 # ------------------------
 from openai import OpenAI
 
-client = OpenAI(api_key="key")
+client = OpenAI(api_key="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")
 
 
 # ------------------------
@@ -298,7 +298,7 @@ def process_pdfs_single_call(pdf_folder: str, output_csv: str):
 # ------------------------
 if __name__ == "__main__":
     # Update these paths as needed
-    pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/pdf_test_20"
+    pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/test"
     output_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output"
     os.makedirs(output_folder, exist_ok=True)
     output_csv = os.path.join(output_folder, "batch_output.csv")
