@@ -1,76 +1,293 @@
+
 import fitz  # PyMuPDF
 import os
 import pandas as pd
 from openai import OpenAI
 import re
 
-# Initialize the OpenAI client
-client = OpenAI(api_key='key')
+# ==============================
+# CONFIG
+# ==============================
 
-# Fine-tuned model ID
-fine_tuned_model_id = 'ft:gpt-4.1-mini-2025-04-14:aide-lab:41mini:C25jTwZ8'
+client = OpenAI(api_key="key")
+fine_tuned_model_id = "ft:gpt-4.1-mini-2025-04-14:aide-lab:update:CbuBEy1P"
 
-# List of questions with full dependency chain
+pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/pdf_test_20"
+output_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output"
+output_csv = os.path.join(output_folder, "finetune_output.csv")
+
+os.makedirs(output_folder, exist_ok=True)
+
 questions = [
-    {"key": "Paper Title",
-     "question": "You will be given the text or OCR/parsed content of an academic paper. Extract the paper’s exact title from the document. Deliberate through the identification steps internally but do not write your reasoning; output only the final title. Identify the title as the main, standalone heading near the top of the first page that precedes the author list or the Abstract. Ignore journal or platform front matter such as article-type labels (e.g., Research Article, Original Article), headers and footers, running heads or short titles, page numbers, DOIs, submission or acceptance dates, copyright notices, issue or volume information, and preprint or platform disclaimers. Do not return citation lines or references to the paper elsewhere in the document. For scanned or OCR’d files, use layout cues and keywords to locate the title block: select the prominent line(s) immediately before the author names or affiliations, or before “Abstract”, “Keywords”, or “JEL”. For conference proceedings or series, ignore series names and venue labels (e.g., Proceedings of …, Working Paper, Discussion Paper) unless they are explicitly part of the title block. If the title spans multiple lines, include all lines in order, joining with single spaces. Remove hyphenation only where it is a line-break artifact, and preserve original capitalization and punctuation. Include any subtitle that is part of the same title block (for example, text after a colon or dash). Remove footnote markers or symbols attached to the title text (such as *, †, ‡, or numeric superscripts). If bilingual titles are presented consecutively, return the first full title block as printed. If metadata or an HTML <title> differs from the in-body title, prefer the in-body title on the first page. Output strictly the title text and nothing else: no quotes, labels, prefixes, or extra whitespace or newlines."},
-    {"key": "DOI",
-     "question": "Extract the DOI of the focal article from the provided material. Identify the DOI for the version of record of the main paper, not DOIs from references, datasets, figures, supplements, errata/corrigenda, retractions, or preprints. Prefer the publisher’s full DOI over shortDOI or preprint identifiers; if both preprint and published DOIs exist, choose the published article’s DOI. Normalize by stripping URL wrappers (e.g., doi:, https://doi.org/), whitespace, line-break hyphenation, and trailing punctuation; return the DOI in lowercase in canonical form like 10.xxxx/xxxxx. Do not return any DOI that appears only in the reference list. If multiple DOIs are visible, select only the one that matches the article’s title/authors/journal/year and ignore all others for output. If no DOI exists for the focal article, answer exactly n/a. Think through the steps needed to disambiguate and verify the focal DOI, but do not reveal your reasoning; output only the final answer. Output must be exactly one token: the DOI string or n/a, with no extra text or formatting."},
-    {"key": "Dependent Variables",
-     "question": "Identify and list the dependent (outcome) variable(s) used in this paper’s main regression model(s). The dependent variable is the left-hand-side outcome being explained; it is not the treatment, instrument, control, covariate, mediator, moderator, fixed effect, or any right-hand-side regressor. Use only evidence from the paper’s main text, equations, and primary results tables; prefer the primary specification(s) in the main results section. Include additional outcomes only if they are explicitly analyzed as main outcomes (not merely robustness or ancillary checks). Extract the exact outcome variable names as they appear on the left-hand side of equations or as column labels/headers in regression tables. If the same outcome appears across multiple specifications or samples, list it once. If multiple distinct main outcomes are analyzed, list each once. Do not include first-stage outcomes in IV models, treatment assignment indicators, event-study dynamic coefficients, exposure variables, instruments, controls, or fixed effects. Output format: return only the variable name(s), with no commentary, no quotes, and no extra text; separate multiple names with semicolons and a single space after each semicolon; preserve case and any transformations that are part of the left-hand-side specification (e.g., ln(wage), log income, Δ outcome); remove measurement units or clarifying parentheses that are not part of the variable name (e.g., drop “(per 1,000)”). If you cannot identify any dependent variable from the provided content, output exactly: n/a. Perform all reasoning internally and output only the final list."},
-    {"key": "Endogenous Variable(s)",
-     "question": "Identify the endogenous explanatory/independent variable(s) in this paper. An endogenous variable is any regressor the authors explicitly treat as endogenous due to simultaneity/reverse causality, omitted variables, or measurement error—typically indicated by statements such as “we treat X as endogenous,” “we instrument X,” or the use of IV/2SLS/IV-Probit/GMM/control-function/2SRI, first-stage regressions, excluded instruments, or weak-instrument tests (e.g., Kleibergen–Paap). Extract only the specific variable name(s) the authors claim are endogenous. Output format: return only the variable name(s), separated by semicolons if multiple; no quotes and no additional text. Use only this paper’s content (main text, tables, figures, appendices); ignore references to other papers. Include every variable treated as endogenous in any specification; if none, return n/a. If the immediately preceding task returned 0 or n/a, return n/a here. Do not return rainfall, precipitation, other weather variables/events, or natural phenomena such as PM-based pollution as endogenous variables. Do not return the dependent variable, instruments themselves, controls treated as exogenous, or generic phrases. Do not explain your answer."},
-    {"key": "Instrumental Variable Used",
-     "question": "Decide whether the paper uses an instrumental-variable method to address endogeneity. Output must be exactly one of: 1, 0, n/a. Return 1 if any specification (main, robustness, or appendix) uses an excluded instrument in an IV framework such as IV/2SLS/TSLS/LIML/3SLS, control-function or two-stage residual inclusion (2SRI), IV-Probit/IV-Logit/IV-Tobit, dynamic panel GMM (Arellano–Bond/Bover/Blundell–Bond), or any GMM/endogenous switching model that explicitly relies on instruments; look for an explicit first stage or instrument set, terms like instrument/instrumented/IV/2SLS, discussion of instrument relevance and exclusion restrictions, or reporting of weak-instrument diagnostics (e.g., Kleibergen–Paap, Cragg–Donald, Stock–Yogo F-statistics) and overidentification tests (Sargan/Hansen J/Anderson–Rubin). Return 0 if the paper runs regressions without using instruments despite discussing endogeneity, or uses other identification strategies instead of IV (e.g., randomized experiments, regression discontinuity, difference-in-differences/event studies, fixed effects only, controls/matching, Heckman selection without excluded instruments, using lags merely as controls) and does not implement an IV first stage or instrument set. Return n/a only if the paper indicates there is no endogeneity concern by design (e.g., a true randomized experiment with exogenous assignment) and therefore has no need for IV. Do not infer IV use from generic mentions of IV/GMM in literature reviews, background, or for other datasets; require actual implementation in this paper’s empirical specifications, results tables, or appendix. Ignore non-statistical uses of the word instrument (e.g., measurement instruments). If multiple instruments or models appear, return 1 if any qualify. Think carefully but do not reveal your reasoning; output exactly one token: 1 or 0 or n/a, with no additional text."},
-    {"key": "Instrumental Variable(s)",
-     "question": "Identify and list the specific excluded instrumental variables used by the authors in their main econometric analysis to address endogeneity. Use only evidence from this paper’s own content (abstract, main text, tables and figures, methods, results, and appendices) and focus on the authors’ main specification or headline IV models. Count as instruments only variables explicitly used in an instrumental‑variable framework such as two‑stage least squares, IV, IV‑Probit, generalized method of moments, control‑function, or two‑stage residual inclusion, and described as instruments, excluded instruments, or first‑stage regressors. Do not include variables that appear only as regressors, controls, exposures, treatments, fixed effects, trends, lags used as controls, or designs without an IV first stage such as difference‑in‑differences, event studies, regression discontinuity, or matching. Ignore instruments mentioned only in cited literature; use only this paper’s models. If multiple instruments are used in the main analysis, list all of them once, in the order they appear. Reproduce the authors’ instrument names or labels as written; if no concise label is given, provide a brief descriptive phrase. For interaction or set‑based instruments, reproduce the instrument label as written (for example, the interaction term), not its component controls. If no instrumental‑variable method is used in the main analysis, output n/a. Think through the identification and selection criteria step by step before responding, but only output the final answer. Output format: one line containing only the instrument name or names separated by semicolons, with no extra text, quotes, or brackets.",
-     "dependency": {"key": "Instrumental Variable Used", "value": "1"}},
-    {"key": "Instrumental Variable Rainfall",
-     "question": "Decide whether the paper uses rainfall or any precipitation-based measure as an instrumental variable. Your task is to return exactly one of: 1, 0, n/a. Return 1 if any specification in the paper (e.g., IV/2SLS, IV-Probit, GMM with excluded instruments, control-function, 2SRI) uses rainfall or a precipitation-derived measure as an excluded instrument. Qualifying precipitation instruments include rainfall level, deviation, shock, anomaly, standardized or cumulative precipitation, wet-day counts, precipitation intensity, drought or wetness indices such as SPI, SPEI, PDSI, scPDSI, monsoon rainfall, snowfall, snowpack or SWE, or any index explicitly constructed from precipitation. Return 0 if the paper uses instrumental-variable methods but none of the excluded instruments are precipitation-based, or if precipitation itself is the endogenous variable being instrumented by non-precipitation instruments. Return n/a if the paper does not use an instrumental-variable framework at all. Count an instrument as precipitation-based only if it is explicitly used as an excluded instrument in a first-stage/IV framework; look for terms like instrument, instrumental variable, excluded instrument, first stage, 2SLS, IV-Probit, GMM with instruments, control-function, weak-instrument F-statistic, Kleibergen-Paap, Anderson-Rubin. Do not count precipitation if it appears only as a regressor, control, interaction, exposure, or in reduced-form, DiD, event-study, RDD, matching, or OLS designs without an IV first stage. Do not count broad climate indices (e.g., ENSO) unless they are explicitly mapped to or constructed from precipitation as the instrument itself. If multiple instruments are used, return 1 if any are precipitation-based. Use only evidence from this paper’s methods, results, and appendices; ignore references to other papers. Think through the decision internally and silently; do not reveal your reasoning. Final output must be exactly one token: 1 or 0 or n/a, with no additional text.",
-     "dependency": {"key": "Instrumental Variable Used", "value": "1"}},
-    {"key": "Rainfall Metric",
-     "question": "From the paper, identify the precipitation-based instrument variable(s) actually used in the first stage of an instrumental-variables specification. Read the full document (main text and appendix) and locate the exact construction/definition of the rainfall or precipitation shock instrument. Confirm that the variable is used as an excluded instrument in an IV/2SLS/IV-Probit/GMM/control-function/2SRI first stage; look for terms such as instrument, first stage, excluded instrument, weak-instrument F-statistic, Kleibergen–Paap, or Anderson–Rubin. Do not return variables used only as controls in the second stage, outcomes, exposures, or generic mentions unconnected to an IV first stage, and do not return cases where precipitation is the endogenous variable being instrumented by something else. Include precipitation-based measures only, such as rainfall level/total/cumulative/sum, rainfall deviations/anomalies/shocks/z-scores, standardized indices (SPI, SPEI, PDSI, scPDSI), drought/wetness indicators, counts of wet/dry days, precipitation intensity, monsoon onset day, dry-spell length, moving averages or windowed sums (e.g., last 7/30/90 days), seasonal or growing-season totals, monthly totals, log transformations, and percentile or threshold-based definitions. Exclude non-precipitation weather measures (temperature, humidity, wind) unless they are explicitly part of the named instrument used in the first stage. If multiple precipitation-based instruments or variants are used anywhere in the paper, list each one separately. Output rules: return only the exact variable name(s) or definition phrase(s) as written in the paper, one per line; preserve any transformations, thresholds, temporal windows, and spatial units; do not add commentary, labels, section names, statistics, or extra words; use plain text and no quotation marks; if numbers are part of the name (e.g., SPI-12, 7-day rainfall), keep them; if no precipitation-based instrument is used, output exactly n/a. Think through the task and select the most precise phrasing, but do not include your reasoning in the output. Examples of acceptable outputs include phrases like growing-season total rainfall, log monthly total rainfall, rainfall deviations from the long-run district mean, SPI-12 standardized precipitation index.",
-     "dependency": {"key": "Instrumental Variable Rainfall", "value": "1"}},
-    {"key": "Rainfall Data Source",
-     "question": "What is the source of the rainfall data used in the study? Identify and report the exact source of the rainfall/precipitation data used as the instrument: name the dataset or provider (e.g., CHIRPS, TRMM, ERA5, NOAA station records, Indian Meterological Department). Please give me the source of the rainfall data without any additional words or numbers. If rainfall is used as an instrumental variable, the data must come from a specific source (e.g., a satellite or organization). Please find the origin of the rainfall data that was used. Please only provide the source of the rainfall data, without the title of the question or any additional words.",
-     "dependency": {"key": "Instrumental Variable Rainfall", "value": "1"}}
+    {
+        "key": "title",
+        "question": (
+            "Extract the paper’s exact title from the document. "
+            "Return only the title text, strictly no author names or author-related information. "
+            "If no title is present, output exactly: n/a."
+        ),
+    },
+    {
+        "key": "doi",
+        "question": "Extract the DOI of the article. Return only the DOI string or n/a if not present.",
+    },
+    {
+        "key": "emp_bin",
+        "question": (
+            "Does this paper present a complete empirical analysis? "
+            "Respond only with 1 (yes), 0 (no), or n/a (not clear)."
+        ),
+    },
+    {
+        "key": "dep_var",
+        "question": (
+            "Identify only the dependent (outcome) variable used in the main regression analysis. "
+            "Return only the variable name, no explanations or extra text. If none, return n/a."
+        ),
+    },
+    {
+        "key": "end_bin",
+        "question": (
+            "Does the paper treat any regressor as endogenous and attempt to address endogeneity? "
+            "Reply only 1, 0, or n/a."
+        ),
+    },
+    {
+        "key": "end_var",
+        "question": (
+            "Identify the endogenous explanatory variable(s) used, if any. "
+            "Return only variable name(s) separated by semicolons, or n/a with no extra text."
+        ),
+    },
+    {
+        "key": "iv_bin",
+        "question": "Does the paper use an instrumental variable method? Reply 1, 0, or n/a.",
+    },
+    {
+        "key": "iv_var",
+        "question": (
+            "Identify the instrumental variable(s) used if any. "
+            "Return only names separated by semicolons or n/a."
+        ),
+        "dependency": {"key": "iv_bin", "value": "1"},
+    },
+    {
+        "key": "rain_bin",
+        "question": "Is rainfall used as an instrumental variable in this analysis? Reply 1, 0, or n/a.",
+        "dependency": {"key": "iv_bin", "value": "1"},
+    },
+    {
+        "key": "rain_var",
+        "question": (
+            "Specify the exact precipitation-based instrumental variable (IV) name if present. "
+            "This includes any instance in which rainfall is used as an instrumental variable in the analysis. "
+            "If you cannot find a rainfall IV respond with n/a."
+        ),
+        "dependency": {"key": "rain_bin", "value": "1"},
+    },
 ]
 
+# ==============================
+# HELPER FUNCTIONS
+# ==============================
 
-def normalize_yes_no(answer):
-    if not answer:
-        return "0"
-    answer = answer.strip().lower()
-    if answer.startswith('yes') or answer == '1':
+def normalize_yes_no(answer) -> str:
+    """Normalize binary answers to '1', '0', or 'n/a', robust to ints."""
+    if answer is None:
+        return "n/a"
+    answer = str(answer).strip().lower()
+    if answer.startswith("yes") or answer == "1":
         return "1"
-    elif answer.startswith('no') or answer == '0':
+    if answer.startswith("no") or answer == "0":
         return "0"
-    else:
+    if answer in {"1", "0", "n/a"}:
+        return answer
+    return "n/a"
+
+
+def strip_to_variable_names(answer) -> str:
+    """
+    Clean up variable name answers:
+    - Handle n/a
+    - Remove URLs, 'Downloaded from', DOIs
+    - Split on semicolons
+    - Drop author-like / boilerplate chunks
+    - Keep only reasonable tokens
+    """
+    if answer is None:
         return "n/a"
 
+    answer = str(answer)
+    low_all = answer.lower().strip()
 
-def clean_dependent_variables(raw_text):
-    cleaned = re.sub(r'\d+\)\s*', '', raw_text)
-    variables = [var.strip() for var in cleaned.split(',') if var.strip()]
-    return ', '.join(variables)
+    if low_all in {"n/a", "na", "none"}:
+        return "n/a"
+
+    # If the model just echoes template text, treat as n/a
+    if "string or n/a" in low_all or "string or n a" in low_all:
+        return "n/a"
+
+    # Remove URLs and boilerplate junk
+    answer = re.sub(r"https?://\S+", " ", answer, flags=re.IGNORECASE)
+    answer = re.sub(r"doi:\S+", " ", answer, flags=re.IGNORECASE)
+    answer = re.sub(r"Downloaded from.*", " ", answer, flags=re.IGNORECASE)
+
+    parts = [v.strip() for v in answer.split(";") if v.strip()]
+    cleaned_parts = []
+
+    author_markers = [
+        "original submitted", "revision received", "accepted", "abstract",
+        "©", "copyright", "journal", "wiley", "springer"
+    ]
+
+    for part in parts:
+        low = part.lower()
+
+        # Drop obviously huge garbage chunks
+        if len(part) > 200:
+            continue
+
+        # Drop chunks that contain explicit author/metadata markers
+        if any(m in low for m in author_markers):
+            continue
+
+        # Keep only reasonable word-like tokens
+        tokens = re.findall(r"[\w\-\(\)\.]+", part)
+        if not tokens:
+            continue
+
+        # If too many tokens, it's probably a sentence/paragraph, not a variable name
+        if len(tokens) > 10:
+            continue
+
+        cleaned = " ".join(tokens)
+        cleaned_parts.append(cleaned)
+
+    return "; ".join(cleaned_parts) if cleaned_parts else "n/a"
 
 
-def extract_relevant_sections(pdf_path):
+def clean_dependent_variables(raw_text: str) -> str:
+    """Clean dependent variable list."""
+    if not raw_text:
+        return "n/a"
+    cleaned = re.sub(r"\d+\)\s*", "", str(raw_text))
+    variables = [var.strip() for var in cleaned.split(",") if var.strip()]
+    return "; ".join(variables) if variables else "n/a"
+
+
+def clean_title(raw_title: str) -> str:
+    """Clean title to a single line without trailing junk."""
+    if not raw_title:
+        return "n/a"
+
+    raw_title = str(raw_title)
+    lines = [l.strip() for l in raw_title.splitlines() if l.strip()]
+    if not lines:
+        return "n/a"
+
+    title = lines[0]
+    title = re.sub(r"\s*\d{4,}\s*$", "", title)  # strip long trailing number
+    title = re.sub(r"\s+", " ", title)
+    title = title.strip(" ,;.")
+    return title if title else "n/a"
+
+
+def extract_relevant_sections(pdf_path: str) -> str:
+    """Extract broadly relevant sections (data, methods, instruments, etc.)."""
     relevant_sections = []
-    keywords = ["instrument", "instrumental variable", "data", "methods", "iv", "rainfall", "model", "econometric", "metrics", "model", "introduction", "abstract", "conclusion", "strategy", "empirical"]
+    keywords = [
+        "instrument",
+        "instrumental variable",
+        "data",
+        "methods",
+        "iv ",
+        "rainfall",
+        "precipitation",
+        "model",
+        "econometric",
+        "metrics",
+        "introduction",
+        "abstract",
+        "conclusion",
+        "strategy",
+        "empirical",
+        "modeling",
+        "approach",
+    ]
     with fitz.open(pdf_path) as doc:
         for page_num in range(len(doc)):
             page = doc.load_page(page_num)
             page_text = page.get_text("text")
-            paragraphs = page_text.split('\n\n')
+            paragraphs = page_text.split("\n\n")
             for paragraph in paragraphs:
                 if any(keyword.lower() in paragraph.lower() for keyword in keywords):
                     relevant_sections.append(paragraph)
-    return ' '.join(relevant_sections)
+    return " ".join(relevant_sections)
 
 
-def query_model_single(text, question, enforce_binary=False, specific_metric=False):
-    user_query = f"""Based on the following relevant sections from an academic text, please answer the question below. {text} Question: {question} {"Please respond with '1' for yes, '0' for no, or 'n/a' if not applicable or unclear." if enforce_binary else "Provide a concise and accurate answer. The response should be a specific metric without broad terms. Avoid using general phrases and ensure the metric is precisely defined. If information is not available, respond with 'n/a'."} """
+def get_first_page_text(pdf_path: str, char_limit: int = 5000) -> str:
+    """Get text from the first page, truncated to char_limit."""
+    with fitz.open(pdf_path) as doc:
+        page = doc.load_page(0)
+        text = page.get_text("text")
+    return text[:char_limit]
+
+
+def extract_iv_sections(pdf_path: str, window_chars: int = 2000) -> str:
+    """
+    Extract sections specifically around instrumental-variable-related terms.
+    This is used for iv_bin, iv_var, rain_bin, rain_var, end_bin, end_var.
+    """
+    keywords = [
+        "instrument",
+        "instrumental",
+        "endogenous",
+        "endogeneity",
+        "two-stage",
+        "2sls",
+        "iv ",
+        "iv,",
+        "iv.",
+    ]
+    sections = []
+
+    with fitz.open(pdf_path) as doc:
+        for page_num in range(len(doc)):
+            page_text = doc.load_page(page_num).get_text("text")
+            lowered = page_text.lower()
+            for kw in keywords:
+                idx = lowered.find(kw)
+                if idx != -1:
+                    start = max(0, idx - window_chars // 2)
+                    end = min(len(page_text), idx + window_chars // 2)
+                    sections.append(page_text[start:end])
+
+    return " ".join(sections)
+
+
+def query_model_single(text: str, question: str, enforce_binary: bool = False, strip_vars: bool = False) -> str:
+    """Query the fine-tuned model for a single field."""
+    if enforce_binary:
+        constraint_text = (
+            "Valid outputs are strictly: 1, 0, or n/a.\n"
+            "- 1 = yes\n"
+            "- 0 = no\n"
+            "- n/a = not clear from the text\n"
+            "You MUST answer with exactly one of: 1, 0, n/a. No other text."
+        )
+    else:
+        constraint_text = (
+            "Answer with a short phrase only, no full sentences, no explanations, "
+            "no surrounding quotes, and no line breaks. If uncertain, answer exactly: n/a."
+        )
+
+    user_query = (
+        f"{question}\n\n"
+        "Paper excerpt:\n"
+        f"{text}\n\n"
+        "Instructions:\n"
+        f"{constraint_text}"
+    )
 
     try:
         response = client.chat.completions.create(
@@ -79,94 +296,181 @@ def query_model_single(text, question, enforce_binary=False, specific_metric=Fal
                 {
                     "role": "system",
                     "content": (
-                        "You are an AI assistant that is an expert in economics paper analysis. You specializing in interpreting complex academic conent and extracting nuanced information. The specific information you look to extract when reading an economic papers relates to metadata, research methods, econometric equations, variables used in the estimating equations, the use of instrumental variables." 
-                        "Answer using information from provided text. If not available, respond with 'n/a'. Only reply with requested information; do not provide additional words and do not include the the question in your response."
-                    )
+                        "You are an AI assistant expert in economics paper analysis. "
+                        "You must follow the user's instructions about allowed output formats exactly. "
+                        "Never include explanations, prose, or multiple lines. "
+                        "If the correct answer is unclear, output exactly: n/a."
+                    ),
                 },
-                {"role": "user", "content": user_query}
+                {"role": "user", "content": user_query},
             ],
-            max_tokens=1000,
-            temperature=0
+            max_tokens=50,
+            temperature=0,
         )
         answer = response.choices[0].message.content.strip()
+
         if enforce_binary:
             return normalize_yes_no(answer)
+        if strip_vars:
+            return strip_to_variable_names(answer)
+
         return answer if answer else "n/a"
+
     except Exception as e:
         print(f"Error querying model: {e}")
         return "n/a"
 
 
-def process_pdfs_conditional_queries(pdf_folder, output_csv):
+def fix_logical_consistency(info_dict: dict) -> dict:
+    """
+    Post-hoc logic to enforce consistency between *_bin and *_var fields.
+    - If we have a non-n/a iv_var, force iv_bin = 1.
+    - If iv_bin == 1 but iv_var == n/a, downgrade iv_bin to n/a.
+    - If we have a non-n/a rain_var, force rain_bin = 1.
+    - If rain_bin == 1 but rain_var == n/a, try to infer rainfall IV from iv_var;
+      if that fails, downgrade rain_bin to n/a.
+    """
+
+    # IV consistency
+    iv_bin = normalize_yes_no(info_dict.get("iv_bin", "n/a"))
+    iv_var_raw = info_dict.get("iv_var", "") or ""
+    iv_var_clean = strip_to_variable_names(iv_var_raw)
+    info_dict["iv_var"] = iv_var_clean
+
+    if iv_var_clean != "n/a":
+        info_dict["iv_bin"] = "1"
+    elif iv_bin == "1" and iv_var_clean == "n/a":
+        info_dict["iv_bin"] = "n/a"
+
+    # Endogenous variable consistency
+    end_bin = normalize_yes_no(info_dict.get("end_bin", "n/a"))
+    end_var_raw = info_dict.get("end_var", "") or ""
+    end_var_clean = strip_to_variable_names(end_var_raw)
+    info_dict["end_var"] = end_var_clean
+
+    if end_var_clean != "n/a":
+        info_dict["end_bin"] = "1"
+    elif end_bin == "1" and end_var_clean == "n/a":
+        info_dict["end_bin"] = "n/a"
+
+    # Rain consistency
+    rain_bin = normalize_yes_no(info_dict.get("rain_bin", "n/a"))
+    rain_var_raw = info_dict.get("rain_var", "") or ""
+    rain_var_clean = strip_to_variable_names(rain_var_raw)
+
+    # If we already have a clean rain_var, force rain_bin = 1
+    if rain_var_clean != "n/a":
+        info_dict["rain_var"] = rain_var_clean
+        info_dict["rain_bin"] = "1"
+    else:
+        # No clean rain_var; try to infer from iv_var
+        rain_like = []
+        for part in iv_var_clean.split(";"):
+            if re.search(r"rain|precip", part, re.IGNORECASE):
+                rain_like.append(part.strip())
+
+        if rain_like:
+            info_dict["rain_var"] = "; ".join(rain_like)
+            info_dict["rain_bin"] = "1"
+        elif rain_bin == "1":
+            # Claimed rainfall IV but couldn't identify any
+            info_dict["rain_bin"] = "n/a"
+            info_dict["rain_var"] = "n/a"
+        else:
+            info_dict["rain_var"] = "n/a"
+            info_dict["rain_bin"] = rain_bin if rain_bin in {"0", "n/a"} else "n/a"
+
+    return info_dict
+
+# ==============================
+# MAIN PROCESSING FUNCTION
+# ==============================
+
+def process_pdfs_conditional_queries(pdf_folder: str, output_csv: str):
     data = []
 
     for filename in os.listdir(pdf_folder):
-        if filename.endswith(".pdf"):
-            pdf_path = os.path.join(pdf_folder, filename)
-            print(f"\nProcessing {filename}...")
-            relevant_sections = extract_relevant_sections(pdf_path)
-            print(f"Extracted relevant sections length: {len(relevant_sections)} characters")
-            max_tokens = 6000
-            text_to_analyze = relevant_sections[:max_tokens * 4]
+        if not filename.endswith(".pdf"):
+            continue
 
-            info_dict = {
-                'File Name': filename,
-                'Paper Title': 'n/a',
-                'DOI': 'n/a',
-                'Dependent Variables': 'n/a',
-                'Endogenous Variable(s)': 'n/a',
-                'Instrumental Variable Used': '0',
-                'Instrumental Variable(s)': 'n/a',
-                'Instrumental Variable Rainfall': '0',
-                'Rainfall Metric': 'n/a',
-                'Rainfall Data Source': 'n/a'
-            }
+        pdf_path = os.path.join(pdf_folder, filename)
+        print(f"\nProcessing {filename}...")
 
-            temp_answers = {}
+        relevant_sections = extract_relevant_sections(pdf_path)
+        first_page_text = get_first_page_text(pdf_path)
+        iv_sections = extract_iv_sections(pdf_path)
 
-            for q in questions:
-                # Universal dependency check for all questions
-                if q.get('dependency'):
-                    dep_key = q['dependency']['key']
-                    dep_value = q['dependency']['value']
-                    current_answer = temp_answers.get(dep_key, info_dict.get(dep_key, None))
+        print(f"Extracted relevant sections length: {len(relevant_sections)} characters")
+        max_tokens = 5000  # rough limit
+        text_to_analyze = relevant_sections[: max_tokens * 4]
 
-                    if current_answer != dep_value:
-                        print(f"Skipping '{q['key']}' due to unmet dependency")
-                        info_dict[q['key']] = '0' if q['key'] == "Instrumental Variable Rainfall" else 'n/a'
-                        temp_answers[q['key']] = info_dict[q['key']]
-                        continue
+        info_dict = {q["key"]: "n/a" for q in questions}
+        info_dict["filename"] = filename
+        temp_answers = {}
 
-                # Special handling for binary questions
-                enforce_binary = q['key'] in ["Instrumental Variable Used", "Instrumental Variable Rainfall"]
-                specific_metric = (q['key'] == "Rainfall Metric")
+        for q in questions:
+            key = q["key"]
 
-                print(f"Querying: {q['question']}")
-                answer = query_model_single(text_to_analyze, q['question'],
-                                            enforce_binary=enforce_binary,
-                                            specific_metric=specific_metric)
+            # Handle dependencies
+            if "dependency" in q:
+                dep_key = q["dependency"]["key"]
+                dep_value = q["dependency"]["value"]
+                if temp_answers.get(dep_key, info_dict.get(dep_key)) != dep_value:
+                    info_dict[key] = "n/a"
+                    temp_answers[key] = "n/a"
+                    print(
+                        f"Skipping '{key}' due to unmet dependency "
+                        f"({dep_key} != {dep_value})"
+                    )
+                    continue
 
-                # Post-processing
-                if q['key'] == "Dependent Variables" and answer != "n/a":
-                    answer = clean_dependent_variables(answer)
-                if enforce_binary:
-                    answer = normalize_yes_no(answer)
+            enforce_binary = key.endswith("_bin")
+            strip_vars = key in {"dep_var", "end_var", "iv_var", "rain_var"}
 
-                info_dict[q['key']] = answer
-                temp_answers[q['key']] = answer
-                print(f"Answer: {answer}")
+            # Choose context based on the question
+            if key in {"title", "doi"}:
+                text_for_q = first_page_text
+            elif key in {"end_bin", "end_var", "iv_bin", "iv_var", "rain_bin", "rain_var"}:
+                text_for_q = iv_sections or text_to_analyze
+            else:
+                text_for_q = text_to_analyze
 
-            print(f"Final extracted info for {filename}: {info_dict}")
-            data.append(info_dict)
+            print(f"Querying: {q['question']}")
+            answer = query_model_single(
+                text_for_q,
+                q["question"],
+                enforce_binary=enforce_binary,
+                strip_vars=strip_vars,
+            )
+
+            if key == "dep_var" and answer != "n/a":
+                answer = clean_dependent_variables(answer)
+            if key == "title" and answer != "n/a":
+                answer = clean_title(answer)
+
+            info_dict[key] = answer
+            temp_answers[key] = answer
+            print(f"Answer for {key}: {answer}")
+
+        # Enforce cross-field consistency (end_*, iv_*, rain_*)
+        info_dict = fix_logical_consistency(info_dict)
+        print("After consistency check:")
+        print(
+            f"  end_bin={info_dict['end_bin']}, end_var={info_dict['end_var']}\n"
+            f"  iv_bin={info_dict['iv_bin']}, iv_var={info_dict['iv_var']}\n"
+            f"  rain_bin={info_dict['rain_bin']}, rain_var={info_dict['rain_var']}"
+        )
+
+        data.append(info_dict)
 
     df = pd.DataFrame(data)
     df.to_csv(output_csv, index=False)
-    print(f"Data saved to {output_csv}")
+    print(f"\nData saved to {output_csv}")
 
 
-# pathnames
-pdf_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/pdf_test_20'
-output_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output'
-output_csv = os.path.join(output_folder, 'finetune_output.csv')
-os.makedirs(output_folder, exist_ok=True)
-process_pdfs_conditional_queries(pdf_folder, output_csv)
+# ==============================
+# RUN
+# ==============================
+
+if __name__ == "__main__":
+    process_pdfs_conditional_queries(pdf_folder, output_csv)

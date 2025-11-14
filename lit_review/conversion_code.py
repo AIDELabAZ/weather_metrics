@@ -1,41 +1,34 @@
-###
-## This script splits the 80% training/validation data to  of total, training:validation
-## Data are formatted as JSON files including prompt, source, and desired output for training
-## JSON files are extracted as training.json and validation.json for fine tuning
-###
-
 import csv
 import json
 import os
 import random
 
-def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path, validation_split=0.125, seed=42):
+def prepare_fine_tuning_data(
+    csv_input_path,
+    training_output_path,
+    validation_output_path,
+    validation_split=0.125,
+    seed=42
+):
     """
-    Builds RFT-ready JSONL:
-      {"messages": [{"role":"user","content":"..."}], "reference_answer": "1. File Name: ...\n2. Paper Title: ...\n..."}
-    - Ensures the last message is NOT assistant.
-    - Keeps your original Q&A wording in reference_answer for the grader.
+    Reads CSV with specified columns and prepares JSONL files for OpenAI fine-tuning (chat format), shuffling and splitting into train/validation.
     """
-    if not os.path.isfile(csv_input_path):
-        print(f"Input CSV file not found at {csv_input_path}")
-        return
-
     required_columns = [
-        'filename', 'paper title', 'doi', 'dependent variables', 'endogenous variable(s)',
-        'instrumental variable used', 'instrumental variable(s)', 'instrumental variable rainfall',
-        'rainfall metric', 'rainfall data source', 'dependent origin', 'endogenous origin',
-        'instrument origin', 'rainfall metric origin', 'data source origin'
+        'filename', 'title', 'doi',
+        'emp_bin', 'dep_var', 'dep_sec', 'dep_txt',
+        'end_bin', 'end_var', 'end_sec', 'end_txt',
+        'iv_bin', 'iv_var', 'iv_sec', 'iv_txt',
+        'rain_bin', 'rain_var', 'rain_sec', 'rain_txt'
     ]
-
-    data_entries = []
     encodings_to_try = ['utf-8-sig', 'utf-16', 'utf-16-le', 'utf-16-be', 'cp1252', 'latin1']
+    data_entries = []
 
+    # Try opening with several encodings if needed
     for encoding in encodings_to_try:
         try:
             with open(csv_input_path, 'r', encoding=encoding, newline='') as csvfile:
                 reader = csv.DictReader(csvfile)
                 headers = reader.fieldnames or []
-
                 missing_columns = [col for col in required_columns if col not in headers]
                 if missing_columns:
                     print(f"Missing required columns: {', '.join(missing_columns)}")
@@ -44,72 +37,80 @@ def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_ou
                 print(f"Successfully read the CSV file using encoding: {encoding}")
 
                 for row in reader:
-                    # Keep your original rule: skip rows missing core identifiers
-                    if not row.get('paper title') or not row.get('doi'):
-                        print(f"Skipping row due to missing critical information: {row.get('filename', 'Unknown file')}")
+                    # Skip rows missing filename, title, or doi
+                    if not row.get('filename') or not row.get('title') or not row.get('doi'):
                         continue
 
-                    # ---- Single USER message (fold system guidance in here) ----
+                    # Prompt template includes all sections
                     user_content = (
-                        "You are an AI assistant that extracts specific information from academic papers. "
-                        "Answer the user's questions using the information from the provided texts. "
-                        "If the information is not available, respond with 'NA.'\n\n"
-                        "Based on the following academic texts, please answer the questions below.\n\n"
-                        f"Dependent Origin:\n{row.get('dependent origin', '')}\n\n"
-                        f"Endogenous Origin:\n{row.get('endogenous origin', '')}\n\n"
-                        f"Instrument Origin:\n{row.get('instrument origin', '')}\n\n"
-                        f"Rainfall Metric Origin:\n{row.get('rainfall metric origin', '')}\n\n"
-                        f"Data Source Origin:\n{row.get('data source origin', '')}\n\n"
-                        "Questions:\n"
-                        "1. What is the file name of the paper?\n"
-                        "2. What is the title of the paper?\n"
-                        "3. What is the DOI (Digital Object Identifier) of the paper?\n"
-                        "4. What dependent variables are analyzed in this paper?\n"
-                        "5. What are the endogenous variable(s) considered in this paper?\n"
-                        "6. Did the study use an instrumental variable in the analysis?\n"
-                        "7. What instrumental variable(s) were used in the study?\n"
-                        "8. Was rainfall used as an instrumental variable in the study?\n"
-                        "9. How exactly was rainfall quantified or measured as an instrument in this paper?\n"
-                        "10. What is the source of the rainfall data used in the study?\n"
+                        "Extract information about a research paper from the following fields and answer the corresponding questions.\n"
+                        f"Filename: {row.get('filename', 'NA')}\n"
+                        f"Title: {row.get('title', 'NA')}\n"
+                        f"DOI: {row.get('doi', 'NA')}\n"
+                        f"emp_bin: {row.get('emp_bin', 'NA')}\n"
+                        f"dep_var: {row.get('dep_var', 'NA')}\n"
+                        f"dep_sec: {row.get('dep_sec', 'NA')}\n"
+                        f"dep_txt: {row.get('dep_txt', 'NA')}\n"
+                        f"end_bin: {row.get('end_bin', 'NA')}\n"
+                        f"end_var: {row.get('end_var', 'NA')}\n"
+                        f"end_sec: {row.get('end_sec', 'NA')}\n"
+                        f"end_txt: {row.get('end_txt', 'NA')}\n"
+                        f"iv_bin: {row.get('iv_bin', 'NA')}\n"
+                        f"iv_var: {row.get('iv_var', 'NA')}\n"
+                        f"iv_sec: {row.get('iv_sec', 'NA')}\n"
+                        f"iv_txt: {row.get('iv_txt', 'NA')}\n"
+                        f"rain_bin: {row.get('rain_bin', 'NA')}\n"
+                        f"rain_var: {row.get('rain_var', 'NA')}\n"
+                        f"rain_sec: {row.get('rain_sec', 'NA')}\n"
+                        f"rain_txt: {row.get('rain_txt', 'NA')}\n"
                     ).strip()
 
-                    messages = [{"role": "user", "content": user_content}]
-
-                    # ---- Gold answers moved to reference_answer (exactly your old assistant content) ----
                     reference_answer = (
-                        f"1. File Name: {row.get('filename', 'NA.')}\n"
-                        f"2. Paper Title: {row.get('paper title', 'NA.')}\n"
-                        f"3. DOI: {row.get('doi', 'NA.')}\n"
-                        f"4. Dependent Variable(s): {row.get('dependent variables', 'NA.')}\n"
-                        f"5. Endogenous Variable(s): {row.get('endogenous variable(s)', 'NA.')}\n"
-                        f"6. IV Binary: {row.get('instrumental variable used', 'NA.')}\n"
-                        f"7. Instrumental Variable(s): {row.get('instrumental variable(s)', 'NA.')}\n"
-                        f"8. Rainfall Binary: {row.get('instrumental variable rainfall', 'NA.')}\n"
-                        f"9. Rainfall Metric: {row.get('rainfall metric', 'NA.')}\n"
-                        f"10. Rainfall Data Source: {row.get('rainfall data source', 'NA.')}\n"
+                        f"1. Filename: {row.get('filename', 'NA')}\n"
+                        f"2. Title: {row.get('title', 'NA')}\n"
+                        f"3. DOI: {row.get('doi', 'NA')}\n"
+                        f"4. emp_bin: {row.get('emp_bin', 'NA')}\n"
+                        f"5. dep_var: {row.get('dep_var', 'NA')}\n"
+                        f"6. dep_sec: {row.get('dep_sec', 'NA')}\n"
+                        f"7. dep_txt: {row.get('dep_txt', 'NA')}\n"
+                        f"8. end_bin: {row.get('end_bin', 'NA')}\n"
+                        f"9. end_var: {row.get('end_var', 'NA')}\n"
+                        f"10. end_sec: {row.get('end_sec', 'NA')}\n"
+                        f"11. end_txt: {row.get('end_txt', 'NA')}\n"
+                        f"12. iv_bin: {row.get('iv_bin', 'NA')}\n"
+                        f"13. iv_var: {row.get('iv_var', 'NA')}\n"
+                        f"14. iv_sec: {row.get('iv_sec', 'NA')}\n"
+                        f"15. iv_txt: {row.get('iv_txt', 'NA')}\n"
+                        f"16. rain_bin: {row.get('rain_bin', 'NA')}\n"
+                        f"17. rain_var: {row.get('rain_var', 'NA')}\n"
+                        f"18. rain_sec: {row.get('rain_sec', 'NA')}\n"
+                        f"19. rain_txt: {row.get('rain_txt', 'NA')}\n"
                     ).strip()
 
-                    data_entries.append({"messages": messages, "reference_answer": reference_answer})
-
-                break  # stop trying other encodings if we succeeded
-
+                    # New: format for OpenAI chat fine-tuning, assistant last
+                    data_entries.append({
+                        "messages": [
+                            {"role": "user", "content": user_content},
+                            {"role": "assistant", "content": reference_answer}
+                        ]
+                    })
+                break  # success, stop trying encodings!
         except UnicodeError as e:
             print(f"Failed to read with encoding {encoding}: {e}")
         except Exception as e:
             print(f"An unexpected error occurred with encoding {encoding}: {e}")
-
     else:
         print("Unable to read the CSV file with the tried encodings.")
         return
 
-    # Preview a few samples before writing
-    print("\nPreview of the first 3 data entries before writing to files:\n")
+    # Preview samples before split
+    print("\nPreview of first 3 data entries (OpenAI format):\n")
     for i, entry in enumerate(data_entries[:3]):
         print(f"Entry {i + 1}:")
         print(json.dumps(entry, indent=4, ensure_ascii=False))
         print('-' * 80)
 
-    # Shuffle & split
+    # Shuffle and split
     random.seed(seed)
     random.shuffle(data_entries)
     total_entries = len(data_entries)
@@ -119,31 +120,29 @@ def prepare_fine_tuning_data(csv_input_path, training_output_path, validation_ou
     training_data = data_entries[:training_size]
     validation_data = data_entries[training_size:]
 
-    # Ensure output dirs exist
+    # Ensure output directories exist
     os.makedirs(os.path.dirname(training_output_path), exist_ok=True)
     os.makedirs(os.path.dirname(validation_output_path), exist_ok=True)
 
-    # Write JSONL
+    # Write JSONL files in OpenAI format
     with open(training_output_path, 'w', encoding='utf-8') as train_file:
         for entry in training_data:
             json.dump(entry, train_file, ensure_ascii=False)
             train_file.write('\n')
-
     with open(validation_output_path, 'w', encoding='utf-8') as val_file:
         for entry in validation_data:
             json.dump(entry, val_file, ensure_ascii=False)
             val_file.write('\n')
 
-    print(f"Training data has been written to {training_output_path}")
-    print(f"Validation data has been written to {validation_output_path}")
+    print(f"Training data written to {training_output_path}")
+    print(f"Validation data written to {validation_output_path}")
 
-    # Optional: quick lint so you catch format issues early
     lint_jsonl(training_output_path)
     lint_jsonl(validation_output_path)
 
 
 def lint_jsonl(path, max_checks=50):
-    """Basic RFT format lint: last message not assistant; has reference_answer; messages non-empty."""
+    """Quick format check for generated JSONL files."""
     try:
         with open(path, 'r', encoding='utf-8') as f:
             for i, line in enumerate(f, 1):
@@ -151,14 +150,11 @@ def lint_jsonl(path, max_checks=50):
                     break
                 obj = json.loads(line)
                 msgs = obj.get("messages", [])
-                assert isinstance(msgs, list) and len(msgs) >= 1, f"{path} item {i}: messages missing/empty"
-                assert msgs[-1].get("role") != "assistant", f"{path} item {i}: last message is assistant"
-                assert "reference_answer" in obj, f"{path} item {i}: missing reference_answer"
-                assert isinstance(obj["reference_answer"], str) and obj["reference_answer"].strip(), f"{path} item {i}: empty reference_answer"
+                assert isinstance(msgs, list) and len(msgs) >= 2, f"{path} item {i}: should have at least 2 messages"
+                assert msgs[-1].get("role") == "assistant", f"{path} item {i}: last message is not assistant"
         print(f"Lint OK (checked first {min(i, max_checks)} items): {path}")
     except Exception as e:
         print(f"Lint FAILED for {path}: {e}")
-
 
 def preview_jsonl_file(file_path, num_entries=3):
     print(f"\nPreviewing the first {num_entries} entries of {file_path}:\n")
@@ -175,12 +171,12 @@ def preview_jsonl_file(file_path, num_entries=3):
     except Exception as e:
         print(f"An error occurred while previewing the file: {e}")
 
-
-# paths:
+# File paths (update as needed)
 csv_input_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/train_80.csv'
 training_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/training.jsonl'
 validation_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/validation.jsonl'
 
+# Run preprocessing and preview
 prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path)
-preview_jsonl_file(training_output_path, num_entries=30)
-preview_jsonl_file(validation_output_path, num_entries=30)
+preview_jsonl_file(training_output_path, num_entries=3)
+preview_jsonl_file(validation_output_path, num_entries=3)
