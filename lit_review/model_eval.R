@@ -23,11 +23,11 @@ model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-Universityof
 # clean the 'ptitle' column to lowercase and convert encoding to UTF-8
 human_data_clean <- human_data %>%
   rename(
-    ptitle = `paper title`,
-    rainmet = `rainfall metric`,
-    endog = `endogenous variable(s)`,
-    depen = `dependent variables`,
-    iv = `instrumental variable(s)`
+    ptitle = `title`,
+    rainmet = `rain_var`,
+    endog = `end_var`,
+    depen = `dep_var`,
+    iv = `iv_var`
   ) %>%
   mutate(
     filename_human = filename,  # Preserve original human filename
