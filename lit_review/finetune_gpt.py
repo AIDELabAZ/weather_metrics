@@ -5,86 +5,97 @@ from openai import OpenAI
 import re
 
 # Initialize the OpenAI client
-client = OpenAI(api_key='key')
+client = OpenAI(api_key="sk-proj-1Q-06WNGnoiu4s3uli2i9zy85kQ0N0ciyOUR48oMgqjLr969Y6bqEygF12eRQaUl3z0cVMvrriT3BlbkFJ2MHImOCAsaR3EUGxTdkhVLgvHavxL_ON7-yp8hK9ZfDg3oyDnyaaymDlWy57aXjmAHRu45PsAA")
 
 # Fine-tuned model ID
-fine_tuned_model_id = 'ft:gpt-4.1-mini-2025-04-14:aide-lab:dec-trial:ClgWlRST'
+fine_tuned_model_id = "ft:gpt-4.1-mini-2025-04-14:aide-lab:dec-trial:ClgWlRST"
 
+# -------------------------------------------------------------------
 # List of questions with full dependency chain
+# -------------------------------------------------------------------
 questions = [
-    {"key": "Paper Title",
-     "question": "Concept (what to look for): You are given the text of an academic article. Your task is to identify the article's exact title as it appears in the document. Extraction instructions (how to find and clean the variable): Look: Look for the title at the top of the first page. Look for the main, standalone heading that appears before the authors' names and/or the abstract and is visually prominent (e.g., largest heading, centered, or bolded). Ignore running headers, journal names, and later section headings (e.g., \"1 Introduction\"). Include: Include the full main title text, including any subtitle that is part of the same heading (e.g., separated by a colon or dash). Use the wording, spelling, punctuation, and capitalization as they appear in the document (aside from footnote markers). Do not include: Do not include author names or affiliations; journal name, volume/issue, or page numbers; running heads or series names; section titles (e.g., \"Abstract\", \"Introduction\"); or footnote markers/symbols attached to the title (e.g., *, †, ‡, numeric superscripts). Extract: Extract the title as the main standalone heading near the top of the first page that precedes the author list and/or the abstract. Remove any footnote markers or symbols attached to the title text. Perform all reasoning about locating and confirming the title internally. Do not write your reasoning; output only the final title text. Assume there is always exactly one title. Output format (exact required answer form): Output only the final title text. Do not include any additional text, labels, quotes, or explanation. Output exactly one line containing the title."},
-    {"key": "DOI",
-     "question": "Concept (what to look for): You are given material from an academic article. Your task is to extract the Digital Object Identifier (DOI) of the focal article (version of record). Extraction instructions (how to find and clean the variable): Look: Look through the document for DOI-like strings, especially: near the article's front matter (first page, header/footer, citation block, or journal info); near phrases or labels such as DOI:, doi:, https://doi.org/, http://dx.doi.org/; near strings matching the typical DOI pattern: starting with 10. followed by digits and / (e.g., 10.1016/j.jpubeco.2020.104123). Ignore DOIs that appear only in the reference list, unless there is clear indication they refer to this article's own citation block (not just a cited reference). Include: Include only the DOI that corresponds to the focal article's version of record (i.e., the published article DOI from the journal/publisher). If both a preprint DOI (e.g., arXiv, SSRN) and a published DOI exist, choose the published DOI. If multiple DOIs are visible, select the one that matches the article's title, authors, journal, and year. Prefer the full publisher DOI over any shortDOI or shortened form. Do not include: Do not include DOIs from references that only refer to other articles; DOIs for datasets, figures, supplements, appendices, errata, corrigenda, retractions, or preprints when a published DOI exists; ShortDOIs or preprint identifiers if a full published DOI is present; or any DOI that clearly does not match the focal article's title/authors/journal/year. Extract: Extract the focal article's DOI and normalize it by: stripping any URL wrappers (e.g., remove prefixes such as doi:, DOI:, https://doi.org/, http://dx.doi.org/, etc.); removing extra whitespace and line-break hyphenation; and removing trailing punctuation (e.g., ., ,, ; at the end of the DOI). Convert the DOI to lowercase. Ensure the output is in canonical DOI form (e.g., 10.xxxx/xxxxx with no spaces). Perform all reasoning and disambiguation internally; do not show your reasoning. Output format (exact required answer form): Output exactly one token: either the normalized DOI string (e.g., 10.1016/j.jpubeco.2020.104123), or exactly n/a if no DOI exists for the focal article. Do not include any additional text, labels, quotes, or explanation. No leading or trailing spaces, and no line breaks beyond the single line containing that token."},
-    {"key": "Dependent Variables",
-     "question": "Concept (what to look for): You are analyzing an academic article. In this task, you must determine what the dependent (outcome) variable(s) are in the article's main regression model(s). List the dependent (outcome) variable(s) used in the article's main regression model(s). The dependent variable is the left-hand-side outcome being explained; it is not the treatment, instrument, control, covariate, mediator, moderator, fixed effect, or any right-hand-side regressor. There will always be at least one dependent variable whenever the article contains empirical statistical analysis. Extraction instructions (how to find and clean the variable): Look: Look for the dependent (outcome) variable(s) in the main text describing the empirical model; the left-hand side of equations; column headers or labels in the primary regression tables in the main results section. Use only evidence from the article itself (not your prior knowledge). Include: Include additional outcomes only if they are explicitly analyzed as main outcomes (not merely robustness or ancillary checks). If the same outcome appears across multiple specifications, samples, or model variants, list it once. If there are multiple distinct main outcome variables, list each distinct main outcome once. Do not include: Do not include first-stage outcomes in IV models, treatment assignment indicators, event-study dynamic coefficients, exposure variables, instruments, controls, or fixed effects. Extract: Extract the name of the dependent variable(s) as it appears on the left-hand side of equations or as the column label/header in regression tables. Output the name of the dependent variable, not purely symbolic notation (e.g., do not output y_it if that is the symbol used to represent the dependent variable). Remove transformations that are part of the left-hand-side specification. For example, if the dependent variable is \"ln(wage)\", then output \"wage\". If the dependent variable is \"log income\", then output \"income\". If the dependent variable is \"Δ GDP\", then output \"gdp\". Remove measurement units or clarifying parentheses that are not part of the core name. For example, drop \"(per 1,000)\", \"(in 2015 USD)\", \"(kg/ha)\", \"(monthly)\", \"(per capita)\". You may make minor simplifications or generalizations to the name of the dependent variable, as long as you are consistent. For example, if the dependent variable is \"maize yield\", you can output just \"yield\". If the dependent variable is \"per capita water consumption\", you can output either \"water consumption\" or \"water demand\". If the dependent variable is \"investment in formal education\", you can output just \"education\". If the dependent variable is \"child stunting\" or some other specific measure of child health, you can output just \"child health\". The key rule when making simplifications or generalizations is that similar variables across different articles should be given the same normalized name. For example, if two articles have \"maize production\" as the dependent variable, do not call this \"agricultural production\" for one article and \"yield\" for another article. Perform all reasoning and intermediate steps internally and use only the article content plus the normalization rules specified in this prompt. Output format (exact required answer form): Return only the name(s) of the dependent variable(s), with no commentary, no quotes, and no extra text and separate multiple names with semicolons and a single space after each semicolon. Print everything in lower case. If there is more than one distinct main outcome or dependent variable, separate them with semicolons, with a single space after each semicolon. For example: wage; employment; child health. Do not repeat the same dependent variable more than once. Do not include any variables that are not the dependent variable or main outcome variable (i.e., do not include independent variables, endogenous variables, instruments, control variables, etc.). Your final output must be exactly one line containing the normalized dependent variable name, or a semicolon-separated list of such names, in lower case, with nothing else."},
-    {"key": "Endogenous Variable(s)",
-     "question": "You are analyzing an academic article. In this task, you must determine which explanatory variable(s) the authors explicitly treat as endogenous in the main empirical analysis. Extraction instructions (how to find and clean the variable): Look: Look for sections such as \"Empirical Strategy\", \"Identification Strategy\", \"Econometric Model\", \"Instrumental Variables\", \"Estimation\", \"Methodology\", \"Data and Methods\", and \"Results\". Look for phrases like \"we treat X as endogenous\", \"X is endogenous\", \"we instrument X\", \"X is instrumented\", or references to first-stage regressions, reduced-form equations, excluded instruments, and weak-instrument tests (e.g., Kleibergen-Paap). Also look for descriptions of IV/2SLS/3SLS, IV-Probit, GMM, control-function approaches, or two-stage residual inclusion that clearly specify which regressor(s) are considered endogenous. Include: Include every explanatory variable that the authors explicitly treat as endogenous in any of the main empirical specifications, even if they later address the endogeneity with instruments or other methods. These are regressors whose endogeneity motivates the identification strategy and are described as being instrumented, treated as endogenous, or tested for endogeneity in the main analysis. If multiple distinct endogenous variables are used, include each variable once. Do not include: Do not include the dependent variable, the instruments themselves, controls or covariates treated as exogenous, generic phrases (e.g., \"endogenous regressor\" without a specific variable name), or variables that appear only in robustness checks or minor ancillary specifications. Do not return randomized treatment or variables that are \"as good as randomly determined\" (for example, rainfall, precipitation, other weather variables or events, or natural phenomena). Do not base inclusion on other articles or references; use only this article's own content (main text, tables, figures, appendices). Extract: Extract the specific name of each endogenous variable as described in the article's text, equations, or tables. Output the name of the endogenous variable, not purely symbolic notation (e.g., do not output x_it if that is the symbol used to represent the endogenous variable). Remove transformations that are part of the right-hand-side specification. For example, if the endogenous variable is \"ln(fertilizer)\", then output \"fertilizer\". If the endogenous variable is \"log income\", then output \"income\". If the endogenous variable is \"Δ mortality\", then output \"mortality\". Remove measurement units or clarifying parentheses that are not part of the core name. For example, drop \"(per 1,000)\", \"(in 2015 USD)\", \"(kg/ha)\", \"(monthly)\", \"(per capita)\". You may make minor simplifications or generalizations to the name of the endogenous variable, as long as you are consistent. For example, if the endogenous variable is \"adoption of hybrid seed\", you can output just \"seed\". If the endogenous variable is \"exports of soy\", you can output just \"agricultural exports\". If the endogenous variable is \"share of households with a migrant\", you can output just \"migration\". If the endogenous variable is \"household dietary diversity score\" or some other specific measure of food consumption, you can output just \"nutrition\". The key rule when making simplifications or generalizations is that similar variables across different articles should be given the same normalized name. For example, if two articles have \"adoption of conservation agriculture\" as the endogenous variable, do not call this \"agricultural technology adoption\" for one article and \"conservation agriculture\" for another article. Perform all reasoning and intermediate steps internally and use only the article content plus the normalization rules specified in this prompt. Output format (exact required answer form): Return only the name(s) of the endogenous variable(s), with no commentary, no quotes, and no extra text and separate multiple names with semicolons and a single space after each semicolon. Print everything in lower case. If there is more than one distinct endogenous variable, separate them with semicolons, with a single space after each semicolon. For example: price; conflict; prenatal care. Do not repeat the same endogenous variable more than once. Do not include any non-endogenous variables (i.e., do not include the dependent variable, instruments, control variables, etc.). Your final output must be exactly one line containing the normalized endogenous variable name, or a semicolon-separated list of such names, in lower case, with nothing else."},
-    {"key": "Instrumental Variable Used",
-     "question": " Concept (what to look for): You are analyzing an academic article. In this task, you must determine whether the article uses an instrumental variable (IV) regression method to address endogeneity. Instrumental variable methods use excluded instruments in a formal IV framework (e.g., IV/2SLS/TSLS/LIML/3SLS, IV-Probit/IV-Logit/IV-Tobit, control-function or two-stage residual inclusion, dynamic panel GMM such as Arellano-Bond/Bover/Blundell-Bond, or other GMM/endogenous switching models that explicitly rely on instruments). Extraction instructions (how to determine if the concept is present): Look: Look for sections such as \"Empirical Strategy\", \"Identification Strategy\", \"Econometric Model\", \"Instrumental Variables\", \"Estimation\", \"Methodology\", \"Data\", \"Methods\", and \"Results\". Look in the text, equations, and regression tables (including appendices). Search for terms and phrases like \"instrument\", \"instrumented\", \"instrumental variable\", \"IV\", \"2SLS\", \"two-stage least squares\", \"LIML\", \"3SLS\", \"dynamic panel\", \"Arellano-Bond\", \"Blundell-Bond\", \"endogenous switching\", \"first stage\", \"reduced form\", \"excluded instrument\", \"exclusion restriction\", and for discussion of weak-instrument tests (e.g., Kleibergen-Paap, Cragg-Donald, Stock-Yogo) or overidentification tests (e.g., Sargan, Hansen J, Anderson-Rubin). Ignore non-statistical uses of the word \"instrument\" (e.g., survey instrument, measurement instrument). Classify: Classify the article as using instrumental-variable regression if any empirical specification in the article (main analysis, robustness, or appendix) actually implements an IV-type estimator with excluded instruments. This includes cases where the authors: (i) present an explicit first-stage equation or instrument set; (ii) describe using IV/2SLS/TSLS/LIML/3SLS, IV-Probit/IV-Logit/IV-Tobit, control-function or two-stage residual inclusion, or dynamic panel GMM estimators that rely on instruments; or (iii) discuss instrument relevance and exclusion restrictions and report weak-instrument or overidentification diagnostics for their own estimations. Do not classify: Do not classify the article as using instrumental variable regression based only on generic mentions of IV or GMM in literature reviews, theory sections, background discussions, or references to other articles or other datasets. Do not classify as IV if the article only employs other identification strategies without an IV first stage or instrument set, such as randomized controlled trials (without any IV for noncompliance), RDD, DiD, event studies, fixed effects only, controls/matching, or Heckman selection models that do not rely on excluded instruments. Do not treat lags used merely as controls, or trend terms, as evidence of IV use. Extract: Carefully evaluate the discussion of the main empirical model and identification strategy. Be deliberative and strict: confirm that the authors implement an instrumental variable method with excluded instruments, rather than merely discussing instruments and why they are not needed or used. Perform all reasoning internally and do not describe it in your output. Output format (exact required answer form): Output 1 if the article uses an IV to address the endogeneity problem in this sense (i.e., the endogenous regressor is instrumented with a variable that satisfies the exclusion restriction). Output 0 if it does not. Output exactly one character, either 1 or 0, with no additional text, spaces, or explanation. If you output 0, then in the broader task all subsequent fields for this article should be treated as n/a and you should move on to the next article."},
-    {"key": "Instrumental Variable(s)",
-     "question": "Only proceed if the previous question \"Instrumental Variable Regression\" was answered 1 (yes, the article uses an instrumental variable regression method to deal with the endogeneity problem). Concept (what to look for): You are analyzing an academic article. In this task, you must identify the specific variable(s) that are used as instrumental variables (excluded instruments) in the main instrumental variable analysis. Extraction instructions (how to find and clean the variable): Look: Look for sections such as \"Empirical Strategy\", \"Identification Strategy\", \"Econometric Model\", \"Instrumental Variables\", \"Estimation\", \"Methodology\", \"Data\", \"Methods\", and \"Results\", including tables and appendices that report first-stage or reduced-form results. Look for phrases like \"we instrument X with Z\", \"Z is our instrument\", \"Z serves as an excluded instrument\", \"Z satisfies the exclusion restriction\", \"first-stage regression\", \"excluded variable\", or \"instrument set\". Examine first-stage or reduced-form equations and any regression tables labeled as first-stage, reduced-form, or IV results for explicit listings of instruments. Include: Include each variable that the authors explicitly describe as an instrument, excluded instrument, or first-stage regressor used to identify an endogenous variable in the main IV analysis. These are variables that enter the first stage but are excluded from the structural equation and are described as providing exogenous variation for the endogenous regressor(s). They are also described as satisfying the \"exclusion restriction\". If multiple distinct main instruments are used, include each instrument once. Do not include: Do not include the dependent variable, the endogenous regressor(s) themselves, standard controls/covariates treated as exogenous, fixed effects, time trends, or lags used only as controls. Do not include design features from non-IV strategies (e.g., DiD indicators, RDD running variables or cutoffs, event-study dummies, matching variables) that are not described as instruments. Do not include variables that appear only in robustness checks or ancillary specifications unless they are clearly described as part of the main IV identification strategy. Do not include exogenous variables that serve as their own instrument and are included in both the first- and second-stage regressions. We are only interested in the excluded instrument. Do not use generic phrases such as \"the instruments\" or \"excluded variables\" without specific variable names. Extract: Extract the specific variable name of each excluded instrument as described in the article's text, equations, or tables. Output the name of the instrumental variable(s), not purely symbolic notation (e.g., do not output z_it if that is the symbol used to represent the IV). Remove transformations that are part of the right-hand-side specification for the first-stage. For example, if the IV is \"ln(rainfall)\", then output \"rainfall\". If the IV is \"log distance\", then output \"distance\". If the IV is \"Δ prices\", then output \"prices\". Remove measurement units or clarifying parentheses that are not part of the core name. For example, drop \"(per 1,000)\", \"(in 2015 USD)\", \"(kg/ha)\", \"(monthly)\", \"(mm)\". You may make minor simplifications or generalizations to the name of the IV, as long as you are consistent. For example, if the IV is \"global commodity price index\", you can output just \"price\". If the IV is \"distance from country border\", you can output just \"distance\". If the IV is \"value of farm assets\", you can output just \"assets\". If the IV is \"mean rainfall, total rainfall, and maximum temperature\" or some other specific measures of weather, you can output just \"rainfall; temperature\" (except when applying the specialized rules in the \"Rainfall Variable(s)\" prompt). The key rule when making simplifications or generalizations is that similar variables across different articles should be given the same normalized name. For example, if two articles have \"investment in agricultural research\" as the IV, do not call this \"agricultural research\" for one article and \"investment in research\" for another article. Perform all reasoning and intermediate steps internally and use only the article content plus the normalization rules specified in this prompt. Output format (exact required answer form): Return only the name(s) of the instrumental variable(s), with no commentary, no quotes, and no extra text and separate multiple names with semicolons and a single space after each semicolon. Print everything in lower case. If there is more than one distinct instrumental variable, separate them with semicolons, with a single space after each semicolon. For example: rainfall; distance; price shock. Do not repeat the same instrumental variable more than once. Do not include any variables that are not excluded instruments (i.e., do not include the dependent variable, endogenous variables, control variables, variables that serve as their own instrument, etc.). Your final output must be exactly one line containing the normalized instrumental variable name, or a semicolon-separated list of such names, in lower case, with nothing else.",
-     "dependency": {"key": "Instrumental Variable Used", "value": "1"}},
-    {"key": "Instrumental Variable Rainfall",
-     "question": "Only proceed if the previous question \"Instrumental Variable Regression\" was answered 1 (the article uses an instrumental variable regression method to deal with the endogeneity problem). Concept (what to look for): You are analyzing an academic article. In this task, you must determine whether any of the excluded instruments used in the article's instrumental variable framework are based on rainfall or precipitation. Extraction instructions (how to determine if the concept is present): Look: Look for sections such as \"Empirical Strategy\", \"Identification Strategy\", \"Instrumental Variables\", \"IV Strategy\", \"Econometric Model\", \"Estimation\", \"Methodology\", \"Data\", \"Methods\", and \"Results\", including tables and appendices with first-stage or IV results. Look for (i) explicit descriptions of instruments that clearly mention rainfall or precipitation; (ii) terms like \"rainfall\", \"precipitation\", \"rain\", \"snow\", \"drought\", \"monsoon rainfall\", \"dry season rainfall\", \"rainfall shock\", or \"weather shocks\" tied specifically to precipitation; (iii) precipitation-derived indices such as rainfall level, deviations, shocks, anomalies, standardized or cumulative precipitation, wet-day counts, precipitation intensity, drought or wetness indices (e.g., SPI, SPEI, PDSI, scPDSI), or any index explicitly constructed from precipitation. Combine this with evidence of IV use: words like \"instrument\", \"instrumental variable\", \"excluded instrument\", \"first stage\", \"2SLS\", \"IV-Probit\", \"GMM with instruments\", \"control-function\", \"2SRI\", and discussion of weak-instrument diagnostics (e.g., Kleibergen-Paap, Cragg-Donald, Stock-Yogo) or overidentification tests (e.g., Sargan, Hansen J, Anderson-Rubin). Classify: Classify the article as using a rainfall (or precipitation-based) instrument if any specification in the article (main analysis, robustness, or appendix) explicitly uses rainfall or a precipitation-derived measure as an excluded instrument in a first-stage/IV framework. Qualifying precipitation instruments include, for example: rainfall level, rainfall deviations or shocks, rainfall anomalies, standardized precipitation, cumulative rainfall, wet-day counts, precipitation intensity, drought or wetness indices (SPI, SPEI, PDSI, scPDSI), monsoon rainfall, snowfall, snowpack or SWE, or any index the article explicitly constructs from precipitation and uses as an excluded instrument. Do not classify: Do not classify the article as using a rainfall instrument if precipitation appears only as: (i) a regressor, control, interaction term, exposure, or outcome; or (ii) part of non-IV designs like reduced-form regressions, DiD, event studies, RDD, matching, or OLS/fixed-effects models without an IV first stage. Do not count rainfall or precipitation if it is the endogenous variable being instrumented by non-precipitation instruments. Do not count broad climate indices (e.g., ENSO) unless the text explicitly states that they are constructed from or directly represent precipitation and are used as the excluded instrument. Ignore mentions of precipitation-based instruments in other articles or datasets; use only this article's own IV specifications. Extract: Carefully evaluate the discussion of rainfall or precipitation-based variables and how they relate to the excluded instrument. Be deliberative and strict: confirm that the authors use rainfall as the excluded instrumental variable that is described as satisfying the exclusion restriction, rather than merely discussing that rainfall could be used as an instrument and why they are not using it or are just using rainfall as a control or as an instrument for itself. Perform all reasoning internally and do not describe it in your output. Output format (exact required answer form): Output 1 if the article uses rainfall or some measure of precipitation as the excluded instrument in first-stage IV regression to address the endogeneity problem in this sense (i.e., the endogenous regressor is instrumented with a variable that measures precipitation and satisfies the exclusion restriction). Output 0 if it does not. Output exactly one character, either 1 or 0, with no additional text, spaces, or explanation. If you output 0, then in the broader task all subsequent fields for this article should be treated as n/a and you should move on to the next article.",
-     "dependency": {"key": "Instrumental Variable Used", "value": "1"}},
-    {"key": "Rainfall Metric",
-     "question": "Only proceed if the previous question \"Rainfall Instrument\" was answered 1 (the article uses at least one rainfall- or precipitation-based variable as the excluded instrument). Concept (what to look for): You are analyzing an academic article. In this task, you must identify the specific rainfall or precipitation-based variable(s) that are used as instrumental variables (excluded instruments) in the main instrumental variable analysis. Extraction instructions (how to find and clean the variable): Look: Look at sections such as \"Empirical Strategy\", \"Identification Strategy\", \"Instrumental Variables\", \"IV Strategy\", \"Econometric Model\", \"Estimation\", \"Methodology\", \"Data\", \"Methods\", and \"Results\", including tables and appendices with first-stage or IV results. Look for phrases like \"we instrument X with rainfall\", \"rainfall is our instrument\", \"precipitation index serves as an excluded instrument\", or similar constructions. Examine first-stage or reduced-form equations and any regression tables labeled as first-stage, reduced-form, or IV results for explicit precipitation-based instruments. Pay special attention to variable names that reference rainfall, precipitation, drought, wetness, or related indices (e.g., \"total annual rainfall\", \"standard deviation of rainfall\", \"mean daily rainfall\", \"monsoon rainfall\", \"monsoon onset\", \"deviations in rainfall\", \"below average rainfall\", \"z-score of rainfall\", \"coefficient of variation in rainfall\"). Include: Include each variable that is (i) explicitly described as an excluded instrument or first-stage regressor, and (ii) clearly based on rainfall or precipitation (including derived precipitation indices such as rainfall level, deviations, shocks, anomalies, standardized or cumulative precipitation, wet-day counts, precipitation intensity, and drought or wetness indices like SPI, SPEI, PDSI, scPDSI, monsoon rainfall, snowfall, snowpack, SWE, or other indices explicitly constructed from precipitation). If multiple distinct rainfall/precipitation instruments are used in the first-stage regression, include each one once. Do not include: Do not include non-precipitation instruments (e.g., distance, policy eligibility, prices) even if they appear in the same instrument set. Do not include precipitation variables used only as controls, exposures, or outcomes rather than excluded instruments. Do not include precipitation variables that appear only in non-IV designs (e.g., reduced-form regressions, DiD, event studies, RDD, matching, or OLS/fixed-effects without an IV first stage). Do not include non-precipitation-based weather instruments (e.g., temperature, wind, growing degree days (GDD), soil quality). Do not include generic phrases like \"rainfall instruments\" without specific variable names. Do not base inclusion on references to rainfall instruments in other articles; use only this article's own IV specification. Extract: Extract the specific variable name as described in the article's text, equations, or tables. Output the descriptive name of the rainfall metric, not just symbolic notation (e.g., do not output z_it; instead output the underlying rainfall variable it represents). Remove transformations that are part of the right-hand-side specification in the first-stage. For example, if the rainfall IV is \"ln(total seasonal rainfall)\", then output \"total seasonal rainfall\". If the rainfall IV is \"log mean annual rainfall\", then output \"mean annual rainfall\". If the rainfall IV is \"Δ long run mean rainfall\", then output \"long run mean rainfall\". Remove measurement units or clarifying parentheses that are not part of the core name. For example, drop \"(mm)\". As with \"Dependent Variable(s)\", \"Endogenous Variable(s)\", \"Instrumental Variable(s)\", you can make minor generalizations to the name of the rainfall IV, as long as you are consistent. For example, if the rainfall IV is \"annual standardized rainfall deviation from the long-term\", you can generalize the output to \"rainfall z-score\". If the rainfall IV is \"per cent deviations of 2011 annual rainfall\", you can generalize the output to \"deviations in annual rainfall\". If the rainfall IV is \"rainfall on election day in mm\", you can generalize the output to \"total daily rainfall\". If the rainfall IV is \"The 2005 and 2006 annual rainfall levels, the rainfall deviations from 1988 to 2005,\" you can generalize the output to \"total annual rainfall; deviations in annual rainfall\". However, unlike with \"Dependent Variable(s)\", \"Endogenous Variable(s)\", \"Instrumental Variable(s)\" do not make simplifications to the name of the rainfall IV that drop the rainfall statistic or the time scale. For example, if the rainfall IV is \"mean annual rainfall\", do not simplify to \"mean rainfall\" or \"annual rainfall\". If the rainfall IV is \"total seasonal rainfall\", do not simplify to \"total rainfall\" or \"seasonal rainfall\". If the rainfall IV is \"deviations in annual rainfall\", do not simplify to \"rainfall shocks\". If the rainfall IV is \"mean monthly rainfall, total monthly rainfall, and maximum monthly temperature\" do not simplify to \"mean rainfall; total rainfall\" or \"monthly rainfall\". Both the rainfall statistic (i.e., mean, standard deviation, total, z-score, negative deviations, coefficient of variation) and the time scale (i.e., daily, monthly, seasonal, annual) should be preserved in the name. The key rule when making generalizations while preserving the relevant rainfall statistic (for example, mean, total, z-score) and time scale (for example, daily, monthly, seasonal, annual) is that similar variables across different articles should be given the same normalized name. For example, if two articles have \"the mean of January-March rainfall and average rainfall in this three-month window that negatively differs from the historic average\" as the rainfall IVs, do not call this \"mean rainfall; deviations in rainfall\" for one article and \"seasonal rainfall; seasonal deviations\" for another article. In this case, the rainfall IVs should be listed as \"mean seasonal rainfall; negative deviations in seasonal rainfall\". Perform all reasoning and intermediate steps internally and use only the article content plus the normalization rules specified in this prompt. Output format (exact required answer form): Return only the name(s) of the rainfall instrumental variable(s), with no commentary, no quotes, and no extra text and separate multiple names with semicolons and a single space after each semicolon. Print everything in lower case. If there is more than one distinct rainfall IV, separate them with semicolons, with a single space after each semicolon. For example: mean seasonal rainfall; standard deviation of seasonal rainfall; z-score of annual rainfall. Do not repeat the same rainfall IV more than once. Do not include any variables that are not excluded rainfall instruments (i.e., do not include non-precipitation-based instruments, dependent variables, endogenous variables, control variables, variables that serve as their own instrument, etc.). Your final output must be exactly one line containing the normalized rainfall instrumental variable name, or a semicolon-separated list of such names, in lower case, with nothing else.",
-     "dependency": {"key": "Instrumental Variable Rainfall", "value": "1"}},
-    {"key": "Rainfall Data Source",
-     "question": "What is the source of the rainfall data used in the study? Identify and report the exact source of the rainfall/precipitation data used as the instrument: name the dataset or provider (e.g., CHIRPS, TRMM, ERA5, NOAA station records, Indian Meterological Department). Please give me the source of the rainfall data without any additional words or numbers. If rainfall is used as an instrumental variable, the data must come from a specific source (e.g., a satellite or organization). Please find the origin of the rainfall data that was used. Please only provide the source of the rainfall data, without the title of the question or any additional words.",
-     "dependency": {"key": "Instrumental Variable Rainfall", "value": "1"}}
+    {
+        "key": "Paper Title",
+        "question": "Concept (what to look for): You are given the text of an academic article. Your task is to identify the article's exact title as it appears in the document. Extraction instructions (how to find and clean the variable): Look: Look for the title at the top of the first page. Look for the main, standalone heading that appears before the authors' names and/or the abstract and is visually prominent (e.g., largest heading, centered, or bolded). Ignore running headers, journal names, and later section headings (e.g., \"1 Introduction\"). Include: Include the full main title text, including any subtitle that is part of the same heading (e.g., separated by a colon or dash). Use the wording, spelling, punctuation, and capitalization as they appear in the document (aside from footnote markers). Do not include: Do not include author names or affiliations; journal name, volume/issue, or page numbers; running heads or series names; section titles (e.g., \"Abstract\", \"Introduction\"); or footnote markers/symbols attached to the title (e.g., *, †, ‡, numeric superscripts). Extract: Extract the title as the main standalone heading near the top of the first page that precedes the author list and/or the abstract. Remove any footnote markers or symbols attached to the title text. Perform all reasoning about locating and confirming the title internally. Do not write your reasoning; output only the final title text. Assume there is always exactly one title. Output format (exact required answer form): Output only the final title text. Do not include any additional text, labels, quotes, or explanation. Output exactly one line containing the title."
+    },
+    {
+        "key": "DOI",
+        "question": "Concept (what to look for): You are given material from an academic article. Your task is to extract the Digital Object Identifier (DOI) of the focal article (version of record). Extraction instructions (how to find and clean the variable): Look: Look through the document for DOI-like strings, especially: near the article's front matter (first page, header/footer, citation block, or journal info); near phrases or labels such as DOI:, doi:, https://doi.org/, http://dx.doi.org/; near strings matching the typical DOI pattern: starting with 10. followed by digits and / (e.g., 10.1016/j.jpubeco.2020.104123). Ignore DOIs that appear only in the reference list, unless there is clear indication they refer to this article's own citation block (not just a cited reference). Include: Include only the DOI that corresponds to the focal article's version of record (i.e., the published article DOI from the journal/publisher). If both a preprint DOI (e.g., arXiv, SSRN) and a published DOI exist, choose the published DOI. If multiple DOIs are visible, select the one that matches the article's title, authors, journal, and year. Prefer the full publisher DOI over any shortDOI or shortened form. Do not include: Do not include DOIs from references that only refer to other articles; DOIs for datasets, figures, supplements, appendices, errata, corrigenda, retractions, or preprints when a published DOI exists; ShortDOIs or preprint identifiers if a full published DOI is present; or any DOI that clearly does not match the focal article's title/authors/journal/year. Extract: Extract the focal article's DOI and normalize it by: stripping any URL wrappers (e.g., remove prefixes such as doi:, DOI:, https://doi.org/, http://dx.doi.org/, etc.); removing extra whitespace and line-break hyphenation; and removing trailing punctuation (e.g., ., ,, ; at the end of the DOI). Convert the DOI to lowercase. Ensure the output is in canonical DOI form (e.g., 10.xxxx/xxxxx with no spaces). Perform all reasoning and disambiguation internally; do not show your reasoning. Output format (exact required answer form): Output exactly one token: either the normalized DOI string (e.g., 10.1016/j.jpubeco.2020.104123), or exactly n/a if no DOI exists for the focal article. Do not include any additional text, labels, quotes, or explanation. No leading or trailing spaces, and no line breaks beyond the single line containing that token."
+    },
+    {
+        "key": "Dependent Variables",
+        "question": "Concept (what to look for): You are analyzing an academic article. In this task, you must determine what the dependent (outcome) variable(s) are in the article's main regression model(s). List the dependent (outcome) variable(s) used in the article's main regression model(s). The dependent variable is the left-hand-side outcome being explained; it is not the treatment, instrument, control, covariate, mediator, moderator, fixed effect, or any right-hand-side regressor. There will always be at least one dependent variable whenever the article contains empirical statistical analysis. Extraction instructions (how to find and clean the variable): Look: Look for the dependent (outcome) variable(s) in the main text describing the empirical model; the left-hand side of equations; column headers or labels in the primary regression tables in the main results section. Use only evidence from the article itself (not your prior knowledge). Include: Include additional outcomes only if they are explicitly analyzed as main outcomes (not merely robustness or ancillary checks). If the same outcome appears across multiple specifications, samples, or model variants, list it once. If there are multiple distinct main outcome variables, list each distinct main outcome once. Do not include: Do not include first-stage outcomes in IV models, treatment assignment indicators, event-study dynamic coefficients, exposure variables, instruments, controls, or fixed effects. Extract: Extract the name of the dependent variable(s) as it appears on the left-hand side of equations or as the column label/header in regression tables. Output the name of the dependent variable, not purely symbolic notation (e.g., do not output y_it if that is the symbol used to represent the dependent variable). Remove transformations that are part of the left-hand-side specification. For example, if the dependent variable is \"ln(wage)\", then output \"wage\". If the dependent variable is \"log income\", then output \"income\". If the dependent variable is \"Δ GDP\", then output \"gdp\". Remove measurement units or clarifying parentheses that are not part of the core name. For example, drop \"(per 1,000)\", \"(in 2015 USD)\", \"(kg/ha)\", \"(monthly)\", \"(per capita)\". You may make minor simplifications or generalizations to the name of the dependent variable, as long as you are consistent. For example, if the dependent variable is \"maize yield\", you can output just \"yield\". If the dependent variable is \"per capita water consumption\", you can output either \"water consumption\" or \"water demand\". If the dependent variable is \"investment in formal education\", you can output just \"education\". If the dependent variable is \"child stunting\" or some other specific measure of child health, you can output just \"child health\". The key rule when making simplifications or generalizations is that similar variables across different articles should be given the same normalized name. For example, if two articles have \"maize production\" as the dependent variable, do not call this \"agricultural production\" for one article and \"yield\" for another article. Perform all reasoning and intermediate steps internally and use only the article content plus the normalization rules specified in this prompt. Output format (exact required answer form): Return only the name(s) of the dependent variable(s), with no commentary, no quotes, and no extra text and separate multiple names with semicolons and a single space after each semicolon. Print everything in lower case. If there is more than one distinct main outcome or dependent variable, separate them with semicolons, with a single space after each semicolon. For example: wage; employment; child health. Do not repeat the same dependent variable more than once. Do not include any variables that are not the dependent variable or main outcome variable (i.e., do not include independent variables, endogenous variables, instruments, control variables, etc.). Your final output must be exactly one line containing the normalized dependent variable name, or a semicolon-separated list of such names, in lower case, with nothing else."
+    },
+    {
+        "key": "Endogenous Variable(s)",
+        "question": "You are analyzing an academic article. In this task, you must determine which explanatory variable(s) the authors explicitly treat as endogenous in the main empirical analysis. Extraction instructions (how to find and clean the variable): Look: Look for sections such as \"Empirical Strategy\", \"Identification Strategy\", \"Econometric Model\", \"Instrumental Variables\", \"Estimation\", \"Methodology\", \"Data and Methods\", and \"Results\". Look for phrases like \"we treat X as endogenous\", \"X is endogenous\", \"we instrument X\", \"X is instrumented\", or references to first-stage regressions, reduced-form equations, excluded instruments, and weak-instrument tests (e.g., Kleibergen-Paap). Also look for descriptions of IV/2SLS/3SLS, IV-Probit, GMM, control-function approaches, or two-stage residual inclusion that clearly specify which regressor(s) are considered endogenous. Include: Include every explanatory variable that the authors explicitly treat as endogenous in any of the main empirical specifications, even if they later address the endogeneity with instruments or other methods. These are regressors whose endogeneity motivates the identification strategy and are described as being instrumented, treated as endogenous, or tested for endogeneity in the main analysis. If multiple distinct endogenous variables are used, include each variable once. Do not include: Do not include the dependent variable, the instruments themselves, controls or covariates treated as exogenous, generic phrases (e.g., \"endogenous regressor\" without a specific variable name), or variables that appear only in robustness checks or minor ancillary specifications. Do not return randomized treatment or variables that are \"as good as randomly determined\" (for example, rainfall, precipitation, other weather variables or events, or natural phenomena). Do not base inclusion on other articles or references; use only this article's own content (main text, tables, figures, appendices). Extract: Extract the specific name of each endogenous variable as described in the article's text, equations, or tables. Output the name of the endogenous variable, not purely symbolic notation (e.g., do not output x_it if that is the symbol used to represent the endogenous variable). Remove transformations that are part of the right-hand-side specification. For example, if the endogenous variable is \"ln(fertilizer)\", then output \"fertilizer\". If the endogenous variable is \"log income\", then output \"income\". If the endogenous variable is \"Δ mortality\", then output \"mortality\". Remove measurement units or clarifying parentheses that are not part of the core name. For example, drop \"(per 1,000)\", \"(in 2015 USD)\", \"(kg/ha)\", \"(monthly)\", \"(per capita)\". You may make minor simplifications or generalizations to the name of the endogenous variable, as long as you are consistent. For example, if the endogenous variable is \"adoption of hybrid seed\", you can output just \"seed\". If the endogenous variable is \"exports of soy\", you can output just \"agricultural exports\". If the endogenous variable is \"share of households with a migrant\", you can output just \"migration\". If the endogenous variable is \"household dietary diversity score\" or some other specific measure of food consumption, you can output just \"nutrition\". The key rule when making simplifications or generalizations is that similar variables across different articles should be given the same normalized name. For example, if two articles have \"adoption of conservation agriculture\" as the endogenous variable, do not call this \"agricultural technology adoption\" for one article and \"conservation agriculture\" for another article. Perform all reasoning and intermediate steps internally and use only the article content plus the normalization rules specified in this prompt. Output format (exact required answer form): Return only the name(s) of the endogenous variable(s), with no commentary, no quotes, and no extra text and separate multiple names with semicolons and a single space after each semicolon. Print everything in lower case. If there is more than one distinct endogenous variable, separate them with semicolons, with a single space after each semicolon. For example: price; conflict; prenatal care. Do not repeat the same endogenous variable more than once. Do not include any non-endogenous variables (i.e., do not include the dependent variable, instruments, control variables, etc.). Your final output must be exactly one line containing the normalized endogenous variable name, or a semicolon-separated list of such names, in lower case, with nothing else."
+    },
+    {
+        "key": "Instrumental Variable Used",
+        "question": " Concept (what to look for): You are analyzing an academic article. In this task, you must determine whether the article uses an instrumental variable (IV) regression method to address endogeneity. Instrumental variable methods use excluded instruments in a formal IV framework (e.g., IV/2SLS/TSLS/LIML/3SLS, IV-Probit/IV-Logit/IV-Tobit, control-function or two-stage residual inclusion, dynamic panel GMM such as Arellano-Bond/Bover/Blundell-Bond, or other GMM/endogenous switching models that explicitly rely on instruments). Extraction instructions (how to determine if the concept is present): Look: Look for sections such as \"Empirical Strategy\", \"Identification Strategy\", \"Econometric Model\", \"Instrumental Variables\", \"Estimation\", \"Methodology\", \"Data\", \"Methods\", and \"Results\". Look in the text, equations, and regression tables (including appendices). Search for terms and phrases like \"instrument\", \"instrumented\", \"instrumental variable\", \"IV\", \"2SLS\", \"two-stage least squares\", \"LIML\", \"3SLS\", \"dynamic panel\", \"Arellano-Bond\", \"Blundell-Bond\", \"endogenous switching\", \"first stage\", \"reduced form\", \"excluded instrument\", \"exclusion restriction\", and for discussion of weak-instrument tests (e.g., Kleibergen-Paap, Cragg-Donald, Stock-Yogo) or overidentification tests (e.g., Sargan, Hansen J, Anderson-Rubin). Ignore non-statistical uses of the word \"instrument\" (e.g., survey instrument, measurement instrument). Classify: Classify the article as using instrumental-variable regression if any empirical specification in the article (main analysis, robustness, or appendix) actually implements an IV-type estimator with excluded instruments. This includes cases where the authors: (i) present an explicit first-stage equation or instrument set; (ii) describe using IV/2SLS/TSLS/LIML/3SLS, IV-Probit/IV-Logit/IV-Tobit, control-function or two-stage residual inclusion, or dynamic panel GMM estimators that rely on instruments; or (iii) discuss instrument relevance and exclusion restrictions and report weak-instrument or overidentification diagnostics for their own estimations. Do not classify: Do not classify the article as using instrumental variable regression based only on generic mentions of IV or GMM in literature reviews, theory sections, background discussions, or references to other articles or other datasets. Do not classify as IV if the article only employs other identification strategies without an IV first stage or instrument set, such as randomized controlled trials (without any IV for noncompliance), RDD, DiD, event studies, fixed effects only, controls/matching, or Heckman selection models that do not rely on excluded instruments. Do not treat lags used merely as controls, or trend terms, as evidence of IV use. Extract: Carefully evaluate the discussion of the main empirical model and identification strategy. Be deliberative and strict: confirm that the authors implement an instrumental variable method with excluded instruments, rather than merely discussing instruments and why they are not needed or used. Perform all reasoning internally and do not describe it in your output. Output format (exact required answer form): Output 1 if the article uses an IV to address the endogeneity problem in this sense (i.e., the endogenous regressor is instrumented with a variable that satisfies the exclusion restriction). Output 0 if it does not. Output exactly one character, either 1 or 0, with no additional text, spaces, or explanation. If you output 0, then in the broader task all subsequent fields for this article should be treated as n/a and you should move on to the next article."
+    },
+    {
+        "key": "Instrumental Variable(s)",
+        "question": "Only proceed if the previous question \"Instrumental Variable Regression\" was answered 1 (yes, the article uses an instrumental variable regression method to deal with the endogeneity problem). Concept (what to look for): You are analyzing an academic article. In this task, you must identify the specific variable(s) that are used as instrumental variables (excluded instruments) in the main instrumental variable analysis. Extraction instructions (how to find and clean the variable): Look: Look for sections such as \"Empirical Strategy\", \"Identification Strategy\", \"Econometric Model\", \"Instrumental Variables\", \"Estimation\", \"Methodology\", \"Data\", \"Methods\", and \"Results\", including tables and appendices that report first-stage or reduced-form results. Look for phrases like \"we instrument X with Z\", \"Z is our instrument\", \"Z serves as an excluded instrument\", \"Z satisfies the exclusion restriction\", \"first-stage regression\", \"excluded variable\", or \"instrument set\". Examine first-stage or reduced-form equations and any regression tables labeled as first-stage, reduced-form, or IV results for explicit listings of instruments. Include: Include each variable that the authors explicitly describe as an instrument, excluded instrument, or first-stage regressor used to identify an endogenous variable in the main IV analysis. These are variables that enter the first stage but are excluded from the structural equation and are described as providing exogenous variation for the endogenous regressor(s). They are also described as satisfying the \"exclusion restriction\". If multiple distinct main instruments are used, include each instrument once. Do not include: Do not include the dependent variable, the endogenous regressor(s) themselves, standard controls/covariates treated as exogenous, fixed effects, time trends, or lags used only as controls. Do not include design features from non-IV strategies (e.g., DiD indicators, RDD running variables or cutoffs, event-study dummies, matching variables) that are not described as instruments. Do not include variables that appear only in robustness checks or ancillary specifications unless they are clearly described as part of the main IV identification strategy. Do not include exogenous variables that serve as their own instrument and are included in both the first- and second-stage regressions. We are only interested in the excluded instrument. Do not use generic phrases such as \"the instruments\" or \"excluded variables\" without specific variable names. Extract: Extract the specific variable name of each excluded instrument as described in the article's text, equations, or tables. Output the name of the instrumental variable(s), not purely symbolic notation (e.g., do not output z_it if that is the symbol used to represent the IV). Remove transformations that are part of the right-hand-side specification for the first-stage. For example, if the IV is \"ln(rainfall)\", then output \"rainfall\". If the IV is \"log distance\", then output \"distance\". If the IV is \"Δ prices\", then output \"prices\". Remove measurement units or clarifying parentheses that are not part of the core name. For example, drop \"(per 1,000)\", \"(in 2015 USD)\", \"(kg/ha)\", \"(monthly)\", \"(mm)\". You may make minor simplifications or generalizations to the name of the IV, as long as you are consistent. For example, if the IV is \"global commodity price index\", you can output just \"price\". If the IV is \"distance from country border\", you can output just \"distance\". If the IV is \"value of farm assets\", you can output just \"assets\". If the IV is \"mean rainfall, total rainfall, and maximum temperature\" or some other specific measures of weather, you can output just \"rainfall; temperature\" (except when applying the specialized rules in the \"Rainfall Variable(s)\" prompt). The key rule when making simplifications or generalizations is that similar variables across different articles should be given the same normalized name. For example, if two articles have \"investment in agricultural research\" as the IV, do not call this \"agricultural research\" for one article and \"investment in research\" for another article. Perform all reasoning and intermediate steps internally and use only the article content plus the normalization rules specified in this prompt. Output format (exact required answer form): Return only the name(s) of the instrumental variable(s), with no commentary, no quotes, and no extra text and separate multiple names with semicolons and a single space after each semicolon. Print everything in lower case. If there is more than one distinct instrumental variable, separate them with semicolons, with a single space after each semicolon. For example: rainfall; distance; price shock. Do not repeat the same instrumental variable more than once. Do not include any variables that are not excluded instruments (i.e., do not include the dependent variable, endogenous variables, control variables, variables that serve as their own instrument, etc.). Your final output must be exactly one line containing the normalized instrumental variable name, or a semicolon-separated list of such names, in lower case, with nothing else.",
+        "dependency": {"key": "Instrumental Variable Used", "value": "1"}
+    },
+    {
+        "key": "Instrumental Variable Rainfall",
+        "question": "Only proceed if the previous question \"Instrumental Variable Regression\" was answered 1 (the article uses an instrumental variable regression method to deal with the endogeneity problem). Concept (what to look for): You are analyzing an academic article. In this task, you must determine whether any of the excluded instruments used in the article's instrumental variable framework are based on rainfall or precipitation. Extraction instructions (how to determine if the concept is present): Look: Look for sections such as \"Empirical Strategy\", \"Identification Strategy\", \"Instrumental Variables\", \"IV Strategy\", \"Econometric Model\", \"Estimation\", \"Methodology\", \"Data\", \"Methods\", and \"Results\", including tables and appendices with first-stage or IV results. Look for (i) explicit descriptions of instruments that clearly mention rainfall or precipitation; (ii) terms like \"rainfall\", \"precipitation\", \"rain\", \"snow\", \"drought\", \"monsoon rainfall\", \"dry season rainfall\", \"rainfall shock\", or \"weather shocks\" tied specifically to precipitation; (iii) precipitation-derived indices such as rainfall level, deviations, shocks, anomalies, standardized or cumulative precipitation, wet-day counts, precipitation intensity, drought or wetness indices (e.g., SPI, SPEI, PDSI, scPDSI), or any index explicitly constructed from precipitation. Combine this with evidence of IV use: words like \"instrument\", \"instrumental variable\", \"excluded instrument\", \"first stage\", \"2SLS\", \"IV-Probit\", \"GMM with instruments\", \"control-function\", \"2SRI\", and discussion of weak-instrument diagnostics (e.g., Kleibergen-Paap, Cragg-Donald, Stock-Yogo) or overidentification tests (e.g., Sargan, Hansen J, Anderson-Rubin). Classify: Classify the article as using a rainfall (or precipitation-based) instrument if any specification in the article (main analysis, robustness, or appendix) explicitly uses rainfall or a precipitation-derived measure as an excluded instrument in a first-stage/IV framework. Qualifying precipitation instruments include, for example: rainfall level, rainfall deviations or shocks, rainfall anomalies, standardized precipitation, cumulative rainfall, wet-day counts, precipitation intensity, drought or wetness indices (SPI, SPEI, PDSI, scPDSI), monsoon rainfall, snowfall, snowpack or SWE, or any index the article explicitly constructs from precipitation and uses as an excluded instrument. Do not classify: Do not classify the article as using a rainfall instrument if precipitation appears only as: (i) a regressor, control, interaction term, exposure, or outcome; or (ii) part of non-IV designs like reduced-form regressions, DiD, event studies, RDD, matching, or OLS/fixed-effects models without an IV first stage. Do not count rainfall or precipitation if it is the endogenous variable being instrumented by non-precipitation instruments. Do not count broad climate indices (e.g., ENSO) unless the text explicitly states that they are constructed from or directly represent precipitation and are used as the excluded instrument. Ignore mentions of precipitation-based instruments in other articles or datasets; use only this article's own IV specifications. Extract: Carefully evaluate the discussion of rainfall or precipitation-based variables and how they relate to the excluded instrument. Be deliberative and strict: confirm that the authors use rainfall as the excluded instrumental variable that is described as satisfying the exclusion restriction, rather than merely discussing that rainfall could be used as an instrument and why they are not using it or are just using rainfall as a control or as an instrument for itself. Perform all reasoning internally and do not describe it in your output. Output format (exact required answer form): Output 1 if the article uses rainfall or some measure of precipitation as the excluded instrument in first-stage IV regression to address the endogeneity problem in this sense (i.e., the endogenous regressor is instrumented with a variable that measures precipitation and satisfies the exclusion restriction). Output 0 if it does not. Output exactly one character, either 1 or 0, with no additional text, spaces, or explanation. If you output 0, then in the broader task all subsequent fields for this article should be treated as n/a and you should move on to the next article.",
+        "dependency": {"key": "Instrumental Variable Used", "value": "1"}
+    },
+    {
+        "key": "Rainfall Metric",
+        "question": "Only proceed if the previous question \"Rainfall Instrument\" was answered 1 (the article uses at least one rainfall- or precipitation-based variable as the excluded instrument). Concept (what to look for): You are analyzing an academic article. In this task, you must identify the specific rainfall or precipitation-based variable(s) that are used as instrumental variables (excluded instruments) in the main instrumental variable analysis. Extraction instructions (how to find and clean the variable): Look: Look at sections such as \"Empirical Strategy\", \"Identification Strategy\", \"Instrumental Variables\", \"IV Strategy\", \"Econometric Model\", \"Estimation\", \"Methodology\", \"Data\", \"Methods\", and \"Results\", including tables and appendices with first-stage or IV results. Look for phrases like \"we instrument X with rainfall\", \"rainfall is our instrument\", \"precipitation index serves as an excluded instrument\", or similar constructions. Examine first-stage or reduced-form equations and any regression tables labeled as first-stage, reduced-form, or IV results for explicit precipitation-based instruments. Pay special attention to variable names that reference rainfall, precipitation, drought, wetness, or related indices (e.g., \"total annual rainfall\", \"standard deviation of rainfall\", \"mean daily rainfall\", \"monsoon rainfall\", \"monsoon onset\", \"deviations in rainfall\", \"below average rainfall\", \"z-score of rainfall\", \"coefficient of variation in rainfall\"). Include: Include each variable that is (i) explicitly described as an excluded instrument or first-stage regressor, and (ii) clearly based on rainfall or precipitation (including derived precipitation indices such as rainfall level, deviations, shocks, anomalies, standardized or cumulative precipitation, wet-day counts, precipitation intensity, and drought or wetness indices like SPI, SPEI, PDSI, scPDSI, monsoon rainfall, snowfall, snowpack, SWE, or other indices explicitly constructed from precipitation). If multiple distinct rainfall/precipitation instruments are used in the first-stage regression, include each one once. Do not include: Do not include non-precipitation instruments (e.g., distance, policy eligibility, prices) even if they appear in the same instrument set. Do not include precipitation variables used only as controls, exposures, or outcomes rather than excluded instruments. Do not include precipitation variables that appear only in non-IV designs (e.g., reduced-form regressions, DiD, event studies, RDD, matching, or OLS/fixed-effects without an IV first stage). Do not include non-precipitation-based weather instruments (e.g., temperature, wind, growing degree days (GDD), soil quality). Do not include generic phrases like \"rainfall instruments\" without specific variable names. Do not base inclusion on references to rainfall instruments in other articles; use only this article's own IV specification. Extract: Extract the specific variable name as described in the article's text, equations, or tables. Output the descriptive name of the rainfall metric, not just symbolic notation (e.g., do not output z_it; instead output the underlying rainfall variable it represents). Remove transformations that are part of the right-hand-side specification in the first-stage. For example, if the rainfall IV is \"ln(total seasonal rainfall)\", then output \"total seasonal rainfall\". If the rainfall IV is \"log mean annual rainfall\", then output \"mean annual rainfall\". If the rainfall IV is \"Δ long run mean rainfall\", then output \"long run mean rainfall\". Remove measurement units or clarifying parentheses that are not part of the core name. For example, drop \"(mm)\". As with \"Dependent Variable(s)\", \"Endogenous Variable(s)\", \"Instrumental Variable(s)\", you can make minor generalizations to the name of the rainfall IV, as long as you are consistent. For example, if the rainfall IV is \"annual standardized rainfall deviation from the long-term\", you can generalize the output to \"rainfall z-score\". If the rainfall IV is \"per cent deviations of 2011 annual rainfall\", you can generalize the output to \"deviations in annual rainfall\". If the rainfall IV is \"rainfall on election day in mm\", you can generalize the output to \"total daily rainfall\". If the rainfall IV is \"The 2005 and 2006 annual rainfall levels, the rainfall deviations from 1988 to 2005,\" you can generalize the output to \"total annual rainfall; deviations in annual rainfall\". However, unlike with \"Dependent Variable(s)\", \"Endogenous Variable(s)\", \"Instrumental Variable(s)\" do not make simplifications to the name of the rainfall IV that drop the rainfall statistic or the time scale. For example, if the rainfall IV is \"mean annual rainfall\", do not simplify to \"mean rainfall\" or \"annual rainfall\". If the rainfall IV is \"total seasonal rainfall\", do not simplify to \"total rainfall\" or \"seasonal rainfall\". If the rainfall IV is \"deviations in annual rainfall\", do not simplify to \"rainfall shocks\". If the rainfall IV is \"mean monthly rainfall, total monthly rainfall, and maximum monthly temperature\" do not simplify to \"mean rainfall; total rainfall\" or \"monthly rainfall\". Both the rainfall statistic (i.e., mean, standard deviation, total, z-score, negative deviations, coefficient of variation) and the time scale (i.e., daily, monthly, seasonal, annual) should be preserved in the name. The key rule when making generalizations while preserving the relevant rainfall statistic (for example, mean, total, z-score) and time scale (for example, daily, monthly, seasonal, annual) is that similar variables across different articles should be given the same normalized name. For example, if two articles have \"the mean of January-March rainfall and average rainfall in this three-month window that negatively differs from the historic average\" as the rainfall IVs, do not call this \"mean rainfall; deviations in rainfall\" for one article and \"seasonal rainfall; seasonal deviations\" for another article. In this case, the rainfall IVs should be listed as \"mean seasonal rainfall; negative deviations in seasonal rainfall\". Perform all reasoning and intermediate steps internally and use only the article content plus the normalization rules specified in this prompt. Output format (exact required answer form): Return only the name(s) of the rainfall instrumental variable(s), with no commentary, no quotes, and no extra text and separate multiple names with semicolons and a single space after each semicolon. Print everything in lower case. If there is more than one distinct rainfall IV, separate them with semicolons, with a single space after each semicolon. For example: mean seasonal rainfall; standard deviation of seasonal rainfall; z-score of annual rainfall. Do not repeat the same rainfall IV more than once. Do not include any variables that are not excluded rainfall instruments (i.e., do not include non-precipitation-based instruments, dependent variables, endogenous variables, control variables, variables that serve as their own instrument, etc.). Your final output must be exactly one line containing the normalized rainfall instrumental variable name, or a semicolon-separated list of such names, in lower case, with nothing else.",
+        "dependency": {"key": "Instrumental Variable Rainfall", "value": "1"}
+    },
+    {
+        "key": "Rainfall Data Source",
+        "question": "What is the source of the rainfall data used in the study? Identify and report the exact source of the rainfall/precipitation data used as the instrument: name the dataset or provider (e.g., CHIRPS, TRMM, ERA5, NOAA station records, Indian Meterological Department). Please give me the source of the rainfall data without any additional words or numbers. If rainfall is used as an instrumental variable, the data must come from a specific source (e.g., a satellite or organization). Please find the origin of the rainfall data that was used. Please only provide the source of the rainfall data, without the title of the question or any additional words.",
+        "dependency": {"key": "Instrumental Variable Rainfall", "value": "1"}
+    },
 ]
 
+# -------------------------------------------------------------------
+# Normalization / cleaning helpers
+# -------------------------------------------------------------------
 
 def normalize_yes_no(answer):
     if not answer:
         return "0"
     answer = answer.strip().lower()
-    if answer.startswith('yes') or answer == '1':
+    if answer.startswith("yes") or answer == "1":
         return "1"
-    elif answer.startswith('no') or answer == '0':
+    elif answer.startswith("no") or answer == "0":
         return "0"
     else:
         return "n/a"
 
 
 def clean_dependent_variables(raw_text):
-    """
-    Simple cleaner for dependent variables: remove numbered prefixes and
-    normalize comma-separated list. (Keeps your existing behavior.)
-    """
-    cleaned = re.sub(r'\d+\)\s*', '', raw_text)
-    variables = [var.strip() for var in cleaned.split(',') if var.strip()]
-    return ', '.join(variables)
+    if not raw_text:
+        return "n/a"
+    cleaned = re.sub(r"\d+\)\s*", "", raw_text)
+    variables = [var.strip() for var in cleaned.split(",") if var.strip()]
+    return ", ".join(variables) if variables else "n/a"
 
 
 def clean_variable_list(raw_text):
-    """
-    Take a noisy answer that *should* be just variable names and
-    return a semicolon-separated list of cleaned variable names.
-    If nothing usable, return 'n/a'.
-    """
     if not raw_text:
         return "n/a"
     txt = raw_text.strip()
 
-    # Immediate passthrough for true n/a
     if txt.lower() in {"n/a", "na", "none"}:
         return "n/a"
 
-    # If the model prepends a label like "Endogenous variables: X, Y"
     if ":" in txt:
         head, tail = txt.split(":", 1)
         if any(w in head.lower() for w in ["variable", "variables", "outcome", "instrument"]):
             txt = tail.strip()
 
-    # Replace newlines with spaces; normalize separators
     txt = txt.replace("\n", " ")
-    # Treat " and " as a separator sometimes used instead of commas/semicolons
     txt = txt.replace(" and ", "; ")
 
-    # Split on common separators
     parts = re.split(r"[;,]", txt)
 
     cleaned = []
@@ -93,23 +104,16 @@ def clean_variable_list(raw_text):
         if not p:
             continue
 
-        # Remove obvious explanation tails: " - something", " – something"
         p = re.split(r"\s[-–]\s", p)[0].strip()
-
-        # Remove trailing descriptive clauses (where/which/that/etc.)
         p = re.split(r"\s(?:such as|for|where|which|that)\b", p, flags=re.I)[0].strip()
+        p = p.strip("\"“”'")
 
-        # Strip quotes
-        p = p.strip('"“”\'')
-
-        # Very long chunks are likely sentences, not variable names
         if len(p.split()) > 8:
             continue
 
         if p and p.lower() not in {"n/a", "none"}:
             cleaned.append(p)
 
-    # Deduplicate while preserving order
     seen = set()
     uniq = []
     for v in cleaned:
@@ -122,10 +126,6 @@ def clean_variable_list(raw_text):
 
 
 def clean_rainfall_source(raw_text):
-    """
-    For the rainfall data source, keep only the dataset/provider name.
-    Example: 'We use CHIRPS rainfall data from ...' -> 'CHIRPS'.
-    """
     if not raw_text:
         return "n/a"
     txt = raw_text.strip()
@@ -133,36 +133,45 @@ def clean_rainfall_source(raw_text):
     if txt.lower() in {"n/a", "na", "none"}:
         return "n/a"
 
-    # Take only the first sentence/line
     txt = re.split(r"[.\n]", txt, 1)[0].strip()
-
-    # Remove leading phrases like "from", "data from", etc.
     txt = re.sub(r"^(from|data from|rainfall data from)\s+", "", txt, flags=re.I)
-
-    # Strip quotes and trailing punctuation
-    txt = txt.strip('"“”\'').strip(" .,")
+    txt = txt.strip("\"“”'").strip(" .,")
 
     return txt if txt else "n/a"
 
+# -------------------------------------------------------------------
+# PDF text extraction
+# -------------------------------------------------------------------
 
 def extract_relevant_sections(pdf_path):
     relevant_sections = []
-    keywords = ["instrument", "instrumental variable", "data", "methods", "iv", "rainfall",
-                "model", "econometric", "metrics", "introduction", "abstract",
-                "conclusion", "strategy", "empirical"]
+    keywords = [
+        "instrument", "instrumental variable", "data", "methods", "iv",
+        "rainfall", "model", "econometric", "metrics", "introduction",
+        "abstract", "conclusion", "strategy", "empirical",
+    ]
     with fitz.open(pdf_path) as doc:
         for page_num in range(len(doc)):
             page = doc.load_page(page_num)
             page_text = page.get_text("text")
-            paragraphs = page_text.split('\n\n')
+            paragraphs = page_text.split("\n\n")
             for paragraph in paragraphs:
                 if any(keyword.lower() in paragraph.lower() for keyword in keywords):
                     relevant_sections.append(paragraph)
-    return ' '.join(relevant_sections)
+    return " ".join(relevant_sections)
 
+# -------------------------------------------------------------------
+# Model query
+# -------------------------------------------------------------------
 
 def query_model_single(text, question, enforce_binary=False, specific_metric=False):
-    user_query = f"""Based on the following relevant sections from an academic text, please answer the question below. {text} Question: {question} {"Please respond with '1' for yes, '0' for no, or 'n/a' if not applicable or unclear." if enforce_binary else "Provide a concise and accurate answer. The response should be a specific metric without broad terms. Avoid using general phrases and ensure the metric is precisely defined. If information is not available, respond with 'n/a'."} """
+    user_query = (
+        "Based on the following relevant sections from an academic text, "
+        "please answer the question below.\n\n"
+        f"{text}\n\n"
+        f"Question: {question}\n\n"
+        f"{'Please respond with \"1\" for yes, \"0\" for no, or \"n/a\" if not applicable or unclear.' if enforce_binary else 'Provide a concise and accurate answer. The response should be a specific metric without broad terms. Avoid using general phrases and ensure the metric is precisely defined. If information is not available, respond with \"n/a\".'}"
+    )
 
     try:
         response = client.chat.completions.create(
@@ -171,106 +180,158 @@ def query_model_single(text, question, enforce_binary=False, specific_metric=Fal
                 {
                     "role": "system",
                     "content": (
-                        "You are an AI assistant that is an expert in economics paper analysis. You specializing in interpreting complex academic conent and extracting specific information, specifically metadata like the variables used in an econometric analysis."
-                        "Answer using information from provided text. If not available, respond with 'n/a'. Only reply with requested information; do not provide additional text and do not include the the question in your response."
-                    )
+                        "You are an AI assistant that is an expert in economics paper analysis. "
+                        "You specialize in interpreting complex academic content and extracting "
+                        "specific information, specifically metadata like the variables used in "
+                        "an econometric analysis. "
+                        "Answer using information from provided text. If not available, respond "
+                        "with 'n/a'. Only reply with requested information; do not provide "
+                        "additional text and do not include the question in your response."
+                    ),
                 },
-                {"role": "user", "content": user_query}
+                {"role": "user", "content": user_query},
             ],
             max_tokens=1000,
-            temperature=.5
+            temperature=0.0,
         )
         answer = response.choices[0].message.content.strip()
+        if not answer:
+            return "n/a"
         if enforce_binary:
             return normalize_yes_no(answer)
-        return answer if answer else "n/a"
+        return answer
     except Exception as e:
         print(f"Error querying model: {e}")
         return "n/a"
 
+# -------------------------------------------------------------------
+# Main processing with enforced dependencies
+# -------------------------------------------------------------------
 
 def process_pdfs_conditional_queries(pdf_folder, output_csv):
     data = []
 
     for filename in os.listdir(pdf_folder):
-        if filename.endswith(".pdf"):
-            pdf_path = os.path.join(pdf_folder, filename)
-            print(f"\nProcessing {filename}...")
-            relevant_sections = extract_relevant_sections(pdf_path)
-            print(f"Extracted relevant sections length: {len(relevant_sections)} characters")
-            max_tokens = 6000
-            text_to_analyze = relevant_sections[:max_tokens * 4]
+        if not filename.endswith(".pdf"):
+            continue
 
-            info_dict = {
-                'File Name': filename,
-                'Paper Title': 'n/a',
-                'DOI': 'n/a',
-                'Dependent Variables': 'n/a',
-                'Endogenous Variable(s)': 'n/a',
-                'Instrumental Variable Used': '0',
-                'Instrumental Variable(s)': 'n/a',
-                'Instrumental Variable Rainfall': '0',
-                'Rainfall Metric': 'n/a',
-                'Rainfall Data Source': 'n/a'
-            }
+        pdf_path = os.path.join(pdf_folder, filename)
+        print(f"\nProcessing {filename}...")
+        relevant_sections = extract_relevant_sections(pdf_path)
+        print(f"Extracted relevant sections length: {len(relevant_sections)} characters")
 
-            temp_answers = {}
+        max_tokens = 6000
+        text_to_analyze = relevant_sections[: max_tokens * 4]
 
-            for q in questions:
-                # Universal dependency check for all questions
-                if q.get('dependency'):
-                    dep_key = q['dependency']['key']
-                    dep_value = q['dependency']['value']
-                    current_answer = temp_answers.get(dep_key, info_dict.get(dep_key, None))
+        info_dict = {
+            "File Name": filename,
+            "Paper Title": "n/a",
+            "DOI": "n/a",
+            "Dependent Variables": "n/a",
+            "Endogenous Variable(s)": "n/a",
+            "Instrumental Variable Used": "0",
+            "Instrumental Variable(s)": "n/a",
+            "Instrumental Variable Rainfall": "0",
+            "Rainfall Metric": "n/a",
+            "Rainfall Data Source": "n/a",
+        }
 
-                    if current_answer != dep_value:
-                        print(f"Skipping '{q['key']}' due to unmet dependency")
-                        # For binary rainfall question default to '0'; others 'n/a'
-                        info_dict[q['key']] = '0' if q['key'] == "Instrumental Variable Rainfall" else 'n/a'
-                        temp_answers[q['key']] = info_dict[q['key']]
-                        continue
+        temp_answers = info_dict.copy()
 
-                # Special handling for binary questions
-                enforce_binary = q['key'] in ["Instrumental Variable Used", "Instrumental Variable Rainfall"]
-                specific_metric = (q['key'] == "Rainfall Metric")
+        for q in questions:
+            q_key = q["key"]
 
-                print(f"Querying: {q['question']}")
-                answer = query_model_single(
-                    text_to_analyze,
-                    q['question'],
-                    enforce_binary=enforce_binary,
-                    specific_metric=specific_metric
-                )
+            # -------------------------
+            # Universal dependency gate
+            # -------------------------
+            dep = q.get("dependency")
+            if dep is not None:
+                dep_key = dep["key"]
+                dep_val = dep["value"]
+                current_dep_answer = temp_answers.get(dep_key)
 
-                # Post-processing
-                if q['key'] == "Dependent Variables" and answer != "n/a":
-                    answer = clean_dependent_variables(answer)
+                if current_dep_answer != dep_val:
+                    print(
+                        f"Skipping '{q_key}' due to unmet dependency "
+                        f"({dep_key}={current_dep_answer} != {dep_val})"
+                    )
 
-                # Enforce variable-name-only outputs for variable questions
-                if q['key'] in ["Endogenous Variable(s)", "Instrumental Variable(s)", "Rainfall Metric"]:
-                    answer = clean_variable_list(answer)
+                    # Binary flags default to "0", others "n/a"
+                    if q_key in ["Instrumental Variable Used", "Instrumental Variable Rainfall"]:
+                        temp_answers[q_key] = "0"
+                    else:
+                        temp_answers[q_key] = "n/a"
 
-                if q['key'] == "Rainfall Data Source":
-                    answer = clean_rainfall_source(answer)
+                    info_dict[q_key] = temp_answers[q_key]
+                    continue
 
-                if enforce_binary:
-                    answer = normalize_yes_no(answer)
+            # -------------------------
+            # Decide query settings
+            # -------------------------
+            enforce_binary = q_key in [
+                "Instrumental Variable Used",
+                "Instrumental Variable Rainfall",
+            ]
+            specific_metric = q_key == "Rainfall Metric"
 
-                info_dict[q['key']] = answer
-                temp_answers[q['key']] = answer
-                print(f"Answer: {answer}")
+            print(f"Querying: {q_key}")
+            answer = query_model_single(
+                text_to_analyze,
+                q["question"],
+                enforce_binary=enforce_binary,
+                specific_metric=specific_metric,
+            )
 
-            print(f"Final extracted info for {filename}: {info_dict}")
-            data.append(info_dict)
+            # -------------------------
+            # Post-processing
+            # -------------------------
+            if q_key == "Dependent Variables" and answer != "n/a":
+                answer = clean_dependent_variables(answer)
+
+            if q_key in ["Endogenous Variable(s)", "Instrumental Variable(s)", "Rainfall Metric"]:
+                answer = clean_variable_list(answer)
+
+            if q_key == "Rainfall Data Source":
+                answer = clean_rainfall_source(answer)
+
+            if enforce_binary:
+                answer = normalize_yes_no(answer)
+
+            # Hard guardrails:
+            # If IV Used != 1, force all downstream IV fields to safe defaults
+            if q_key == "Instrumental Variable Used":
+                if answer != "1":
+                    answer = "0"
+                    temp_answers["Instrumental Variable(s)"] = "n/a"
+                    temp_answers["Instrumental Variable Rainfall"] = "0"
+                    temp_answers["Rainfall Metric"] = "n/a"
+                    temp_answers["Rainfall Data Source"] = "n/a"
+
+            # If IV Rainfall != 1, force rainfall-specific details to safe defaults
+            if q_key == "Instrumental Variable Rainfall":
+                if answer != "1":
+                    answer = "0"
+                    temp_answers["Rainfall Metric"] = "n/a"
+                    temp_answers["Rainfall Data Source"] = "n/a"
+
+            info_dict[q_key] = answer
+            temp_answers[q_key] = answer
+            print(f"Answer for {q_key}: {answer}")
+
+        print(f"Final extracted info for {filename}: {info_dict}")
+        data.append(info_dict)
 
     df = pd.DataFrame(data)
     df.to_csv(output_csv, index=False)
     print(f"Data saved to {output_csv}")
 
+# -------------------------------------------------------------------
+# Paths and execution
+# -------------------------------------------------------------------
 
-# pathnames
-pdf_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/pdf_test_20'
-output_folder = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output'
-output_csv = os.path.join(output_folder, 'finetune_output.csv')
+pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/pdf_test_20"
+output_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output"
 os.makedirs(output_folder, exist_ok=True)
+output_csv = os.path.join(output_folder, "finetune_output.csv")
+
 process_pdfs_conditional_queries(pdf_folder, output_csv)
