@@ -48,6 +48,7 @@ human_data_clean <- human_data %>%
     iv_bin = as.numeric(iv_bin),
     rain_bin = as.numeric(rain_bin)
   )
+
 model_data_clean <- model_data %>%
   rename(
     filename = `File Name`,
