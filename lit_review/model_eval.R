@@ -48,7 +48,6 @@ human_data_clean <- human_data %>%
     iv_bin = as.numeric(iv_bin),
     rain_bin = as.numeric(rain_bin)
   )
-
 model_data_clean <- model_data %>%
   rename(
     filename = `File Name`,
@@ -117,7 +116,8 @@ merged_data <- human_data_clean %>%
   rename(filename_merged = filename)  # Rename joined filename column
 
 write_csv(merged_data, "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/merged_data.csv")  # [2][3]
-merged_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/merged_corrected.csv")
+
+# merged_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/merged_corrected.csv")
 ############################################
 # convert to factor for confusionMatrix:
 merged_data$hasIV_human <- factor(merged_data$iv_bin_human, levels = c(0, 1))
