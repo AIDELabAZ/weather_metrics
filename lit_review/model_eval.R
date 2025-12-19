@@ -91,10 +91,20 @@ clean_filenames <- function(df) {
         str_squish()
     )
 }
-
+clean_doi <- function(df) {
+  df |>
+    mutate(
+      doi = doi |>
+        # remove common URL prefixes
+        str_remove("^https?://(dx\\.)?doi\\.org/") |>
+        str_remove("^https?://") |>
+        str_squish()
+    )
+}
 human_data_clean <- human_data_clean %>% clean_filenames()
 model_data_clean <- model_data_clean %>% clean_filenames()
-
+human_data_clean <- human_data_clean %>% clean_doi()
+model_data_clean <- model_data_clean %>% clean_doi()
 ###
 # NA deal
 ###
