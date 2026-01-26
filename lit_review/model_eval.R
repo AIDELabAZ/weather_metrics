@@ -313,3 +313,89 @@ cat("\nBERT Semantic Similarity (Python/reticulate):\n")
 print(similarity_metrics)
 # mean = 32.93%, median = 14.52%, sd = 33.92%
 
+
+
+
+
+
+
+
+
+############# NEWBERT
+############################################
+# Higher-quality semantic similarity (Cross-Encoder STS) via reticulate
+############################################
+library(reticulate)
+
+# 1) Python env (create once; comment out after first successful run)
+virtualenv_create("bert_env")
+use_virtualenv("bert_env", required = TRUE)
+
+# CrossEncoder lives in sentence-transformers; torch + transformers are dependencies
+py_install(c("torch", "transformers", "sentence-transformers"))
+
+# 2) Define Python Cross-Encoder scorer (loads model once, scores in batches)
+py_run_string("
+from sentence_transformers import CrossEncoder
+import numpy as np
+
+# Load once (global) so you don't reload for every column
+_ce_model = CrossEncoder('cross-encoder/stsb-roberta-large')
+
+def ce_similarity(texts1, texts2, batch_size=32):
+    # texts1/texts2 are lists of strings (same length)
+    pairs = list(zip(texts1, texts2))  # list of (text1, text2)
+    scores = _ce_model.predict(pairs, batch_size=batch_size)
+    return np.array(scores, dtype=float)
+")
+
+# 3) R helper: safely score aligned pairs (handles NA)
+ce_score_pairs <- function(x, y, batch_size = 32L) {
+  stopifnot(length(x) == length(y))
+
+  # Preserve NA structure
+  ok <- !(is.na(x) | is.na(y))
+  out <- rep(NA_real_, length(x))
+
+  if (any(ok)) {
+    # Reticulate will convert character vectors to Python lists automatically
+    out[ok] <- py$ce_similarity(as.character(x[ok]), as.character(y[ok]), batch_size = as.integer(batch_size))
+  }
+  out
+}
+
+# 4) Apply to your aligned columns (one-to-one rows)
+merged_data$rainmet_similarity <- ce_score_pairs(merged_data$rainmet_human, merged_data$rainmet_model)
+merged_data$endog_similarity   <- ce_score_pairs(merged_data$endog_human,   merged_data$endog_model)
+merged_data$doi_similarity     <- ce_score_pairs(merged_data$doi_human,     merged_data$doi_model)
+merged_data$depen_similarity   <- ce_score_pairs(merged_data$depen_human,   merged_data$depen_model)
+merged_data$ptitle_similarity  <- ce_score_pairs(merged_data$ptitle_human,  merged_data$ptitle_model)
+merged_data$iv_similarity      <- ce_score_pairs(merged_data$iv_human,      merged_data$iv_model)
+
+# 5) Metrics helper
+similarity_metrics <- function(v) {
+  list(
+    mean   = mean(v, na.rm = TRUE),
+    median = median(v, na.rm = TRUE),
+    sd     = sd(v, na.rm = TRUE)
+  )
+}
+
+cat("\nCross-Encoder STS Similarity (0..1): rainmet\n")
+print(similarity_metrics(merged_data$rainmet_similarity))
+
+cat("\nCross-Encoder STS Similarity (0..1): endog\n")
+print(similarity_metrics(merged_data$endog_similarity))
+
+cat("\nCross-Encoder STS Similarity (0..1): doi\n")
+print(similarity_metrics(merged_data$doi_similarity))
+
+cat("\nCross-Encoder STS Similarity (0..1): depen\n")
+print(similarity_metrics(merged_data$depen_similarity))
+
+cat("\nCross-Encoder STS Similarity (0..1): ptitle\n")
+print(similarity_metrics(merged_data$ptitle_similarity))
+
+cat("\nCross-Encoder STS Similarity (0..1): iv\n")
+print(similarity_metrics(merged_data$iv_similarity))
+
