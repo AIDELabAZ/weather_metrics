@@ -90,13 +90,13 @@ def predict_nuextract(model, tokenizer, text, schema):
         input_llm, 
         return_tensors="pt", 
         truncation=True, 
-        max_length=2500  # Reduced from 3500 to save memory
+        max_length=1500  # Reduced from 3500 to save memory
     ).to(DEVICE)
     
     with torch.no_grad():
         output = model.generate(
             **input_ids, 
-            max_new_tokens=400,
+            max_new_tokens=200,
             use_cache=False,
             do_sample=False,
             temperature=None,
@@ -387,7 +387,7 @@ def process_pdfs_with_nuextract(pdf_folder, output_csv):
         print(f"Extracted relevant sections length: {len(relevant_sections)} characters")
         
         # Truncate to fit NuExtract's context window (keep at 6000)
-        max_chars = 6000
+        max_chars = 2000
         text_to_analyze = relevant_sections[:max_chars]
         
         # Initialize results
@@ -506,7 +506,7 @@ def process_pdfs_with_nuextract(pdf_folder, output_csv):
 # -------------------------------------------------------------------
 
 if __name__ == "__main__":
-    pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/smalltest"
+    pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/pdf_test_20"
     output_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output"
     os.makedirs(output_folder, exist_ok=True)
     output_csv = os.path.join(output_folder, "nuextract_output.csv")
