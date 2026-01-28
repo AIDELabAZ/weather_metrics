@@ -56,113 +56,134 @@ questions = [
     {
         "key": "Is Academic Paper",
         "question": (
-            "Determine whether the provided PDF text is an academic paper.\n"
-            "An academic paper typically has a title, author list, abstract, sections (e.g., introduction, data, methods), and references.\n"
-            "Non-papers include posters, slide decks/presentations, proposals, memos, syllabi, or random excerpts.\n"
-            "Output format: Output exactly one character: 1 if it is an academic paper, 0 if it is not. No other text."
+            "Determine whether the provided text contains empirical quantitative statistical analysis. "
+            "By empirical quantitative statistical analysis, we mean the article uses regressions, econometrics, "
+            "or similar statistical methods to fit a model/equation to data (e.g., estimated coefficients with "
+            "standard errors, p-values, confidence intervals; methods like OLS, IV/2SLS, DiD, RDD, fixed effects, "
+            "logit/probit, Poisson, GMM, etc.). "
+            "Do not infer this from the topic/title alone; verify from the text that estimation is actually done. "
+            "Output format: Output exactly one character: 1 if it contains empirical quantitative statistical analysis, "
+            "0 if it does not. No other text."
         )
     },
+
     {
         "key": "Paper Title",
         "question": (
-            "Extract the exact title of the article from the provided text. "
-            "The title is the main standalone name of the article itself. "
-            "Do not include anything that is not simply the title of the article."
-            "Ignore human names, introduction, abstract, and journal names. "
-            "Output format: Output exactly one line containing only the title of the article and nothing else."
+            "Extract the article’s exact title as it appears in the document. "
+            "Look for the main standalone heading near the top of the first page, before the author list and/or abstract. "
+            "Include any subtitle that is part of the same heading (e.g., separated by a colon or dash). "
+            "Do not include author names, affiliations, journal name, running headers, section titles (e.g., Abstract, Introduction), "
+            "or footnote markers/symbols attached to the title. "
+            "Output format: Output exactly one line containing only the title text and nothing else."
         ),
         "dependency": {"key": "Is Academic Paper", "value": "1"},
     },
+
     {
         "key": "DOI",
         "question": (
-            "Extract the DOI of the focal article (version of record). "
-            "A DOI is a string that starts with 10. and contains a slash. "
-            "Only return the DOI of the article itself, not DOIs of referenced articles, datasets, or supplements. "
-            "If more than one DOI appears, choose the one that is presented as the article's own DOI in the front matter or header. "
-            "Output format: Output exactly one token: either the DOI string (as it appears, trimmed of leading \"doi:\" or \"https://doi.org/\") "
-            "or exactly n/a if the article has no DOI. Do not output any extra text, labels, or punctuation."
+            "Extract the Digital Object Identifier (DOI) of the focal article (version of record). "
+            "Look for DOI-like strings near front matter, headers/footers, or citation blocks (e.g., 'doi:', 'DOI', 'https://doi.org/'). "
+            "Ignore DOIs that appear only in references unless clearly the article’s own DOI. "
+            "If both preprint and published DOIs exist, choose the published DOI. "
+            "Normalize by stripping prefixes/URL wrappers (e.g., remove 'doi:' and 'https://doi.org/'), removing whitespace/line-break hyphenation, "
+            "and trimming trailing punctuation; convert to lowercase. "
+            "Output format: Output exactly one token: the normalized DOI (e.g., 10.xxxx/xxxx) or exactly n/a."
         ),
         "dependency": {"key": "Is Academic Paper", "value": "1"},
     },
+
     {
         "key": "Dependent Variables",
         "question": (
-            "Extract the dependent variable name or names used in the article's main analysis. "
-            "This is the outcome or effect being measured by the researcher. "
-            "Do not output single letters, Greek symbols, equations, or purely symbolic notation. "
-            "If the article does not estimate any regression or statistical model with a clearly defined dependent variable in the main analysis, return exactly \"n/a\". "
-            "Output format: exactly one line containing either a single dependent variable name, a semicolon-separated list of no more than three names, or \"n/a\""
+            "Only proceed if the text contains empirical quantitative statistical analysis. "
+            "Identify the dependent (outcome) variable(s) in the main regression models (left-hand-side outcomes). "
+            "Do not include first-stage outcomes, treatments, instruments, controls, fixed effects, or other RHS variables. "
+            "Normalize names: do not output symbolic notation; remove transformations (e.g., if 'log income' then output 'income'); "
+            "remove units/parentheses that are not part of the core name; keep names consistent across papers. "
+            "Output format: exactly one line; lower case; a semicolon-separated list with a single space after each semicolon; "
+            "do not repeat variables; if none can be identified from the text, output exactly n/a."
         ),
         "dependency": {"key": "Is Academic Paper", "value": "1"},
     },
+
     {
         "key": "Endogenous Variable(s)",
         "question": (
-            "Extract the primary explanatory variable name or names that the authors explicitly treat as endogenous in the main empirical analysis. "
-            "This is an independent variable in a regression model that correlates with the error term, biasing estimates. "
-            "Normalize each selected variable to a short, human-readable descriptive name that reflects its substantive meaning. "
-            "Do not use single letters, Greek symbols, equations, or purely symbolic notation. "
-            "Do not output internal dataset or code variable names unless they are self-explanatory without additional context. "
-            "If no endogenous explanatory variable is explicitly identified in the main analysis, return exactly \"n/a\". "
-            "Output format: exactly one line containing the endogenous explanatory variable name(s), a semicolon-separated list of no more than three names, or \"n/a\" "
+            "Only proceed if the text contains empirical quantitative statistical analysis. "
+            "Identify the explanatory variable(s) the authors explicitly treat as endogenous in the main empirical analysis "
+            "(i.e., variables they say are endogenous/potentially endogenous and instrument or otherwise treat as endogenous). "
+            "Do not include dependent variables, instruments, controls, or generic phrases without specific variable names. "
+            "Do not output symbolic notation; remove transformations (e.g., 'ln fertilizer' -> 'fertilizer') and units; "
+            "print everything in lower case; semicolon-separated with a single space after each semicolon; no more than three. "
+            "If no endogenous explanatory variable is explicitly identified, output exactly n/a."
         ),
         "dependency": {"key": "Is Academic Paper", "value": "1"},
     },
+
     {
         "key": "Instrumental Variable Used",
         "question": (
-            "Determine whether the authors of the article used an instrumental variable (IV) in their main empirical analysis. "
-            "This is a regression method to address endogeneity in independent variables. Instrumental variable methods use excluded instruments in a formal IV framework. "
-            "Ignore non-statistical uses of the word \"instrument\" (e.g., survey instrument, measurement instrument). "
-            "Do not classify the article as using instrumental variable regression based only on generic mentions of IV. "
-            "Do not use single letters, Greek symbols, equations, or purely symbolic notation. "
-            "Output format: Output 1 if the article uses an IV in this sense. Output 0 if it does not. Output exactly one character, either 1 or 0, with no additional text."
+            "Determine whether the article uses an instrumental variable (IV) regression method with excluded instruments "
+            "to address endogeneity (e.g., IV/2SLS/LIML/3SLS, IV-probit/logit/tobit, control-function/2SRI, dynamic panel GMM with instruments, etc.). "
+            "Ignore non-statistical uses of 'instrument' (e.g., survey instrument). "
+            "Do not classify as IV based only on generic mentions or citations to other work; confirm the article implements an IV-type estimator "
+            "with excluded instruments (e.g., first stage, instrument set, weak-instrument/over-id tests) in its own analysis. "
+            "Output format: Output exactly one character: 1 if IV regression is used, 0 if not. No other text."
         ),
         "dependency": {"key": "Is Academic Paper", "value": "1"},
     },
+
     {
         "key": "Instrumental Variable(s)",
         "question": (
-            "Only proceed if the previous question \"Instrumental Variable Used\" was answered 1.\n"
-            "If the authors used an IV, identify the instrumental variable(s) used in the main analysis.\n"
-            "This is a regression method to address endogeneity in independent variables. Instrumental variable methods use excluded instruments in a formal IV framework. "
-            "Return only the name(s) of the instrumental variable(s), no commentary; lower case; semicolon-separated; or n/a."
-            "Do not use single letters, Greek symbols, equations, or purely symbolic notation. "
-            "Output format: exactly one line containing either a single instrumental variable variable name, a semicolon-separated list of no more than three names, or \"n/a\""
+            "Only proceed if the previous question 'Instrumental Variable Used' was answered 1. "
+            "Identify the excluded instrument variable(s) used in the main IV analysis (i.e., variables that enter the first stage "
+            "and are excluded from the structural equation). "
+            "Do not include endogenous regressors, controls, fixed effects, time trends, lags used only as controls, or non-IV design elements. "
+            "Normalize names: do not output symbolic notation; remove transformations and units when they are not part of the core name; "
+            "print everything in lower case. "
+            "Output format: exactly one line; semicolon-separated with a single space after each semicolon; do not repeat; "
+            "no more than three; or exactly n/a."
         ),
         "dependency": {"key": "Instrumental Variable Used", "value": "1"},
     },
+
     {
         "key": "Instrumental Variable Rainfall",
         "question": (
-            "Only proceed if the previous question \"Instrumental Variable Used\" was answered 1.\n"
-            "If the authors used an instrumental variable in their analysis, were any of these instruments based on rainfall or precipitation?\n"
-            "This means employing rainfall measurements as an exogenous shock to identify causal effects in econometric analysis. "
-            "Output 1 if yes, 0 if no. Exactly one character."
+            "Only proceed if the previous question 'Instrumental Variable Used' was answered 1. "
+            "Determine whether any excluded instrument used in the article’s IV framework is based on rainfall or precipitation "
+            "(including precipitation-derived indices such as anomalies/shocks/deviations, standardized precipitation, cumulative rainfall, "
+            "wet-day counts, precipitation intensity, or drought/wetness indices like SPI/SPEI/PDSI/scPDSI; also snowfall/snowpack/SWE). "
+            "Do not count rainfall if it is only a control/exposure/outcome or appears only in non-IV designs; confirm it is an excluded instrument. "
+            "Output format: Output exactly one character: 1 if yes, 0 if no. No other text."
         ),
         "dependency": {"key": "Instrumental Variable Used", "value": "1"},
     },
+
     {
         "key": "Rainfall Metric",
         "question": (
-            "Only proceed if the previous question \"Instrumental Variable Rainfall\" was answered 1.\n"
-            "If the authors used rainfall or percipitation metric as an instrumental variable, identify which specific instrument metric(s) were used.\n"
-            "This means that they employed rainfall measurements as an exogenous shock to identify causal effects in econometric analysis. "
-            "Hard constraint: it must NOT be just 'rainfall' or 'precipitation'; it must include statistic/transform/time scale "
-            "(e.g., 'log annual rainfall', 'monthly average precipitation', 'z-score of seasonal rainfall').\n"
-            "Do not use single letters, Greek symbols, equations, or purely symbolic notation. "
-            "Output formet: exactly one line containing only the rainfall metric name(s), a semicolon-separated list of no more than three names, or \"n/a\""
+            "Only proceed if the previous question 'Instrumental Variable Rainfall' was answered 1. "
+            "Identify the specific rainfall/precipitation-based excluded instrument metric(s) used. "
+            "Hard constraint: it must NOT be only 'rainfall'/'precipitation'; it must preserve both (i) the statistic/transform "
+            "(e.g., total/mean/std dev/z-score/anomaly/deviation/negative deviation/cumulative, etc.) and (ii) the time scale "
+            "(e.g., daily/monthly/seasonal/annual, or specific season/window). "
+            "Do not output symbolic notation; remove units like mm; print in lower case. "
+            "Output format: exactly one line; semicolon-separated with a single space after each semicolon; no more than three; or exactly n/a."
         ),
         "dependency": {"key": "Instrumental Variable Rainfall", "value": "1"},
     },
+
     {
         "key": "Rainfall Data Source",
         "question": (
-            "Only proceed if the previous question \"Instrumental Variable Rainfall\" was answered 1.\n"
-            "What is the source of the rainfall data used in the study? "
-            "Identify and report the exact dataset/provider (e.g., CHIRPS, TRMM, ERA5, NOAA, Indian Meteorological Department). "
-            "Output only the source name, or n/a."
+            "Only proceed if the previous question 'Instrumental Variable Rainfall' was answered 1. "
+            "What is the source/dataset/provider of the rainfall/precipitation data used for the rainfall-based instrument(s)? "
+            "Report the dataset/provider name (e.g., CHIRPS, TRMM, ERA5, NOAA, Indian Meteorological Department), or n/a. "
+            "Output format: Output only the source name, or exactly n/a."
         ),
         "dependency": {"key": "Instrumental Variable Rainfall", "value": "1"},
     },
