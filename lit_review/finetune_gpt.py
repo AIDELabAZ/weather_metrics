@@ -9,7 +9,7 @@ import re
 # -------------------------------------------------------------------
 
 # Initialize the OpenAI client
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="key")
 
 
 # Fine-tuned model ID
