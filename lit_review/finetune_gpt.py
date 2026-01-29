@@ -3,6 +3,7 @@ import os
 import pandas as pd
 from openai import OpenAI
 import re
+from datetime import datetime
 
 # -------------------------------------------------------------------
 # Config knobs you can tweak
@@ -13,7 +14,7 @@ client = OpenAI(api_key="key")
 
 
 # Fine-tuned model ID
-fine_tuned_model_id = "ft:gpt-4.1-mini-2025-04-14:aide-lab:dec-trial:ClgWlRST"
+fine_tuned_model_id = "ft:gpt-4.1-mini-2025-04-14:aide-lab:janrun:D3DMZE4c"
 
 DEFAULT_MAX_COMPLETION_TOKENS = 80
 MAX_COMPLETION_TOKENS_BY_KEY = {
@@ -651,3 +652,5 @@ if __name__ == "__main__":
     output_csv = os.path.join(output_folder, "finetune_output.csv")
     
     process_pdfs_conditional_queries(pdf_folder, output_csv)
+
+print(f"Script finished: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

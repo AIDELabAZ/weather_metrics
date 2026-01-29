@@ -18,7 +18,7 @@ library(reticulate)
 ############################################
 # load data
 human_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/removed_20.csv", na = c("n/a", "NA", ""))
-model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/nuextract_output.csv", na = c("n/a", "NA", ""))
+model_data <- read_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/finetune_output.csv", na = c("n/a", "NA", ""))
 
 # clean the 'ptitle' column to lowercase and convert encoding to UTF-8
 human_data_clean <- human_data %>%
@@ -48,7 +48,6 @@ human_data_clean <- human_data %>%
     iv_bin = as.numeric(iv_bin),
     rain_bin = as.numeric(rain_bin)
   )
-
 model_data_clean <- model_data %>%
   rename(
     filename = `File Name`,
