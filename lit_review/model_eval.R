@@ -48,16 +48,20 @@ human_data_clean <- human_data %>%
     iv_bin = as.numeric(iv_bin),
     rain_bin = as.numeric(rain_bin)
   )
+
+model_data <- model_data |> 
+  slice(-80)
+
 model_data_clean <- model_data %>%
   rename(
     filename = `File Name`,
     doi = DOI,
-    iv_bin = `Instrumental Variable Used`,
-    rain_bin = `Instrumental Variable Rainfall`,
-    ptitle = `Paper Title`,
-    rainmet = `Rainfall Metric`,
+    iv_bin = `Instrumental Variable Regression`,
+    rain_bin = `Rainfall Instrument`,
+    ptitle = `Article Title`,
+    rainmet = `Rainfall Variable(s)`,
     endog = `Endogenous Variable(s)`,
-    depen = `Dependent Variables`,
+    depen = `Dependent Variable(s)`,
     iv = `Instrumental Variable(s)`
   ) %>%
   mutate(

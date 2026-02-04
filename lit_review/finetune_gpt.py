@@ -16,18 +16,18 @@ client = OpenAI(api_key="key")
 # Fine-tuned model ID (keep yours here)
 fine_tuned_model_id = "ft:gpt-4.1-mini-2025-04-14:aide-lab:janrun:D3DMZE4c"
 
-DEFAULT_MAX_COMPLETION_TOKENS = 120
+DEFAULT_MAX_COMPLETION_TOKENS = 40
 MAX_COMPLETION_TOKENS_BY_KEY = {
-    "Article Title": 60,
-    "DOI": 60,
+    "Article Title": 30,
+    "DOI": 30,
     "Empirical Analysis": 10,
-    "Dependent Variable(s)": 60,
+    "Dependent Variable(s)": 30,
     "Endogeneity Problem": 10,
-    "Endogenous Variable(s)": 60,
+    "Endogenous Variable(s)": 30,
     "Instrumental Variable Regression": 10,
-    "Instrumental Variable(s)": 80,
+    "Instrumental Variable(s)": 30,
     "Rainfall Instrument": 10,
-    "Rainfall Variable(s)": 120,
+    "Rainfall Variable(s)": 10,
 }
 
 STOP_SEQUENCES_BY_KEY = {
@@ -497,10 +497,10 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
 # -------------------------------------------------------------------
 
 if __name__ == "__main__":
-    pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/papers"
+    pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/pdf_test_20"
     output_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output"
     os.makedirs(output_folder, exist_ok=True)
-    output_csv = os.path.join(output_folder, "allpapers_output.csv")
+    output_csv = os.path.join(output_folder, "finetune_output.csv")
 
     process_pdfs_conditional_queries(pdf_folder, output_csv)
 
