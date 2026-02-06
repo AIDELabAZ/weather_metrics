@@ -56,10 +56,10 @@ model_data_clean <- model_data %>%
   rename(
     filename = `File Name`,
     doi = DOI,
-    iv_bin = `Instrumental Variable Regression`,
-    rain_bin = `Rainfall Instrument`,
-    ptitle = `Article Title`,
-    rainmet = `Rainfall Variable(s)`,
+    iv_bin = `Instrumental Variable Used`,
+    rain_bin = `Instrumental Variable Rainfall`,
+    ptitle = `Title`,
+    rainmet = `Rainfall Instrument`,
     endog = `Endogenous Variable(s)`,
     depen = `Dependent Variable(s)`,
     iv = `Instrumental Variable(s)`
@@ -402,3 +402,300 @@ print(similarity_metrics(merged_data$ptitle_similarity))
 cat("\nCross-Encoder STS Similarity (0..1): iv\n")
 print(similarity_metrics(merged_data$iv_similarity))
 
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+############################################
+# model evaluation code (UPDATED to match new extractor output)
+############################################
+# - Matches new model output columns:
+#   File Name, Title, DOI, Empirical Analysis, Dependent Variable(s),
+#   Endogeneity Problem, Endogenous Variable(s),
+#   Instrumental Variable Used, Instrumental Variable(s),
+#   Instrumental Variable Rainfall, Rainfall Instrument
+# - Removes "academic paper"; uses "empirical" instead
+# - Adds HUMAN endogenous identification category:
+#     endog_id_bin_human = 1 if end_var present, else n/a (NA)
+#   and also creates eval-ready 0/1 versions for confusionMatrix.
+#
+# Note: caret::confusionMatrix requires data/reference to be factors with the same levels. [web:17]
+############################################
+
+library(tidyverse)
+library(caret)
+library(reticulate)
+
+############################################
+# Paths
+############################################
+human_path <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/removed_20.csv"
+model_path <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/finetune_output.csv"
+merged_out  <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/merged_data.csv"
+
+############################################
+# Read in data
+############################################
+human_data <- read_csv(human_path, na = c("n/a", "NA", ""))
+model_data <- read_csv(model_path, na = c("n/a", "NA", ""))
+
+############################################
+# Helpers
+############################################
+norm_txt <- function(x) {
+  x <- iconv(x, to = "UTF-8", sub = "byte")
+  x <- tolower(x)
+  x <- str_replace_all(x, "\\s+", " ")
+  x <- str_squish(x)
+  x
+}
+
+clean_filenames <- function(df) {
+  df %>%
+    mutate(
+      filename = filename %>%
+        norm_txt() %>%
+        str_remove_all("\\.pdf$") %>%
+        str_replace_all(" copy( \\d+)?$", "") %>%
+        iconv(to = "ASCII//TRANSLIT", sub = "") %>%
+        str_squish()
+    )
+}
+
+clean_doi <- function(df) {
+  df %>%
+    mutate(
+      doi = doi %>%
+        norm_txt() %>%
+        str_remove("^https?://(dx\\.)?doi\\.org/") %>%
+        str_remove("^doi:\\s*") %>%
+        str_squish()
+    )
+}
+
+# For n/a-style text fields: 1 if present, else 0
+present_na_style <- function(x) {
+  x <- norm_txt(as.character(x))
+  ifelse(is.na(x) | x %in% c("", "n/a", "na", "none"), 0L, 1L)
+}
+
+# Confusion-matrix helper (only runs if columns exist and have complete cases)
+maybe_confusion <- function(df, pred_col, ref_col, title, positive = "1") {
+  if (!(pred_col %in% names(df) && ref_col %in% names(df))) {
+    cat("\nSkipping", title, "- missing column(s):", pred_col, "and/or", ref_col, "\n")
+    return(invisible(NULL))
+  }
+
+  tmp <- df %>%
+    select(all_of(c(pred_col, ref_col))) %>%
+    drop_na()
+
+  if (nrow(tmp) == 0) {
+    cat("\nSkipping", title, "- no complete cases.\n")
+    return(invisible(NULL))
+  }
+
+  # Enforce identical factor levels to avoid caret errors. [web:17]
+  pred <- factor(as.character(tmp[[pred_col]]), levels = c("0", "1"))
+  ref  <- factor(as.character(tmp[[ref_col]]),  levels = c("0", "1"))
+
+  cat("\nConfusion Matrix for", title, ":\n")
+  print(confusionMatrix(data = pred, reference = ref, positive = positive))
+  invisible(NULL)
+}
+
+############################################
+# Clean HUMAN data
+############################################
+# Expected human columns (adjust rename targets if your CSV differs):
+# filename, title, doi, dep_var, end_var, iv_var, rain_var, iv_bin, rain_bin
+human_data_clean <- human_data %>%
+  rename(
+    filename = filename,
+    ptitle   = title,
+    doi      = doi,
+    depen    = dep_var,
+    endog    = end_var,
+    iv       = iv_var,
+    rainmet  = rain_var
+  ) %>%
+  mutate(
+    filename_human = filename,
+
+    filename = norm_txt(filename),
+    ptitle   = norm_txt(ptitle),
+    doi      = norm_txt(doi),
+    depen    = norm_txt(depen),
+    endog    = norm_txt(endog),
+    iv       = norm_txt(iv),
+    rainmet  = norm_txt(rainmet),
+
+    iv_bin   = as.integer(iv_bin),
+    rain_bin = as.integer(rain_bin)
+  )
+
+# NEW: Endogenous identification (HUMAN)
+# 1 if something is present, otherwise n/a (NA)
+human_data_clean <- human_data_clean %>%
+  mutate(
+    endog_id_bin_human = ifelse(present_na_style(endog) == 1L, 1L, NA_integer_),
+    # Eval-ready 0/1 version for confusionMatrix:
+    endog_id_eval_human = present_na_style(endog)
+  )
+
+# NEW/UPDATED: Empirical binary (HUMAN)
+# Adjust to your actual human column name(s). If none exist, it stays NA and is skipped.
+human_data_clean <- human_data_clean %>%
+  mutate(
+    empirical_bin_human = case_when(
+      "empirical_bin" %in% names(human_data) ~ as.integer(human_data$empirical_bin),
+      "empirical"     %in% names(human_data) ~ as.integer(human_data$empirical),
+      TRUE ~ NA_integer_
+    )
+  )
+
+human_data_clean <- human_data_clean %>%
+  clean_filenames() %>%
+  clean_doi() %>%
+  mutate(
+    iv_bin   = ifelse(is.na(iv_bin), 0L, iv_bin),
+    rain_bin = ifelse(is.na(rain_bin), 0L, rain_bin)
+  )
+
+############################################
+# Clean MODEL data (matches your new extractor output)
+############################################
+model_data_clean <- model_data %>%
+  rename(
+    filename   = `File Name`,
+    ptitle     = `Title`,
+    doi        = `DOI`,
+    empirical  = `Empirical Analysis`,
+    depen      = `Dependent Variable(s)`,
+    endogprob  = `Endogeneity Problem`,
+    endog      = `Endogenous Variable(s)`,
+    iv_used    = `Instrumental Variable Used`,
+    iv         = `Instrumental Variable(s)`,
+    rain_iv    = `Instrumental Variable Rainfall`,
+    rainmet    = `Rainfall Instrument`
+  ) %>%
+  mutate(
+    filename_model = filename,
+
+    filename  = norm_txt(filename),
+    ptitle    = norm_txt(ptitle),
+    doi       = norm_txt(doi),
+    depen     = norm_txt(depen),
+    endog     = norm_txt(endog),
+    iv        = norm_txt(iv),
+    rainmet   = norm_txt(rainmet),
+
+    # Convert model "1/0/n/a" style outputs to numeric binaries
+    empirical_bin_model = ifelse(norm_txt(empirical) == "1", 1L, 0L),
+    iv_bin_model        = ifelse(norm_txt(iv_used)   == "1", 1L, 0L),
+    rain_bin_model      = ifelse(norm_txt(rain_iv)   == "1", 1L, 0L),
+    endogprob_bin_model = ifelse(norm_txt(endogprob) == "1", 1L, 0L),
+
+    # NEW: Endogenous identification (MODEL)
+    # 1 if something is present, otherwise n/a (NA)
+    endog_id_bin_model = ifelse(present_na_style(endog) == 1L, 1L, NA_integer_),
+    # Eval-ready 0/1 version for confusionMatrix:
+    endog_id_eval_model = present_na_style(endog)
+  ) %>%
+  clean_filenames() %>%
+  clean_doi()
+
+############################################
+# Merge on filename
+############################################
+merged_data <- human_data_clean %>%
+  inner_join(model_data_clean, by = "filename", suffix = c("_human", "_model")) %>%
+  rename(filename_merged = filename)
+
+write_csv(merged_data, merged_out)
+
+############################################
+# Confusion matrices (binary tasks)
+############################################
+# Existing (human-provided) IV and rainfall bins:
+maybe_confusion(merged_data, "iv_bin_model",   "iv_bin",   "Instrumental Variable Used (IV)")
+maybe_confusion(merged_data, "rain_bin_model", "rain_bin", "Rainfall-based IV used")
+
+# Empirical (if your human file has empirical_bin_human populated):
+maybe_confusion(merged_data, "empirical_bin_model", "empirical_bin_human", "Empirical analysis (empirical)")
+
+# Endogenous-ID confusion matrix using eval-ready 0/1 versions:
+maybe_confusion(merged_data, "endog_id_eval_model", "endog_id_eval_human", "Endogenous variable identified")
+
+# Optional: endogeneity problem flagged (only if you add a human binary later)
+# maybe_confusion(merged_data, "endogprob_bin_model", "endogprob_bin_human", "Endogeneity problem flagged")
+
+############################################
+# Cross-Encoder semantic similarity via reticulate
+############################################
+# Create env only once; comment out after first successful run:
+# virtualenv_create("bert_env")
+use_virtualenv("bert_env", required = TRUE)
+# py_install(c("torch", "transformers", "sentence-transformers"))
+
+py_run_string("
+from sentence_transformers import CrossEncoder
+import numpy as np
+
+_ce_model = CrossEncoder('cross-encoder/stsb-roberta-large')
+
+def ce_similarity(texts1, texts2, batch_size=32):
+    pairs = list(zip(texts1, texts2))
+    scores = _ce_model.predict(pairs, batch_size=batch_size)
+    return np.array(scores, dtype=float)
+")
+
+ce_score_pairs <- function(x, y, batch_size = 32L) {
+  stopifnot(length(x) == length(y))
+  ok <- !(is.na(x) | is.na(y))
+  out <- rep(NA_real_, length(x))
+  if (any(ok)) {
+    out[ok] <- py$ce_similarity(as.character(x[ok]), as.character(y[ok]),
+                               batch_size = as.integer(batch_size))
+  }
+  out
+}
+
+similarity_metrics <- function(v) {
+  list(
+    mean   = mean(v, na.rm = TRUE),
+    median = median(v, na.rm = TRUE),
+    sd     = sd(v, na.rm = TRUE)
+  )
+}
+
+# Similarity on aligned pairs (human vs model)
+merged_data$ptitle_similarity  <- ce_score_pairs(merged_data$ptitle_human, merged_data$ptitle_model)
+merged_data$doi_similarity     <- ce_score_pairs(merged_data$doi_human,    merged_data$doi_model)
+merged_data$depen_similarity   <- ce_score_pairs(merged_data$depen_human,  merged_data$depen_model)
+merged_data$endog_similarity   <- ce_score_pairs(merged_data$endog_human,  merged_data$endog_model)
+merged_data$iv_similarity      <- ce_score_pairs(merged_data$iv_human,     merged_data$iv_model)
+merged_data$rainmet_similarity <- ce_score_pairs(merged_data$rainmet_human,merged_data$rainmet_model)
+
+cat("\nCross-Encoder STS Similarity (raw scores): title\n")
+print(similarity_metrics(merged_data$ptitle_similarity))
+
+cat("\nCross-Encoder STS Similarity (raw scores): doi\n")
+print(similarity_metrics(merged_data$doi_similarity))
+
+cat("\nCross-Encoder STS Similarity (raw scores): dependent var\n")
+print(similarity_metrics(merged_data$depen_similarity))
+
+cat("\nCross-Encoder STS Similarity (raw scores): endogenous var\n")
+print(similarity_metrics(merged_data$endog_similarity))
+
+cat("\nCross-Encoder STS Similarity (raw scores): iv list\n")
+print(similarity_metrics(merged_data$iv_similarity))
+
+cat("\nCross-Encoder STS Similarity (raw scores): rainfall instrument\n")
+print(similarity_metrics(merged_data$rainmet_similarity))
