@@ -13,11 +13,11 @@ from datetime import datetime
 
 # Initialize the OpenAI client
 # Tip: consider using an environment variable instead of hardcoding the key.
-client = OpenAI(api_key="key")
+client = OpenAI(api_key="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")
 
 
 # Fine-tuned model ID
-fine_tuned_model_id = "ft:gpt-4.1-mini-2025-04-14:aide-lab:janrun:D3DMZE4c"
+fine_tuned_model_id = "ft:gpt-4.1-mini-2025-04-14:aide-lab:scmods:DEMpaURA"
 
 
 DEFAULT_MAX_COMPLETION_TOKENS = 100
@@ -68,51 +68,25 @@ questions = [
     {
         "key": "Title",
         "question": (
-            "Extract the article's exact title as it appears in the document. "
-            "Look for the main standalone heading near the top of the first page, before the author list and/or abstract. "
-            "Include any subtitle that is part of the same heading (e.g., separated by a colon or dash). "
-            "Do not include author names, affiliations, journal name, running headers, section titles (e.g., Abstract, Introduction), "
-            "or footnote markers/symbols attached to the title. "
-            "Output format: Output exactly one line containing only the title text and nothing else."
+            "Task: Extract the article title.\nLook: top of first page (main heading before authors/abstract).\nRules: include subtitle if in the same heading; exclude authors/affiliations/journal headers/footers/section headers; ignore footnote markers (*, †, superscripts).\nOutput: ONE line: title text only. No quotes, labels, or extra words."
         ),
     },
     {
         "key": "DOI",
         "question": (
-            "Extract the Digital Object Identifier (DOI) of the focal article (version of record). "
-            "Look for DOI-like strings near front matter, headers/footers, or citation blocks (e.g., 'doi:', 'DOI', 'https://doi.org/'). "
-            "Ignore DOIs that appear only in references unless clearly the article's own DOI. "
-            "If both preprint and published DOIs exist, choose the published DOI. "
-            "Normalize by stripping prefixes/URL wrappers (e.g., remove 'doi:' and 'https://doi.org/'), removing whitespace/line-break hyphenation, "
-            "and trimming trailing punctuation; convert to lowercase. "
-            "Output format: Output exactly one token: the normalized DOI (e.g., 10.xxxx/xxxx) or exactly n/a."
+            "Task: Extract the DOI of THIS article (version of record), not DOIs in references.\nLook: first page/front matter for doi:, DOI, https://doi.org/.\nRules: remove URL/prefix (doi:, https://doi.org/); remove spaces/line breaks; strip trailing punctuation; output lowercase.\nOutput: ONE token = normalized DOI (10.xxxx/xxxx) OR exactly n/a."
         ),
     },
     {
         "key": "Empirical Analysis",
         "question": (
-            "Determine whether the provided text contains empirical quantitative statistical analysis. "
-            "By empirical quantitative statistical analysis, we mean the article uses regressions, econometrics, "
-            "or similar statistical methods to fit a model/equation to data (e.g., estimated coefficients with "
-            "standard errors, p-values, confidence intervals; methods like OLS, IV/2SLS, DiD, RDD, fixed effects, "
-            "logit/probit, Poisson, GMM, etc.). "
-            "Do not infer this from the topic/title alone; verify from the text that estimation is actually done. "
-            "If you answer 1, in your response briefly note the key phrase or evidence that confirms empirical analysis "
-            "(e.g., 'regression results', 'estimated coefficients'). "
-            "Output format: Start with exactly one character: 1 if it contains empirical quantitative statistical analysis, "
-            "0 if it does not. If 1, follow with a brief justification on the same line."
+            "Task: Does the article contain empirical quantitative statistical estimation (e.g., regressions/econometrics with estimated coefficients/SEs/p-values)?\nLook: 'we estimate/regress', model equations with error terms, regression tables with coefficients.\nRules: do NOT infer from topic/title/abstract. Count only analysis done in THIS article (not summaries of other papers). Exclude purely theoretical work, qualitative/descriptive only, and simulation/calibration only.\nOutput: 1 if yes, 0 if no. Output exactly one character."
         )
     },
     {
         "key": "Dependent Variable(s)",
         "question": (
-            "Only proceed if the text contains empirical quantitative statistical analysis. "
-            "Identify the dependent (outcome) variable(s) in the main regression models (left-hand-side outcomes). "
-            "Do not include first-stage outcomes, treatments, instruments, controls, fixed effects, or other RHS variables. "
-            "Normalize names: do not output symbolic notation; remove transformations (e.g., if 'log income' then output 'income'); "
-            "remove units/parentheses that are not part of the core name; keep names consistent across papers. "
-            "Output format: exactly one line; lower case; a semicolon-separated list with a single space after each semicolon; "
-            "do not repeat variables; if none can be identified from the text, output exactly n/a."
+            "Task: List the main dependent/outcome variable(s) used in the primary regression/econometric results.\nLook: LHS of main equations; column headers of main regression tables; text describing the main empirical model.\nRules: exclude first-stage outcomes, RHS variables (treatments/endogenous regressors/instruments/controls/covariates/fixed effects), mediators/moderators.\nKeep names exactly as written in the paper/table (including any log/ln/differences/units if shown).\nOutput: ONE line: variable name(s) only; separate multiple with '; '."
         ),
         "dependency": {"key": "Empirical Analysis", "value": "1"},
     },
@@ -131,10 +105,8 @@ questions = [
         "question": (
             "Only proceed if the text contains empirical quantitative statistical analysis. "
             "Answer BOTH parts below using ONLY the provided article text.\n\n"
-            "Part A (binary): Determine whether the authors explicitly identify/discuss an endogeneity problem "
-            "(omitted variable bias, reverse causality, measurement error, simultaneity, selection, etc.). \n"
-            "Part B (list): If you found that there was an explicitly mentioned endogeneity problem in the text, identify the specific explanatory variable(s) the authors treat as endogenous "
-            "(these will not be instruments,  outcomes, or controls). If Part A != 1, output n/a.\n\n"
+            "Part A (binary): Task: In the MAIN empirical analysis, do the authors treat any RHS variable as endogenous (correlated with the error term) and address it explicitly?\nLook: statements that a regressor is endogenous + a method to address it (IV/2SLS/3SLS/LIML, control function/2SRI, GMM with instruments, first stage, weak-IV tests, etc.).\nRules: do NOT count generic mentions of 'endogeneity' without an actual endogenous regressor in the main specs.\nOutput: 1 if yes, 0 if no. Output exactly one character."
+            "Part B (list): Task: If endogenous explanatory variable(s) exist in this paper, list the explanatory variable(s) explicitly treated as endogenous in the main analysis.\nLook: 'we instrument X', 'X is endogenous', first-stage descriptions/tables, reduced form, weak-IV/overid tests.\nRules: exclude instruments, dependent variables, and ordinary controls.\nKeep names exactly as written in the paper/table (including any log/ln/differences/units if shown).\nOutput: ONE line: variable name(s) only; separate multiple with '; '."
             "Output format (EXACTLY requested information, no extra text):\n"
             "ENDOGENEITY_PROBLEM: <0 or 1>\n"
             "ENDOGENOUS_VARIABLES: <semicolon-separated list; or n/a>"
@@ -149,12 +121,9 @@ questions = [
             "IVS": ("Instrumental Variable(s)", "var_list"),
         },
         "question": (
-            "Only proceed if an endogeneity problem is identified. "
             "Answer BOTH parts below using ONLY the provided article text.\n\n"
-            "Part A (binary): Determine whether the article uses an instrumental variable (IV) regression method with excluded instruments "
-            "(IV/2SLS/LIML/3SLS, control-function/2SRI, IV-probit/logit/tobit, etc.). \n"
-            "Part B (list): If you identified use of an instrumental variable in part A, list the excluded instrument variable(s) used in the main IV analysis "
-            "(first stage, excluded from structural equation). If Part A != 1, output n/a.\n\n"
+            "Part A (binary): Task: In the MAIN empirical analysis, do the authors implement an IV-type estimator with excluded instruments to address endogeneity?\nLook: an actual excluded instrument set used in a first stage/reduced form; 2SLS/IV/3SLS/LIML; IV-Probit; control function/2SRI; GMM with instruments; exclusion restriction; first-stage equations/tables.\nRules: do NOT count non-statistical uses of 'instrument' (survey instrument, measurement instrument) or papers that only use RCT/RDD/DiD/event study without an IV first stage.\nOutput: 1 if yes, 0 if no. Output exactly one character."
+            "Part B (list): Task: List the excluded instrument(s) used in the main IV analysis.\nLook: 'we instrument X with Z', 'Z is our instrument', 'excluded instrument', first-stage/reduced-form equations or tables.\nRules: exclude endogenous regressors themselves, dependent variables, and regular controls.\nKeep names exactly as written in the paper/table (including any log/ln/differences/units if shown).\nOutput: ONE line: instrument name(s) only; separate multiple with '; '."
             "Output format (EXACTLY requested information, no extra text):\n"
             "IV_USED: <0 or 1>\n"
             "IVS: <semicolon-separated list; or n/a>"
@@ -169,12 +138,9 @@ questions = [
             "RAINFALL_INSTRUMENT": ("Rainfall Instrument", "var_list"),
         },
         "question": (
-            "Only proceed if IV regression is used. "
             "Answer BOTH parts below using ONLY the provided article text.\n\n"
-            "Part A (binary): Determine whether any excluded instrument in the IV framework is based on rainfall/precipitation "
-            "(including anomalies/shocks/deviations; SPI/SPEI/PDSI/scPDSI; wet-day counts; intensity; snowfall/snowpack/SWE). "
-            "Confirm it is an excluded instrument (not just a control). \n"
-            "Part B (detail): If you found that some rainfall metric was used as an instrumental variable in part A, state that exact rainfall/precipitation-based excluded instrument metric(s)  "
+            "Part A (binary): Task: Is any excluded instrument based on rainfall/precipitation?\nLook: rainfall, precipitation, drought, monsoon rainfall/onset, wet-day counts, SPI/SPEI/PDSI, precipitation-derived indices used as the EXCLUDED instrument.\nRules: count only if precipitation-based and used as an excluded instrument in an IV first stage/reduced form. Do NOT count precipitation used only as regressor/control/interaction/exposure/outcome. Do NOT count ENSO or other climate indices unless explicitly stated to be precipitation-based AND used as the excluded instrument. Ignore mentions in other papers.\nOutput: 1 if yes, 0 if no. Output exactly one character."
+            "Part B (detail): Task: List the specific rainfall/precipitation-based excluded instrument(s) used in the main IV analysis.\nLook: first-stage/reduced-form equations/tables for the precipitation-based instrument name(s) (e.g., total/mean rainfall over a window, rainfall deviations/shocks, monsoon onset, rainfall index, coefficient of variation of rainfall).\nRules: keep names exactly as written in the paper/table (including window/statistic/units/logs if shown).\nOutput: ONE line: rainfall instrument name(s) only; separate multiple with '; '."
             " If Part A != 1, output n/a.\n\n"
             "Output format (EXACTLY requested information, no extra text):\n"
             "RAINFALL_IV: <0 or 1>\n"
