@@ -13,7 +13,7 @@ from datetime import datetime
 
 # Initialize the OpenAI client
 # Tip: consider using an environment variable instead of hardcoding the key.
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="key")
 
 
 # Fine-tuned model ID
