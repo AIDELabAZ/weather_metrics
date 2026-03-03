@@ -41,7 +41,8 @@ human_data_clean <- human_data %>%
     iv      = tolower(iconv(iv,      to = "UTF-8", sub = "byte")),
     iv_bin   = as.numeric(iv_bin),
     rain_bin = as.numeric(rain_bin),
-    emp_bin  = as.numeric(emp_bin)
+    emp_bin  = as.numeric(emp_bin),
+    end_bin = as.numeric(end_bin)
   )
 
 ############################################
@@ -61,7 +62,8 @@ model_data_clean <- model_data %>%
     endog = `Endogenous Variable(s)`,
     depen = `Dependent Variable(s)`,
     iv = `Instrumental Variable(s)`,
-    emp_bin = `Empirical Analysis`
+    emp_bin = `Empirical Analysis`,
+    end_bin = `Endogeneity Problem`
   ) %>%
   mutate(
     filename_model = filename,  # preserve original model filename
@@ -74,7 +76,8 @@ model_data_clean <- model_data %>%
     iv      = tolower(iconv(iv,      to = "UTF-8", sub = "byte")),
     iv_bin   = as.numeric(iv_bin),
     rain_bin = as.numeric(rain_bin),
-    emp_bin  = as.numeric(emp_bin)
+    emp_bin  = as.numeric(emp_bin),
+    end_bin = as.numeric(end_bin)
   )
 
 ############################################
@@ -111,14 +114,16 @@ model_data_clean <- model_data_clean %>%
   mutate(
     rain_bin = ifelse(is.na(rain_bin), 0, rain_bin),
     iv_bin   = ifelse(is.na(iv_bin),   0, iv_bin),
-    emp_bin  = ifelse(is.na(emp_bin),  0, emp_bin)
+    emp_bin  = ifelse(is.na(emp_bin),  0, emp_bin),
+    end_bin = ifelse(is.na(end_bin), 0, end_bin)
   )
 
 human_data_clean <- human_data_clean %>%
   mutate(
     rain_bin = ifelse(is.na(rain_bin), 0, rain_bin),
     iv_bin   = ifelse(is.na(iv_bin),   0, iv_bin),
-    emp_bin  = ifelse(is.na(emp_bin),  0, emp_bin)
+    emp_bin  = ifelse(is.na(emp_bin),  0, emp_bin),
+    end_bin = ifelse(is.na(end_bin), 0, end_bin)
   )
 
 ############################################
@@ -148,7 +153,9 @@ merged_data <- merged_data %>%
     rain_bin_human = factor(rain_bin_human, levels = c(0, 1)),
     rain_bin_model = factor(rain_bin_model, levels = c(0, 1)),
     emp_bin_human  = factor(emp_bin_human,  levels = c(0, 1)),
-    emp_bin_model  = factor(emp_bin_model,  levels = c(0, 1))
+    emp_bin_model  = factor(emp_bin_model,  levels = c(0, 1)),
+    end_bin_human = factor(end_bin_human, levels = c(0,1)),
+    end_bin_model = factor(end_bin_model, levels = c(0,1))
   )
 
 ############################################
@@ -181,6 +188,14 @@ cm_emp_bin <- confusionMatrix(
 cat("\nConfusion Matrix for emp_bin:\n")
 print(cm_emp_bin)
 
+cm_end_bin <- confusionMatrix(
+  data = merged_data$end_bin_model,
+  reference = merged_data$end_bin_human,
+  positive = "1"
+)
+
+cat("\nConfusion Matrix for end_bin:\n")
+print(cm_end_bin)
 ############################################
 # BERT semantic similarity for rainmet (Python/reticulate)
 ############################################
@@ -667,4 +682,4 @@ maybe_confusion(merged_data, "endog_id_eval_model", "endog_id_eval_human", "Endo
 ############################################
 # Create env only once; comment out after first successful run:
 # virtualenv_create("bert_env")
-d o
+
