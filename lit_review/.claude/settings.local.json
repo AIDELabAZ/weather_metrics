@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /Users/kieran/Documents/GitHub/weather_metrics/lit_review/*.py /Users/kieran/Documents/GitHub/weather_metrics/lit_review/*.do /Users/kieran/Documents/GitHub/weather_metrics/lit_review/*.R)",
+      "Bash(find /Users/kieran/Documents/GitHub/weather_metrics/lit_review -type f \\\\\\(-name README* -o -name *.md -o -name *.txt -o -name *.cfg -o -name *.yaml -o -name *.yml -o -name *.json \\\\\\))",
+      "Bash(ls -lh /Users/kieran/Documents/GitHub/weather_metrics/lit_review/*.log)",
+      "Bash(python3 -c \":*)",
+      "Bash(pip install:*)",
+      "Bash(python3 sankey_iv_clustering.py)",
+      "Bash(grep -v \"^$\")",
+      "Bash(open \"/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_rainfall_iv.html\")"
+    ]
+  }
+}

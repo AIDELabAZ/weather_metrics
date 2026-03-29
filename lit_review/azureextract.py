@@ -1,5 +1,6 @@
 import fitz  # PyMuPDF
 import os
+import time
 import pandas as pd
 from openai import AzureOpenAI
 import re
@@ -406,32 +407,38 @@ def get_stop_sequences(q_key: str):
 # -------------------------------------------------------------------
 # Model query with conversation history (UPDATED FOR AZURE/PHI-3.5)
 # -------------------------------------------------------------------
-def query_model_with_history(messages, q_key, enforce_binary=False, max_completion_tokens_override=None):
+def query_model_with_history(messages, q_key, enforce_binary=False, max_completion_tokens_override=None,
+                             max_retries=4, base_delay=2.0):
     max_comp = int(max_completion_tokens_override) if max_completion_tokens_override is not None else get_max_completion_tokens(q_key)
     stop = get_stop_sequences(q_key)
-    
-    try:
-        kwargs = dict(
-            model=MODEL_NAME,
-            messages=messages,
-            max_tokens=max_comp,
-            temperature=TEMPERATURE,
-        )
-        if stop:
-            kwargs["stop"] = stop
-        
-        response = client.chat.completions.create(**kwargs)
-        answer = response.choices[0].message.content.strip()
-        
-        if not answer:
-            return "n/a"
-        if enforce_binary:
-            return normalize_yes_no(answer)
-        return answer
-    
-    except Exception as e:
-        print(f"Error querying model ({q_key}): {e}")
-        return "n/a"
+
+    kwargs = dict(
+        model=MODEL_NAME,
+        messages=messages,
+        max_tokens=max_comp,
+        temperature=TEMPERATURE,
+    )
+    if stop:
+        kwargs["stop"] = stop
+
+    for attempt in range(max_retries):
+        try:
+            response = client.chat.completions.create(**kwargs)
+            answer = response.choices[0].message.content.strip()
+            if not answer:
+                return "n/a"
+            if enforce_binary:
+                return normalize_yes_no(answer)
+            return answer
+
+        except Exception as e:
+            if attempt < max_retries - 1:
+                delay = base_delay * (2 ** attempt)
+                print(f"Error querying model ({q_key}): {e}. Retrying in {delay:.0f}s...")
+                time.sleep(delay)
+            else:
+                print(f"Error querying model ({q_key}) after {max_retries} attempts: {e}")
+                return "n/a"
 
 # -------------------------------------------------------------------
 # Main processing

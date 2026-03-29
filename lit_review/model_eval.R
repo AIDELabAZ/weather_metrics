@@ -48,9 +48,6 @@ human_data_clean <- human_data %>%
 ############################################
 # 2) Clean/standardize model data
 ############################################
-model_data <- model_data %>%
-  slice(-80)
-
 model_data_clean <- model_data %>%
   rename(
     filename = `File Name`,

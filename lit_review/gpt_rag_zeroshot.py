@@ -177,27 +177,37 @@ def query_model(context: str, question: Dict) -> str:
 def process_pdf(pdf_path: str) -> Dict:
     """Processing pipeline with enhanced validation"""
     text_data = extract_text_from_pdf(pdf_path)
+    context = text_data["main_text"]
     results = {"Filename": os.path.basename(pdf_path)}
 
     # DOI extraction pipeline
     results["DOI"] = extract_doi(text_data) or "n/a"
 
-    # Process other questions
+    # Process questions with dependency gating
     for question in questions:
-        if question["key"] == "DOI":
+        key = question["key"]
+        if key == "DOI":
             continue
 
-        context = text_data["main_text"]
-        results[question["key"]] = query_model(context, question)
+        # Gate: skip IV detail questions if IV not used
+        if key in ("Instrumental Variable", "Instrumental Variable Rainfall"):
+            if results.get("Instrumental Variable Used") != "1":
+                results[key] = "n/a"
+                continue
 
-    # Post-processing validation
-    if results["Instrumental Variable Rainfall"] == "1":
-        if results["Rainfall Metric"] == "n/a":
-            results["Rainfall Metric"] = query_model(text_data["main_text"],
-                                                     next(q for q in questions if q["key"] == "Rainfall Metric"))
-    else:
-        results["Rainfall Metric"] = "n/a"
-        results["Rainfall Data Source"] = "n/a"
+        # Gate: skip rainfall detail questions if rainfall IV not used
+        if key in ("Rainfall Metric", "Rainfall Data Source"):
+            if results.get("Instrumental Variable Rainfall") != "1":
+                results[key] = "n/a"
+                continue
+
+        results[key] = query_model(context, question)
+
+    # Second pass: re-ask Rainfall Metric if still missing after confirmed rainfall IV
+    if results.get("Instrumental Variable Rainfall") == "1" and results.get("Rainfall Metric") == "n/a":
+        results["Rainfall Metric"] = query_model(
+            context, next(q for q in questions if q["key"] == "Rainfall Metric")
+        )
 
     return results
 

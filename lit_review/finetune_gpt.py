@@ -1,5 +1,6 @@
 import fitz  # PyMuPDF
 import os
+import time
 import pandas as pd
 from openai import OpenAI
 import re
@@ -13,7 +14,7 @@ from datetime import datetime
 
 # Initialize the OpenAI client
 # Tip: consider using an environment variable instead of hardcoding the key.
-client = OpenAI(api_key="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")
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 # Fine-tuned model ID
@@ -206,9 +207,9 @@ def clean_variable_list(raw_text):
         if not p:
             continue
 
-        p = re.split(r"\\s[-–]\\s", p)[0].strip()
-        p = re.split(r"\\s(?:such as|for|where|which|that)\\b", p, flags=re.I)[0].strip()
-        p = p.strip("\\\"\"''")
+        p = re.split(r"\s[-–]\s", p)[0].strip()
+        p = re.split(r"\s(?:such as|for|where|which|that)\b", p, flags=re.I)[0].strip()
+        p = p.strip("\"\"''")
 
         if len(p.split()) > 10:
             continue
@@ -413,9 +414,9 @@ def extract_relevant_sections(pdf_path):
         "rainfall", "model", "econometric", "metrics", "introduction",
         "abstract", "conclusion", "strategy", "empirical", "estimation",
         "outcome", "precipitation", "first stage", "first-stage",
-        "endogeneity", "endogenous", "identification", "2SLS", "first stage",
-        "second stage", "doi", "strategy", "excluded", "estimate", "effect", "affects", "exogenous",
-        "two-stage least squares", "first stage", "2sls", "GMM", "fixed effects"
+        "endogeneity", "endogenous", "identification", "2SLS",
+        "second stage", "doi", "excluded", "estimate", "effect", "affects", "exogenous",
+        "two-stage least squares", "2sls", "GMM", "fixed effects"
     ]
 
     try:
@@ -452,31 +453,34 @@ def get_stop_sequences(q_key: str):
 # -------------------------------------------------------------------
 
 
-def query_model_with_history(messages, q_key, is_binary=False, max_completion_tokens_override=None):
+def query_model_with_history(messages, q_key, is_binary=False, max_completion_tokens_override=None,
+                             max_retries=4, base_delay=2.0):
     max_comp = int(max_completion_tokens_override) if max_completion_tokens_override is not None else get_max_completion_tokens(q_key)
     stop = get_stop_sequences(q_key)
 
-    try:
-        kwargs = dict(
-            model=fine_tuned_model_id,
-            messages=messages,
-            max_tokens=max_comp,
-            temperature=TEMPERATURE,
-        )
-        if stop:
-            kwargs["stop"] = stop
+    kwargs = dict(
+        model=fine_tuned_model_id,
+        messages=messages,
+        max_tokens=max_comp,
+        temperature=TEMPERATURE,
+    )
+    if stop:
+        kwargs["stop"] = stop
 
-        response = client.chat.completions.create(**kwargs)
-        answer = response.choices[0].message.content.strip()
+    for attempt in range(max_retries):
+        try:
+            response = client.chat.completions.create(**kwargs)
+            answer = response.choices[0].message.content.strip()
+            return answer if answer else "n/a"
 
-        if not answer:
-            return "n/a"
-
-        return answer
-
-    except Exception as e:
-        print(f"Error querying model ({q_key}): {e}")
-        return "n/a"
+        except Exception as e:
+            if attempt < max_retries - 1:
+                delay = base_delay * (2 ** attempt)
+                print(f"Error querying model ({q_key}): {e}. Retrying in {delay:.0f}s...")
+                time.sleep(delay)
+            else:
+                print(f"Error querying model ({q_key}) after {max_retries} attempts: {e}")
+                return "n/a"
 
 
 # -------------------------------------------------------------------
@@ -484,11 +488,35 @@ def query_model_with_history(messages, q_key, is_binary=False, max_completion_to
 # -------------------------------------------------------------------
 
 
+FIELDNAMES = [
+    "File Name", "Title", "DOI", "Empirical Analysis", "Dependent Variable(s)",
+    "Endogeneity Problem", "Endogenous Variable(s)", "Instrumental Variable Used",
+    "Instrumental Variable(s)", "Instrumental Variable Rainfall", "Rainfall Instrument",
+]
+
+
 def process_pdfs_conditional_queries(pdf_folder, output_csv):
-    data = []
+    # Resume: load already-processed filenames
+    already_done = set()
+    if os.path.exists(output_csv):
+        existing = pd.read_csv(output_csv, usecols=["File Name"])
+        already_done = set(existing["File Name"].dropna().tolist())
+        print(f"Resuming — {len(already_done)} file(s) already processed, skipping.")
+
+    # Open CSV in append mode; write header only if starting fresh
+    write_header = not os.path.exists(output_csv) or len(already_done) == 0
+    csv_file = open(output_csv, "a", newline="", encoding="utf-8")
+    writer = pd.io.common  # placeholder — use csv module below
+    import csv as _csv
+    writer = _csv.DictWriter(csv_file, fieldnames=FIELDNAMES, extrasaction="ignore")
+    if write_header:
+        writer.writeheader()
 
     for filename in os.listdir(pdf_folder):
         if not filename.endswith(".pdf"):
+            continue
+        if filename in already_done:
+            print(f"Skipping {filename} (already processed).")
             continue
 
         pdf_path = os.path.join(pdf_folder, filename)
@@ -679,10 +707,10 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
         info_dict = enforce_dependency_consistency(info_dict, justifications, verbose=False)
 
         print(f"Final extracted info for {filename}: {info_dict}")
-        data.append(info_dict)
+        writer.writerow(info_dict)
+        csv_file.flush()
 
-    df = pd.DataFrame(data)
-    df.to_csv(output_csv, index=False)
+    csv_file.close()
     print(f"Data saved to {output_csv}")
 
 
@@ -698,6 +726,4 @@ if __name__ == "__main__":
     output_csv = os.path.join(output_folder, "finetune_output.csv")
 
     process_pdfs_conditional_queries(pdf_folder, output_csv)
-
-
-print(f"Script finished: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"Script finished: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
