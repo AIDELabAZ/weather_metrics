@@ -32,13 +32,16 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # ─── Paths ─────────────────────────────────────────────────────────────────
-INPUT_CSV       = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/allpapers_output.csv"
-OUTPUT_HTML     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_rainfall_iv.html"
-CLUSTER_SUMMARY = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_summary.csv"
+INPUT_CSV              = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/allpapers_output.csv"
+OUTPUT_HTML            = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_rainfall_iv.html"
+OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_rainfall_depvar.html"
+CLUSTER_SUMMARY        = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_summary.csv"
+CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_summary_depvar.csv"
 
 # ─── HDBSCAN / UMAP params ─────────────────────────────────────────────────
-MIN_CLUSTER_SIZE_ENDOG = 6    # raise to get fewer, broader clusters
-MIN_CLUSTER_SIZE_RAIN  = 5
+MIN_CLUSTER_SIZE_ENDOG  = 6    # raise to get fewer, broader clusters
+MIN_CLUSTER_SIZE_RAIN   = 5
+MIN_CLUSTER_SIZE_DEPVAR = 6
 MIN_SAMPLES            = 2    # lower = more points pulled from noise
 UMAP_N_COMPONENTS      = 10   # dims to reduce to before HDBSCAN
 UMAP_N_NEIGHBORS       = 15
@@ -109,6 +112,7 @@ RAIN_LABEL_OVERRIDES: dict[int, str] = {
     14: "Other (Rainfall Metrics)",       # noise
     15: "Rainfall Shocks",
 }
+DEPVAR_LABEL_OVERRIDES: dict[int, str] = {}  # populate after reviewing cluster_summary_depvar.csv
 
 # ─── Cleaning config ───────────────────────────────────────────────────────
 MAX_WORDS = 8     # truncate entries longer than this
@@ -411,17 +415,17 @@ def auto_label_clusters(texts: list[str], cluster_ids: np.ndarray) -> dict[int, 
 
 
 # ─── Build cluster summary for review ──────────────────────────────────────
-def build_summary(endog_df: pd.DataFrame, rain_df: pd.DataFrame) -> pd.DataFrame:
+def build_summary(*sides) -> pd.DataFrame:
+    """
+    Each element of sides is a tuple: (side_name, df, id_col, label_col).
+    """
     rows = []
-    for side, df, id_col, label_col in [
-        ("endog", endog_df, "endog_cluster_id", "endog_cluster_label"),
-        ("rain",  rain_df,  "rain_cluster_id",  "rain_cluster_label"),
-    ]:
+    for side_name, df, id_col, label_col in sides:
         for (cid, label), grp in df.groupby([id_col, label_col]):
             from collections import Counter
             sample = [e for e, _ in Counter(grp["entry"]).most_common(8)]
             rows.append({
-                "side": side,
+                "side": side_name,
                 "cluster_id": cid,
                 "label": label,
                 "n_entries": len(grp),
@@ -439,55 +443,65 @@ def build_summary(endog_df: pd.DataFrame, rain_df: pd.DataFrame) -> pd.DataFrame
 # Entries mapped to these labels are dropped from flows (not shown as a node).
 # This covers: noise, model hallucinations, and variables that cannot be
 # endogenous (e.g. weather phenomena that are quasi-random by nature).
-ENDOG_EXCLUDE = {"Other (Endogenous Variables)"}
-RAIN_EXCLUDE  = {"Other (Rainfall Metrics)"}
+ENDOG_EXCLUDE  = {"Other (Endogenous Variables)"}
+RAIN_EXCLUDE   = {"Other (Rainfall Metrics)"}
+DEPVAR_EXCLUDE = {"Other (Dependent Variables)"}
 
 
 # ─── Sankey ────────────────────────────────────────────────────────────────
-def build_sankey(endog_df: pd.DataFrame, rain_df: pd.DataFrame, paper_index) -> go.Figure:
+def build_sankey(
+    left_df: pd.DataFrame,
+    right_df: pd.DataFrame,
+    paper_index,
+    left_label_col: str,
+    right_label_col: str,
+    left_exclude: set,
+    right_exclude: set,
+    title: str,
+) -> go.Figure:
     # Per-paper label sets, with excluded labels stripped out
-    rain_map = (
-        rain_df[~rain_df["rain_cluster_label"].isin(RAIN_EXCLUDE)]
-        .groupby("paper_idx")["rain_cluster_label"].apply(set).to_dict()
+    left_map = (
+        left_df[~left_df[left_label_col].isin(left_exclude)]
+        .groupby("paper_idx")[left_label_col].apply(set).to_dict()
     )
-    endog_map = (
-        endog_df[~endog_df["endog_cluster_label"].isin(ENDOG_EXCLUDE)]
-        .groupby("paper_idx")["endog_cluster_label"].apply(set).to_dict()
+    right_map = (
+        right_df[~right_df[right_label_col].isin(right_exclude)]
+        .groupby("paper_idx")[right_label_col].apply(set).to_dict()
     )
 
     flows: dict[tuple[str, str], int] = defaultdict(int)
     for paper_idx in paper_index:
-        r_labels = rain_map.get(paper_idx, set())
-        e_labels = endog_map.get(paper_idx, set())
-        if not r_labels or not e_labels:
+        l_labels = left_map.get(paper_idx, set())
+        r_labels = right_map.get(paper_idx, set())
+        if not l_labels or not r_labels:
             continue
-        for r in r_labels:
-            for e in e_labels:
-                flows[(r, e)] += 1
+        for l in l_labels:
+            for r in r_labels:
+                flows[(l, r)] += 1
 
     if not flows:
         raise ValueError("No flows found — check that both columns have overlapping papers.")
 
     # Sort nodes by total flow for a cleaner diagram
-    rain_totals  = defaultdict(int)
-    endog_totals = defaultdict(int)
-    for (r, e), v in flows.items():
-        rain_totals[r]  += v
-        endog_totals[e] += v
+    left_totals  = defaultdict(int)
+    right_totals = defaultdict(int)
+    for (l, r), v in flows.items():
+        left_totals[l]  += v
+        right_totals[r] += v
 
-    rain_nodes  = sorted(rain_totals,  key=lambda x: -rain_totals[x])
-    endog_nodes = sorted(endog_totals, key=lambda x: -endog_totals[x])
-    all_nodes   = rain_nodes + endog_nodes
+    left_nodes  = sorted(left_totals,  key=lambda x: -left_totals[x])
+    right_nodes = sorted(right_totals, key=lambda x: -right_totals[x])
+    all_nodes   = left_nodes + right_nodes
     node_idx    = {n: i for i, n in enumerate(all_nodes)}
 
-    sources = [node_idx[r] for r, _ in flows]
-    targets = [node_idx[e] for _, e in flows]
+    sources = [node_idx[l] for l, _ in flows]
+    targets = [node_idx[r] for _, r in flows]
     values  = list(flows.values())
 
-    n_rain  = len(rain_nodes)
-    n_endog = len(endog_nodes)
-    rain_colours  = [f"hsl({int(200 + 120*i/max(n_rain-1,1))},60%,55%)"  for i in range(n_rain)]
-    endog_colours = [f"hsl({int(20  + 40 *i/max(n_endog-1,1))},70%,55%)" for i in range(n_endog)]
+    n_left  = len(left_nodes)
+    n_right = len(right_nodes)
+    left_colours  = [f"hsl({int(200 + 120*i/max(n_left-1,1))},60%,55%)"  for i in range(n_left)]
+    right_colours = [f"hsl({int(20  + 40 *i/max(n_right-1,1))},70%,55%)" for i in range(n_right)]
 
     fig = go.Figure(go.Sankey(
         arrangement="snap",
@@ -496,7 +510,7 @@ def build_sankey(endog_df: pd.DataFrame, rain_df: pd.DataFrame, paper_index) -> 
             thickness=18,
             line=dict(color="white", width=0.5),
             label=all_nodes,
-            color=rain_colours + endog_colours,
+            color=left_colours + right_colours,
         ),
         link=dict(
             source=sources,
@@ -507,7 +521,7 @@ def build_sankey(endog_df: pd.DataFrame, rain_df: pd.DataFrame, paper_index) -> 
     ))
 
     fig.update_layout(
-        title_text="Rainfall Instruments → Endogenous Variables",
+        title_text=title,
         title_font_size=18,
         font_size=13,
         height=900,
@@ -587,16 +601,56 @@ def main():
         requires_rainfall=True,
     )
 
-    summary = build_summary(endog_exp, rain_exp)
+    depvar_exp = process_side(
+        rain_df_raw,
+        col="Dependent Variables",
+        min_cluster_size=MIN_CLUSTER_SIZE_DEPVAR,
+        label_overrides=DEPVAR_LABEL_OVERRIDES,
+        id_col="depvar_cluster_id",
+        label_col="depvar_cluster_label",
+        side_name="Dependent Variables",
+    )
+
+    summary = build_summary(
+        ("endog", endog_exp, "endog_cluster_id", "endog_cluster_label"),
+        ("rain",  rain_exp,  "rain_cluster_id",  "rain_cluster_label"),
+    )
     summary.to_csv(CLUSTER_SUMMARY, index=False)
     print(f"\nCluster summary → {CLUSTER_SUMMARY}")
+
+    summary_depvar = build_summary(
+        ("depvar", depvar_exp, "depvar_cluster_id", "depvar_cluster_label"),
+        ("rain",   rain_exp,  "rain_cluster_id",   "rain_cluster_label"),
+    )
+    summary_depvar.to_csv(CLUSTER_SUMMARY_DEPVAR, index=False)
+    print(f"Dependent variable cluster summary → {CLUSTER_SUMMARY_DEPVAR}")
     print("Review it, add label overrides above, and rerun.")
 
-    print("\nBuilding Sankey...")
-    fig = build_sankey(endog_exp, rain_exp, rain_df_raw.index)
+    print("\nBuilding Sankey: Rainfall → Endogenous Variables...")
+    fig = build_sankey(
+        rain_exp, endog_exp, rain_df_raw.index,
+        left_label_col="rain_cluster_label",
+        right_label_col="endog_cluster_label",
+        left_exclude=RAIN_EXCLUDE,
+        right_exclude=ENDOG_EXCLUDE,
+        title="Rainfall Instruments → Endogenous Variables",
+    )
     fig.write_html(OUTPUT_HTML)
     print(f"Sankey → {OUTPUT_HTML}")
+
+    print("\nBuilding Sankey: Rainfall → Dependent Variables...")
+    fig_depvar = build_sankey(
+        rain_exp, depvar_exp, rain_df_raw.index,
+        left_label_col="rain_cluster_label",
+        right_label_col="depvar_cluster_label",
+        left_exclude=RAIN_EXCLUDE,
+        right_exclude=DEPVAR_EXCLUDE,
+        title="Rainfall Instruments → Dependent Variables",
+    )
+    fig_depvar.write_html(OUTPUT_HTML_DEPVAR)
+    print(f"Sankey → {OUTPUT_HTML_DEPVAR}")
 
 
 if __name__ == "__main__":
     main()
+
