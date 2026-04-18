@@ -112,7 +112,31 @@ RAIN_LABEL_OVERRIDES: dict[int, str] = {
     14: "Other (Rainfall Metrics)",       # noise
     15: "Rainfall Shocks",
 }
-DEPVAR_LABEL_OVERRIDES: dict[int, str] = {}  # populate after reviewing cluster_summary_depvar.csv
+DEPVAR_LABEL_OVERRIDES: dict[int, str] = {
+    13: "Business Registration",           # merge with 14
+    14: "Business Registration",           # merge with 13
+    15: "GDP Per Capita",                  # redundant "per capita per capita" wording
+    16: "GDP Per Capita Growth",           # merge with 20 and 21
+    18: "Housing & Rents",                 # panel subscript noise in auto-label
+    20: "GDP Per Capita Growth",           # log-change sentence noise; variable is gdp growth
+    21: "GDP Per Capita Growth",           # canonical
+    24: "Air Pollution",                   # rename Local Pollutants
+    28: "Green Innovation",                # auto-label "White (%)" is noise; entries are green tech
+    29: "Other (Dependent Variables)",     # fragment noise
+    31: "Other (Dependent Variables)",     # methodology label, not a variable
+    32: "Other (Dependent Variables)",     # price/variable code noise
+    33: "Political Institutions",          # entries are about contracts and institutions
+    37: "Institutional Quality",           # merge with positive framing
+    38: "Other (Dependent Variables)",     # variable code
+    43: "Foreign Direct Investment",       # sentence noise; variable is FDI
+    47: "Air Pollution",                   # merge with 24
+    49: "Food Prices",                     # sentence noise; variable is food prices
+    57: "Economic Growth",                 # canonical
+    62: "Economic Growth",                 # too generic; merge with 57
+    72: "Total Factor Productivity",       # user fix: Tfp_Lpit
+    77: "Other (Dependent Variables)",     # variable code noise
+    78: "Other (Dependent Variables)",     # equation fragment
+}
 
 # ─── Cleaning config ───────────────────────────────────────────────────────
 MAX_WORDS = 8     # truncate entries longer than this
@@ -458,7 +482,9 @@ def build_sankey(
     left_exclude: set,
     right_exclude: set,
     title: str,
-) -> go.Figure:
+    node_pad: int = 20,
+    left_node_order: list[str] | None = None,
+) -> tuple[go.Figure, list[str]]:
     # Per-paper label sets, with excluded labels stripped out
     left_map = (
         left_df[~left_df[left_label_col].isin(left_exclude)]
@@ -489,10 +515,20 @@ def build_sankey(
         left_totals[l]  += v
         right_totals[r] += v
 
-    left_nodes  = sorted(left_totals,  key=lambda x: -left_totals[x])
+    if left_node_order is not None:
+        # Use provided order, appending any new nodes not in it at the end
+        known = set(left_node_order)
+        left_nodes = [n for n in left_node_order if n in left_totals] + \
+                     sorted((n for n in left_totals if n not in known), key=lambda x: -left_totals[x])
+    else:
+        left_nodes = sorted(left_totals, key=lambda x: -left_totals[x])
     right_nodes = sorted(right_totals, key=lambda x: -right_totals[x])
     all_nodes   = left_nodes + right_nodes
     node_idx    = {n: i for i, n in enumerate(all_nodes)}
+    labeled_nodes = (
+        [f"{n} ({left_totals[n]})"  for n in left_nodes] +
+        [f"{n} ({right_totals[n]})" for n in right_nodes]
+    )
 
     sources = [node_idx[l] for l, _ in flows]
     targets = [node_idx[r] for _, r in flows]
@@ -506,10 +542,10 @@ def build_sankey(
     fig = go.Figure(go.Sankey(
         arrangement="snap",
         node=dict(
-            pad=20,
+            pad=node_pad,
             thickness=18,
             line=dict(color="white", width=0.5),
-            label=all_nodes,
+            label=labeled_nodes,
             color=left_colours + right_colours,
         ),
         link=dict(
@@ -527,7 +563,7 @@ def build_sankey(
         height=900,
         margin=dict(l=20, r=20, t=60, b=20),
     )
-    return fig
+    return fig, left_nodes
 
 
 # ─── Main ──────────────────────────────────────────────────────────────────
@@ -627,7 +663,7 @@ def main():
     print("Review it, add label overrides above, and rerun.")
 
     print("\nBuilding Sankey: Rainfall → Endogenous Variables...")
-    fig = build_sankey(
+    fig, rain_node_order = build_sankey(
         rain_exp, endog_exp, rain_df_raw.index,
         left_label_col="rain_cluster_label",
         right_label_col="endog_cluster_label",
@@ -639,13 +675,15 @@ def main():
     print(f"Sankey → {OUTPUT_HTML}")
 
     print("\nBuilding Sankey: Rainfall → Dependent Variables...")
-    fig_depvar = build_sankey(
+    fig_depvar, _ = build_sankey(
         rain_exp, depvar_exp, rain_df_raw.index,
         left_label_col="rain_cluster_label",
         right_label_col="depvar_cluster_label",
         left_exclude=RAIN_EXCLUDE,
         right_exclude=DEPVAR_EXCLUDE,
         title="Rainfall Instruments → Dependent Variables",
+        node_pad=50,
+        left_node_order=rain_node_order,
     )
     fig_depvar.write_html(OUTPUT_HTML_DEPVAR)
     print(f"Sankey → {OUTPUT_HTML_DEPVAR}")
