@@ -1,7 +1,6 @@
 import fitz  # PyMuPDF
 import os
 import time
-import pandas as pd
 from openai import OpenAI
 import re
 from datetime import datetime
@@ -18,7 +17,7 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 # Fine-tuned model ID
-fine_tuned_model_id = "ft:gpt-4.1-mini-2025-04-14:aide-lab:scmods:DEMpaURA"
+fine_tuned_model_id = "ft:gpt-4.1-mini-2025-04-14:aide-lab:dif:DdlPK8T6"
 
 
 DEFAULT_MAX_COMPLETION_TOKENS = 100
@@ -496,27 +495,14 @@ FIELDNAMES = [
 
 
 def process_pdfs_conditional_queries(pdf_folder, output_csv):
-    # Resume: load already-processed filenames
-    already_done = set()
-    if os.path.exists(output_csv):
-        existing = pd.read_csv(output_csv, usecols=["File Name"])
-        already_done = set(existing["File Name"].dropna().tolist())
-        print(f"Resuming — {len(already_done)} file(s) already processed, skipping.")
-
-    # Open CSV in append mode; write header only if starting fresh
-    write_header = not os.path.exists(output_csv) or len(already_done) == 0
-    csv_file = open(output_csv, "a", newline="", encoding="utf-8")
-    writer = pd.io.common  # placeholder — use csv module below
+    # Always overwrite — reprocess all PDFs on every run
     import csv as _csv
+    csv_file = open(output_csv, "w", newline="", encoding="utf-8")
     writer = _csv.DictWriter(csv_file, fieldnames=FIELDNAMES, extrasaction="ignore")
-    if write_header:
-        writer.writeheader()
+    writer.writeheader()
 
     for filename in os.listdir(pdf_folder):
         if not filename.endswith(".pdf"):
-            continue
-        if filename in already_done:
-            print(f"Skipping {filename} (already processed).")
             continue
 
         pdf_path = os.path.join(pdf_folder, filename)
@@ -571,6 +557,10 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
                     "Here are the relevant sections from the article:\n\n"
                     f"{text_to_analyze}"
                 ),
+            },
+            {
+                "role": "assistant",
+                "content": "Understood. I will answer each extraction question using only the provided article text.",
             },
         ]
 

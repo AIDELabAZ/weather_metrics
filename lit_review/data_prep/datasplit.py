@@ -1,4 +1,5 @@
 ###
+## 1
 ## This script reads in a CSV containing all data and splits it into 80:20 training/validation and test CSVs
 ## Split is randomly determined, data are extracted to train_80 and removed_20
 ## A txt file is also generated with filenames for the removed_20 data
@@ -7,8 +8,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 # Load CSV
-file_path = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_new/training_new.csv"
-df = pd.read_csv(file_path)
+file_path = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_new_labels/training_all_new.xlsx"
+df = pd.read_excel(file_path)
 
 # Calculate exact whole number split sizes
 total_rows = len(df)
@@ -39,3 +40,5 @@ print(f"""Split complete:
 - Original rows: {total_rows}
 - Training set: {len(train_df)} rows ({len(train_df)/total_rows:.1%})
 - Test filenames: {len(test_filenames)} files ({len(test_filenames)/total_rows:.1%})""")
+
+

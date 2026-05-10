@@ -1,4 +1,5 @@
 ###
+## 2
 ## This script matches filenames from the 20% test CSV to those of the PDFs in the full PDF folder
 ## Matched PDF files are copied to a new folder callede pdf_test_20
 ###
@@ -79,7 +80,7 @@ def move_test_pdfs(test_filenames_path, pdf_source_folder, test_pdf_dest):
 # Usage remains the same
 move_test_pdfs(
     "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/test_filenames.txt",
-    "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_all",
+    "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_new_papers",
     "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/pdf_test_20"
 )
 
