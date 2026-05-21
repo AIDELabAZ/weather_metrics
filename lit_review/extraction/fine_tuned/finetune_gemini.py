@@ -1,45 +1,34 @@
 import fitz  # PyMuPDF
 import os
 import time
-import pandas as pd
 import re
 import csv as _csv
 from datetime import datetime
 
-import vertexai
-from vertexai.generative_models import GenerativeModel, ChatSession
+from google import genai
+from google.genai import types
 
 
 # -------------------------------------------------------------------
 # Config — update these before running
 # -------------------------------------------------------------------
 
-# Google Cloud project and region where the fine-tuning job was run.
-GCP_PROJECT = os.environ.get("GCP_PROJECT", "your-gcp-project")
-GCP_LOCATION = os.environ.get("GCP_LOCATION", "us-central1")
+GCP_PROJECT   = "311885870283"
+GCP_LOCATION  = "us-west1"
+ENDPOINT_ID   = "938070335469649920"
+ENDPOINT_NAME = f"projects/{GCP_PROJECT}/locations/{GCP_LOCATION}/endpoints/{ENDPOINT_ID}"
 
-# Endpoint of the fine-tuned model.
-# After sft.train() completes, retrieve it with:
-#   print(sft_job.tuned_model_name)
-# and paste it here, or set the env var GEMINI_TUNED_MODEL_ENDPOINT.
-TUNED_MODEL_ENDPOINT = os.environ.get(
-    "GEMINI_TUNED_MODEL_ENDPOINT",
-    "projects/YOUR_PROJECT/locations/us-central1/endpoints/YOUR_ENDPOINT_ID"
-)
-
-DEFAULT_MAX_OUTPUT_TOKENS = 100
+DEFAULT_MAX_OUTPUT_TOKENS = 512
 MAX_OUTPUT_TOKENS_BY_KEY = {
-    "Title": 100,
-    "DOI": 30,
-    "Empirical Analysis": 10,
-    "Dependent Variable(s)": 100,
-    "Endogeneity Bundle": 100,
-    "IV Bundle": 100,
-    "Rainfall IV Bundle": 100,
-    "Rainfall Instrument Reask": 100,
+    "Title": 256,
+    "DOI": 128,
+    "Empirical Analysis": 256,
+    "Dependent Variable(s)": 512,
+    "Endogeneity Bundle": 512,
+    "IV Bundle": 512,
+    "Rainfall IV Bundle": 512,
+    "Rainfall Instrument Reask": 512,
 }
-
-RAINFALL_INSTRUMENT_REASK_MAX_OUTPUT_TOKENS = 120
 
 STOP_SEQUENCES_BY_KEY = {
     "Title": ["\n\n"],
@@ -54,6 +43,7 @@ STOP_SEQUENCES_BY_KEY = {
 
 TEMPERATURE = 0.0
 
+# Must match conversion_code_gemini_aistudio.py exactly
 SYSTEM_INSTRUCTION = (
     "You are an AI assistant that is an expert in analysis of economic literature. "
     "You interpret complex content and extract specific information, especially about "
@@ -66,9 +56,15 @@ SYSTEM_INSTRUCTION = (
     "For binary questions with justification requests, always start with 0 or 1"
 )
 
+# Must match conversion_code_gemini_aistudio.py exactly
+QUESTION_SUFFIX = (
+    "\n\nAnswer using only the article text above and, if helpful, your previous answers in this conversation. "
+    "Remember to follow the required output format exactly."
+)
+
 
 # -------------------------------------------------------------------
-# Questions (identical to finetune_gpt.py)
+# Questions (identical to conversion_code_gemini_aistudio.py)
 # -------------------------------------------------------------------
 
 questions = [
@@ -151,7 +147,7 @@ questions = [
 
 
 # -------------------------------------------------------------------
-# Cleaning helpers (identical to finetune_gpt.py)
+# Cleaning helpers
 # -------------------------------------------------------------------
 
 def normalize_binary_with_justification(answer):
@@ -207,7 +203,7 @@ def clean_variable_list(raw_text):
     return "; ".join(uniq) if uniq else "n/a"
 
 
-def parse_prefixed_lines(answer: str, field_map: dict):
+def parse_prefixed_lines(answer, field_map):
     out = {tkey: "n/a" for _, (tkey, _) in field_map.items()}
     just = {}
     if not answer:
@@ -248,7 +244,7 @@ def extract_instruments_from_justification(justification_text):
     return txt
 
 
-def extract_rainfall_iv_snippets(full_text: str, max_chars: int = 9000) -> str:
+def extract_rainfall_iv_snippets(full_text, max_chars=9000):
     if not full_text:
         return ""
     RAINFALL_TERMS = [
@@ -317,7 +313,7 @@ def enforce_dependency_consistency(temp_answers, justifications, *, verbose=Fals
 
 
 # -------------------------------------------------------------------
-# PDF extraction (identical to finetune_gpt.py)
+# PDF extraction
 # -------------------------------------------------------------------
 
 def extract_relevant_sections(pdf_path):
@@ -347,55 +343,64 @@ def extract_relevant_sections(pdf_path):
 
 
 # -------------------------------------------------------------------
-# Token/stop helpers
+# Single-turn query — matches training format exactly
 # -------------------------------------------------------------------
 
-def get_max_output_tokens(q_key: str) -> int:
-    return int(MAX_OUTPUT_TOKENS_BY_KEY.get(q_key, DEFAULT_MAX_OUTPUT_TOKENS))
+_client = None
 
-def get_stop_sequences(q_key: str):
-    return STOP_SEQUENCES_BY_KEY.get(q_key)
-
-
-# -------------------------------------------------------------------
-# Gemini query via persistent ChatSession
-# -------------------------------------------------------------------
-
-def make_chat_session() -> ChatSession:
-    vertexai.init(project=GCP_PROJECT, location=GCP_LOCATION)
-    model = GenerativeModel(
-        model_name=TUNED_MODEL_ENDPOINT,
-        system_instruction=SYSTEM_INSTRUCTION,
-    )
-    return model.start_chat()
+def get_client():
+    global _client
+    if _client is None:
+        _client = genai.Client(vertexai=True, project=GCP_PROJECT, location=GCP_LOCATION)
+    return _client
 
 
-def query_model_with_history(chat: ChatSession, question_text: str, q_key: str,
-                              max_output_tokens_override=None,
-                              max_retries=4, base_delay=2.0):
+def build_text_input(doc_context, prior_qa_pairs, current_key, current_question):
     """
-    Send a single turn to the existing ChatSession. Gemini's ChatSession
-    maintains conversation history automatically — no manual message list needed.
+    Assemble the full prompt for one question, identical to conversion_code_gemini_aistudio.py.
+    prior_qa_pairs: list of (key, question_text, answer_text) already answered.
     """
-    max_tok = int(max_output_tokens_override) if max_output_tokens_override is not None else get_max_output_tokens(q_key)
-    stop = get_stop_sequences(q_key)
+    parts = [SYSTEM_INSTRUCTION, ""]
+    parts.append("Article sections:")
+    parts.append(doc_context)
 
-    generation_config = {
-        "temperature": TEMPERATURE,
-        "max_output_tokens": max_tok,
-    }
-    if stop:
-        generation_config["stop_sequences"] = stop
+    if prior_qa_pairs:
+        parts.append("")
+        parts.append("Previous answers:")
+        for q_key, q_text, a_text in prior_qa_pairs:
+            parts.append(f"Q: Question key: {q_key}.")
+            parts.append(q_text)
+            parts.append(f"A: {a_text}")
+            parts.append("")
+
+    parts.append(f"Question key: {current_key}.")
+    parts.append(current_question)
+    parts.append(QUESTION_SUFFIX.strip())
+
+    return "\n".join(parts)
+
+
+def query_model_single_turn(text_input, q_key, max_output_tokens_override=None,
+                             max_retries=4, base_delay=2.0):
+    client = get_client()
+    max_tok = int(max_output_tokens_override) if max_output_tokens_override is not None \
+        else MAX_OUTPUT_TOKENS_BY_KEY.get(q_key, DEFAULT_MAX_OUTPUT_TOKENS)
+    stop = STOP_SEQUENCES_BY_KEY.get(q_key)
 
     for attempt in range(max_retries):
         try:
-            response = chat.send_message(
-                question_text,
-                generation_config=generation_config,
+            response = client.models.generate_content(
+                model=ENDPOINT_NAME,
+                contents=text_input,
+                config=types.GenerateContentConfig(
+                    temperature=TEMPERATURE,
+                    max_output_tokens=max_tok,
+                    stop_sequences=stop if stop else None,
+                    thinking_config=types.ThinkingConfig(thinking_budget=0),
+                )
             )
             answer = response.text.strip()
             return answer if answer else "n/a"
-
         except Exception as e:
             if attempt < max_retries - 1:
                 delay = base_delay * (2 ** attempt)
@@ -418,23 +423,13 @@ FIELDNAMES = [
 
 
 def process_pdfs_conditional_queries(pdf_folder, output_csv):
-    already_done = set()
-    if os.path.exists(output_csv):
-        existing = pd.read_csv(output_csv, usecols=["File Name"])
-        already_done = set(existing["File Name"].dropna().tolist())
-        print(f"Resuming — {len(already_done)} file(s) already processed, skipping.")
-
-    write_header = not os.path.exists(output_csv) or len(already_done) == 0
-    csv_file = open(output_csv, "a", newline="", encoding="utf-8")
+    # Always overwrite — reprocess all PDFs on every run
+    csv_file = open(output_csv, "w", newline="", encoding="utf-8")
     writer = _csv.DictWriter(csv_file, fieldnames=FIELDNAMES, extrasaction="ignore")
-    if write_header:
-        writer.writeheader()
+    writer.writeheader()
 
     for filename in os.listdir(pdf_folder):
         if not filename.endswith(".pdf"):
-            continue
-        if filename in already_done:
-            print(f"Skipping {filename} (already processed).")
             continue
 
         pdf_path = os.path.join(pdf_folder, filename)
@@ -442,7 +437,7 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
         relevant_sections = extract_relevant_sections(pdf_path)
         print(f"Extracted relevant sections length: {len(relevant_sections)} characters")
 
-        text_to_analyze = relevant_sections[:40000]
+        doc_context = relevant_sections[:40000]
 
         info_dict = {
             "File Name": filename,
@@ -461,42 +456,27 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
         temp_answers = info_dict.copy()
         justifications = {}
 
-        # Each PDF gets a fresh ChatSession; Gemini maintains the history internally.
-        chat = make_chat_session()
-
-        # Seed the conversation with the article context
-        opening = (
-            "You will be asked a sequence of extraction questions about the same academic article. "
-            "I am specifically interested in how researchers address endogeneity problems, particularly "
-            "using instrumental variables and especially rainfall-based instruments. "
-            "Use answers you have already given as context for later questions when helpful, "
-            "but always ground your answers in the provided text.\n\n"
-            "Here are the relevant sections from the article:\n\n"
-            f"{text_to_analyze}"
-        )
-        try:
-            chat.send_message(opening, generation_config={"temperature": TEMPERATURE, "max_output_tokens": 10})
-        except Exception as e:
-            print(f"Warning: failed to seed context for {filename}: {e}")
+        # prior_qa_pairs accumulates (key, question_text, clean_answer) for each
+        # answered question; passed into build_text_input() for subsequent questions.
+        prior_qa_pairs = []
 
         for q in questions:
             q_key = q["key"]
+            q_text = q["question"]
 
             dep = q.get("dependency")
             if dep is not None:
                 dep_key = dep["key"]
                 dep_val = dep["value"]
                 current_dep_answer = temp_answers.get(dep_key)
-                if current_dep_answer and current_dep_answer[0] in {"0", "1"}:
-                    current_dep_binary = current_dep_answer[0]
-                else:
-                    current_dep_binary = current_dep_answer
-
+                current_dep_binary = (
+                    current_dep_answer[0]
+                    if current_dep_answer and current_dep_answer[0] in {"0", "1"}
+                    else current_dep_answer
+                )
                 if current_dep_binary != dep_val:
-                    print(
-                        f"Skipping '{q_key}' due to unmet dependency "
-                        f"({dep_key}={current_dep_binary} != {dep_val})"
-                    )
+                    print(f"Skipping '{q_key}' due to unmet dependency "
+                          f"({dep_key}={current_dep_binary} != {dep_val})")
                     if "field_map" in q:
                         for _, (tkey, _) in q["field_map"].items():
                             temp_answers[tkey] = "n/a"
@@ -504,19 +484,15 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
                     else:
                         temp_answers[q_key] = "n/a"
                         info_dict[q_key] = "n/a"
-                    temp_answers = enforce_dependency_consistency(temp_answers, justifications, verbose=True)
+                    temp_answers = enforce_dependency_consistency(
+                        temp_answers, justifications, verbose=True)
                     continue
 
-            print(f"Querying: {q_key} (max_output_tokens={get_max_output_tokens(q_key)})")
+            print(f"Querying: {q_key} "
+                  f"(max_output_tokens={MAX_OUTPUT_TOKENS_BY_KEY.get(q_key, DEFAULT_MAX_OUTPUT_TOKENS)})")
 
-            question_text = (
-                f"Question key: {q_key}.\n"
-                f"{q['question']}\n\n"
-                "Answer using only the article text above and, if helpful, your previous answers in this conversation. "
-                "Remember to follow the required output format exactly."
-            )
-
-            answer = query_model_with_history(chat, question_text, q_key=q_key)
+            text_input = build_text_input(doc_context, prior_qa_pairs, q_key, q_text)
+            answer = query_model_single_turn(text_input, q_key)
 
             if "field_map" in q:
                 parsed, bundle_just = parse_prefixed_lines(answer, q["field_map"])
@@ -525,25 +501,30 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
                     info_dict[col] = val
                 for col, jtxt in bundle_just.items():
                     justifications[col] = jtxt
-                temp_answers = enforce_dependency_consistency(temp_answers, justifications, verbose=True)
+                temp_answers = enforce_dependency_consistency(
+                    temp_answers, justifications, verbose=True)
                 for col in parsed.keys():
                     print(f"Answer for {col}: {info_dict[col]}")
 
+                # Rainfall instrument re-ask when rain=1 but instrument still missing
                 if q_key == "Rainfall IV Bundle":
-                    if temp_answers.get("Instrumental Variable Rainfall") == "1" and temp_answers.get("Rainfall Instrument", "n/a") == "n/a":
-                        focused = extract_rainfall_iv_snippets(text_to_analyze)
+                    if (temp_answers.get("Instrumental Variable Rainfall") == "1"
+                            and temp_answers.get("Rainfall Instrument", "n/a") == "n/a"):
+                        focused = extract_rainfall_iv_snippets(doc_context)
                         if focused:
-                            print("Re-asking rainfall instrument detail with rainfall/IV-focused context...")
-                            reask_text = (
-                                "Now focus only on the following rainfall- and IV-related snippets from the article:\n\n"
-                                f"{focused}\n\n"
-                                "Provide EXACTLY one line in this format:\n"
-                                "RAINFALL_INSTRUMENT: <detailed semicolon-separated description(s); or n/a>\n\n"
-                                "Do not include any other lines or text."
+                            print("Re-asking rainfall instrument detail with focused context...")
+                            reask_q_text = (
+                                "Based on the rainfall/IV-focused article snippets above, "
+                                "extract the specific rainfall/precipitation-based excluded instrument name(s).\n"
+                                "Provide EXACTLY one line:\n"
+                                "RAINFALL_INSTRUMENT: <semicolon-separated; or n/a>"
                             )
-                            retry = query_model_with_history(
-                                chat, reask_text, q_key="Rainfall Instrument Reask",
-                                max_output_tokens_override=RAINFALL_INSTRUMENT_REASK_MAX_OUTPUT_TOKENS,
+                            reask_input = build_text_input(
+                                focused, prior_qa_pairs, "Rainfall Instrument Reask", reask_q_text
+                            )
+                            retry = query_model_single_turn(
+                                reask_input, "Rainfall Instrument Reask",
+                                max_output_tokens_override=MAX_OUTPUT_TOKENS_BY_KEY["Rainfall Instrument Reask"],
                             )
                             parsed2, _ = parse_prefixed_lines(
                                 retry,
@@ -551,26 +532,50 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
                             )
                             temp_answers["Rainfall Instrument"] = parsed2.get("Rainfall Instrument", "n/a")
                             info_dict["Rainfall Instrument"] = temp_answers["Rainfall Instrument"]
-                            temp_answers = enforce_dependency_consistency(temp_answers, justifications, verbose=True)
+                            temp_answers = enforce_dependency_consistency(
+                                temp_answers, justifications, verbose=True)
                             print(f"Answer for Rainfall Instrument (reask): {info_dict['Rainfall Instrument']}")
 
+                # Reconstruct clean bundle string for history
+                if q_key == "Endogeneity Bundle":
+                    history_answer = (
+                        f"ENDOGENEITY_PROBLEM: {temp_answers.get('Endogeneity Problem', 'n/a')}\n"
+                        f"ENDOGENOUS_VARIABLES: {temp_answers.get('Endogenous Variable(s)', 'n/a')}"
+                    )
+                elif q_key == "IV Bundle":
+                    history_answer = (
+                        f"IV_USED: {temp_answers.get('Instrumental Variable Used', 'n/a')}\n"
+                        f"IVS: {temp_answers.get('Instrumental Variable(s)', 'n/a')}"
+                    )
+                elif q_key == "Rainfall IV Bundle":
+                    history_answer = (
+                        f"RAINFALL_IV: {temp_answers.get('Instrumental Variable Rainfall', 'n/a')}\n"
+                        f"RAINFALL_INSTRUMENT: {temp_answers.get('Rainfall Instrument', 'n/a')}"
+                    )
+                else:
+                    history_answer = answer
+                prior_qa_pairs.append((q_key, q_text, history_answer))
                 continue
 
-            is_binary = q_key in ["Empirical Analysis"]
+            is_binary = q_key == "Empirical Analysis"
             if is_binary:
                 binary_val, justification = normalize_binary_with_justification(answer)
                 temp_answers[q_key] = binary_val
                 if justification:
                     justifications[q_key] = justification
                     print(f"  Binary: {binary_val}, Justification: {justification[:100]}...")
+                history_answer = binary_val
             else:
-                if q_key in ["Dependent Variable(s)"]:
+                if q_key == "Dependent Variable(s)":
                     answer = clean_variable_list(answer)
                 temp_answers[q_key] = answer
+                history_answer = answer
 
-            temp_answers = enforce_dependency_consistency(temp_answers, justifications, verbose=True)
+            temp_answers = enforce_dependency_consistency(
+                temp_answers, justifications, verbose=True)
             info_dict[q_key] = temp_answers[q_key]
             print(f"Answer for {q_key}: {info_dict[q_key]}")
+            prior_qa_pairs.append((q_key, q_text, history_answer))
 
         info_dict = enforce_dependency_consistency(info_dict, justifications, verbose=False)
         print(f"Final extracted info for {filename}: {info_dict}")
@@ -589,7 +594,7 @@ if __name__ == "__main__":
     pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/pdf_test_20"
     output_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output"
     os.makedirs(output_folder, exist_ok=True)
-    output_csv = os.path.join(output_folder, "finetune_gemini_output.csv")
+    output_csv = os.path.join(output_folder, "finetune_gemini_aistudio_output.csv")
 
     process_pdfs_conditional_queries(pdf_folder, output_csv)
     print(f"Script finished: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

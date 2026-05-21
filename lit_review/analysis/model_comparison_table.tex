@@ -1,0 +1,58 @@
+\begin{table}[htbp]
+\centering
+\caption{Model Performance Comparison: Fine-Tuned GPT vs.\ Fine-Tuned Gemini}
+\label{tab:model_comparison}
+\begin{tabular}{lcc}
+\toprule
+& \textbf{GPT Fine-Tuned} & \textbf{Gemini Fine-Tuned} \\
+\midrule
+\multicolumn{3}{l}{\textit{Panel A: Semantic Similarity (text extraction fields)}} \\
+\midrule
+Title               & \textbf{96.9\%} & 95.7\% \\
+DOI                 & \textbf{90.0\%} & 89.4\% \\
+Dependent Variable  & \textbf{66.7\%} & 55.9\% \\
+Endogenous Variable & \textbf{70.1\%} & 69.4\% \\
+Instrumental Variable & \textbf{63.1\%} & 60.5\% \\
+Rainfall Instrument & \textbf{66.6\%} & 64.5\% \\
+\midrule
+\multicolumn{3}{l}{\textit{Panel B: Binary Classification — Empirical Analysis}} \\
+\midrule
+Accuracy            & 88.6\% & 88.6\% \\
+Kappa               & 0.453  & 0.453  \\
+Sensitivity         & 100.0\% & 100.0\% \\
+Specificity         & 33.3\% & 33.3\% \\
+Balanced Accuracy   & 66.7\% & 66.7\% \\
+\midrule
+\multicolumn{3}{l}{\textit{Panel C: Binary Classification — Endogeneity Problem}} \\
+\midrule
+Accuracy            & 93.2\% & 93.2\% \\
+Kappa               & 0.782  & 0.782  \\
+Sensitivity         & 97.1\% & 97.1\% \\
+Specificity         & 77.8\% & 77.8\% \\
+Balanced Accuracy   & 87.5\% & 87.5\% \\
+\midrule
+\multicolumn{3}{l}{\textit{Panel D: Binary Classification — IV Used}} \\
+\midrule
+Accuracy            & \textbf{96.6\%} & 93.2\% \\
+Kappa               & \textbf{0.905}  & 0.806  \\
+Sensitivity         & \textbf{97.1\%} & 95.6\% \\
+Specificity         & \textbf{95.0\%} & 85.0\% \\
+Balanced Accuracy   & \textbf{96.0\%} & 90.3\% \\
+\midrule
+\multicolumn{3}{l}{\textit{Panel E: Binary Classification — Rainfall IV}} \\
+\midrule
+Accuracy            & \textbf{96.6\%} & 95.5\% \\
+Kappa               & \textbf{0.930}  & 0.905  \\
+Sensitivity         & \textbf{97.2\%} & 91.7\% \\
+Specificity         & 96.2\% & \textbf{98.1\%} \\
+Balanced Accuracy   & \textbf{96.7\%} & 94.9\% \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} Semantic similarity scores computed using cosine similarity of sentence embeddings.
+Bold values indicate the better-performing model on each metric.
+Panels B--E report metrics from confusion matrices against hand-labelled ground truth ($n = 88$).
+Panels B and C are identical across models.
+\end{tablenotes}
+\end{table}
