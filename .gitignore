@@ -19,3 +19,4 @@
 *.stswp
 *.do.stswp
 .Rproj.user
+.rag_gpt_embedding_cache.json

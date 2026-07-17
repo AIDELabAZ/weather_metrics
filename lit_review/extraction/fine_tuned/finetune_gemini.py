@@ -355,33 +355,38 @@ def get_client():
     return _client
 
 
-def build_text_input(doc_context, prior_qa_pairs, current_key, current_question):
+def _part(text):
+    """Wrap text in Vertex AI parts format (matches conversion_code_gemini.py)."""
+    return [{"text": text}]
+
+
+def initial_contents(doc_context):
     """
-    Assemble the full prompt for one question, identical to conversion_code_gemini_aistudio.py.
-    prior_qa_pairs: list of (key, question_text, answer_text) already answered.
+    Build the opening two turns of the conversation, identical to the first
+    two entries of `contents` in conversion_code_gemini.py's build_record().
     """
-    parts = [SYSTEM_INSTRUCTION, ""]
-    parts.append("Article sections:")
-    parts.append(doc_context)
+    return [
+        {
+            "role": "user",
+            "parts": _part(
+                "You will be asked a sequence of extraction questions about the same academic article. "
+                "I am specifically interested in how researchers address endogeneity problems, particularly "
+                "using instrumental variables and especially rainfall-based instruments. "
+                "Use answers you have already given as context for later questions when helpful, "
+                "but always ground your answers in the provided text.\n\n"
+                "Here are the relevant sections from the article:\n\n"
+                f"{doc_context}"
+            ),
+        },
+        {
+            "role": "model",
+            "parts": _part("Understood. I will answer each extraction question using only the provided article text."),
+        },
+    ]
 
-    if prior_qa_pairs:
-        parts.append("")
-        parts.append("Previous answers:")
-        for q_key, q_text, a_text in prior_qa_pairs:
-            parts.append(f"Q: Question key: {q_key}.")
-            parts.append(q_text)
-            parts.append(f"A: {a_text}")
-            parts.append("")
 
-    parts.append(f"Question key: {current_key}.")
-    parts.append(current_question)
-    parts.append(QUESTION_SUFFIX.strip())
-
-    return "\n".join(parts)
-
-
-def query_model_single_turn(text_input, q_key, max_output_tokens_override=None,
-                             max_retries=4, base_delay=2.0):
+def query_model_with_history(contents, q_key, max_output_tokens_override=None,
+                              max_retries=4, base_delay=2.0):
     client = get_client()
     max_tok = int(max_output_tokens_override) if max_output_tokens_override is not None \
         else MAX_OUTPUT_TOKENS_BY_KEY.get(q_key, DEFAULT_MAX_OUTPUT_TOKENS)
@@ -391,8 +396,9 @@ def query_model_single_turn(text_input, q_key, max_output_tokens_override=None,
         try:
             response = client.models.generate_content(
                 model=ENDPOINT_NAME,
-                contents=text_input,
+                contents=contents,
                 config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_INSTRUCTION,
                     temperature=TEMPERATURE,
                     max_output_tokens=max_tok,
                     stop_sequences=stop if stop else None,
@@ -456,9 +462,9 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
         temp_answers = info_dict.copy()
         justifications = {}
 
-        # prior_qa_pairs accumulates (key, question_text, clean_answer) for each
-        # answered question; passed into build_text_input() for subsequent questions.
-        prior_qa_pairs = []
+        # Single conversation thread for this PDF (mirrors finetune_gpt.py's `messages`
+        # and the multi-turn `contents` structure used in the training data).
+        contents = initial_contents(doc_context)
 
         for q in questions:
             q_key = q["key"]
@@ -491,8 +497,13 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
             print(f"Querying: {q_key} "
                   f"(max_output_tokens={MAX_OUTPUT_TOKENS_BY_KEY.get(q_key, DEFAULT_MAX_OUTPUT_TOKENS)})")
 
-            text_input = build_text_input(doc_context, prior_qa_pairs, q_key, q_text)
-            answer = query_model_single_turn(text_input, q_key)
+            question_text = f"Question key: {q_key}.\n{q_text}{QUESTION_SUFFIX}"
+            contents.append({"role": "user", "parts": _part(question_text)})
+
+            answer = query_model_with_history(contents, q_key)
+
+            # Append the model's raw answer to the conversation (matches finetune_gpt.py)
+            contents.append({"role": "model", "parts": _part(answer)})
 
             if "field_map" in q:
                 parsed, bundle_just = parse_prefixed_lines(answer, q["field_map"])
@@ -514,18 +525,18 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
                         if focused:
                             print("Re-asking rainfall instrument detail with focused context...")
                             reask_q_text = (
-                                "Based on the rainfall/IV-focused article snippets above, "
-                                "extract the specific rainfall/precipitation-based excluded instrument name(s).\n"
-                                "Provide EXACTLY one line:\n"
-                                "RAINFALL_INSTRUMENT: <semicolon-separated; or n/a>"
+                                "Now focus only on the following rainfall- and IV-related snippets "
+                                f"from the article:\n\n{focused}\n\n"
+                                "Provide EXACTLY one line in this format:\n"
+                                "RAINFALL_INSTRUMENT: <detailed semicolon-separated description(s); or n/a>\n\n"
+                                "Do not include any other lines or text."
                             )
-                            reask_input = build_text_input(
-                                focused, prior_qa_pairs, "Rainfall Instrument Reask", reask_q_text
-                            )
-                            retry = query_model_single_turn(
-                                reask_input, "Rainfall Instrument Reask",
+                            contents.append({"role": "user", "parts": _part(reask_q_text)})
+                            retry = query_model_with_history(
+                                contents, "Rainfall Instrument Reask",
                                 max_output_tokens_override=MAX_OUTPUT_TOKENS_BY_KEY["Rainfall Instrument Reask"],
                             )
+                            contents.append({"role": "model", "parts": _part(retry)})
                             parsed2, _ = parse_prefixed_lines(
                                 retry,
                                 {"RAINFALL_INSTRUMENT": ("Rainfall Instrument", "var_list")}
@@ -536,25 +547,6 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
                                 temp_answers, justifications, verbose=True)
                             print(f"Answer for Rainfall Instrument (reask): {info_dict['Rainfall Instrument']}")
 
-                # Reconstruct clean bundle string for history
-                if q_key == "Endogeneity Bundle":
-                    history_answer = (
-                        f"ENDOGENEITY_PROBLEM: {temp_answers.get('Endogeneity Problem', 'n/a')}\n"
-                        f"ENDOGENOUS_VARIABLES: {temp_answers.get('Endogenous Variable(s)', 'n/a')}"
-                    )
-                elif q_key == "IV Bundle":
-                    history_answer = (
-                        f"IV_USED: {temp_answers.get('Instrumental Variable Used', 'n/a')}\n"
-                        f"IVS: {temp_answers.get('Instrumental Variable(s)', 'n/a')}"
-                    )
-                elif q_key == "Rainfall IV Bundle":
-                    history_answer = (
-                        f"RAINFALL_IV: {temp_answers.get('Instrumental Variable Rainfall', 'n/a')}\n"
-                        f"RAINFALL_INSTRUMENT: {temp_answers.get('Rainfall Instrument', 'n/a')}"
-                    )
-                else:
-                    history_answer = answer
-                prior_qa_pairs.append((q_key, q_text, history_answer))
                 continue
 
             is_binary = q_key == "Empirical Analysis"
@@ -564,18 +556,15 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
                 if justification:
                     justifications[q_key] = justification
                     print(f"  Binary: {binary_val}, Justification: {justification[:100]}...")
-                history_answer = binary_val
             else:
                 if q_key == "Dependent Variable(s)":
                     answer = clean_variable_list(answer)
                 temp_answers[q_key] = answer
-                history_answer = answer
 
             temp_answers = enforce_dependency_consistency(
                 temp_answers, justifications, verbose=True)
             info_dict[q_key] = temp_answers[q_key]
             print(f"Answer for {q_key}: {info_dict[q_key]}")
-            prior_qa_pairs.append((q_key, q_text, history_answer))
 
         info_dict = enforce_dependency_consistency(info_dict, justifications, verbose=False)
         print(f"Final extracted info for {filename}: {info_dict}")
