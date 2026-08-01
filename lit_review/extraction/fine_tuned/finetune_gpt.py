@@ -17,7 +17,7 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 # Fine-tuned model ID
-fine_tuned_model_id = "ft:gpt-4.1-2025-04-14:aide-lab:jul:E1ciR9NY"
+fine_tuned_model_id = "ft:gpt-4.1-mini-2025-04-14:aide-lab:minjul:E2TUFmm0"
 
 
 DEFAULT_MAX_COMPLETION_TOKENS = 512
@@ -403,7 +403,7 @@ def enforce_dependency_consistency(temp_answers, justifications, *, verbose=Fals
 # -------------------------------------------------------------------
 
 
-def extract_relevant_sections(pdf_path):
+def extract_relevant_sections(pdf_path, max_retries=4, base_delay=3.0):
     relevant_sections = []
     keywords = [
         "instrument", "instrumental variable", "data", "methods", "iv",
@@ -415,20 +415,30 @@ def extract_relevant_sections(pdf_path):
         "two-stage least squares", "2sls", "GMM", "fixed effects"
     ]
 
-    try:
-        with fitz.open(pdf_path) as doc:
-            for page_num in range(len(doc)):
-                page = doc.load_page(page_num)
-                page_text = page.get_text("text")
-                paragraphs = page_text.split("\n\n")
-                for paragraph in paragraphs:
-                    if any(keyword.lower() in paragraph.lower() for keyword in keywords):
-                        relevant_sections.append(paragraph)
-    except Exception as e:
-        print(f"Error extracting PDF {pdf_path}: {e}")
-        return ""
-
-    return " ".join(relevant_sections)
+    # OneDrive stores these PDFs as on-demand ("cloud-only") files — the first
+    # open() on an unhydrated file can fail while OneDrive downloads it in the
+    # background. Retrying after a short delay resolves this without any
+    # persistent failures (confirmed empirically across the full test folder).
+    for attempt in range(max_retries):
+        try:
+            with fitz.open(pdf_path) as doc:
+                for page_num in range(len(doc)):
+                    page = doc.load_page(page_num)
+                    page_text = page.get_text("text")
+                    paragraphs = page_text.split("\n\n")
+                    for paragraph in paragraphs:
+                        if any(keyword.lower() in paragraph.lower() for keyword in keywords):
+                            relevant_sections.append(paragraph)
+            return " ".join(relevant_sections)
+        except Exception as e:
+            if attempt < max_retries - 1:
+                delay = base_delay * (attempt + 1)
+                print(f"Error opening PDF {pdf_path}: {e}. Retrying in {delay:.0f}s "
+                      f"(likely still downloading from OneDrive)...")
+                time.sleep(delay)
+            else:
+                print(f"Error extracting PDF {pdf_path} after {max_retries} attempts: {e}")
+                return ""
 
 
 # -------------------------------------------------------------------
@@ -707,10 +717,10 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
 
 
 if __name__ == "__main__":
-    pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/pdf_test_20"
+    pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/papers"
     output_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output"
     os.makedirs(output_folder, exist_ok=True)
-    output_csv = os.path.join(output_folder, "gpt_finetune_output.csv")
+    output_csv = os.path.join(output_folder, "full_finetune_gpt_output.csv")
 
     process_pdfs_conditional_queries(pdf_folder, output_csv)
     print(f"Script finished: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

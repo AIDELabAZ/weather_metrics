@@ -969,10 +969,10 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv, pools):
 
 
 if __name__ == "__main__":
-    pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/pdf_test_20"
+    pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/papers"
     output_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output"
     os.makedirs(output_folder, exist_ok=True)
-    output_csv = os.path.join(output_folder, "rag_gpt_output.csv")
+    output_csv = os.path.join(output_folder, "full_rag_gpt_output.csv")
 
     training_rows = load_training_rows(TRAIN_CSV_PATH)
     retrieval_pools = build_retrieval_pools(training_rows)

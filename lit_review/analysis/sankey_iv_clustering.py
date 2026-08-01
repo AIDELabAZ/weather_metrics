@@ -1,142 +1,73 @@
 """
 sankey_iv_clustering.py
 
-Reads the model output CSV, clusters endogenous variables and rainfall metrics
-using sentence embeddings + UMAP + HDBSCAN, then generates an interactive
-Sankey diagram connecting rainfall instrument types to endogenous variable
-categories.
+Reads the model output CSV, categorizes endogenous variables and rainfall
+metrics using an LLM (taxonomy discovery + classification in one call per
+side), then generates an interactive Sankey diagram connecting rainfall
+instrument types to endogenous variable categories.
 
 Workflow:
-  1. Filter to rainfall IV papers
+  1. Filter to rainfall IV papers (model output ∪ human-labeled papers)
   2. Aggressively clean + normalize entries (remove noise, equations, generics)
-  3. Embed with sentence-transformers, reduce with UMAP, cluster with HDBSCAN
-  4. Merge near-duplicate clusters by centroid similarity
-  5. Export cluster_summary.csv so you can review/rename clusters
-  6. Build Plotly Sankey: left = rainfall metric clusters, right = endog clusters
+  3. One LLM call per side: propose a topical taxonomy over all unique cleaned
+     entries and classify every entry into it (or an "Other" noise bucket)
+  4. Merge guardrail: collapse near-duplicate category names the LLM didn't
+     consolidate itself (plural/singular variants, embedding-similar names)
+  5. Export cluster_summary.csv so you can review/rename categories
+  6. Build Plotly Sankey: left = rainfall metric categories, right = endog categories
   7. Save interactive HTML
 
 After first run: review cluster_summary.csv, then add overrides to
-ENDOG_LABEL_OVERRIDES / RAIN_LABEL_OVERRIDES below and rerun — the
-embeddings are cached so reruns are fast.
+ENDOG_LABEL_OVERRIDES / RAIN_LABEL_OVERRIDES below and rerun — LLM
+classifications are cached by entry text so reruns are fast.
 """
 
+import hashlib
+import json
+import os
 import re
 import unicodedata
-from collections import defaultdict
+from collections import Counter, defaultdict
 import numpy as np
 import pandas as pd
-import hdbscan
-import umap
 import plotly.graph_objects as go
+from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
 # ─── Paths ─────────────────────────────────────────────────────────────────
-INPUT_CSV              = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/allpapers_output.csv"
-OUTPUT_HTML            = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_rainfall_iv.html"
-OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_rainfall_depvar.html"
-CLUSTER_SUMMARY        = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_summary.csv"
-CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_summary_depvar.csv"
+INPUT_CSV              = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/full_finetune_gpt_output.csv"
+# Human-reviewed papers (train_80 + removed_20 combined) — unioned with the
+# model output below so papers only the model saw and papers only a human
+# reviewed both make it into the Sankey.
+HUMAN_LABELED_XLSX     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_new_labels/training_all_new.xlsx"
+OUTPUT_HTML            = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_full_finetune_gpt_rainfall_iv.html"
+OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_full_finetune_gpt_rainfall_depvar.html"
+CLUSTER_SUMMARY        = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_full_finetune_gpt_summary.csv"
+CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_full_finetune_gpt_summary_depvar.csv"
 
-# ─── HDBSCAN / UMAP params ─────────────────────────────────────────────────
-MIN_CLUSTER_SIZE_ENDOG  = 6    # raise to get fewer, broader clusters
-MIN_CLUSTER_SIZE_RAIN   = 5
-MIN_CLUSTER_SIZE_DEPVAR = 6
-MIN_SAMPLES            = 2    # lower = more points pulled from noise
-UMAP_N_COMPONENTS      = 10   # dims to reduce to before HDBSCAN
-UMAP_N_NEIGHBORS       = 15
-UMAP_MIN_DIST          = 0.0  # 0.0 keeps tight clusters
+# ─── LLM categorization params ──────────────────────────────────────────────
+CATEGORY_MODEL = "gpt-4.1-2025-04-14"
 
-# After clustering, merge any two clusters whose centroids have cosine sim
-# above this threshold (handles near-duplicate clusters like "cumulative
-# rainfall" appearing twice).
-MERGE_THRESHOLD = 0.92
+# Guardrail: after the LLM proposes/assigns categories, merge any two whose
+# name embeddings have cosine similarity >= this threshold (catches
+# near-duplicates the LLM itself didn't consolidate, e.g. "Labor Market"
+# vs "Employment", on top of the plural/singular pass).
+CATEGORY_MERGE_SIM_THRESHOLD = 0.88
 
-# ─── Manual label overrides (edit after reviewing cluster_summary.csv) ─────
-# Format: {cluster_id (int): "Your Label"}
-# Note: if you merge two clusters via same label string, their flows combine.
-ENDOG_LABEL_OVERRIDES: dict[int, str] = {
-    0:  "Other (Endogenous Variables)",   # exogenous — weather phenomenon
-    1:  "Agricultural Production",
-    2:  "Other (Endogenous Variables)",   # exogenous — weather phenomenon
-    3:  "Health",
-    4:  "Other (Endogenous Variables)",   # exogenous — weather-derived index
-    5:  "Other (Endogenous Variables)",   # sentence noise
-    6:  "Other (Endogenous Variables)",   # sentence noise
-    7:  "Financial Access & Credit",
-    8:  "Economic Growth & GDP",
-    9:  "Financial Access & Credit",      # merge with 7
-    10: "Other (Endogenous Variables)",   # sentence noise
-    11: "Other (Endogenous Variables)",   # unicode variable code
-    12: "Other (Endogenous Variables)",   # sentence noise
-    13: "Trade Openness",
-    14: "Other (Endogenous Variables)",   # methodology label
-    15: "Capital & Investment",
-    16: "Capital & Investment",           # merge with 15
-    17: "Inflation & Prices",
-    18: "Energy Prices",
-    19: "Other (Endogenous Variables)",   # noise
-    20: "Taxation",
-    21: "Other (Endogenous Variables)",   # sentence noise
-    22: "Government Spending",
-    23: "Land Policy",
-    24: "Labor",
-    25: "Crime",
-    26: "Inequality & Welfare",
-    27: "Economic Growth & GDP",          # merge with 8
-    28: "CO2 Emissions",
-    29: "Population & Urbanization",
-    30: "Population & Urbanization",      # merge with 29
-    31: "Other (Endogenous Variables)",   # variable code
-    32: "Energy & Electricity",
-    33: "Other (Endogenous Variables)",   # variable code
-    34: "Other (Endogenous Variables)",   # variable code
-    35: "Other (Endogenous Variables)",   # variable code
-    36: "Other (Endogenous Variables)",   # equation noise
-    37: "Air Pollution",
-    38: "Air Transport",
-    39: "Air Transport",                  # merge with 38
-    40: "Institutional Quality",
-    41: "Other (Endogenous Variables)",   # noise
-    42: "Institutional Quality",          # merge with 40
-}
-RAIN_LABEL_OVERRIDES: dict[int, str] = {
-    1:  "Cumulative Rainfall",            # merge with cluster 3
-    4:  "Other (Rainfall Metrics)",       # noise (non-rainfall content)
-    5:  "Temperature Deviation",
-    6:  "Seasonal Rainfall",
-    7:  "Extreme Weather & Snow",
-    8:  "Daily Rainfall",
-    10: "Other (Rainfall Metrics)",       # prompt text leakage
-    12: "Local Rainfall",
-    14: "Other (Rainfall Metrics)",       # noise
-    15: "Rainfall Shocks",
-}
-DEPVAR_LABEL_OVERRIDES: dict[int, str] = {
-    13: "Business Registration",           # merge with 14
-    14: "Business Registration",           # merge with 13
-    15: "GDP Per Capita",                  # redundant "per capita per capita" wording
-    16: "GDP Per Capita Growth",           # merge with 20 and 21
-    18: "Housing & Rents",                 # panel subscript noise in auto-label
-    20: "GDP Per Capita Growth",           # log-change sentence noise; variable is gdp growth
-    21: "GDP Per Capita Growth",           # canonical
-    24: "Air Pollution",                   # rename Local Pollutants
-    28: "Green Innovation",                # auto-label "White (%)" is noise; entries are green tech
-    29: "Other (Dependent Variables)",     # fragment noise
-    31: "Other (Dependent Variables)",     # methodology label, not a variable
-    32: "Other (Dependent Variables)",     # price/variable code noise
-    33: "Political Institutions",          # entries are about contracts and institutions
-    37: "Institutional Quality",           # merge with positive framing
-    38: "Other (Dependent Variables)",     # variable code
-    43: "Foreign Direct Investment",       # sentence noise; variable is FDI
-    47: "Air Pollution",                   # merge with 24
-    49: "Food Prices",                     # sentence noise; variable is food prices
-    57: "Economic Growth",                 # canonical
-    62: "Economic Growth",                 # too generic; merge with 57
-    72: "Total Factor Productivity",       # user fix: Tfp_Lpit
-    77: "Other (Dependent Variables)",     # variable code noise
-    78: "Other (Dependent Variables)",     # equation fragment
-}
+CATEGORY_CACHE_PATH = os.path.join(os.path.dirname(__file__), ".sankey_category_cache.json")
+
+# ─── Manual label overrides (optional; edit after reviewing cluster_summary.csv) ──
+# Format: {"Category name the LLM/merge guardrail produced": "Desired final name"}
+# Applied as a final rename pass — use only for edge cases the merge guardrail
+# didn't catch (e.g. two categories that mean the same thing but aren't close
+# enough in embedding space to auto-merge). Merging two categories into the
+# same string combines their flows.
+ENDOG_LABEL_OVERRIDES: dict[str, str] = {}
+RAIN_LABEL_OVERRIDES: dict[str, str] = {}
+DEPVAR_LABEL_OVERRIDES: dict[str, str] = {}
 
 # ─── Cleaning config ───────────────────────────────────────────────────────
 MAX_WORDS = 8     # truncate entries longer than this
@@ -150,14 +81,18 @@ GENERIC_TERMS = {
     "particularly", "proxy", "quarterly", "monthly", "annual",
 }
 
-# For the rainfall side only: entry must contain at least one of these terms
+# For the rainfall side only: entry must contain at least one of these terms.
+# "temperature"/"climate"/"weather" are deliberately excluded — they let pure
+# temperature entries (e.g. "average maximum temperature") through with zero
+# rainfall/precipitation content. A genuine joint rainfall+temperature
+# instrument entry still passes since it also mentions rain/precip/drought/etc.
 RAINFALL_REQUIRED_TERMS = {
     "rain", "rainfall", "precipitation", "precip", "ppt", "monsoon",
     "drought", "wet", "dry", "flood", "storm", "snow", "snowfall",
     "snowpack", "swe", "humidity", "moisture", "cumulative", "seasonal",
-    "annual", "monthly", "weekly", "daily", "temperature", "climate",
-    "weather", "spi", "spei", "pdsi", "humidity", "wind", "sunshine",
-    "cloud", "runoff", "river", "streamflow", "waterlog",
+    "annual", "monthly", "weekly", "daily", "spi", "spei", "pdsi",
+    "humidity", "wind", "sunshine", "cloud", "runoff", "river",
+    "streamflow", "waterlog",
 }
 
 # Regex patterns that flag an entry as noise
@@ -314,9 +249,18 @@ def clean_entry(txt: str, requires_rainfall: bool = False) -> str | None:
     if txt.strip() in GENERIC_TERMS:
         return None
 
-    # For rainfall side: require at least one weather/precip-related term
+    # For rainfall side: require at least one weather/precip-related term.
+    # Reject pure-temperature entries outright even if they also match a
+    # generic time-scale word (daily/monthly/annual/etc.) — those words alone
+    # don't make an entry rainfall-related, and "temperature" entries like
+    # "daily high temperature" would otherwise slip through via "daily".
     if requires_rainfall:
         if not any(term in txt for term in RAINFALL_REQUIRED_TERMS):
+            return None
+        true_rain_terms = RAINFALL_REQUIRED_TERMS - {
+            "cumulative", "seasonal", "annual", "monthly", "weekly", "daily"
+        }
+        if "temperature" in txt and not any(term in txt for term in true_rain_terms):
             return None
 
     # Normalize for embedding
@@ -348,56 +292,103 @@ def embed_texts(texts: list[str]) -> np.ndarray:
     return model.encode(texts, show_progress_bar=True, normalize_embeddings=True)
 
 
-# ─── UMAP + HDBSCAN ────────────────────────────────────────────────────────
-def cluster_embeddings(embeddings: np.ndarray, min_cluster_size: int) -> np.ndarray:
-    print(f"  UMAP: {embeddings.shape[1]}d → {UMAP_N_COMPONENTS}d ...")
-    reducer = umap.UMAP(
-        n_components=UMAP_N_COMPONENTS,
-        n_neighbors=UMAP_N_NEIGHBORS,
-        min_dist=UMAP_MIN_DIST,
-        metric="cosine",
-        random_state=42,
+# ─── LLM taxonomy discovery + classification (one call per side) ───────────
+def _load_category_cache() -> dict:
+    if os.path.exists(CATEGORY_CACHE_PATH):
+        try:
+            with open(CATEGORY_CACHE_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+
+def _save_category_cache(cache: dict) -> None:
+    with open(CATEGORY_CACHE_PATH, "w", encoding="utf-8") as f:
+        json.dump(cache, f)
+
+
+_category_cache = _load_category_cache()
+
+
+def classify_into_categories(entries: list[str], side_name: str, other_label: str) -> dict[str, str]:
+    """
+    One LLM call: given every unique cleaned entry for this side, propose a
+    concise topical taxonomy (merging synonyms/plurals itself where obvious)
+    and assign each entry to exactly one category, or to `other_label` if it
+    doesn't fit any real category (noise, unclassifiable fragments, etc.).
+    Cached on disk keyed by (side_name, entries) so unchanged reruns are free.
+    Returns {entry: category}.
+    """
+    cache_key = hashlib.sha256(
+        (side_name + "|" + "|".join(entries)).encode("utf-8")
+    ).hexdigest()
+    if cache_key in _category_cache:
+        return _category_cache[cache_key]
+
+    numbered = "\n".join(f"{i}: {e}" for i, e in enumerate(entries))
+    prompt = (
+        f"You are categorizing short variable-name strings extracted from economics "
+        f"papers, for the '{side_name}' side of a Sankey diagram.\n\n"
+        f"Here are {len(entries)} unique entries (one per line, numbered):\n{numbered}\n\n"
+        "Task: design a concise topical taxonomy (aim for roughly 15-30 categories) "
+        "that groups these entries by economic/topical theme, then assign every "
+        "entry to exactly one category.\n"
+        "Rules:\n"
+        "- Category names: 2-4 words, Title Case, describing the general theme "
+        "(e.g. 'Agricultural Production', 'Financial Access & Credit').\n"
+        "- Merge synonyms, singular/plural variants, and near-duplicate themes into "
+        "ONE category yourself — do not create both 'Labor Market' and 'Labor Markets'.\n"
+        f"- If an entry is noise, a sentence fragment, a variable code, or otherwise "
+        f"doesn't fit any real category, assign it exactly '{other_label}'.\n"
+        "- Every one of the numbered entries must appear exactly once in your answer.\n\n"
+        'Respond with ONLY a JSON object: {"assignments": {"<entry index as string>": "<category>", ...}}'
     )
-    reduced = reducer.fit_transform(embeddings)
 
-    print(f"  HDBSCAN (min_cluster_size={min_cluster_size}) ...")
-    clusterer = hdbscan.HDBSCAN(
-        min_cluster_size=min_cluster_size,
-        min_samples=MIN_SAMPLES,
-        metric="euclidean",
-        cluster_selection_method="eom",
+    response = client.chat.completions.create(
+        model=CATEGORY_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.0,
+        max_tokens=8000,
+        response_format={"type": "json_object"},
     )
-    return clusterer.fit_predict(reduced)
+    assignments = json.loads(response.choices[0].message.content).get("assignments", {})
+
+    result = {}
+    for i, entry in enumerate(entries):
+        cat = assignments.get(str(i))
+        result[entry] = cat.strip() if cat else other_label
+
+    _category_cache[cache_key] = result
+    _save_category_cache(_category_cache)
+    return result
 
 
-# ─── Merge near-duplicate clusters ─────────────────────────────────────────
-def merge_duplicate_clusters(
-    cluster_ids: np.ndarray,
-    embeddings: np.ndarray,
+def _plural_signature(name: str) -> str:
+    """Bag-of-singularized-words signature used to catch simple plural/singular
+    duplicates ('Labor Market' vs 'Labor Markets') that survive the LLM pass."""
+    words = re.sub(r"[^a-z0-9\s]", "", name.lower()).split()
+    singularized = sorted(w[:-1] if w.endswith("s") and not w.endswith("ss") else w for w in words)
+    return " ".join(singularized)
+
+
+def merge_similar_category_names(
+    category_counts: dict[str, int],
+    other_label: str,
     threshold: float,
-) -> np.ndarray:
+) -> dict[str, str]:
     """
-    Compute per-cluster centroid (mean embedding), then merge any two clusters
-    whose centroids have cosine similarity > threshold.
-    Returns a new cluster_ids array with merged labels.
+    Guardrail over LLM-proposed category names: merge any two whose
+    plural-insensitive signature matches, then merge any two whose name
+    embeddings have cosine similarity >= threshold. The canonical name for a
+    merged group is whichever original name has the most entries (ties broken
+    alphabetically), so the more heavily-used name wins.
     """
-    unique = sorted(c for c in set(cluster_ids) if c != -1)
-    if len(unique) <= 1:
-        return cluster_ids
+    uniq = sorted(c for c in category_counts if c != other_label)
+    if len(uniq) <= 1:
+        return {c: c for c in list(category_counts) + [other_label]}
 
-    centroids = np.array([
-        embeddings[cluster_ids == cid].mean(axis=0) for cid in unique
-    ])
-    # Normalize centroids
-    norms = np.linalg.norm(centroids, axis=1, keepdims=True)
-    norms[norms == 0] = 1
-    centroids_normed = centroids / norms
-
-    sim = cosine_similarity(centroids_normed)
-    np.fill_diagonal(sim, 0)
-
-    # Union-find merge
-    parent = {cid: cid for cid in unique}
+    parent = {c: c for c in uniq}
 
     def find(x):
         while parent[x] != x:
@@ -405,37 +396,44 @@ def merge_duplicate_clusters(
             x = parent[x]
         return x
 
-    for i, ci in enumerate(unique):
-        for j, cj in enumerate(unique):
+    def union(a, b):
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[rb] = ra
+
+    # Pass 1: plural/singular + word-order-insensitive signature match
+    by_signature: dict[str, list[str]] = defaultdict(list)
+    for c in uniq:
+        by_signature[_plural_signature(c)].append(c)
+    for group in by_signature.values():
+        for c in group[1:]:
+            union(group[0], c)
+
+    # Pass 2: embedding cosine similarity
+    embeddings = embed_texts(uniq)
+    norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+    norms[norms == 0] = 1
+    normed = embeddings / norms
+    sim = cosine_similarity(normed)
+    np.fill_diagonal(sim, 0)
+    for i, ci in enumerate(uniq):
+        for j, cj in enumerate(uniq):
             if j <= i:
                 continue
             if sim[i, j] >= threshold:
-                ri, rj = find(ci), find(cj)
-                if ri != rj:
-                    parent[rj] = ri
+                union(ci, cj)
 
-    # Remap cluster ids to their root
-    remap = {cid: find(cid) for cid in unique}
-    # Re-index roots to 0..N-1
-    roots = sorted(set(remap.values()))
-    root_to_new = {r: i for i, r in enumerate(roots)}
-    remap = {cid: root_to_new[find(cid)] for cid in unique}
+    groups: dict[str, list[str]] = defaultdict(list)
+    for c in uniq:
+        groups[find(c)].append(c)
 
-    new_ids = np.array([remap.get(c, -1) if c != -1 else -1 for c in cluster_ids])
-    return new_ids
+    canonical_map = {other_label: other_label}
+    for members in groups.values():
+        canonical = sorted(members, key=lambda m: (-category_counts.get(m, 0), m))[0]
+        for m in members:
+            canonical_map[m] = canonical
 
-
-# ─── Auto-label via most frequent entry ────────────────────────────────────
-def auto_label_clusters(texts: list[str], cluster_ids: np.ndarray) -> dict[int, str]:
-    unique_ids = sorted(c for c in set(cluster_ids) if c != -1)
-    result = {}
-    for cid in unique_ids:
-        members = [t for t, c in zip(texts, cluster_ids) if c == cid]
-        # Most common entry is the label
-        from collections import Counter
-        counts = Counter(members)
-        result[cid] = counts.most_common(1)[0][0].title()
-    return result
+    return canonical_map
 
 
 # ─── Build cluster summary for review ──────────────────────────────────────
@@ -446,7 +444,6 @@ def build_summary(*sides) -> pd.DataFrame:
     rows = []
     for side_name, df, id_col, label_col in sides:
         for (cid, label), grp in df.groupby([id_col, label_col]):
-            from collections import Counter
             sample = [e for e, _ in Counter(grp["entry"]).most_common(8)]
             rows.append({
                 "side": side_name,
@@ -463,13 +460,14 @@ def build_summary(*sides) -> pd.DataFrame:
     )
 
 
-# ─── Labels to exclude from the Sankey entirely ────────────────────────────
-# Entries mapped to these labels are dropped from flows (not shown as a node).
-# This covers: noise, model hallucinations, and variables that cannot be
-# endogenous (e.g. weather phenomena that are quasi-random by nature).
-ENDOG_EXCLUDE  = {"Other (Endogenous Variables)"}
-RAIN_EXCLUDE   = {"Other (Rainfall Metrics)"}
-DEPVAR_EXCLUDE = {"Other (Dependent Variables)"}
+# ─── Labels to exclude from the Sankey entirely (opt-in) ───────────────────
+# Empty by default — every paper with a rainfall IV should appear in the
+# diagram, including ones whose only entries are noise ("Other (...)") or
+# missing text ("Not Specified (...)"). Add a label here only if you want to
+# deliberately hide a specific category (its flows are dropped, not shown).
+ENDOG_EXCLUDE:  set[str] = set()
+RAIN_EXCLUDE:   set[str] = set()
+DEPVAR_EXCLUDE: set[str] = set()
 
 
 # ─── Sankey ────────────────────────────────────────────────────────────────
@@ -541,6 +539,7 @@ def build_sankey(
 
     fig = go.Figure(go.Sankey(
         arrangement="snap",
+        domain=dict(x=[0, 1], y=[0, 0.94]),  # leave a gap below the title so top nodes can't overlap it
         node=dict(
             pad=node_pad,
             thickness=18,
@@ -557,11 +556,10 @@ def build_sankey(
     ))
 
     fig.update_layout(
-        title_text=title,
-        title_font_size=18,
+        title=dict(text=title, font=dict(size=18), y=0.99, yanchor="top"),
         font_size=13,
-        height=900,
-        margin=dict(l=20, r=20, t=60, b=20),
+        height=950,
+        margin=dict(l=20, r=20, t=110, b=20),
     )
     return fig, left_nodes
 
@@ -570,8 +568,7 @@ def build_sankey(
 def process_side(
     rain_df_raw: pd.DataFrame,
     col: str,
-    min_cluster_size: int,
-    label_overrides: dict[int, str],
+    label_overrides: dict[str, str],
     id_col: str,
     label_col: str,
     side_name: str,
@@ -581,45 +578,108 @@ def process_side(
     exp = expand_column(rain_df_raw, col, requires_rainfall=requires_rainfall)
     print(f"  Entries after cleaning: {len(exp)} (from {rain_df_raw[col].notna().sum()} non-null rows)")
 
-    if len(exp) == 0:
-        raise ValueError(f"No clean entries found in column '{col}'.")
+    other_label        = f"Other ({side_name})"
+    not_specified_label = f"Not Specified ({side_name})"
+    unique_entries = sorted(exp["entry"].unique()) if len(exp) else []
 
-    texts = exp["entry"].tolist()
+    print(f"  Classifying {len(unique_entries)} unique entries via LLM...")
+    entry_to_category = classify_into_categories(unique_entries, side_name, other_label) if unique_entries else {}
 
-    print(f"  Embedding {len(texts)} entries...")
-    embeddings = embed_texts(texts)
+    category_counts = Counter(entry_to_category.values())
+    n_raw = len(category_counts) - (1 if other_label in category_counts else 0)
+    print(f"  LLM proposed {n_raw} categories "
+          f"(+ {other_label}: {category_counts.get(other_label, 0)} entries)")
 
-    cluster_ids = cluster_embeddings(embeddings, min_cluster_size)
-    cluster_ids = merge_duplicate_clusters(cluster_ids, embeddings, MERGE_THRESHOLD)
+    canonical_map = merge_similar_category_names(category_counts, other_label, CATEGORY_MERGE_SIM_THRESHOLD)
+    n_merged = len({v for k, v in canonical_map.items() if k != other_label})
+    if n_merged < n_raw:
+        print(f"  Merge guardrail: {n_raw} → {n_merged} categories after collapsing near-duplicates")
 
-    n_clusters = len(set(cluster_ids) - {-1})
-    n_noise    = (cluster_ids == -1).sum()
-    print(f"  Clusters after merging: {n_clusters}  |  Noise points: {n_noise} ({100*n_noise/len(cluster_ids):.0f}%)")
+    final_map = dict(canonical_map)
+    for raw, override in label_overrides.items():
+        final_map[raw] = override
+        final_map[canonical_map.get(raw, raw)] = override
 
-    auto = auto_label_clusters(texts, cluster_ids)
-    final = {**auto, **label_overrides, -1: f"Other ({side_name})"}
+    exp[label_col] = exp["entry"].map(entry_to_category).map(lambda c: final_map.get(c, c))
+    exp[id_col]    = exp[label_col]
 
-    exp[id_col]    = cluster_ids
-    exp[label_col] = [final.get(c, f"Cluster {c}") for c in cluster_ids]
+    # Every paper in rain_df_raw is here *because* it has a rainfall IV — so a
+    # paper missing from this side isn't "no data," it's raw text that was
+    # blank or that every candidate entry failed cleaning on. Give each such
+    # paper an explicit fallback node instead of silently dropping it from
+    # the Sankey.
+    covered = set(exp["paper_idx"])
+    fallback_rows = []
+    for paper_idx in rain_df_raw.index.unique():
+        if paper_idx in covered:
+            continue
+        raw_vals = rain_df_raw.loc[[paper_idx], col]
+        has_raw = any(str(v).strip().lower() not in ("", "n/a", "na") for v in raw_vals.dropna())
+        label = other_label if has_raw else not_specified_label
+        fallback_rows.append({"paper_idx": paper_idx, "entry": label.lower(), label_col: label, id_col: label})
+    if fallback_rows:
+        print(f"  +{len(fallback_rows)} papers with no surviving entry added as fallback nodes")
+        exp = pd.concat([exp, pd.DataFrame(fallback_rows)], ignore_index=True)
 
-    for cid in sorted(final):
-        n = int((cluster_ids == cid).sum())
-        if n > 0:
-            print(f"    {cid:3d}: {final[cid]}  ({n} entries)")
+    for label, n in exp[label_col].value_counts().items():
+        print(f"    {label}  ({n} entries)")
 
     return exp
 
 
+# ─── Combine model output + human-labeled rainfall IV papers ───────────────
+def normalize_filename(fn) -> str:
+    """Alphanumeric-only, lowercased join key. Model output and the human xlsx
+    render the same DOI with different punctuation (10.1002/x vs 10.1002_x vs
+    10.1002x), so this is the only reliable way to match papers across them."""
+    s = str(fn).lower()
+    s = re.sub(r"\.pdf$", "", s)
+    s = re.sub(r"[^a-z0-9]", "", s)
+    return s
+
+
+def load_combined_rainfall_papers(model_csv_path: str, human_xlsx_path: str) -> pd.DataFrame:
+    """
+    Union of every paper either source identified as having a rainfall IV:
+      - model output: Instrumental Variable Rainfall == 1
+      - human labels:  rain_bin == 1
+    Indexed by normalized filename so a paper present in both sources shares
+    one identity downstream (expand_column/build_sankey group by this index),
+    merging rather than double-counting its entries.
+    """
+    model_df = pd.read_csv(model_csv_path)
+    model_rain = model_df[model_df["Instrumental Variable Rainfall"] == 1.0].copy()
+    model_rain["paper_key"] = model_rain["File Name"].map(normalize_filename)
+    model_rain = model_rain[
+        ["paper_key", "Rainfall Instrument", "Endogenous Variable(s)", "Dependent Variable(s)"]
+    ]
+
+    human_df = pd.read_excel(human_xlsx_path)
+    human_rain = human_df[human_df["rain_bin"] == 1.0].copy()
+    human_rain["paper_key"] = human_rain["filename"].map(normalize_filename)
+    human_rain = human_rain.rename(columns={
+        "rain_var": "Rainfall Instrument",
+        "end_var":  "Endogenous Variable(s)",
+        "dep_var":  "Dependent Variable(s)",
+    })[["paper_key", "Rainfall Instrument", "Endogenous Variable(s)", "Dependent Variable(s)"]]
+
+    both  = set(model_rain["paper_key"]) & set(human_rain["paper_key"])
+    union = set(model_rain["paper_key"]) | set(human_rain["paper_key"])
+    print(f"Rainfall IV papers — model: {len(model_rain)}, human: {len(human_rain)}, "
+          f"overlap: {len(both)}, combined unique: {len(union)}")
+
+    combined = pd.concat([model_rain, human_rain], ignore_index=True)
+    return combined.set_index("paper_key")
+
+
 def main():
     print("Loading data...")
-    df = pd.read_csv(INPUT_CSV)
-    rain_df_raw = df[df["Instrumental Variable Rainfall"] == 1.0].copy()
-    print(f"Rainfall IV papers: {len(rain_df_raw)}")
+    rain_df_raw = load_combined_rainfall_papers(INPUT_CSV, HUMAN_LABELED_XLSX)
+    print(f"Rainfall IV papers (combined, deduped): {rain_df_raw.index.nunique()}")
 
     endog_exp = process_side(
         rain_df_raw,
         col="Endogenous Variable(s)",
-        min_cluster_size=MIN_CLUSTER_SIZE_ENDOG,
         label_overrides=ENDOG_LABEL_OVERRIDES,
         id_col="endog_cluster_id",
         label_col="endog_cluster_label",
@@ -628,8 +688,7 @@ def main():
 
     rain_exp = process_side(
         rain_df_raw,
-        col="Rainfall Metric",
-        min_cluster_size=MIN_CLUSTER_SIZE_RAIN,
+        col="Rainfall Instrument",
         label_overrides=RAIN_LABEL_OVERRIDES,
         id_col="rain_cluster_id",
         label_col="rain_cluster_label",
@@ -639,8 +698,7 @@ def main():
 
     depvar_exp = process_side(
         rain_df_raw,
-        col="Dependent Variables",
-        min_cluster_size=MIN_CLUSTER_SIZE_DEPVAR,
+        col="Dependent Variable(s)",
         label_overrides=DEPVAR_LABEL_OVERRIDES,
         id_col="depvar_cluster_id",
         label_col="depvar_cluster_label",
@@ -664,7 +722,7 @@ def main():
 
     print("\nBuilding Sankey: Rainfall → Endogenous Variables...")
     fig, rain_node_order = build_sankey(
-        rain_exp, endog_exp, rain_df_raw.index,
+        rain_exp, endog_exp, rain_df_raw.index.unique(),
         left_label_col="rain_cluster_label",
         right_label_col="endog_cluster_label",
         left_exclude=RAIN_EXCLUDE,
@@ -676,7 +734,7 @@ def main():
 
     print("\nBuilding Sankey: Rainfall → Dependent Variables...")
     fig_depvar, _ = build_sankey(
-        rain_exp, depvar_exp, rain_df_raw.index,
+        rain_exp, depvar_exp, rain_df_raw.index.unique(),
         left_label_col="rain_cluster_label",
         right_label_col="depvar_cluster_label",
         left_exclude=RAIN_EXCLUDE,
