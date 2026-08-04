@@ -19,9 +19,21 @@ merged_dir <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/w
 
 model_paths <- list(
   # gemini = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/finetune_gemini_aistudio_output.csv",
-  gpt    = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/mini_gpt_finetune_output.csv"
+  gpt_baseline = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/baseline/baseline_gpt_output.csv",
+  gpt_finetune = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/gpt_finetune_output.csv",
+  gpt_rag      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/rag/rag_gpt_output.csv"
   # llama = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/llama_finetune_output.csv",
   # gemma = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gemma_finetune_output.csv"
+)
+
+# Where the LaTeX comparison table (built at the bottom of this script) is written.
+tex_output_path <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output"
+
+# Display labels for model_paths keys, used as column headers in the LaTeX table.
+model_display_names <- c(
+  gpt_baseline = "GPT Baseline",
+  gpt_finetune = "GPT Fine-tuned",
+  gpt_rag      = "GPT RAG"
 )
 
 ############################################
@@ -197,17 +209,32 @@ evaluate_model <- function(model_path, model_label) {
       end_bin_model  = factor(end_bin_model,  levels = c(0, 1))
     )
 
+  cm_iv   <- confusionMatrix(merged_data$iv_bin_model,   merged_data$iv_bin_human,   positive = "1")
+  cm_rain <- confusionMatrix(merged_data$rain_bin_model, merged_data$rain_bin_human, positive = "1")
+  cm_emp  <- confusionMatrix(merged_data$emp_bin_model,  merged_data$emp_bin_human,  positive = "1")
+  cm_end  <- confusionMatrix(merged_data$end_bin_model,  merged_data$end_bin_human,  positive = "1")
+
   cat("\nConfusion Matrix for hasIV:\n")
-  print(confusionMatrix(merged_data$iv_bin_model, merged_data$iv_bin_human, positive = "1"))
+  print(cm_iv)
 
   cat("\nConfusion Matrix for isRainfall:\n")
-  print(confusionMatrix(merged_data$rain_bin_model, merged_data$rain_bin_human, positive = "1"))
+  print(cm_rain)
 
   cat("\nConfusion Matrix for emp_bin:\n")
-  print(confusionMatrix(merged_data$emp_bin_model, merged_data$emp_bin_human, positive = "1"))
+  print(cm_emp)
 
   cat("\nConfusion Matrix for end_bin:\n")
-  print(confusionMatrix(merged_data$end_bin_model, merged_data$end_bin_human, positive = "1"))
+  print(cm_end)
+
+  # Accuracy/Sensitivity/Specificity per binary field, for the LaTeX comparison
+  # table built at the bottom of this script — same numbers already printed
+  # above via confusionMatrix(), just captured in a tidy structure too.
+  binary_metrics <- bind_rows(
+    data.frame(field = "Has IV",              accuracy = cm_iv$overall[["Accuracy"]],   sensitivity = cm_iv$byClass[["Sensitivity"]],   specificity = cm_iv$byClass[["Specificity"]]),
+    data.frame(field = "Is Rainfall IV",      accuracy = cm_rain$overall[["Accuracy"]], sensitivity = cm_rain$byClass[["Sensitivity"]], specificity = cm_rain$byClass[["Specificity"]]),
+    data.frame(field = "Empirical Analysis",  accuracy = cm_emp$overall[["Accuracy"]],  sensitivity = cm_emp$byClass[["Sensitivity"]],  specificity = cm_emp$byClass[["Specificity"]]),
+    data.frame(field = "Endogeneity Problem", accuracy = cm_end$overall[["Accuracy"]],  sensitivity = cm_end$byClass[["Sensitivity"]],  specificity = cm_end$byClass[["Specificity"]])
+  )
 
   merged_data$rainmet_similarity <- ce_score_pairs(merged_data$rainmet_human, merged_data$rainmet_model)
   merged_data$endog_similarity   <- ce_score_pairs(merged_data$endog_human,   merged_data$endog_model)
@@ -233,7 +260,7 @@ evaluate_model <- function(model_path, model_label) {
   cat("\nSemantic similarity summary:\n")
   print(similarity_summary)
 
-  invisible(merged_data)
+  invisible(list(merged_data = merged_data, binary = binary_metrics, similarity = similarity_summary))
 }
 
 ############################################
@@ -242,5 +269,90 @@ evaluate_model <- function(model_path, model_label) {
 results <- setNames(
   lapply(names(model_paths), function(m) evaluate_model(model_paths[[m]], m)),
   names(model_paths)
+)
+
+############################################
+# LaTeX comparison table (binary + similarity metrics, all models side by side)
+############################################
+# One combined table: a binary-classification block (Accuracy/Sensitivity/
+# Specificity per field) on top, a semantic-similarity block (mean score per
+# field) below, models as columns throughout. Requires \usepackage{booktabs}
+# in the LaTeX document that \input{}s this file.
+build_latex_comparison_table <- function(results, model_keys, model_labels, out_path) {
+  # Accept either a full file path or a directory — if out_path is (or looks
+  # like) a directory, write "model_comparison.tex" inside it rather than
+  # erroring on file() trying to open a directory for writing.
+  if (dir.exists(out_path) || grepl("/$", out_path)) {
+    out_path <- file.path(out_path, "model_comparison.tex")
+  }
+
+  binary_field_order    <- c("Has IV", "Is Rainfall IV", "Empirical Analysis", "Endogeneity Problem")
+  binary_metric_order   <- c("Accuracy", "Sensitivity", "Specificity")
+  similarity_field_order <- c(
+    rainmet = "Rainfall Instrument",
+    endog   = "Endogenous Variable(s)",
+    doi     = "DOI",
+    depen   = "Dependent Variable(s)",
+    ptitle  = "Title",
+    iv      = "Instrument(s)"
+  )
+
+  fmt <- function(x) ifelse(is.na(x), "--", sprintf("%.3f", x))
+
+  n_models  <- length(model_keys)
+  col_spec  <- paste0("ll", strrep("c", n_models))
+  header    <- paste(model_labels, collapse = " & ")
+
+  lines <- c(
+    "\\begin{table}[htbp]",
+    "\\centering",
+    "\\caption{Comparison of extraction performance across GPT variants}",
+    "\\label{tab:model_comparison}",
+    sprintf("\\begin{tabular}{%s}", col_spec),
+    "\\toprule",
+    sprintf(" & & %s \\\\", header),
+    "\\midrule",
+    sprintf("\\multicolumn{%d}{l}{\\textit{Binary Classification Metrics}} \\\\", n_models + 2)
+  )
+
+  for (field in binary_field_order) {
+    for (i in seq_along(binary_metric_order)) {
+      metric     <- binary_metric_order[i]
+      metric_key <- tolower(metric)
+      row_label  <- if (i == 1) field else ""
+      vals <- sapply(model_keys, function(m) {
+        v <- results[[m]]$binary[[metric_key]][results[[m]]$binary$field == field]
+        if (length(v) == 0) NA else v
+      })
+      lines <- c(lines, sprintf("%s & %s & %s \\\\", row_label, metric, paste(fmt(vals), collapse = " & ")))
+    }
+  }
+
+  lines <- c(
+    lines, "\\midrule",
+    sprintf("\\multicolumn{%d}{l}{\\textit{Semantic Similarity (Mean)}} \\\\", n_models + 2)
+  )
+
+  for (key in names(similarity_field_order)) {
+    label <- similarity_field_order[[key]]
+    vals <- sapply(model_keys, function(m) {
+      v <- results[[m]]$similarity$mean[results[[m]]$similarity$field == key]
+      if (length(v) == 0) NA else v
+    })
+    lines <- c(lines, sprintf("%s & & %s \\\\", label, paste(fmt(vals), collapse = " & ")))
+  }
+
+  lines <- c(lines, "\\bottomrule", "\\end{tabular}", "\\end{table}")
+
+  dir.create(dirname(out_path), showWarnings = FALSE, recursive = TRUE)
+  writeLines(lines, out_path)
+  cat("\nLaTeX comparison table written to:", out_path, "\n")
+}
+
+build_latex_comparison_table(
+  results,
+  model_keys   = names(model_paths),
+  model_labels = model_display_names[names(model_paths)],
+  out_path     = tex_output_path
 )
 

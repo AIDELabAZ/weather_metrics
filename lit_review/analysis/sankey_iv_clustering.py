@@ -38,15 +38,15 @@ from sklearn.metrics.pairwise import cosine_similarity
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # ─── Paths ─────────────────────────────────────────────────────────────────
-INPUT_CSV              = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/full_finetune_gpt_output.csv"
+INPUT_CSV              = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/baseline/full_baseline_gpt_output.csv"
 # Human-reviewed papers (train_80 + removed_20 combined) — unioned with the
 # model output below so papers only the model saw and papers only a human
 # reviewed both make it into the Sankey.
 HUMAN_LABELED_XLSX     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_new_labels/training_all_new.xlsx"
-OUTPUT_HTML            = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_full_finetune_gpt_rainfall_iv.html"
-OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_full_finetune_gpt_rainfall_depvar.html"
-CLUSTER_SUMMARY        = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_full_finetune_gpt_summary.csv"
-CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_full_finetune_gpt_summary_depvar.csv"
+OUTPUT_HTML            = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_baseline_gpt_rainfall_iv.html"
+OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_baseline_gpt_rainfall_depvar.html"
+CLUSTER_SUMMARY        = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_baseline_gpt_summary.csv"
+CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_baseline_gpt_summary_depvar.csv"
 
 # ─── LLM categorization params ──────────────────────────────────────────────
 CATEGORY_MODEL = "gpt-4.1-2025-04-14"
@@ -80,6 +80,10 @@ GENERIC_TERMS = {
     "data", "index", "measure", "level", "value", "total", "which",
     "particularly", "proxy", "quarterly", "monthly", "annual",
 }
+
+# Subset of GENERIC_TERMS that IS the topic on the rainfall side (not noise
+# there, unlike on the endog/depvar sides) — see the exception in clean_entry.
+RAINFALL_CORE_TERMS = {"rainfall", "precipitation", "rain", "precip", "ppt"}
 
 # For the rainfall side only: entry must contain at least one of these terms.
 # "temperature"/"climate"/"weather" are deliberately excluded — they let pure
@@ -190,6 +194,12 @@ def clean_entry(txt: str, requires_rainfall: bool = False) -> str | None:
     except Exception:
         pass
 
+    # Acronym exception: short ALL-CAPS/alnum tokens (TFP, M1, M2, CO2, GDP)
+    # are real economics shorthand, not noise — MIN_CHARS would otherwise
+    # discard them. Must check original case before lowercasing below, since
+    # that's the only signal separating an acronym from ordinary short junk.
+    is_acronym = bool(re.fullmatch(r"[A-Z][A-Z0-9]{1,5}", txt.strip()))
+
     txt = txt.strip().lower()
 
     if txt in _TRIVIAL:
@@ -228,16 +238,21 @@ def clean_entry(txt: str, requires_rainfall: bool = False) -> str | None:
     if is_sentence_like(txt):
         return None
 
-    # Drop if it's a subscript variable code (lnnetit, soeit, btmit, etc.)
+    # Drop if it's a subscript variable code (lnnetit, soeit, btmit, etc.).
+    # Only judge tokens long enough to plausibly BE a subscript code — with
+    # none (e.g. short acronyms like "m1", "gi"), `all()` on an empty
+    # generator is vacuously True, which was wrongly rejecting every short
+    # entry regardless of content.
     tokens = txt.split()
-    if all(_SUBSCRIPT_VAR.match(tok) for tok in tokens if len(tok) > 2):
+    long_tokens = [tok for tok in tokens if len(tok) > 2]
+    if long_tokens and all(_SUBSCRIPT_VAR.match(tok) for tok in long_tokens):
         return None
 
     # Remove parenthetical citations like (2020)
     txt = re.sub(r"\(\s*(?:19|20)\d{2}\s*\)", "", txt)
     txt = re.sub(r"\s+", " ", txt).strip()
 
-    if len(txt) < MIN_CHARS:
+    if len(txt) < MIN_CHARS and not is_acronym and not (requires_rainfall and txt.strip() in RAINFALL_CORE_TERMS):
         return None
 
     # Truncate to MAX_WORDS
@@ -245,8 +260,11 @@ def clean_entry(txt: str, requires_rainfall: bool = False) -> str | None:
     if len(words) > MAX_WORDS:
         txt = " ".join(words[:MAX_WORDS])
 
-    # After truncation, check if it reduces to a single generic term
-    if txt.strip() in GENERIC_TERMS:
+    # After truncation, check if it reduces to a single generic term. On the
+    # rainfall side, bare "rainfall"/"precipitation"/"rain" IS the topic, not
+    # noise — don't discard it here; let the LLM decide whether it deserves
+    # its own general/unspecified category instead of silently vanishing.
+    if txt.strip() in GENERIC_TERMS and not (requires_rainfall and txt.strip() in RAINFALL_CORE_TERMS):
         return None
 
     # For rainfall side: require at least one weather/precip-related term.
@@ -266,7 +284,7 @@ def clean_entry(txt: str, requires_rainfall: bool = False) -> str | None:
     # Normalize for embedding
     txt = normalize_text(txt)
 
-    if len(txt) < MIN_CHARS:
+    if len(txt) < MIN_CHARS and not is_acronym and not (requires_rainfall and txt.strip() in RAINFALL_CORE_TERMS):
         return None
 
     return txt
@@ -436,6 +454,136 @@ def merge_similar_category_names(
     return canonical_map
 
 
+def _broaden_categories_once(
+    category_counts: dict[str, int],
+    category_samples: dict[str, list[str]],
+    side_name: str,
+    other_label: str,
+    target_lo: int,
+    target_hi: int,
+) -> dict[str, str]:
+    """
+    Single LLM consolidation pass. Embedding similarity only catches
+    near-duplicate wording — it routinely misses categories that are the same
+    broad theme but lexically different (e.g. "Agricultural Revenue" and
+    "Agricultural Productivity" are both Agricultural Production, but aren't
+    close enough in embedding space to auto-merge). An LLM can reason about
+    topical relatedness directly — but only if it can actually see what's in
+    each category, not just its name, which is why sample entries are
+    included: a name like "Quality & Standards" is unjudgeable on its own.
+    Returns {category: broadened_category}.
+    """
+    cats = sorted(c for c in category_counts if c != other_label)
+    if len(cats) <= 1:
+        return {c: c for c in category_counts}
+
+    cache_key = hashlib.sha256(
+        (f"broaden|{side_name}|{target_lo}-{target_hi}|"
+         + "|".join(f"{c}:{category_counts[c]}" for c in cats)).encode("utf-8")
+    ).hexdigest()
+    if cache_key in _category_cache:
+        return _category_cache[cache_key]
+
+    listing = "\n".join(
+        f"- {c} ({category_counts[c]} entries) — e.g. {', '.join(category_samples.get(c, [])[:3])}"
+        for c in cats
+    )
+    prompt = (
+        f"You are consolidating a topical taxonomy of {len(cats)} categories used to label "
+        f"'{side_name}' entries extracted from economics papers, for a Sankey diagram.\n\n"
+        f"Categories (with entry counts and example entries):\n{listing}\n\n"
+        "Task: aggressively merge categories into fewer, broader themes. Merge any two that "
+        "represent the SAME broad economic/topical theme even if their wording differs "
+        "entirely — e.g. 'Agricultural Revenue' and 'Agricultural Productivity' should both "
+        "merge into one broader 'Agricultural Production' category; 'GDP Growth' and "
+        "'Economic Growth' should merge into one; 'Exchange Rates & Prices' and 'Inflation & "
+        "Price Levels' should merge into one 'Macroeconomic Indicators' or similar category.\n"
+        f"Target: roughly {target_lo}-{target_hi} final categories — this is a hard reduction "
+        "target, not a suggestion. If your first pass leaves more than that, keep merging "
+        "before answering.\n"
+        "Rules:\n"
+        "- Any category with only 1-3 entries should almost always be folded into a larger "
+        "related category — a standalone small category is only acceptable if it is a truly "
+        "distinct major theme with no reasonable broader home.\n"
+        "- Every category in the input list must map to exactly one output category.\n"
+        "- The output name should be the clearest, most general label for the group (reuse "
+        "one of the input names if it fits, or write a new short 2-4 word Title Case name).\n"
+        "- Do not merge categories that are genuinely different themes just because they "
+        "share a word.\n\n"
+        'Respond with ONLY a JSON object: {"mapping": {"<input category>": "<final category>", ...}}'
+    )
+
+    response = client.chat.completions.create(
+        model=CATEGORY_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.0,
+        max_tokens=4000,
+        response_format={"type": "json_object"},
+    )
+    mapping = json.loads(response.choices[0].message.content).get("mapping", {})
+
+    result = {other_label: other_label}
+    for c in cats:
+        result[c] = mapping.get(c, c).strip() if mapping.get(c) else c
+
+    _category_cache[cache_key] = result
+    _save_category_cache(_category_cache)
+    return result
+
+
+def broaden_categories(
+    category_counts: dict[str, int],
+    category_samples: dict[str, list[str]],
+    side_name: str,
+    other_label: str,
+    max_rounds: int = 3,
+) -> dict[str, str]:
+    """
+    Repeatedly applies _broaden_categories_once() to its own output until the
+    category count falls within a fixed target range, stops shrinking, or
+    max_rounds is hit. The target is computed ONCE from the starting count and
+    reused across rounds — recomputing it from the current (already-shrunk)
+    count each round compounds geometrically (verified empirically: 59 raw
+    categories collapsed to 8 after 3 rounds chasing a shrinking target,
+    losing meaningful distinctions). A single pass also reliably undershoots
+    a fixed target on its own (59 only reached 39 against a 19-29 target),
+    which is why this iterates at all.
+    Returns {original_category: final_broadened_category}.
+    """
+    n_start = len({c for c in category_counts if c != other_label})
+    target_lo = max(10, round(n_start * 0.25))
+    target_hi = max(18, round(n_start * 0.40))
+
+    total_map: dict[str, str] = {c: c for c in category_counts}
+    counts = dict(category_counts)
+    samples = {c: list(v) for c, v in category_samples.items()}
+
+    for _ in range(max_rounds):
+        n_before = len({v for k, v in total_map.items() if k != other_label})
+        if n_before <= target_hi:
+            break
+
+        round_map = _broaden_categories_once(counts, samples, side_name, other_label, target_lo, target_hi)
+
+        total_map = {orig: round_map.get(cur, cur) for orig, cur in total_map.items()}
+
+        counts = defaultdict(int)
+        new_samples: dict[str, list[str]] = defaultdict(list)
+        for orig, cnt in category_counts.items():
+            final = total_map[orig]
+            counts[final] += cnt
+            for s in category_samples.get(orig, []):
+                if len(new_samples[final]) < 3 and s not in new_samples[final]:
+                    new_samples[final].append(s)
+        samples = new_samples
+
+        n_after = len({v for k, v in total_map.items() if k != other_label})
+        if n_after >= n_before:
+            break
+
+    return total_map
+
+
 # ─── Build cluster summary for review ──────────────────────────────────────
 def build_summary(*sides) -> pd.DataFrame:
     """
@@ -465,7 +613,7 @@ def build_summary(*sides) -> pd.DataFrame:
 # diagram, including ones whose only entries are noise ("Other (...)") or
 # missing text ("Not Specified (...)"). Add a label here only if you want to
 # deliberately hide a specific category (its flows are dropped, not shown).
-ENDOG_EXCLUDE:  set[str] = set()
+ENDOG_EXCLUDE:  set[str] = {"Not Specified (Endogenous Variables)"}
 RAIN_EXCLUDE:   set[str] = set()
 DEPVAR_EXCLUDE: set[str] = set()
 
@@ -595,13 +743,27 @@ def process_side(
     if n_merged < n_raw:
         print(f"  Merge guardrail: {n_raw} → {n_merged} categories after collapsing near-duplicates")
 
-    final_map = dict(canonical_map)
-    for raw, override in label_overrides.items():
-        final_map[raw] = override
-        final_map[canonical_map.get(raw, raw)] = override
+    canonical_counts = Counter()
+    canonical_samples: dict[str, list[str]] = defaultdict(list)
+    for entry, raw_cat in entry_to_category.items():
+        canon = canonical_map.get(raw_cat, raw_cat)
+        canonical_counts[canon] += 1
+        if len(canonical_samples[canon]) < 3 and entry not in canonical_samples[canon]:
+            canonical_samples[canon].append(entry)
 
-    exp[label_col] = exp["entry"].map(entry_to_category).map(lambda c: final_map.get(c, c))
-    exp[id_col]    = exp[label_col]
+    broad_map = broaden_categories(canonical_counts, canonical_samples, side_name, other_label)
+    n_broad = len({v for k, v in broad_map.items() if k != other_label})
+    if n_broad < n_merged:
+        print(f"  Broadening pass: {n_merged} → {n_broad} categories after consolidating same-theme categories")
+
+    exp[label_col] = (
+        exp["entry"]
+        .map(entry_to_category)
+        .map(lambda c: canonical_map.get(c, c))
+        .map(lambda c: broad_map.get(c, c))
+        .map(lambda c: label_overrides.get(c, c))
+    )
+    exp[id_col] = exp[label_col]
 
     # Every paper in rain_df_raw is here *because* it has a rainfall IV — so a
     # paper missing from this side isn't "no data," it's raw text that was
