@@ -38,15 +38,15 @@ from sklearn.metrics.pairwise import cosine_similarity
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # ─── Paths ─────────────────────────────────────────────────────────────────
-INPUT_CSV              = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/baseline/full_baseline_gpt_output.csv"
+INPUT_CSV              = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/full_finetune_gpt_output.csv"
 # Human-reviewed papers (train_80 + removed_20 combined) — unioned with the
 # model output below so papers only the model saw and papers only a human
 # reviewed both make it into the Sankey.
 HUMAN_LABELED_XLSX     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_new_labels/training_all_new.xlsx"
-OUTPUT_HTML            = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_baseline_gpt_rainfall_iv.html"
-OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/sankey_baseline_gpt_rainfall_depvar.html"
-CLUSTER_SUMMARY        = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_baseline_gpt_summary.csv"
-CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_baseline_gpt_summary_depvar.csv"
+OUTPUT_HTML            = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/sankey_finetune_gpt_rainfall_iv.html"
+OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/sankey_finetune_gpt_rainfall_depvar.html"
+CLUSTER_SUMMARY        = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_finetune_gpt_summary.csv"
+CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_finetune_gpt_summary_depvar.csv"
 
 # ─── LLM categorization params ──────────────────────────────────────────────
 CATEGORY_MODEL = "gpt-4.1-2025-04-14"
@@ -682,8 +682,50 @@ def build_sankey(
 
     n_left  = len(left_nodes)
     n_right = len(right_nodes)
-    left_colours  = [f"hsl({int(200 + 120*i/max(n_left-1,1))},60%,55%)"  for i in range(n_left)]
-    right_colours = [f"hsl({int(20  + 40 *i/max(n_right-1,1))},70%,55%)" for i in range(n_right)]
+
+    # Node count on each side is dynamic (15-24+ categories after the LLM
+    # broadening pass) — too many for a fixed ≤8-slot categorical palette, so
+    # hues are spread evenly across a range instead. This is safe here
+    # specifically because identity is never color-alone: every node already
+    # carries its own text label, so color is a secondary flow-tracing aid,
+    # not the only way to tell categories apart (unlike a legend-bound chart).
+    #
+    # Left = a cool gradient (teal → blue → violet), right = a warm gradient
+    # (red → orange → yellow) — intuitively distinct at a glance, and the two
+    # ranges are disjoint by construction, so no left node can coincidentally
+    # land on the same hue as a right node (which would read as "these are
+    # related" when they aren't).
+    # Saturation/lightness cycle through 3 tiers as hue steps forward, instead
+    # of staying flat — with many nodes packed into one warm/cool band, hue
+    # steps get small enough that flat S/L made neighbors blur together, even
+    # though the overall gradient still reads as a coherent warm/cool sweep.
+    _SAT_TIERS   = (60, 78, 68)
+    _LIGHT_TIERS = (50, 63, 42)
+
+    def spread_hues(n: int, hue_start: float, hue_end: float) -> list[tuple[float, int, int]]:
+        if n <= 0:
+            return []
+        if n == 1:
+            return [((hue_start + hue_end) / 2, _SAT_TIERS[0], _LIGHT_TIERS[0])]
+        step = (hue_end - hue_start) / (n - 1)
+        return [
+            (hue_start + i * step, _SAT_TIERS[i % 3], _LIGHT_TIERS[i % 3])
+            for i in range(n)
+        ]
+
+    left_hsl  = spread_hues(n_left,  hue_start=175, hue_end=290)  # cool: teal -> blue -> violet
+    right_hsl = spread_hues(n_right, hue_start=0,   hue_end=55)   # warm: red -> orange -> yellow
+
+    left_colours  = [f"hsl({h:.0f},{s}%,{l}%)" for h, s, l in left_hsl]
+    right_colours = [f"hsl({h:.0f},{s}%,{l}%)" for h, s, l in right_hsl]
+
+    # Links take their source node's hue at reduced opacity, so each flow
+    # visually traces back to the rainfall-metric category it came from.
+    left_node_hsl = dict(zip(left_nodes, left_hsl))
+    link_colours = [
+        "hsla({:.0f},{}%,{}%,0.35)".format(*left_node_hsl[l])
+        for l, _ in flows
+    ]
 
     fig = go.Figure(go.Sankey(
         arrangement="snap",
@@ -699,7 +741,7 @@ def build_sankey(
             source=sources,
             target=targets,
             value=values,
-            color="rgba(160,160,160,0.25)",
+            color=link_colours,
         ),
     ))
 

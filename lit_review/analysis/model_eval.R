@@ -20,8 +20,8 @@ merged_dir <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/w
 model_paths <- list(
   # gemini = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/finetune_gemini_aistudio_output.csv",
   gpt_baseline = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/baseline/baseline_gpt_output.csv",
-  gpt_finetune = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/gpt_finetune_output.csv",
-  gpt_rag      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/rag/rag_gpt_output.csv"
+  gpt_rag      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/rag/rag_gpt_output.csv",
+  gpt_finetune = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/gpt_finetune_output.csv"
   # llama = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/llama_finetune_output.csv",
   # gemma = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gemma_finetune_output.csv"
 )
@@ -30,10 +30,11 @@ model_paths <- list(
 tex_output_path <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output"
 
 # Display labels for model_paths keys, used as column headers in the LaTeX table.
+# Column order in the table follows names(model_paths): Zero-shot, RAG, Fine-tuned.
 model_display_names <- c(
-  gpt_baseline = "GPT Baseline",
-  gpt_finetune = "GPT Fine-tuned",
-  gpt_rag      = "GPT RAG"
+  gpt_baseline = "Zero-shot",
+  gpt_rag      = "RAG",
+  gpt_finetune = "Fine-tuned"
 )
 
 ############################################
@@ -226,14 +227,28 @@ evaluate_model <- function(model_path, model_label) {
   cat("\nConfusion Matrix for end_bin:\n")
   print(cm_end)
 
-  # Accuracy/Sensitivity/Specificity per binary field, for the LaTeX comparison
-  # table built at the bottom of this script — same numbers already printed
-  # above via confusionMatrix(), just captured in a tidy structure too.
+  # Accuracy/Sensitivity/Specificity/Precision/F1/Balanced Accuracy per binary
+  # field, for the LaTeX comparison table built at the bottom of this script —
+  # same numbers already printed above via confusionMatrix(), just captured in
+  # a tidy structure too. caret's byClass already computes Precision, F1, and
+  # Balanced Accuracy directly (verified via byClass field names), so no need
+  # to derive them by hand.
+  binary_row <- function(field_name, cm) {
+    data.frame(
+      field             = field_name,
+      accuracy          = cm$overall[["Accuracy"]],
+      sensitivity       = cm$byClass[["Sensitivity"]],
+      specificity       = cm$byClass[["Specificity"]],
+      precision         = cm$byClass[["Precision"]],
+      f1                = cm$byClass[["F1"]],
+      balanced_accuracy = cm$byClass[["Balanced Accuracy"]]
+    )
+  }
   binary_metrics <- bind_rows(
-    data.frame(field = "Has IV",              accuracy = cm_iv$overall[["Accuracy"]],   sensitivity = cm_iv$byClass[["Sensitivity"]],   specificity = cm_iv$byClass[["Specificity"]]),
-    data.frame(field = "Is Rainfall IV",      accuracy = cm_rain$overall[["Accuracy"]], sensitivity = cm_rain$byClass[["Sensitivity"]], specificity = cm_rain$byClass[["Specificity"]]),
-    data.frame(field = "Empirical Analysis",  accuracy = cm_emp$overall[["Accuracy"]],  sensitivity = cm_emp$byClass[["Sensitivity"]],  specificity = cm_emp$byClass[["Specificity"]]),
-    data.frame(field = "Endogeneity Problem", accuracy = cm_end$overall[["Accuracy"]],  sensitivity = cm_end$byClass[["Sensitivity"]],  specificity = cm_end$byClass[["Specificity"]])
+    binary_row("Empirical Analysis",  cm_emp),
+    binary_row("Endogeneity Problem", cm_end),
+    binary_row("Has IV",              cm_iv),
+    binary_row("Is Rainfall IV",      cm_rain)
   )
 
   merged_data$rainmet_similarity <- ce_score_pairs(merged_data$rainmet_human, merged_data$rainmet_model)
@@ -286,15 +301,23 @@ build_latex_comparison_table <- function(results, model_keys, model_labels, out_
     out_path <- file.path(out_path, "model_comparison.tex")
   }
 
-  binary_field_order    <- c("Has IV", "Is Rainfall IV", "Empirical Analysis", "Endogeneity Problem")
-  binary_metric_order   <- c("Accuracy", "Sensitivity", "Specificity")
+  binary_field_order  <- c("Empirical Analysis", "Endogeneity Problem", "Has IV", "Is Rainfall IV")
+  binary_metric_order <- c("Accuracy", "Sensitivity", "Specificity", "Precision", "F1", "Balanced Accuracy")
+  binary_metric_keys  <- c(
+    "Accuracy"          = "accuracy",
+    "Sensitivity"       = "sensitivity",
+    "Specificity"       = "specificity",
+    "Precision"         = "precision",
+    "F1"                = "f1",
+    "Balanced Accuracy" = "balanced_accuracy"
+  )
   similarity_field_order <- c(
-    rainmet = "Rainfall Instrument",
-    endog   = "Endogenous Variable(s)",
+    ptitle  = "Title",
     doi     = "DOI",
     depen   = "Dependent Variable(s)",
-    ptitle  = "Title",
-    iv      = "Instrument(s)"
+    endog   = "Endogenous Variable(s)",
+    iv      = "Instrument(s)",
+    rainmet = "Rainfall Instrument"
   )
 
   fmt <- function(x) ifelse(is.na(x), "--", sprintf("%.3f", x))
@@ -318,7 +341,7 @@ build_latex_comparison_table <- function(results, model_keys, model_labels, out_
   for (field in binary_field_order) {
     for (i in seq_along(binary_metric_order)) {
       metric     <- binary_metric_order[i]
-      metric_key <- tolower(metric)
+      metric_key <- binary_metric_keys[[metric]]
       row_label  <- if (i == 1) field else ""
       vals <- sapply(model_keys, function(m) {
         v <- results[[m]]$binary[[metric_key]][results[[m]]$binary$field == field]
@@ -330,17 +353,32 @@ build_latex_comparison_table <- function(results, model_keys, model_labels, out_
 
   lines <- c(
     lines, "\\midrule",
-    sprintf("\\multicolumn{%d}{l}{\\textit{Semantic Similarity (Mean)}} \\\\", n_models + 2)
+    sprintf("\\multicolumn{%d}{l}{\\textit{Semantic Similarity}} \\\\", n_models + 2)
   )
 
+  # Each field gets two rows: mean, then [mean - 1 SD, mean + 1 SD] below it.
   for (key in names(similarity_field_order)) {
     label <- similarity_field_order[[key]]
-    vals <- sapply(model_keys, function(m) {
+    mean_vals <- sapply(model_keys, function(m) {
       v <- results[[m]]$similarity$mean[results[[m]]$similarity$field == key]
       if (length(v) == 0) NA else v
     })
-    lines <- c(lines, sprintf("%s & & %s \\\\", label, paste(fmt(vals), collapse = " & ")))
+    sd_vals <- sapply(model_keys, function(m) {
+      v <- results[[m]]$similarity$sd[results[[m]]$similarity$field == key]
+      if (length(v) == 0) NA else v
+    })
+    bracket_vals <- mapply(function(mu, sdv) {
+      if (is.na(mu) || is.na(sdv)) "--" else sprintf("[%.3f, %.3f]", mu - sdv, mu + sdv)
+    }, mean_vals, sd_vals)
+
+    lines <- c(lines, sprintf("%s & & %s \\\\", label, paste(fmt(mean_vals), collapse = " & ")))
+    lines <- c(lines, sprintf(" & & %s \\\\", paste(bracket_vals, collapse = " & ")))
   }
+
+  lines <- c(
+    lines, "\\midrule",
+    sprintf("\\multicolumn{%d}{l}{\\footnotesize Bracketed values denote mean $\\pm$ 1 SD.} \\\\", n_models + 2)
+  )
 
   lines <- c(lines, "\\bottomrule", "\\end{tabular}", "\\end{table}")
 
