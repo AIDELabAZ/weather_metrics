@@ -195,8 +195,6 @@ evaluate_model <- function(model_path, model_label) {
     inner_join(model_data_clean, by = "filename", suffix = c("_human", "_model")) %>%
     rename(filename_merged = filename)
 
-  write_csv(merged_data, file.path(merged_dir, paste0("merged_data_", model_label, ".csv")))
-
   # confusionMatrix requires data/reference to be factors with the same levels
   merged_data <- merged_data %>%
     mutate(
@@ -258,6 +256,12 @@ evaluate_model <- function(model_path, model_label) {
   merged_data$ptitle_similarity  <- ce_score_pairs(merged_data$ptitle_human,  merged_data$ptitle_model)
   merged_data$iv_similarity      <- ce_score_pairs(merged_data$iv_human,      merged_data$iv_model)
 
+  # Written here (not right after the join) so the per-paper *_similarity
+  # columns are included — downstream analyses (e.g. density plots of the
+  # score spread) need the raw per-paper values, not just the aggregate
+  # mean/sd in similarity_summary below.
+  write_csv(merged_data, file.path(merged_dir, paste0("merged_data_", model_label, ".csv")))
+
   similarity_summary <- data.frame(
     field = c("rainmet", "endog", "doi", "depen", "ptitle", "iv"),
     rbind(
@@ -275,7 +279,14 @@ evaluate_model <- function(model_path, model_label) {
   cat("\nSemantic similarity summary:\n")
   print(similarity_summary)
 
-  invisible(list(merged_data = merged_data, binary = binary_metrics, similarity = similarity_summary))
+  confusion_tables <- list(
+    "Empirical Analysis"  = cm_emp$table,
+    "Endogeneity Problem" = cm_end$table,
+    "Has IV"              = cm_iv$table,
+    "Is Rainfall IV"      = cm_rain$table
+  )
+
+  invisible(list(merged_data = merged_data, binary = binary_metrics, similarity = similarity_summary, confusion = confusion_tables))
 }
 
 ############################################
@@ -356,7 +367,7 @@ build_latex_comparison_table <- function(results, model_keys, model_labels, out_
     sprintf("\\multicolumn{%d}{l}{\\textit{Semantic Similarity}} \\\\", n_models + 2)
   )
 
-  # Each field gets two rows: mean, then [mean - 1 SD, mean + 1 SD] below it.
+  # Each field gets two rows: mean, then (SD) below it.
   for (key in names(similarity_field_order)) {
     label <- similarity_field_order[[key]]
     mean_vals <- sapply(model_keys, function(m) {
@@ -367,17 +378,15 @@ build_latex_comparison_table <- function(results, model_keys, model_labels, out_
       v <- results[[m]]$similarity$sd[results[[m]]$similarity$field == key]
       if (length(v) == 0) NA else v
     })
-    bracket_vals <- mapply(function(mu, sdv) {
-      if (is.na(mu) || is.na(sdv)) "--" else sprintf("[%.3f, %.3f]", mu - sdv, mu + sdv)
-    }, mean_vals, sd_vals)
+    sd_display <- ifelse(is.na(sd_vals), "--", sprintf("(%.3f)", sd_vals))
 
     lines <- c(lines, sprintf("%s & & %s \\\\", label, paste(fmt(mean_vals), collapse = " & ")))
-    lines <- c(lines, sprintf(" & & %s \\\\", paste(bracket_vals, collapse = " & ")))
+    lines <- c(lines, sprintf(" & & %s \\\\", paste(sd_display, collapse = " & ")))
   }
 
   lines <- c(
     lines, "\\midrule",
-    sprintf("\\multicolumn{%d}{l}{\\footnotesize Bracketed values denote mean $\\pm$ 1 SD.} \\\\", n_models + 2)
+    sprintf("\\multicolumn{%d}{l}{\\footnotesize Parenthetical values denote SD.} \\\\", n_models + 2)
   )
 
   lines <- c(lines, "\\bottomrule", "\\end{tabular}", "\\end{table}")
@@ -388,6 +397,245 @@ build_latex_comparison_table <- function(results, model_keys, model_labels, out_
 }
 
 build_latex_comparison_table(
+  results,
+  model_keys   = names(model_paths),
+  model_labels = model_display_names[names(model_paths)],
+  out_path     = tex_output_path
+)
+
+############################################
+# Similarity KDE grid 
+############################################
+# A 2x2 small-multiples grid — one panel per free-text field, one density
+# curve per model — showing the SHAPE of the per-paper similarity scores
+# (results[[m]]$merged_data already carries them, added right after
+# ce_score_pairs() above), not just the mean/sd already in the LaTeX table.
+# Two models can share a mean while looking completely different here (e.g.
+# a bimodal hit-or-miss model vs. a consistently-mediocre one).
+build_similarity_density_plot <- function(results, model_keys, model_labels, out_path) {
+  if (dir.exists(out_path) || grepl("/$", out_path)) {
+    out_path <- file.path(out_path, "similarity_kdensities.png")
+  }
+
+  field_cols <- c(
+    ptitle_similarity  = "Title",
+    doi_similarity     = "DOI",
+    depen_similarity   = "Dependent Variable(s)",
+    endog_similarity   = "Endogenous Variable(s)",
+    iv_similarity      = "Instrument(s)",
+    rainmet_similarity = "Rainfall Instrument"
+  )
+
+  density_data <- bind_rows(lapply(model_keys, function(m) {
+    md <- results[[m]]$merged_data
+    bind_rows(lapply(names(field_cols), function(col) {
+      vals <- md[[col]]
+      vals <- vals[!is.na(vals)]
+      if (length(vals) == 0) return(NULL)
+      data.frame(model = model_labels[[m]], field = field_cols[[col]], value = vals)
+    }))
+  }))
+
+  density_data$model <- factor(density_data$model, levels = unname(model_labels[model_keys]))
+  density_data$field <- factor(density_data$field, levels = unname(field_cols))
+
+  # Same 3-slot categorical palette used elsewhere for these models (blue/
+  # orange/aqua) — validated for CVD-safety at this series count.
+  palette <- c("#08B2E3", "#484D6D", "#57A773")
+  model_colors <- setNames(palette[seq_along(model_keys)], unname(model_labels[model_keys]))
+
+  n_facet_rows <- ceiling(length(field_cols) / 2)
+
+  # One vertical line per (field, model) at that group's mean similarity —
+  # drawn from a separate summary data frame so each facet gets its own set
+  # of lines rather than one global mean across all fields.
+  mean_lines <- density_data %>%
+    group_by(field, model) %>%
+    summarise(mean_value = mean(value, na.rm = TRUE), .groups = "drop")
+
+  p <- ggplot(density_data, aes(x = value, color = model, fill = model)) +
+    geom_density(linewidth = 0.3, alpha = 0.1) +
+    geom_vline(
+      data = mean_lines,
+      aes(xintercept = mean_value, color = model),
+      linetype = "dashed", linewidth = 0.6, show.legend = FALSE
+    ) +
+    facet_wrap(~ field, ncol = 2, scales = "free_y") +
+    scale_color_manual(values = model_colors) +
+    scale_fill_manual(values = model_colors) +
+    coord_cartesian(xlim = c(0, 1)) +
+    labs(
+      title = "Semantic Similarity Score Distributions — Zero-shot vs. RAG vs. Fine-tuned",
+      x = "Cross-encoder similarity",
+      y = "Density",
+      color = NULL, fill = NULL
+    ) +
+    theme_minimal(base_size = 12) +
+    theme(
+      plot.title    = element_text(hjust = 0),
+      panel.grid.minor = element_blank(),
+      strip.text    = element_text(face = "bold", hjust = 0),
+      legend.position = "top"
+    )
+
+  # 3.2 per facet row + 1.6 fixed for title/legend — reproduces the original
+  # height=8 at 2 rows (4 fields), scales up cleanly as fields are added.
+  dir.create(dirname(out_path), showWarnings = FALSE, recursive = TRUE)
+  ggsave(out_path, plot = p, width = 11, height = 3.2 * n_facet_rows + 1.6, dpi = 150, bg = "white")
+  cat("\nSimilarity KDE grid written to:", out_path, "\n")
+}
+
+build_similarity_density_plot(
+  results,
+  model_keys   = names(model_paths),
+  model_labels = model_display_names[names(model_paths)],
+  out_path     = tex_output_path
+)
+
+############################################
+# Confusion matrices LaTeX
+############################################
+# Raw Prediction x Reference counts for each binary field, one table per
+# field with a column-pair per model — the counts behind the summary
+# accuracy/sensitivity/etc. already in model_comparison.tex.
+build_confusion_matrices_tex <- function(results, model_keys, model_labels, out_path) {
+  if (dir.exists(out_path) || grepl("/$", out_path)) {
+    out_path <- file.path(out_path, "confusion_matrices.tex")
+  }
+
+  field_order <- c("Empirical Analysis", "Endogeneity Problem", "Has IV", "Is Rainfall IV")
+  n_models    <- length(model_keys)
+  col_spec    <- paste0("l", strrep("cc", n_models))
+
+  model_header <- paste(
+    sapply(model_labels[model_keys], function(lbl) sprintf("\\multicolumn{2}{c}{%s}", lbl)),
+    collapse = " & "
+  )
+  ref_header <- paste(rep("Ref. 0 & Ref. 1", n_models), collapse = " & ")
+  cmidrules  <- paste(
+    sapply(seq_len(n_models), function(i) sprintf("\\cmidrule(lr){%d-%d}", 2 * i, 2 * i + 1)),
+    collapse = " "
+  )
+
+  lines <- c()
+  for (field_idx in seq_along(field_order)) {
+    field      <- field_order[field_idx]
+    label_slug <- gsub("[^a-z]", "", tolower(field))
+
+    lines <- c(lines,
+      "\\begin{table}[htbp]", "\\centering",
+      sprintf("\\caption{Confusion matrix: %s}", field),
+      sprintf("\\label{tab:cm_%s}", label_slug),
+      sprintf("\\begin{tabular}{%s}", col_spec),
+      "\\toprule",
+      sprintf(" & %s \\\\", model_header),
+      cmidrules,
+      sprintf("Predicted & %s \\\\", ref_header),
+      "\\midrule"
+    )
+
+    for (pred_class in c("0", "1")) {
+      cells <- unlist(lapply(model_keys, function(m) {
+        tbl <- results[[m]]$confusion[[field]]
+        if (is.null(tbl)) return(c("--", "--"))
+        c(as.character(tbl[pred_class, "0"]), as.character(tbl[pred_class, "1"]))
+      }))
+      lines <- c(lines, sprintf("%s & %s \\\\", pred_class, paste(cells, collapse = " & ")))
+    }
+
+    lines <- c(lines, "\\bottomrule", "\\end{tabular}", "\\end{table}")
+    if (field_idx < length(field_order)) lines <- c(lines, "", "\\vspace{1em}", "")
+  }
+
+  dir.create(dirname(out_path), showWarnings = FALSE, recursive = TRUE)
+  writeLines(lines, out_path)
+  cat("\nConfusion matrices LaTeX written to:", out_path, "\n")
+}
+
+build_confusion_matrices_tex(
+  results,
+  model_keys   = names(model_paths),
+  model_labels = model_display_names[names(model_paths)],
+  out_path     = tex_output_path
+)
+
+############################################
+# Classification scoreboard 
+############################################
+# One column per binary field, one row per metric, one dot per model at
+# that (metric, field) — unconnected, so it's a direct side-by-side
+# comparison of all three models on each metric rather than a line implying
+# trend across metrics (which don't have a natural order/scale to trend
+# along). Vertical guides at 50% (chance) and 80% (a common "good enough"
+# bar) give fixed reference points across every panel.
+build_classification_scoreboard_plot <- function(results, model_keys, model_labels, out_path) {
+  if (dir.exists(out_path) || grepl("/$", out_path)) {
+    out_path <- file.path(out_path, "classification_scoreboard.png")
+  }
+
+  field_order  <- c("Empirical Analysis", "Endogeneity Problem", "Has IV", "Is Rainfall IV")
+  metric_order <- c("Accuracy", "Sensitivity", "Specificity", "Precision", "F1", "Balanced Accuracy")
+  metric_keys  <- c(
+    "Accuracy"          = "accuracy",
+    "Sensitivity"       = "sensitivity",
+    "Specificity"       = "specificity",
+    "Precision"         = "precision",
+    "F1"                = "f1",
+    "Balanced Accuracy" = "balanced_accuracy"
+  )
+
+  dot_data <- bind_rows(lapply(model_keys, function(m) {
+    b <- results[[m]]$binary
+    bind_rows(lapply(field_order, function(field) {
+      row <- b[b$field == field, ]
+      data.frame(
+        model  = model_labels[[m]],
+        field  = field,
+        metric = metric_order,
+        value  = as.numeric(row[1, metric_keys[metric_order]]) * 100
+      )
+    }))
+  }))
+
+  dot_data$model  <- factor(dot_data$model, levels = unname(model_labels[model_keys]))
+  dot_data$field  <- factor(dot_data$field, levels = field_order)
+  # rev() so Accuracy (first in metric_order) plots at the top.
+  dot_data$metric <- factor(dot_data$metric, levels = rev(metric_order))
+
+  # Same 3-slot model palette used for the KDE density plot, so a model's
+  # color means the same thing everywhere in this script's output.
+  palette      <- c("#08B2E3", "#484D6D", "#57A773")
+  model_colors <- setNames(palette[seq_along(model_keys)], unname(model_labels[model_keys]))
+
+  # Manual per-model y-offset (rather than ggplot's position_dodge, which
+  # dodges along x by default) so dots land at fixed, predictable rows.
+  offsets <- setNames(seq(0.22, -0.22, length.out = length(model_keys)), unname(model_labels[model_keys]))
+  dot_data$metric_num <- as.numeric(dot_data$metric) + offsets[as.character(dot_data$model)]
+
+  p <- ggplot(dot_data, aes(x = value, y = metric_num, color = model)) +
+    geom_vline(xintercept = c(50, 80), color = "#D6D6D6", linewidth = 0.5) +
+    geom_point(size = 2.6) +
+    scale_color_manual(values = model_colors, name = NULL) +
+    scale_x_continuous(limits = c(0, 100), breaks = c(0, 50, 100)) +
+    scale_y_continuous(breaks = seq_along(metric_order), labels = rev(metric_order),
+                        limits = c(0.5, length(metric_order) + 0.5)) +
+    facet_wrap(~ field, nrow = 1) +
+    labs(x = "Performance (%)", y = NULL, title = "Classification performance by field") +
+    theme_minimal(base_size = 11) +
+    theme(
+      panel.grid.minor = element_blank(),
+      panel.grid.major.y = element_blank(),
+      strip.text        = element_text(face = "bold"),
+      plot.title         = element_text(hjust = 0),
+      legend.position    = "top"
+    )
+
+  dir.create(dirname(out_path), showWarnings = FALSE, recursive = TRUE)
+  ggsave(out_path, plot = p, width = 12, height = 4.3, dpi = 150, bg = "white")
+  cat("\nClassification scoreboard written to:", out_path, "\n")
+}
+
+build_classification_scoreboard_plot(
   results,
   model_keys   = names(model_paths),
   model_labels = model_display_names[names(model_paths)],
