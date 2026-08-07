@@ -613,25 +613,21 @@ build_classification_scoreboard_plot <- function(results, model_keys, model_labe
   dot_data$metric_num <- as.numeric(dot_data$metric) + offsets[as.character(dot_data$model)]
 
   p <- ggplot(dot_data, aes(x = value, y = metric_num, color = model)) +
-    geom_vline(xintercept = c(50, 80), color = "#D6D6D6", linewidth = 0.5) +
-    geom_point(size = 2.6) +
+    geom_point(size = 2) +
     scale_color_manual(values = model_colors, name = NULL) +
-    scale_x_continuous(limits = c(0, 100), breaks = c(0, 50, 100)) +
+    scale_x_continuous(limits = c(0, 100), breaks = c(0, 25, 50, 75, 100)) +
     scale_y_continuous(breaks = seq_along(metric_order), labels = rev(metric_order),
                         limits = c(0.5, length(metric_order) + 0.5)) +
-    facet_wrap(~ field, nrow = 1) +
+    facet_wrap(~ field, ncol = 2) +
     labs(x = "Performance (%)", y = NULL, title = "Classification performance by field") +
-    theme_minimal(base_size = 11) +
+    theme_minimal(base_size = 12) +
     theme(
-      panel.grid.minor = element_blank(),
-      panel.grid.major.y = element_blank(),
-      strip.text        = element_text(face = "bold"),
-      plot.title         = element_text(hjust = 0),
-      legend.position    = "top"
+      panel.border = element_rect(color = "#4a4a4abf", fill = NA, linewidth = 0.4),
+      panel.grid   = element_line(color = "#ececec", linewidth = 0.4)
     )
 
   dir.create(dirname(out_path), showWarnings = FALSE, recursive = TRUE)
-  ggsave(out_path, plot = p, width = 12, height = 4.3, dpi = 150, bg = "white")
+  ggsave(out_path, plot = p, width = 9, height = 8, dpi = 150, bg = "white")
   cat("\nClassification scoreboard written to:", out_path, "\n")
 }
 
