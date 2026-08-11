@@ -10,6 +10,7 @@
 library(tidyverse)
 library(caret)
 library(reticulate)
+library(shadowtext)
 
 ############################################
 # Paths
@@ -448,10 +449,49 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
 
   # One vertical line per (field, model) at that group's mean similarity —
   # drawn from a separate summary data frame so each facet gets its own set
-  # of lines rather than one global mean across all fields.
+  # of lines rather than one global mean across all fields. The label for
+  # each line sits AT that line's own KDE curve height (where the dashed
+  # line actually crosses its density curve), not clustered at the panel's
+  # top edge — since each model's curve height at its own mean differs,
+  # this naturally staggers the three labels vertically along their lines.
   mean_lines <- density_data %>%
     group_by(field, model) %>%
     summarise(mean_value = mean(value, na.rm = TRUE), .groups = "drop")
+
+  # curve_height: where the line crosses its own KDE curve (the label's
+  # natural resting point). curve_max: that curve's peak, used below to
+  # size a minimum-gap in the SAME units as curve_height so labels never
+  # collide when two models' means (and thus curve heights) land close
+  # together — a fixed pixel/data gap wouldn't scale across panels since
+  # y ranges from ~2 (most fields) to 300+ (Title).
+  mean_lines$curve_height <- NA_real_
+  mean_lines$curve_max    <- NA_real_
+  for (i in seq_len(nrow(mean_lines))) {
+    vals_i <- density_data$value[density_data$field == mean_lines$field[i] &
+                                    density_data$model == mean_lines$model[i]]
+    d <- density(vals_i, from = 0, to = 1, n = 512)
+    mean_lines$curve_height[i] <- stats::approx(d$x, d$y, xout = mean_lines$mean_value[i])$y
+    mean_lines$curve_max[i]    <- max(d$y)
+  }
+
+  # Push overlapping labels apart, field by field: sort by height ascending,
+  # then walk up the list bumping any label that's within min_gap of the
+  # one below it — keeps well-separated labels exactly on their curve, only
+  # nudges the ones that would otherwise overlap.
+  mean_lines$label_y <- mean_lines$curve_height
+  mean_lines <- mean_lines[order(mean_lines$field, mean_lines$label_y), ]
+  for (f in unique(mean_lines$field)) {
+    idx     <- which(mean_lines$field == f)
+    min_gap <- 0.18 * max(mean_lines$curve_max[idx])
+    for (k in seq_along(idx)[-1]) {
+      i <- idx[k]; prev <- idx[k - 1]
+      if (mean_lines$label_y[i] - mean_lines$label_y[prev] < min_gap) {
+        mean_lines$label_y[i] <- mean_lines$label_y[prev] + min_gap
+      }
+    }
+  }
+
+  mean_lines$mean_label <- sprintf("%.3f", mean_lines$mean_value)
 
   p <- ggplot(density_data, aes(x = value, color = model, fill = model)) +
     geom_density(linewidth = 0.3, alpha = 0.1) +
@@ -460,9 +500,23 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
       aes(xintercept = mean_value, color = model),
       linetype = "dashed", linewidth = 0.6, show.legend = FALSE
     ) +
+    # Label starts right at the line/curve intersection and reads upward
+    # from there (rotated to run alongside the dashed line). A white
+    # halo (geom_shadowtext, not plain geom_text) keeps it legible where
+    # a dashed line or another curve's fill sits directly behind it.
+    geom_shadowtext(
+      data = mean_lines,
+      aes(x = mean_value, y = label_y, label = mean_label, color = model),
+      angle = 90, hjust = -0.15, vjust = -0.4, size = 2.6, fontface = "bold", show.legend = FALSE,
+      bg.color = "white", bg.r = 0.1
+    ) +
     facet_wrap(~ field, ncol = 2, scales = "free_y") +
     scale_color_manual(values = model_colors) +
     scale_fill_manual(values = model_colors) +
+    # Extra top headroom (vs. ggplot's default ~5%) so stacked labels have
+    # room to clear the tallest curve without being clipped by the panel
+    # edge — each free_y panel expands proportionally to its own range.
+    scale_y_continuous(expand = expansion(mult = c(0.05, 0.35))) +
     coord_cartesian(xlim = c(0, 1)) +
     labs(
       title = "Semantic Similarity Score Distributions — Zero-shot vs. RAG vs. Fine-tuned",
