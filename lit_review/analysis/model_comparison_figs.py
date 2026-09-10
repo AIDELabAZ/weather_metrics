@@ -38,16 +38,27 @@ from sklearn.metrics import (
 
 # ─── Paths ───────────────────────────────────────────────────────────────────
 
-MODELS_DIR = (
+OUTPUT_ROOT = (
     "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/"
-    "weather_iv_lit/training/models"
+    "weather_iv_lit/output"
 )
-MERGED_DIR = os.path.join(MODELS_DIR, "finetune_data")
-OUTPUT_DIR = os.path.join(MODELS_DIR, "output")
+
+# Per-approach directory holding merged_data_{key}.csv (written by
+# analysis/model_eval.R). Keys match FAMILIES[...]["approaches"]:
+# gpt_finetune's folder is "sft", agentic sits outside gpt/.
+MERGED_DIRS = {
+    "gpt_baseline": os.path.join(OUTPUT_ROOT, "gpt", "baseline"),
+    "gpt_rag":      os.path.join(OUTPUT_ROOT, "gpt", "rag"),
+    "gpt_finetune": os.path.join(OUTPUT_ROOT, "gpt", "sft"),
+    "agentic":      os.path.join(OUTPUT_ROOT, "agentic"),
+}
+
+# Composite figures: OUTPUT_ROOT/<family>/<family>_figs/ (e.g. output/gpt/gpt_figs).
+OUTPUT_DIR = OUTPUT_ROOT
 
 # ─── Families and approaches ─────────────────────────────────────────────────
-# Approach order is fixed and doubles as the color order; merged CSV path is
-# finetune_data/merged_data_{approach_key}.csv. Missing files are skipped with
+# Approach order is fixed and doubles as the color order; each approach's merged
+# CSV is MERGED_DIRS[key]/merged_data_{key}.csv. Missing files are skipped with
 # a warning so pending families can be listed here ahead of their data.
 
 FAMILIES = {
@@ -342,14 +353,18 @@ def draw_sim_panel(ax, stats_by_approach, colors, labels):
 
 # ─── Figure assembly ─────────────────────────────────────────────────────────
 
-PANEL_TOP = 0.745
+PANEL_TOP = 0.805
 PANEL_BOT = 0.115
 
 
 def make_family_figure(family_key, cfg):
     approaches, dfs = [], []
     for key, label in cfg["approaches"].items():
-        path = os.path.join(MERGED_DIR, f"merged_data_{key}.csv")
+        merged_dir = MERGED_DIRS.get(key)
+        if merged_dir is None:
+            print(f"  WARNING: no MERGED_DIRS entry for '{key}' — skipping approach '{label}'")
+            continue
+        path = os.path.join(merged_dir, f"merged_data_{key}.csv")
         if not os.path.exists(path):
             print(f"  WARNING: {path} not found — skipping approach '{label}'")
             continue
@@ -360,32 +375,22 @@ def make_family_figure(family_key, cfg):
         return None
 
     colors = APPROACH_COLORS[: len(approaches)]
-    n_papers = max(len(df) for df in dfs)
 
     fig = plt.figure(figsize=(18, 9.5))
 
-    # Header
-    fig.text(0.055, 0.932, f"{cfg['display']}: binary and semantic performance",
-             size=17, weight="bold", color=INK)
-    fig.text(0.055, 0.885, "Confusion mosaics, classification, and "
-             "text-similarity performance per extraction approach, "
-             f"n = {n_papers} held-out test papers.", size=9.5, color=INK2)
-    fig.add_artist(Line2D([0.055, 0.965], [0.862, 0.862], color=GRID, lw=1,
-                          transform=fig.transFigure))
-
-    # Shared approach legend (top right, colors mean the same in every panel)
+    # Shared approach legend (bottom center, colors mean the same in every panel)
     handles = [Line2D([0], [0], marker="o", ls="none", ms=6, mfc=c,
                       mec=_darken(c), mew=0.6) for c in colors]
-    fig.legend(handles, approaches, loc="lower right", bbox_to_anchor=(0.965, 0.878),
+    fig.legend(handles, approaches, loc="lower center", bbox_to_anchor=(0.5, 0.02),
                ncol=len(approaches), frameon=False, fontsize=8.5,
                handletextpad=0.3, columnspacing=1.2)
 
     # Panel headers
-    panel_header(fig, 0.055, 0.828, "a", "   Confusion mosaics",
+    panel_header(fig, 0.055, 0.888, "a", "   Confusion mosaics",
                  "Area encodes each cell's share of n=88")
-    panel_header(fig, 0.345, 0.828, "b", "   Classification performance",
+    panel_header(fig, 0.345, 0.888, "b", "   Classification performance",
                  "Dots compare the approaches within binary fields.")
-    panel_header(fig, 0.756, 0.828, "c", "   Semantic similarity summaries",
+    panel_header(fig, 0.756, 0.888, "c", "   Semantic similarity summaries",
                  "Min-max, mean ± SD, mean, and median are shown for each field and approach.")
 
     # Panel c: encoding key (generic swatches; color meaning comes from the approach legend above)
@@ -396,14 +401,14 @@ def make_family_figure(family_key, cfg):
         Line2D([0], [0], marker="|", ls="none", ms=7, mew=1.3, color=INK),
     ]
     fig.legend(sim_legend_handles, ["Min-max", "Mean ± SD", "Mean", "Median"],
-               loc="lower left", bbox_to_anchor=(0.752, 0.775), ncol=4, frameon=False,
+               loc="lower left", bbox_to_anchor=(0.752, 0.835), ncol=4, frameon=False,
                fontsize=7, handlelength=1.6, columnspacing=1.6, handletextpad=0.8)
 
     # Panel a: mosaic legend, column headers, 4 fields x N approaches
     cell_handles = [Patch(facecolor=MOSAIC_COLORS[k], edgecolor="none", label=k)
                     for k in ("TN", "FP", "FN", "TP")]
     fig.legend(cell_handles, ["TN", "FP", "FN", "TP"], loc="lower left",
-               bbox_to_anchor=(0.05, 0.778), ncol=4, frameon=False, fontsize=7,
+               bbox_to_anchor=(0.05, 0.838), ncol=4, frameon=False, fontsize=7,
                handlelength=1.0, handleheight=1.0, columnspacing=1.0,
                handletextpad=1.0)
     mosaic_rows = grid_axes(fig, 0.075, 0.30, PANEL_BOT, PANEL_TOP,
@@ -440,13 +445,6 @@ def make_family_figure(family_key, cfg):
         else:
             stats_by_approach.append({f: sim_stats(df, f) for f in SIM_FIELDS})
     draw_sim_panel(sim_ax, stats_by_approach, colors, approaches)
-
-    # Footer
-    footer = cfg.get("footer", "")
-    note = ("Similarity is a cross-encoder score (stsb-roberta-large) between "
-            "human- and model-extracted text; n varies where either one is missing or marked NA.")
-    fig.text(0.055, 0.038, (footer + "\n" if footer else "") + note,
-             size=7, color=MUTED, va="top")
 
     out_dir = os.path.join(OUTPUT_DIR, family_key, f"{family_key}_figs")
     os.makedirs(out_dir, exist_ok=True)

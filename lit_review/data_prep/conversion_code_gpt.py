@@ -409,9 +409,9 @@ def preview_jsonl_file(file_path, num_entries=3):
 
 
 # File paths (update as needed)
-csv_input_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/train_80.csv'
-training_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/training.jsonl'
-validation_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/validation.jsonl'
+csv_input_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/data_prep_all_models/train_80.csv'
+training_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/gpt/training.jsonl'
+validation_output_path = '/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/gpt/validation.jsonl'
 
 prepare_fine_tuning_data(csv_input_path, training_output_path, validation_output_path)
 preview_jsonl_file(training_output_path, num_entries=3)

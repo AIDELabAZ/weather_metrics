@@ -14,7 +14,10 @@ Workflow:
   4. Merge guardrail: collapse near-duplicate category names the LLM didn't
      consolidate itself (plural/singular variants, embedding-similar names)
   5. Export cluster_summary.csv so you can review/rename categories
-  6. Build Plotly Sankey: left = rainfall metric categories, right = endog categories
+  6. Build Plotly Sankey: left = rainfall metric categories, right = endog categories.
+     Each node's number is the exact count of individual instruments / variables
+     in that category (a paper listing two in one category counts both) — see
+     COUNT_INDIVIDUAL_INSTANCES
   7. Save interactive HTML
 
 After first run: review cluster_summary.csv, then add overrides to
@@ -38,17 +41,18 @@ from sklearn.metrics.pairwise import cosine_similarity
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # ─── Paths ─────────────────────────────────────────────────────────────────
-INPUT_CSV              = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/full_finetune_gpt_output.csv"
+# select output file sankey creation and specify path + file names
+INPUT_CSV              = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/full_sft_gpt_output.csv"
 # Human-reviewed papers (train_80 + removed_20 combined) — unioned with the
 # model output below so papers only the model saw and papers only a human
 # reviewed both make it into the Sankey.
 HUMAN_LABELED_XLSX     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_new_labels/training_all_new.xlsx"
-OUTPUT_HTML            = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/sankey_finetune_gpt_rainfall_iv.html"
-OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/sankey_finetune_gpt_rainfall_depvar.html"
-OUTPUT_PNG             = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/sankey_finetune_gpt_rainfall_iv.png"
-OUTPUT_PNG_DEPVAR      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/sankey_finetune_gpt_rainfall_depvar.png"
-CLUSTER_SUMMARY        = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_finetune_gpt_summary.csv"
-CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_finetune_gpt_summary_depvar.csv"
+OUTPUT_HTML            = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/sankey_sft_gpt_rainfall_iv.html"
+OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/sankey_sft_gpt_rainfall_depvar.html"
+OUTPUT_PNG             = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/sankey_sft_gpt_rainfall_iv.png"
+OUTPUT_PNG_DEPVAR      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/sankey_sft_gpt_rainfall_depvar.png"
+CLUSTER_SUMMARY        = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/cluster_sft_gpt_summary.csv"
+CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/cluster_sft_gpt_summary_depvar.csv"
 
 # ─── LLM categorization params ──────────────────────────────────────────────
 # Used by the broadening/consolidation pass only (_broaden_categories_once).
@@ -372,7 +376,7 @@ def classify_into_categories(entries: list[str], side_name: str, other_label: st
         "that groups these entries by economic/topical theme, then assign every "
         "entry to exactly one category.\n"
         "Rules:\n"
-        "- Category names: 2-4 words, Title Case, describing the general theme "
+        "- Category names: No more than a few words, Title Case, describing the general theme "
         "(e.g. 'Agricultural Production', 'Financial Access & Credit').\n"
         "- Merge synonyms, singular/plural variants, and near-duplicate themes into "
         "ONE category yourself — do not create both 'Labor Market' and 'Labor Markets'.\n"
@@ -646,6 +650,23 @@ ENDOG_EXCLUDE:  set[str] = {"Not Specified (Endogenous Variables)"}
 RAIN_EXCLUDE:   set[str] = set()
 DEPVAR_EXCLUDE: set[str] = set()
 
+# ─── Node counting (both sides) ───────────────────────────────────────────
+# True  → every node's printed number is the EXACT count of individual
+#         instruments / variables in that category: one per distinct entry a
+#         paper lists (de-duplicated per paper on cleaned text), so a paper
+#         that lists two rainfall IVs — or two dependent variables — in the
+#         same category adds 2, not 1. Left totals and right totals are
+#         independent and generally differ.
+#         Link weight: each rainfall-IV instance contributes 1.0, split evenly
+#         across the distinct outcome categories its paper spans. So every LEFT
+#         node's bar height equals its printed count exactly; RIGHT bar heights
+#         are only proportional (they sum to the left total, not the right
+#         total) while the RIGHT printed numbers stay exact.
+# False → original behaviour: collapse each paper to its set of distinct
+#         categories per side; each node number is the summed width of its
+#         links (so both sides share one inflated total).
+COUNT_INDIVIDUAL_INSTANCES = True
+
 
 # ─── Sankey ────────────────────────────────────────────────────────────────
 def build_sankey(
@@ -661,35 +682,79 @@ def build_sankey(
     left_node_order: list[str] | None = None,
     show_title: bool = True,
 ) -> tuple[go.Figure, list[str]]:
-    # Per-paper label sets, with excluded labels stripped out
-    left_map = (
-        left_df[~left_df[left_label_col].isin(left_exclude)]
-        .groupby("paper_idx")[left_label_col].apply(set).to_dict()
-    )
-    right_map = (
-        right_df[~right_df[right_label_col].isin(right_exclude)]
-        .groupby("paper_idx")[right_label_col].apply(set).to_dict()
-    )
+    # link_papers[(l, r)] = # papers connecting category l to category r,
+    # surfaced on link hover (only populated in the instance-level branch).
+    link_papers: dict[tuple[str, str], int] = defaultdict(int)
 
-    flows: dict[tuple[str, str], int] = defaultdict(int)
-    for paper_idx in paper_index:
-        l_labels = left_map.get(paper_idx, set())
-        r_labels = right_map.get(paper_idx, set())
-        if not l_labels or not r_labels:
-            continue
-        for l in l_labels:
-            for r in r_labels:
-                flows[(l, r)] += 1
+    if COUNT_INDIVIDUAL_INSTANCES:
+        # One label per distinct entry a paper lists on each side (de-duped per
+        # paper on cleaned text). left_totals / right_totals are then the exact
+        # instance counts per category and are what gets printed. Link weight:
+        # each left instance contributes 1.0, split evenly across the paper's
+        # distinct right-hand categories — so left bar heights equal left counts
+        # exactly; right bar heights are proportional (they sum to the left
+        # total) while right printed counts stay exact.
+        left_map = (
+            left_df[~left_df[left_label_col].isin(left_exclude)]
+            .drop_duplicates(["paper_idx", "entry"])
+            .groupby("paper_idx")[left_label_col].apply(list).to_dict()
+        )
+        right_map = (
+            right_df[~right_df[right_label_col].isin(right_exclude)]
+            .drop_duplicates(["paper_idx", "entry"])
+            .groupby("paper_idx")[right_label_col].apply(list).to_dict()
+        )
+
+        flows: dict[tuple[str, str], float] = defaultdict(float)
+        left_totals:  dict[str, float] = defaultdict(int)
+        right_totals: dict[str, float] = defaultdict(int)
+        for paper_idx in paper_index:
+            l_inst = left_map.get(paper_idx, [])
+            r_inst = right_map.get(paper_idx, [])
+            if not l_inst or not r_inst:
+                continue
+            for l in l_inst:
+                left_totals[l] += 1
+            for r in r_inst:
+                right_totals[r] += 1
+            r_cats = set(r_inst)
+            w = 1.0 / len(r_cats)
+            for l in l_inst:
+                for r in r_cats:
+                    flows[(l, r)] += w
+            for l in set(l_inst):
+                for r in r_cats:
+                    link_papers[(l, r)] += 1
+    else:
+        # Original: collapse each paper to its set of distinct categories per
+        # side; every node number is the summed width of its links.
+        left_map = (
+            left_df[~left_df[left_label_col].isin(left_exclude)]
+            .groupby("paper_idx")[left_label_col].apply(set).to_dict()
+        )
+        right_map = (
+            right_df[~right_df[right_label_col].isin(right_exclude)]
+            .groupby("paper_idx")[right_label_col].apply(set).to_dict()
+        )
+
+        flows = defaultdict(int)
+        for paper_idx in paper_index:
+            l_labels = left_map.get(paper_idx, set())
+            r_labels = right_map.get(paper_idx, set())
+            if not l_labels or not r_labels:
+                continue
+            for l in l_labels:
+                for r in r_labels:
+                    flows[(l, r)] += 1
+
+        left_totals  = defaultdict(int)
+        right_totals = defaultdict(int)
+        for (l, r), v in flows.items():
+            left_totals[l]  += v
+            right_totals[r] += v
 
     if not flows:
         raise ValueError("No flows found — check that both columns have overlapping papers.")
-
-    # Sort nodes by total flow for a cleaner diagram
-    left_totals  = defaultdict(int)
-    right_totals = defaultdict(int)
-    for (l, r), v in flows.items():
-        left_totals[l]  += v
-        right_totals[r] += v
 
     if left_node_order is not None:
         # Use provided order, appending any new nodes not in it at the end
@@ -774,6 +839,13 @@ def build_sankey(
             target=targets,
             value=values,
             color=link_colours,
+            # In instance-level mode link `value` is a fractional weight; show
+            # the plain paper count on hover instead so it reads cleanly.
+            customdata=[link_papers[(l, r)] for l, r in flows] if link_papers else None,
+            hovertemplate=(
+                "%{source.label} → %{target.label}<br>%{customdata} paper(s)<extra></extra>"
+                if link_papers else None
+            ),
         ),
     ))
 

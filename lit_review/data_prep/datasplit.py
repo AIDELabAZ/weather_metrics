@@ -25,15 +25,15 @@ train_df, test_df = train_test_split(
 )
 
 # Save training data (80%)
-train_output_path = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/train_80.csv"
+train_output_path = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/data_prep_all_models/train_80.csv"
 train_df.to_csv(train_output_path, index=False)
 
 # Save test filenames (20%)
 test_filenames = test_df["filename"]
-test_output_path = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/test_filenames.txt"
+test_output_path = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/data_prep_all_models/test_filenames.txt"
 test_filenames.to_csv(test_output_path, index=False, header=False)
 # Save removed rows (20%)
-test_df.to_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/removed_20.csv", index=False)
+test_df.to_csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/data_prep_all_models/removed_20.csv", index=False)
 
 # Verification output
 print(f"""Split complete:

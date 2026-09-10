@@ -15,21 +15,38 @@ library(shadowtext)
 ############################################
 # Paths
 ############################################
-human_path <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data/removed_20.csv"
-merged_dir <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/finetune_data"
+human_path <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/data_prep_all_models/removed_20.csv"
+
+# Root for everything this script reads or writes. GPT artifacts live under
+# output/gpt: per-approach files in baseline/ rag/ sft/, cross-approach
+# comparison tables/figures in output/gpt itself. The agentic (Claude) run has
+# its own sibling folder. The training/ tree holds inputs only (data prep,
+# labels, JSONL per model family) and is never written to here.
+output_root <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output"
 
 model_paths <- list(
-  # gemini = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/finetune_gemini_aistudio_output.csv",
-  gpt_baseline = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/baseline/baseline_gpt_output.csv",
-  gpt_rag      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/rag/rag_gpt_output.csv",
-  gpt_finetune = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/gpt_finetune_output.csv",
-  agentic      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/agentic/agentic_output.csv"
-  # llama = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/llama_finetune_output.csv",
-  # gemma = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gemma_finetune_output.csv"
+  # gemini = "",
+  gpt_baseline = file.path(output_root, "gpt", "baseline", "baseline_gpt_output.csv"),
+  gpt_rag      = file.path(output_root, "gpt", "rag",      "rag_gpt_output.csv"),
+  gpt_finetune = file.path(output_root, "gpt", "sft",      "gpt_finetune_output.csv"),
+  agentic      = file.path(output_root, "agentic",         "agentic_output.csv")
+  # llama = "",
+  # gemma = ""
 )
 
-# Where the LaTeX comparison table (built at the bottom of this script) is written.
-tex_output_path <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output"
+# Per-model directory for that model's merged_data_<key>.csv, keyed to match
+# model_paths. Note gpt_finetune's folder is "sft"; agentic writes to its own
+# sibling folder, not under gpt/.
+model_output_dirs <- list(
+  gpt_baseline = file.path(output_root, "gpt", "baseline"),
+  gpt_rag      = file.path(output_root, "gpt", "rag"),
+  gpt_finetune = file.path(output_root, "gpt", "sft"),
+  agentic      = file.path(output_root, "agentic")
+)
+
+# Cross-approach comparison table/figures (all variants side by side) — not
+# specific to one approach, so they land in output/gpt directly.
+tex_output_path <- file.path(output_root, "gpt")
 
 # Display labels for model_paths keys, used as column headers in the LaTeX table.
 # Column order in the table follows names(model_paths): Zero-shot, RAG, Fine-tuned.
@@ -152,7 +169,9 @@ human_data_clean <- human_data %>%
 ############################################
 # Per-model evaluation
 ############################################
-evaluate_model <- function(model_path, model_label) {
+evaluate_model <- function(model_path, model_label,
+                           output_dir = model_output_dirs[[model_label]]) {
+  stopifnot("no model_output_dirs entry for this model_label" = !is.null(output_dir))
   cat("\n============================\nEvaluating:", model_label, "\n============================\n")
 
   model_data <- read_csv(model_path, na = c("n/a", "NA", ""))
@@ -263,7 +282,8 @@ evaluate_model <- function(model_path, model_label) {
   # columns are included — downstream analyses (e.g. density plots of the
   # score spread) need the raw per-paper values, not just the aggregate
   # mean/sd in similarity_summary below.
-  write_csv(merged_data, file.path(merged_dir, paste0("merged_data_", model_label, ".csv")))
+  dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+  write_csv(merged_data, file.path(output_dir, paste0("merged_data_", model_label, ".csv")))
 
   similarity_summary <- data.frame(
     field = c("rainmet", "endog", "doi", "depen", "ptitle", "iv"),
@@ -490,7 +510,6 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
     scale_y_continuous(expand = expansion(mult = c(0.05, 0.35))) +
     coord_cartesian(xlim = c(0, 1)) +
     labs(
-      title = "Semantic Similarity Score Distributions by extraction approach",
       x = "Cross-encoder similarity",
       y = "Density",
       color = NULL, fill = NULL
@@ -500,7 +519,7 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
       plot.title    = element_text(hjust = 0),
       panel.grid.minor = element_blank(),
       strip.text    = element_text(face = "bold", hjust = 0),
-      legend.position = "top"
+      legend.position = "bottom"
     )
 
   # 3.2 per facet row + 1.6 fixed for title/legend — reproduces the original
@@ -510,10 +529,13 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
   cat("\nSimilarity KDE grid written to:", out_path, "\n")
 }
 
+# TEMP: agentic outputs excluded from the KDE grid only (still in every other
+# table/plot below). Drop the setdiff() to put it back.
+density_model_keys <- setdiff(names(model_paths), "agentic")
 build_similarity_density_plot(
   results,
-  model_keys   = names(model_paths),
-  model_labels = model_display_names[names(model_paths)],
+  model_keys   = density_model_keys,
+  model_labels = model_display_names[density_model_keys],
   out_path     = tex_output_path
 )
 

@@ -714,13 +714,15 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
 # -------------------------------------------------------------------
 # Paths and execution
 # -------------------------------------------------------------------
-
+# specify these paths based on goal: if looking to test performance, pdfs should come from /training/data_prep_all_models/pdf_test_20 and output to
+# /output/gpt/sft/test_sft_gpt_output.csv while if running full extraction specify pdf_folder to /weather_iv_lit/papers and output to
+# /output/gpt/sft/full_sft_gpt_output.csv
 
 if __name__ == "__main__":
-    pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/papers"
-    output_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output"
+    pdf_folder = ""
+    output_folder = ""
     os.makedirs(output_folder, exist_ok=True)
-    output_csv = os.path.join(output_folder, "full_finetune_gpt_output.csv")
+    output_csv = os.path.join(output_folder, "full_sft_gpt_output.csv")
 
     process_pdfs_conditional_queries(pdf_folder, output_csv)
     print(f"Script finished: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
