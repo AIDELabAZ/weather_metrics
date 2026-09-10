@@ -183,7 +183,7 @@ def build_record(row):
 
     Vertex AI supervised fine-tuning format:
       {
-        "systemInstruction": {"role": "user", "parts": [{"text": "..."}]},
+        "systemInstruction": {"role": "system", "parts": [{"text": "..."}]},
         "contents": [
           {"role": "user",  "parts": [{"text": "..."}]},
           {"role": "model", "parts": [{"text": "..."}]},
@@ -251,7 +251,7 @@ def build_record(row):
 
     return {
         "systemInstruction": {
-            "role": "user",
+            "role": "system",
             "parts": _part(SYSTEM_INSTRUCTION),
         },
         "contents": contents,
@@ -270,7 +270,7 @@ def prepare_fine_tuning_data(
 
     Vertex AI supervised fine-tuning format (one JSON object per line):
       {
-        "systemInstruction": {"role": "user", "parts": [{"text": "<system prompt>"}]},
+        "systemInstruction": {"role": "system", "parts": [{"text": "<system prompt>"}]},
         "contents": [
           {"role": "user",  "parts": [{"text": "..."}]},
           {"role": "model", "parts": [{"text": "..."}]}

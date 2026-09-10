@@ -45,11 +45,27 @@ INPUT_CSV              = "/Users/kieran/Library/CloudStorage/OneDrive-University
 HUMAN_LABELED_XLSX     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_new_labels/training_all_new.xlsx"
 OUTPUT_HTML            = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/sankey_finetune_gpt_rainfall_iv.html"
 OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/sankey_finetune_gpt_rainfall_depvar.html"
+OUTPUT_PNG             = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/sankey_finetune_gpt_rainfall_iv.png"
+OUTPUT_PNG_DEPVAR      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/sankey_finetune_gpt_rainfall_depvar.png"
 CLUSTER_SUMMARY        = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_finetune_gpt_summary.csv"
 CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/cluster_finetune_gpt_summary_depvar.csv"
 
 # ─── LLM categorization params ──────────────────────────────────────────────
+# Used by the broadening/consolidation pass only (_broaden_categories_once).
 CATEGORY_MODEL = "gpt-4.1-2025-04-14"
+
+# Trial: the initial taxonomy-discovery + classification call
+# (classify_into_categories) uses its own model, independent of CATEGORY_MODEL,
+# so this can be swapped back to a non-reasoning model (set CLASSIFY_IS_REASONING
+# = False, drop CLASSIFY_REASONING_EFFORT) without touching the broadening pass.
+# Reasoning models reject temperature/max_tokens — see the branch in
+# classify_into_categories() below.
+CLASSIFY_MODEL = "gpt-5"
+CLASSIFY_IS_REASONING = True
+CLASSIFY_REASONING_EFFORT = "high"  # only used when CLASSIFY_IS_REASONING
+# Reasoning tokens count against this budget but never appear in the response,
+# so this needs far more headroom than a non-reasoning call's max_tokens would.
+CLASSIFY_MAX_COMPLETION_TOKENS = 32000
 
 # Guardrail: after the LLM proposes/assigns categories, merge any two whose
 # name embeddings have cosine similarity >= this threshold (catches
@@ -335,11 +351,14 @@ def classify_into_categories(entries: list[str], side_name: str, other_label: st
     concise topical taxonomy (merging synonyms/plurals itself where obvious)
     and assign each entry to exactly one category, or to `other_label` if it
     doesn't fit any real category (noise, unclassifiable fragments, etc.).
-    Cached on disk keyed by (side_name, entries) so unchanged reruns are free.
+    Uses CLASSIFY_MODEL (independent of CATEGORY_MODEL, which only governs the
+    later broadening pass). Cached on disk keyed by (model, side_name, entries)
+    so unchanged reruns are free and swapping CLASSIFY_MODEL never returns a
+    stale result cached under a different model.
     Returns {entry: category}.
     """
     cache_key = hashlib.sha256(
-        (side_name + "|" + "|".join(entries)).encode("utf-8")
+        (CLASSIFY_MODEL + "|" + side_name + "|" + "|".join(entries)).encode("utf-8")
     ).hexdigest()
     if cache_key in _category_cache:
         return _category_cache[cache_key]
@@ -363,13 +382,23 @@ def classify_into_categories(entries: list[str], side_name: str, other_label: st
         'Respond with ONLY a JSON object: {"assignments": {"<entry index as string>": "<category>", ...}}'
     )
 
-    response = client.chat.completions.create(
-        model=CATEGORY_MODEL,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.0,
-        max_tokens=8000,
-        response_format={"type": "json_object"},
-    )
+    if CLASSIFY_IS_REASONING:
+        # Reasoning models reject temperature and the legacy max_tokens param.
+        response = client.chat.completions.create(
+            model=CLASSIFY_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            reasoning_effort=CLASSIFY_REASONING_EFFORT,
+            max_completion_tokens=CLASSIFY_MAX_COMPLETION_TOKENS,
+            response_format={"type": "json_object"},
+        )
+    else:
+        response = client.chat.completions.create(
+            model=CLASSIFY_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.0,
+            max_tokens=8000,
+            response_format={"type": "json_object"},
+        )
     assignments = json.loads(response.choices[0].message.content).get("assignments", {})
 
     result = {}
@@ -478,7 +507,7 @@ def _broaden_categories_once(
         return {c: c for c in category_counts}
 
     cache_key = hashlib.sha256(
-        (f"broaden|{side_name}|{target_lo}-{target_hi}|"
+        (f"{CATEGORY_MODEL}|broaden|{side_name}|{target_lo}-{target_hi}|"
          + "|".join(f"{c}:{category_counts[c]}" for c in cats)).encode("utf-8")
     ).hexdigest()
     if cache_key in _category_cache:
@@ -630,6 +659,7 @@ def build_sankey(
     title: str,
     node_pad: int = 20,
     left_node_order: list[str] | None = None,
+    show_title: bool = True,
 ) -> tuple[go.Figure, list[str]]:
     # Per-paper label sets, with excluded labels stripped out
     left_map = (
@@ -729,7 +759,9 @@ def build_sankey(
 
     fig = go.Figure(go.Sankey(
         arrangement="snap",
-        domain=dict(x=[0, 1], y=[0, 0.94]),  # leave a gap below the title so top nodes can't overlap it
+        # Leave a gap below the title so top nodes can't overlap it; with no
+        # title there's nothing to leave room for, so use the full height.
+        domain=dict(x=[0, 1], y=[0, 0.94] if show_title else [0, 1]),
         node=dict(
             pad=node_pad,
             thickness=18,
@@ -745,12 +777,17 @@ def build_sankey(
         ),
     ))
 
-    fig.update_layout(
-        title=dict(text=title, font=dict(size=18), y=0.99, yanchor="top"),
+    layout_kwargs = dict(
         font_size=13,
+        width=770,
         height=950,
-        margin=dict(l=20, r=20, t=110, b=20),
     )
+    if show_title:
+        layout_kwargs["title"] = dict(text=title, font=dict(size=18), y=0.99, yanchor="top")
+        layout_kwargs["margin"] = dict(l=20, r=20, t=110, b=20)
+    else:
+        layout_kwargs["margin"] = dict(l=20, r=20, t=20, b=20)
+    fig.update_layout(**layout_kwargs)
     return fig, left_nodes
 
 
@@ -763,6 +800,7 @@ def process_side(
     label_col: str,
     side_name: str,
     requires_rainfall: bool = False,
+    skip_broadening: bool = False,
 ) -> pd.DataFrame:
     print(f"\n[{side_name}]")
     exp = expand_column(rain_df_raw, col, requires_rainfall=requires_rainfall)
@@ -793,10 +831,14 @@ def process_side(
         if len(canonical_samples[canon]) < 3 and entry not in canonical_samples[canon]:
             canonical_samples[canon].append(entry)
 
-    broad_map = broaden_categories(canonical_counts, canonical_samples, side_name, other_label)
-    n_broad = len({v for k, v in broad_map.items() if k != other_label})
-    if n_broad < n_merged:
-        print(f"  Broadening pass: {n_merged} → {n_broad} categories after consolidating same-theme categories")
+    if skip_broadening:
+        broad_map = {c: c for c in canonical_counts}
+        print(f"  Broadening pass: skipped — keeping {n_merged} categories from the merge guardrail")
+    else:
+        broad_map = broaden_categories(canonical_counts, canonical_samples, side_name, other_label)
+        n_broad = len({v for k, v in broad_map.items() if k != other_label})
+        if n_broad < n_merged:
+            print(f"  Broadening pass: {n_merged} → {n_broad} categories after consolidating same-theme categories")
 
     exp[label_col] = (
         exp["entry"]
@@ -932,9 +974,12 @@ def main():
         left_exclude=RAIN_EXCLUDE,
         right_exclude=ENDOG_EXCLUDE,
         title="Rainfall Instruments → Endogenous Variables",
+        show_title=False,
     )
     fig.write_html(OUTPUT_HTML)
     print(f"Sankey → {OUTPUT_HTML}")
+    fig.write_image(OUTPUT_PNG, scale=2)
+    print(f"Sankey → {OUTPUT_PNG}")
 
     print("\nBuilding Sankey: Rainfall → Dependent Variables...")
     fig_depvar, _ = build_sankey(
@@ -946,9 +991,12 @@ def main():
         title="Rainfall Instruments → Dependent Variables",
         node_pad=50,
         left_node_order=rain_node_order,
+        show_title=False,
     )
     fig_depvar.write_html(OUTPUT_HTML_DEPVAR)
     print(f"Sankey → {OUTPUT_HTML_DEPVAR}")
+    fig_depvar.write_image(OUTPUT_PNG_DEPVAR, scale=2)
+    print(f"Sankey → {OUTPUT_PNG_DEPVAR}")
 
 
 if __name__ == "__main__":

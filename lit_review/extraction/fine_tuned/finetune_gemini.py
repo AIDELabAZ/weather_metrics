@@ -43,7 +43,7 @@ STOP_SEQUENCES_BY_KEY = {
 
 TEMPERATURE = 0.0
 
-# Must match conversion_code_gemini_aistudio.py exactly
+# Must match conversion_code_gemini.py exactly
 SYSTEM_INSTRUCTION = (
     "You are an AI assistant that is an expert in analysis of economic literature. "
     "You interpret complex content and extract specific information, especially about "
@@ -56,7 +56,7 @@ SYSTEM_INSTRUCTION = (
     "For binary questions with justification requests, always start with 0 or 1"
 )
 
-# Must match conversion_code_gemini_aistudio.py exactly
+# Must match conversion_code_gemini.py exactly
 QUESTION_SUFFIX = (
     "\n\nAnswer using only the article text above and, if helpful, your previous answers in this conversation. "
     "Remember to follow the required output format exactly."
@@ -64,7 +64,7 @@ QUESTION_SUFFIX = (
 
 
 # -------------------------------------------------------------------
-# Questions (identical to conversion_code_gemini_aistudio.py)
+# Questions (identical to conversion_code_gemini.py)
 # -------------------------------------------------------------------
 
 questions = [
@@ -316,7 +316,7 @@ def enforce_dependency_consistency(temp_answers, justifications, *, verbose=Fals
 # PDF extraction
 # -------------------------------------------------------------------
 
-def extract_relevant_sections(pdf_path):
+def extract_relevant_sections(pdf_path, max_retries=4, base_delay=3.0):
     relevant_sections = []
     keywords = [
         "instrument", "instrumental variable", "data", "methods", "iv",
@@ -327,19 +327,31 @@ def extract_relevant_sections(pdf_path):
         "second stage", "doi", "excluded", "estimate", "effect", "affects", "exogenous",
         "two-stage least squares", "2sls", "GMM", "fixed effects"
     ]
-    try:
-        with fitz.open(pdf_path) as doc:
-            for page_num in range(len(doc)):
-                page = doc.load_page(page_num)
-                page_text = page.get_text("text")
-                paragraphs = page_text.split("\n\n")
-                for paragraph in paragraphs:
-                    if any(keyword.lower() in paragraph.lower() for keyword in keywords):
-                        relevant_sections.append(paragraph)
-    except Exception as e:
-        print(f"Error extracting PDF {pdf_path}: {e}")
-        return ""
-    return " ".join(relevant_sections)
+
+    # OneDrive stores these PDFs as on-demand ("cloud-only") files — the first
+    # open() on an unhydrated file can fail while OneDrive downloads it in the
+    # background. Retrying after a short delay resolves this without any
+    # persistent failures (confirmed empirically across the full test folder).
+    for attempt in range(max_retries):
+        try:
+            with fitz.open(pdf_path) as doc:
+                for page_num in range(len(doc)):
+                    page = doc.load_page(page_num)
+                    page_text = page.get_text("text")
+                    paragraphs = page_text.split("\n\n")
+                    for paragraph in paragraphs:
+                        if any(keyword.lower() in paragraph.lower() for keyword in keywords):
+                            relevant_sections.append(paragraph)
+            return " ".join(relevant_sections)
+        except Exception as e:
+            if attempt < max_retries - 1:
+                delay = base_delay * (attempt + 1)
+                print(f"Error opening PDF {pdf_path}: {e}. Retrying in {delay:.0f}s "
+                      f"(likely still downloading from OneDrive)...")
+                time.sleep(delay)
+            else:
+                print(f"Error extracting PDF {pdf_path} after {max_retries} attempts: {e}")
+                return ""
 
 
 # -------------------------------------------------------------------

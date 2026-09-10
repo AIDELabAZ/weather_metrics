@@ -22,7 +22,8 @@ model_paths <- list(
   # gemini = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/finetune_gemini_aistudio_output.csv",
   gpt_baseline = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/baseline/baseline_gpt_output.csv",
   gpt_rag      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/rag/rag_gpt_output.csv",
-  gpt_finetune = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/gpt_finetune_output.csv"
+  gpt_finetune = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gpt/finetune/gpt_finetune_output.csv",
+  agentic      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/agentic/agentic_output.csv"
   # llama = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/llama_finetune_output.csv",
   # gemma = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/models/output/gemma_finetune_output.csv"
 )
@@ -35,7 +36,8 @@ tex_output_path <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofAriz
 model_display_names <- c(
   gpt_baseline = "Zero-shot",
   gpt_rag      = "RAG",
-  gpt_finetune = "Fine-tuned"
+  gpt_finetune = "Fine-tuned",
+  agentic      = "Agentic (Claude)"
 )
 
 ############################################
@@ -442,7 +444,7 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
 
   # Same 3-slot categorical palette used elsewhere for these models (blue/
   # orange/aqua) — validated for CVD-safety at this series count.
-  palette <- c("#08B2E3", "#484D6D", "#57A773")
+  palette <- c("#08B2E3", "#484D6D", "#57A773", "#C1666B")
   model_colors <- setNames(palette[seq_along(model_keys)], unname(model_labels[model_keys]))
 
   n_facet_rows <- ceiling(length(field_cols) / 2)
@@ -488,7 +490,7 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
     scale_y_continuous(expand = expansion(mult = c(0.05, 0.35))) +
     coord_cartesian(xlim = c(0, 1)) +
     labs(
-      title = "Semantic Similarity Score Distributions — Zero-shot vs. RAG vs. Fine-tuned",
+      title = "Semantic Similarity Score Distributions by extraction approach",
       x = "Cross-encoder similarity",
       y = "Density",
       color = NULL, fill = NULL
@@ -627,7 +629,7 @@ build_classification_scoreboard_plot <- function(results, model_keys, model_labe
 
   # Same 3-slot model palette used for the KDE density plot, so a model's
   # color means the same thing everywhere in this script's output.
-  palette      <- c("#08B2E3", "#484D6D", "#57A773")
+  palette      <- c("#08B2E3", "#484D6D", "#57A773", "#C1666B")
   model_colors <- setNames(palette[seq_along(model_keys)], unname(model_labels[model_keys]))
 
   # Manual per-model y-offset (rather than ggplot's position_dodge, which
@@ -660,4 +662,3 @@ build_classification_scoreboard_plot(
   model_labels = model_display_names[names(model_paths)],
   out_path     = tex_output_path
 )
-

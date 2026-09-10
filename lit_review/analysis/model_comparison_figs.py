@@ -57,10 +57,12 @@ FAMILIES = {
             "gpt_baseline": "Zero-shot",
             "gpt_rag": "RAG",
             "gpt_finetune": "SFT",
+            "agentic": "Agentic",
         },
         "footer": (
             "Zero-shot: gpt-4.1-2025-04-14  ·  RAG: gpt-4.1-2025-04-14 + "
-            "text-embedding-3-small  ·  SFT: ft:gpt-4.1-2025-04-14 (aide-lab)"
+            "text-embedding-3-small  ·  SFT: ft:gpt-4.1-2025-04-14 (aide-lab)  ·  "
+            "Agentic: claude-sonnet-5 (section-router + reader/adversary + verifier + judge)"
         ),
     },
     # "gemini": {"display": "Gemini", "approaches": {"gemini_finetune": "SFT"}, "footer": ""},
@@ -109,7 +111,7 @@ SURFACE = "#ffffff"
 # existing R-generated ones. Note: the slate #484D6D is low-chroma and reads
 # close to gray, so it doesn't clear the dataviz skill's CVD-safety validator
 # the way the skill's reference trio does — kept anyway for cross-figure consistency.
-APPROACH_COLORS = ["#08B2E3", "#484D6D", "#57A773"]
+APPROACH_COLORS = ["#08B2E3", "#484D6D", "#57A773", "#C1666B"]
 
 MOSAIC_COLORS = {"TN": "#08B2E3", "FP": "#e34948", "FN": "#eda100", "TP": "#57A773"}
 
