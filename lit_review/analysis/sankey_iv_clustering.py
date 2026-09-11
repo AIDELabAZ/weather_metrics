@@ -1,28 +1,21 @@
 """
-sankey_iv_clustering.py
+This script is used to generate sankey diagrams which help us visualize potential
+exclusion restriction violations present in our corpus. First, model generated outputs 
+from a single extraction pipeline are collected alongside the entire human-labeled
+reference sample. Looking only at rows that have ≥1 rainfall insturmental variable 
+identified, text is normalized and if any papers match (e.g., different versions or an
+accidental duplicate) only one instance is kept. Every cell entry in the rainfall IV 
+and dependent variable columns are split and ; separeted, including those cells with
+more than 1 entry. Entries are further cleaned, dropping equations, strings of notation,
+and sentence fragments. For each side of the sankey, all unique entries are sent in
+a single LLM call tasked with classifying each into broader categories. For example,
+rainfall shocks, deviations in annual rainfall, and rainfall deviations from long term average 
+might all be classified as rainfall deviations and anomalies. The categorized counts are
+then built into a sankey, where node counts are the literal instance counts of that variable. 
+A single paper may contribute 2 different rainfall IVs, in which case each instance is 
+classified accordingly. 
 
-Reads the model output CSV, categorizes endogenous variables and rainfall
-metrics using an LLM (taxonomy discovery + classification in one call per
-side), then generates an interactive Sankey diagram connecting rainfall
-instrument types to endogenous variable categories.
-
-Workflow:
-  1. Filter to rainfall IV papers (model output ∪ human-labeled papers)
-  2. Aggressively clean + normalize entries (remove noise, equations, generics)
-  3. One LLM call per side: propose a topical taxonomy over all unique cleaned
-     entries and classify every entry into it (or an "Other" noise bucket)
-  4. Merge guardrail: collapse near-duplicate category names the LLM didn't
-     consolidate itself (plural/singular variants, embedding-similar names)
-  5. Export cluster_summary.csv so you can review/rename categories
-  6. Build Plotly Sankey: left = rainfall metric categories, right = endog categories.
-     Each node's number is the exact count of individual instruments / variables
-     in that category (a paper listing two in one category counts both) — see
-     COUNT_INDIVIDUAL_INSTANCES
-  7. Save interactive HTML
-
-After first run: review cluster_summary.csv, then add overrides to
-ENDOG_LABEL_OVERRIDES / RAIN_LABEL_OVERRIDES below and rerun — LLM
-classifications are cached by entry text so reruns are fast.
+Remember to change pathnames before running on different model outputs and set environmental API key. 
 """
 
 import hashlib
@@ -42,17 +35,14 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # ─── Paths ─────────────────────────────────────────────────────────────────
 # select output file sankey creation and specify path + file names
-INPUT_CSV              = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/full_sft_gpt_output.csv"
+INPUT_CSV              = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/full_baseline_gpt_output.csv"
 # Human-reviewed papers (train_80 + removed_20 combined) — unioned with the
 # model output below so papers only the model saw and papers only a human
 # reviewed both make it into the Sankey.
 HUMAN_LABELED_XLSX     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_new_labels/training_all_new.xlsx"
-OUTPUT_HTML            = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/sankey_sft_gpt_rainfall_iv.html"
-OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/sankey_sft_gpt_rainfall_depvar.html"
-OUTPUT_PNG             = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/sankey_sft_gpt_rainfall_iv.png"
-OUTPUT_PNG_DEPVAR      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/sankey_sft_gpt_rainfall_depvar.png"
-CLUSTER_SUMMARY        = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/cluster_sft_gpt_summary.csv"
-CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/cluster_sft_gpt_summary_depvar.csv"
+OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/sankey_baseline_gpt_rainfall_depvar.html"
+OUTPUT_PNG_DEPVAR      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/sankey_baseline_gpt_rainfall_depvar.png"
+CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/cluster_baseline_gpt_summary_depvar.csv"
 
 # ─── LLM categorization params ──────────────────────────────────────────────
 # Used by the broadening/consolidation pass only (_broaden_categories_once).
@@ -79,13 +69,12 @@ CATEGORY_MERGE_SIM_THRESHOLD = 0.88
 
 CATEGORY_CACHE_PATH = os.path.join(os.path.dirname(__file__), ".sankey_category_cache.json")
 
-# ─── Manual label overrides (optional; edit after reviewing cluster_summary.csv) ──
+# ─── Manual label overrides (optional; edit after reviewing cluster_summary_depvar.csv) ──
 # Format: {"Category name the LLM/merge guardrail produced": "Desired final name"}
 # Applied as a final rename pass — use only for edge cases the merge guardrail
 # didn't catch (e.g. two categories that mean the same thing but aren't close
 # enough in embedding space to auto-merge). Merging two categories into the
 # same string combines their flows.
-ENDOG_LABEL_OVERRIDES: dict[str, str] = {}
 RAIN_LABEL_OVERRIDES: dict[str, str] = {}
 DEPVAR_LABEL_OVERRIDES: dict[str, str] = {}
 
@@ -642,13 +631,16 @@ def build_summary(*sides) -> pd.DataFrame:
 
 
 # ─── Labels to exclude from the Sankey entirely (opt-in) ───────────────────
-# Empty by default — every paper with a rainfall IV should appear in the
-# diagram, including ones whose only entries are noise ("Other (...)") or
-# missing text ("Not Specified (...)"). Add a label here only if you want to
-# deliberately hide a specific category (its flows are dropped, not shown).
-ENDOG_EXCLUDE:  set[str] = {"Not Specified (Endogenous Variables)"}
-RAIN_EXCLUDE:   set[str] = set()
-DEPVAR_EXCLUDE: set[str] = set()
+# A label in here is dropped from build_sankey()'s left/right maps *before*
+# grouping by paper — so a paper whose ONLY entries on that side are noise
+# ("Other (...)") or missing text ("Not Specified (...)") ends up with an
+# empty entry list and is skipped entirely by the
+# `if not l_inst or not r_inst: continue` check in build_sankey() — it
+# contributes to neither side's counts, not just a hidden/renamed node. A
+# paper with a MIX of real and noise/missing entries keeps its real ones;
+# only the excluded label's rows are dropped.
+RAIN_EXCLUDE:   set[str] = {"Other (Rainfall Metrics)", "Not Specified (Rainfall Metrics)"}
+DEPVAR_EXCLUDE: set[str] = {"Other (Dependent Variables)", "Not Specified (Dependent Variables)"}
 
 # ─── Node counting (both sides) ───────────────────────────────────────────
 # True  → every node's printed number is the EXACT count of individual
@@ -778,6 +770,16 @@ def build_sankey(
     n_left  = len(left_nodes)
     n_right = len(right_nodes)
 
+    # Ground-truth totals for what's actually in the diagram: left_totals/
+    # right_totals are already post-exclude (RAIN_EXCLUDE/DEPVAR_EXCLUDE),
+    # post-per-paper-duplicate-collapse, and post-cross-side-requirement (a
+    # paper only counts here if it has a surviving entry on BOTH sides) — so
+    # these numbers are the real total, not something to hand-count off the
+    # rendered nodes.
+    print(f"  Sankey totals — left instances: {int(sum(left_totals.values()))} "
+          f"across {n_left} categories; right instances: {int(sum(right_totals.values()))} "
+          f"across {n_right} categories")
+
     # Node count on each side is dynamic (15-24+ categories after the LLM
     # broadening pass) — too many for a fixed ≤8-slot categorical palette, so
     # hues are spread evenly across a range instead. This is safe here
@@ -890,6 +892,12 @@ def process_side(
     print(f"  LLM proposed {n_raw} categories "
           f"(+ {other_label}: {category_counts.get(other_label, 0)} entries)")
 
+    # Blank cells never reach here at all (they never survive expand_column/
+    # clean_entry, and only show up later as fallback rows), so this is
+    # exactly "unique entries excluding both blank and incoherent (Other)."
+    n_unique_real = len(unique_entries) - category_counts.get(other_label, 0)
+    print(f"  Unique entries classified into a real category: {n_unique_real} / {len(unique_entries)}")
+
     canonical_map = merge_similar_category_names(category_counts, other_label, CATEGORY_MERGE_SIM_THRESHOLD)
     n_merged = len({v for k, v in canonical_map.items() if k != other_label})
     if n_merged < n_raw:
@@ -981,9 +989,20 @@ def load_combined_rainfall_papers(model_csv_path: str, human_xlsx_path: str) -> 
         "dep_var":  "Dependent Variable(s)",
     })[["paper_key", "Rainfall Instrument", "Endogenous Variable(s)", "Dependent Variable(s)"]]
 
+    model_unique = model_rain["paper_key"].nunique()
+    human_unique = human_rain["paper_key"].nunique()
     both  = set(model_rain["paper_key"]) & set(human_rain["paper_key"])
     union = set(model_rain["paper_key"]) | set(human_rain["paper_key"])
-    print(f"Rainfall IV papers — model: {len(model_rain)}, human: {len(human_rain)}, "
+    # Report unique papers per source, not raw row counts — a source can list
+    # the same paper_key on more than one row within itself (e.g. a duplicate
+    # row in the model CSV), which would otherwise make model/human look
+    # inconsistent with overlap/combined unique (those are always computed
+    # from deduplicated sets). Flag it explicitly when it happens so a
+    # mismatch isn't mistaken for a bug in the union logic.
+    if model_unique != len(model_rain) or human_unique != len(human_rain):
+        print(f"  (note: model has {len(model_rain) - model_unique} duplicate paper_key row(s), "
+              f"human has {len(human_rain) - human_unique} — counts below are deduplicated)")
+    print(f"Rainfall IV papers — model: {model_unique}, human: {human_unique}, "
           f"overlap: {len(both)}, combined unique: {len(union)}")
 
     combined = pd.concat([model_rain, human_rain], ignore_index=True)
@@ -994,15 +1013,6 @@ def main():
     print("Loading data...")
     rain_df_raw = load_combined_rainfall_papers(INPUT_CSV, HUMAN_LABELED_XLSX)
     print(f"Rainfall IV papers (combined, deduped): {rain_df_raw.index.nunique()}")
-
-    endog_exp = process_side(
-        rain_df_raw,
-        col="Endogenous Variable(s)",
-        label_overrides=ENDOG_LABEL_OVERRIDES,
-        id_col="endog_cluster_id",
-        label_col="endog_cluster_label",
-        side_name="Endogenous Variables",
-    )
 
     rain_exp = process_side(
         rain_df_raw,
@@ -1023,13 +1033,6 @@ def main():
         side_name="Dependent Variables",
     )
 
-    summary = build_summary(
-        ("endog", endog_exp, "endog_cluster_id", "endog_cluster_label"),
-        ("rain",  rain_exp,  "rain_cluster_id",  "rain_cluster_label"),
-    )
-    summary.to_csv(CLUSTER_SUMMARY, index=False)
-    print(f"\nCluster summary → {CLUSTER_SUMMARY}")
-
     summary_depvar = build_summary(
         ("depvar", depvar_exp, "depvar_cluster_id", "depvar_cluster_label"),
         ("rain",   rain_exp,  "rain_cluster_id",   "rain_cluster_label"),
@@ -1037,21 +1040,6 @@ def main():
     summary_depvar.to_csv(CLUSTER_SUMMARY_DEPVAR, index=False)
     print(f"Dependent variable cluster summary → {CLUSTER_SUMMARY_DEPVAR}")
     print("Review it, add label overrides above, and rerun.")
-
-    print("\nBuilding Sankey: Rainfall → Endogenous Variables...")
-    fig, rain_node_order = build_sankey(
-        rain_exp, endog_exp, rain_df_raw.index.unique(),
-        left_label_col="rain_cluster_label",
-        right_label_col="endog_cluster_label",
-        left_exclude=RAIN_EXCLUDE,
-        right_exclude=ENDOG_EXCLUDE,
-        title="Rainfall Instruments → Endogenous Variables",
-        show_title=False,
-    )
-    fig.write_html(OUTPUT_HTML)
-    print(f"Sankey → {OUTPUT_HTML}")
-    fig.write_image(OUTPUT_PNG, scale=2)
-    print(f"Sankey → {OUTPUT_PNG}")
 
     print("\nBuilding Sankey: Rainfall → Dependent Variables...")
     fig_depvar, _ = build_sankey(
@@ -1062,7 +1050,6 @@ def main():
         right_exclude=DEPVAR_EXCLUDE,
         title="Rainfall Instruments → Dependent Variables",
         node_pad=50,
-        left_node_order=rain_node_order,
         show_title=False,
     )
     fig_depvar.write_html(OUTPUT_HTML_DEPVAR)
