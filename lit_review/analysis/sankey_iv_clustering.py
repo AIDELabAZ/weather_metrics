@@ -16,6 +16,8 @@ A single paper may contribute 2 different rainfall IVs, in which case each insta
 classified accordingly. 
 
 Remember to change pathnames before running on different model outputs and set environmental API key. 
+
+Run model_eval.r first to generate full corpus files.
 """
 
 import hashlib
@@ -35,14 +37,15 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # ─── Paths ─────────────────────────────────────────────────────────────────
 # select output file sankey creation and specify path + file names
-INPUT_CSV              = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/full_baseline_gpt_output.csv"
-# Human-reviewed papers (train_80 + removed_20 combined) — unioned with the
-# model output below so papers only the model saw and papers only a human
-# reviewed both make it into the Sankey.
-HUMAN_LABELED_XLSX     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/training_new_labels/training_all_new.xlsx"
-OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/sankey_baseline_gpt_rainfall_depvar.html"
-OUTPUT_PNG_DEPVAR      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/sankey_baseline_gpt_rainfall_depvar.png"
-CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/cluster_baseline_gpt_summary_depvar.csv"
+# One merged file per implementation (model output + human-reviewed labels
+# already combined upstream). Full corpus merged files are in analysis folder. 
+MERGED_CSV             = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/analysis/sft_full_corpus.csv"
+OUTPUT_HTML_DEPVAR     = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/sankey_sft_gpt_rainfall_depvar.html"
+OUTPUT_PNG_DEPVAR      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/sankey_sft_gpt_rainfall_depvar.png"
+CLUSTER_SUMMARY_DEPVAR = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/cluster_sft_gpt_summary_depvar.csv"
+# Every raw ";"-split fragment clean_entry() discarded, for manual review —
+# see the docstring on expand_column().
+REJECTED_ENTRIES_CSV   = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/rejected_entries_sft_gpt.csv"
 
 # ─── LLM categorization params ──────────────────────────────────────────────
 # Used by the broadening/consolidation pass only (_broaden_categories_once).
@@ -155,11 +158,22 @@ _STOP_PHRASES = [
 _NORMALIZATIONS = [
     # log/ln unification
     (re.compile(r"\bln\b"),             "log"),
+    # "log(x)" / "log ( x )" → "log x", consuming BOTH parens together — the
+    # fallback regex right below this one used to be the only rule here, and
+    # it only ever consumed the opening "(", leaving a dangling ")" behind
+    # (e.g. "log(rainfall)" -> "log rainfall)").
+    (re.compile(r"\blog\s*\(\s*([^()]*?)\s*\)"), r"log \1"),
+    # Fallback for a truncated "log(" with no closing paren in this fragment.
     (re.compile(r"\blog\s*\(?\s*"),     "log "),
     # precipitation synonyms → single term
     (re.compile(r"\bprecip\b"),         "precipitation"),
     (re.compile(r"\bppt\b"),            "precipitation"),
-    (re.compile(r"\brain(?:fall)?\b"),  "rainfall"),
+    # "rain fall" (extraction split it across a space) / "rainfall" → one
+    # term, consumed together first so the standalone-"rain" fallback right
+    # below doesn't leave the original "fall" behind as a duplicate (the old
+    # bug: "rain fall" -> "rainfall fall").
+    (re.compile(r"\brain\s*fall\b"),    "rainfall"),
+    (re.compile(r"\brain\b"),           "rainfall"),
     # time-scale normalization
     (re.compile(r"\bann(?:ual)?\b"),    "annual"),
     (re.compile(r"\bseas(?:onal)?\b"),  "seasonal"),
@@ -293,6 +307,13 @@ def clean_entry(txt: str, requires_rainfall: bool = False) -> str | None:
     # Normalize for embedding
     txt = normalize_text(txt)
 
+    # Defensive backstop: a normalization regex could in principle consume
+    # one side of a delimiter pair but not the other (this is exactly how the
+    # log-paren and rain/fall bugs above surfaced) — strip a lone unmatched
+    # edge paren rather than shipping mangled text to the classifier.
+    if txt.count("(") != txt.count(")"):
+        txt = txt.strip("()").strip()
+
     if len(txt) < MIN_CHARS and not is_acronym and not (requires_rainfall and txt.strip() in RAINFALL_CORE_TERMS):
         return None
 
@@ -300,17 +321,32 @@ def clean_entry(txt: str, requires_rainfall: bool = False) -> str | None:
 
 
 # ─── Expand semicolon-separated column, keeping paper index ────────────────
-def expand_column(df: pd.DataFrame, col: str, requires_rainfall: bool = False) -> pd.DataFrame:
+def expand_column(df: pd.DataFrame, col: str, requires_rainfall: bool = False) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Returns (kept, rejected). `kept` has one row per surviving cleaned entry.
+    `rejected` has one row per raw ";"-split fragment clean_entry() discarded
+    (verbatim, pre-cleaning) — cleaning rules are heuristics tuned on
+    examples seen so far, so this is what lets someone audit whether real
+    rainfall/depvar mentions are being silently thrown away by a rule that
+    doesn't fit a case it hasn't seen yet, rather than just trusting the
+    rules blindly.
+    """
     records = []
+    rejected = []
     for idx, row in df.iterrows():
         val = row[col]
         if pd.isna(val):
             continue
         for part in str(val).split(";"):
+            raw = part.strip()
+            if not raw:
+                continue
             cleaned = clean_entry(part, requires_rainfall=requires_rainfall)
             if cleaned:
                 records.append({"paper_idx": idx, "entry": cleaned})
-    return pd.DataFrame(records)
+            else:
+                rejected.append({"paper_idx": idx, "raw_fragment": raw})
+    return pd.DataFrame(records), pd.DataFrame(rejected)
 
 
 # ─── Embed ─────────────────────────────────────────────────────────────────
@@ -875,10 +911,12 @@ def process_side(
     side_name: str,
     requires_rainfall: bool = False,
     skip_broadening: bool = False,
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     print(f"\n[{side_name}]")
-    exp = expand_column(rain_df_raw, col, requires_rainfall=requires_rainfall)
-    print(f"  Entries after cleaning: {len(exp)} (from {rain_df_raw[col].notna().sum()} non-null rows)")
+    exp, rejected = expand_column(rain_df_raw, col, requires_rainfall=requires_rainfall)
+    rejected = rejected.assign(side=side_name)
+    print(f"  Entries after cleaning: {len(exp)} (from {rain_df_raw[col].notna().sum()} non-null rows, "
+          f"{len(rejected)} raw fragments rejected by cleaning)")
 
     other_label        = f"Other ({side_name})"
     not_specified_label = f"Not Specified ({side_name})"
@@ -950,10 +988,10 @@ def process_side(
     for label, n in exp[label_col].value_counts().items():
         print(f"    {label}  ({n} entries)")
 
-    return exp
+    return exp, rejected
 
 
-# ─── Combine model output + human-labeled rainfall IV papers ───────────────
+# ─── Load rainfall IV papers from the pre-merged per-implementation corpus ──
 def normalize_filename(fn) -> str:
     """Alphanumeric-only, lowercased join key. Model output and the human xlsx
     render the same DOI with different punctuation (10.1002/x vs 10.1002_x vs
@@ -964,57 +1002,51 @@ def normalize_filename(fn) -> str:
     return s
 
 
-def load_combined_rainfall_papers(model_csv_path: str, human_xlsx_path: str) -> pd.DataFrame:
+def load_rainfall_papers(merged_csv_path: str) -> pd.DataFrame:
     """
-    Union of every paper either source identified as having a rainfall IV:
-      - model output: Instrumental Variable Rainfall == 1
-      - human labels:  rain_bin == 1
-    Indexed by normalized filename so a paper present in both sources shares
-    one identity downstream (expand_column/build_sankey group by this index),
-    merging rather than double-counting its entries.
+    Loads the pre-merged per-implementation corpus (model output + human-
+    reviewed labels already combined upstream, one row per source per paper)
+    and keeps only rows flagged as having a rainfall IV. Indexed by
+    normalized filename so a paper that survives on more than one row (e.g.
+    both a model-extracted and a human-reviewed row for the same paper)
+    shares one identity downstream (expand_column/build_sankey group by this
+    index), merging rather than double-counting its entries.
     """
-    model_df = pd.read_csv(model_csv_path)
-    model_rain = model_df[model_df["Instrumental Variable Rainfall"] == 1.0].copy()
-    model_rain["paper_key"] = model_rain["File Name"].map(normalize_filename)
-    model_rain = model_rain[
-        ["paper_key", "Rainfall Instrument", "Endogenous Variable(s)", "Dependent Variable(s)"]
-    ]
+    df = pd.read_csv(merged_csv_path)
+    df = df.rename(columns={
+        "File.Name":                      "File Name",
+        "Dependent.Variable.s.":          "Dependent Variable(s)",
+        "Endogenous.Variable.s.":         "Endogenous Variable(s)",
+        "Instrumental.Variable.Rainfall": "Instrumental Variable Rainfall",
+        "Rainfall.Instrument":            "Rainfall Instrument",
+    })
 
-    human_df = pd.read_excel(human_xlsx_path)
-    human_rain = human_df[human_df["rain_bin"] == 1.0].copy()
-    human_rain["paper_key"] = human_rain["filename"].map(normalize_filename)
-    human_rain = human_rain.rename(columns={
-        "rain_var": "Rainfall Instrument",
-        "end_var":  "Endogenous Variable(s)",
-        "dep_var":  "Dependent Variable(s)",
-    })[["paper_key", "Rainfall Instrument", "Endogenous Variable(s)", "Dependent Variable(s)"]]
+    rain = df[df["Instrumental Variable Rainfall"] == 1.0].copy()
+    rain["paper_key"] = rain["File Name"].map(normalize_filename)
+    rain = rain[["paper_key", "Rainfall Instrument", "Endogenous Variable(s)", "Dependent Variable(s)"]]
 
-    model_unique = model_rain["paper_key"].nunique()
-    human_unique = human_rain["paper_key"].nunique()
-    both  = set(model_rain["paper_key"]) & set(human_rain["paper_key"])
-    union = set(model_rain["paper_key"]) | set(human_rain["paper_key"])
-    # Report unique papers per source, not raw row counts — a source can list
-    # the same paper_key on more than one row within itself (e.g. a duplicate
-    # row in the model CSV), which would otherwise make model/human look
-    # inconsistent with overlap/combined unique (those are always computed
-    # from deduplicated sets). Flag it explicitly when it happens so a
-    # mismatch isn't mistaken for a bug in the union logic.
-    if model_unique != len(model_rain) or human_unique != len(human_rain):
-        print(f"  (note: model has {len(model_rain) - model_unique} duplicate paper_key row(s), "
-              f"human has {len(human_rain) - human_unique} — counts below are deduplicated)")
-    print(f"Rainfall IV papers — model: {model_unique}, human: {human_unique}, "
-          f"overlap: {len(both)}, combined unique: {len(union)}")
+    n_unique = rain["paper_key"].nunique()
+    # A paper can carry more than one surviving row here (e.g. a model row
+    # and a human row for the same paper both flagged rainfall) — that's
+    # expected and merged downstream via the shared paper_key index, not a
+    # bug, but worth surfacing since it changes what "row count" means.
+    if n_unique != len(rain):
+        print(f"  (note: {len(rain) - n_unique} duplicate paper_key row(s) — same paper "
+              f"flagged rainfall on more than one row; counts below are deduplicated)")
 
-    combined = pd.concat([model_rain, human_rain], ignore_index=True)
-    return combined.set_index("paper_key")
+    return rain.set_index("paper_key")
 
 
 def main():
     print("Loading data...")
-    rain_df_raw = load_combined_rainfall_papers(INPUT_CSV, HUMAN_LABELED_XLSX)
-    print(f"Rainfall IV papers (combined, deduped): {rain_df_raw.index.nunique()}")
+    rain_df_raw = load_rainfall_papers(MERGED_CSV)
+    print(f"Rainfall IV papers (deduped): {rain_df_raw.index.nunique()}")
 
-    rain_exp = process_side(
+    # TEMP: broadening pass (second LLM call, gpt-4.1) disabled to see the
+    # diagram with only the first classification call + the non-LLM
+    # near-duplicate-name merge. Delete skip_broadening=True (or set False)
+    # on both calls below to revert.
+    rain_exp, rain_rejected = process_side(
         rain_df_raw,
         col="Rainfall Instrument",
         label_overrides=RAIN_LABEL_OVERRIDES,
@@ -1022,16 +1054,23 @@ def main():
         label_col="rain_cluster_label",
         side_name="Rainfall Metrics",
         requires_rainfall=True,
+        skip_broadening=True,
     )
 
-    depvar_exp = process_side(
+    depvar_exp, depvar_rejected = process_side(
         rain_df_raw,
         col="Dependent Variable(s)",
         label_overrides=DEPVAR_LABEL_OVERRIDES,
         id_col="depvar_cluster_id",
         label_col="depvar_cluster_label",
         side_name="Dependent Variables",
+        skip_broadening=True,
     )
+
+    rejected_all = pd.concat([rain_rejected, depvar_rejected], ignore_index=True)
+    rejected_all.to_csv(REJECTED_ENTRIES_CSV, index=False)
+    print(f"\nRejected raw fragments (review for real data dropped by cleaning) → "
+          f"{REJECTED_ENTRIES_CSV} ({len(rejected_all)} rows)")
 
     summary_depvar = build_summary(
         ("depvar", depvar_exp, "depvar_cluster_id", "depvar_cluster_label"),

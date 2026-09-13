@@ -684,3 +684,63 @@ build_classification_scoreboard_plot(
   model_labels = model_display_names[names(model_paths)],
   out_path     = tex_output_path
 )
+
+##############################################
+# Create per-implementation full corpus files
+##############################################
+# Each implementation has different outputs and we want to compare them
+# against each other. This section merges rows from full_[implementation]_[family].csv
+# files with those from testing in [implementation]_[family].csv and  
+# human verified in train_80.csv which are output to /weather_iv_lit/training/data_prep_all_models
+# as [implementation]_[model]_all_papers.csv for each. 
+
+# read in all files
+# change pathnames accordingly
+full_sft_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/full_sft_gpt_output.csv")
+full_rag_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/full_rag_gpt_output.csv")
+full_baseline_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/full_baseline_gpt_output.csv")
+test_sft_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/gpt_finetune_output.csv")
+test_rag_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/rag_gpt_output.csv")
+test_baseline_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/baseline_gpt_output.csv")
+human_labeled <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/data_prep_all_models/train_80.csv")
+
+# clean human_labeled to match column length
+human_labeled <- human_labeled |>
+  rename(
+    File.Name = filename,
+    Title = title,
+    DOI = doi,
+    Empirical.Analysis = emp_bin,
+    Dependent.Variable.s. = dep_var,
+    Endogeneity.Problem = end_bin,
+    Endogenous.Variable.s. = end_var,
+    Instrumental.Variable.Used = iv_bin,
+    Instrumental.Variable.s. = iv_var,
+    Instrumental.Variable.Rainfall = rain_bin,
+    Rainfall.Instrument = rain_var
+  ) |> 
+  select(
+    File.Name, Title, DOI, Empirical.Analysis, Dependent.Variable.s., Endogeneity.Problem, Endogenous.Variable.s.,
+    Instrumental.Variable.Used, Instrumental.Variable.s., Instrumental.Variable.Rainfall, Rainfall.Instrument
+  )
+
+# full_baseline_gpt_output.csv never produced a row for
+# 10.5958/0974-0279.2022.00030.1 + and never separately extracted
+# 10.1016/j.jinteco.2013.07.008. Drop the same two
+# rows from rag/sft so all three implementations compare.
+drop_baseline_gap_rows <- function(df) {
+  df %>%
+    filter(DOI != "10.5958/0974-0279.2022.00030.1") %>%
+    filter(!(DOI == "10.1016/j.jinteco.2013.07.008" & File.Name == "10.1016_j.jinteco.2013.07.008.pdf"))
+}
+
+## merge ##
+# sft
+corpus_output_sft <- rbind(full_sft_gpt, human_labeled, test_sft_gpt) %>% drop_baseline_gap_rows()
+write.csv(corpus_output_sft, "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/analysis/sft_full_corpus.csv", row.names = FALSE)
+# rag
+corpus_output_rag <- rbind(full_rag_gpt, human_labeled, test_rag_gpt) %>% drop_baseline_gap_rows()
+write.csv(corpus_output_rag, "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/analysis/rag_full_corpus.csv", row.names = FALSE)
+# baseline
+corpus_output_baseline <- rbind(full_baseline_gpt, human_labeled, test_baseline_gpt)
+write.csv(corpus_output_baseline, "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/analysis/baseline_full_corpus.csv", row.names = FALSE)
