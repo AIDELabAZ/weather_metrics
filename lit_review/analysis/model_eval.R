@@ -690,8 +690,8 @@ build_classification_scoreboard_plot(
 ##############################################
 # Each implementation has different outputs and we want to compare them
 # against each other. This section merges rows from full_[implementation]_[family].csv
-# files with those from testing in [implementation]_[family].csv and  
-# human verified in train_80.csv which are output to /weather_iv_lit/training/data_prep_all_models
+# files with those from testing in [implementation]_[family].csv 
+# which are output to /weather_iv_lit/training/data_prep_all_models
 # as [implementation]_[model]_all_papers.csv for each. 
 
 # read in all files

@@ -1,8 +1,7 @@
 """
 This script is used to generate sankey diagrams which help us visualize potential
 exclusion restriction violations present in our corpus. First, model generated outputs 
-from a single extraction pipeline are collected alongside the entire human-labeled
-reference sample. Looking only at rows that have ≥1 rainfall insturmental variable 
+from a single extraction pipeline are collected. Looking only at rows that have ≥1 rainfall insturmental variable 
 identified, text is normalized and if any papers match (e.g., different versions or an
 accidental duplicate) only one instance is kept. Every cell entry in the rainfall IV 
 and endogenous variable columns are split and ; separeted, including those cells with
@@ -37,11 +36,11 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # ─── Paths ─────────────────────────────────────────────────────────────────
 # select output file sankey creation and specify path + file names
-# One merged file per implementation (model output + human-reviewed labels
-# already combined upstream). Full corpus merged files are in analysis folder. 
+# One merged file per implementation. Full corpus merged files are in analysis folder. 
 MERGED_CSV             = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/analysis/baseline_full_corpus.csv"
 OUTPUT_HTML_ENDOG      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/sankey_baseline_gpt_rainfall_endog.html"
 OUTPUT_PNG_ENDOG       = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_baseline_gpt_rainfall_endog.png"
+OUTPUT_EPS_ENDOG       = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_baseline_gpt_rainfall_endog.eps"
 CLUSTER_SUMMARY_ENDOG  = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/cluster_baseline_gpt_summary_endog.csv"
 # Every raw ";"-split fragment clean_entry() discarded, for manual review —
 # see the docstring on expand_column().
@@ -1101,6 +1100,8 @@ def main():
     print(f"Sankey → {OUTPUT_HTML_ENDOG}")
     fig_endog.write_image(OUTPUT_PNG_ENDOG, scale=2)
     print(f"Sankey → {OUTPUT_PNG_ENDOG}")
+    fig_endog.write_image(OUTPUT_EPS_ENDOG, scale=2)
+    print(f"Sankey → {OUTPUT_EPS_ENDOG}")
 
 
 if __name__ == "__main__":
