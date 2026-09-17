@@ -53,10 +53,21 @@ FIGURES_DIR = (
 )
 # (figsize, output filename) for each orientation -- row/column fractions
 # below are shared by both; only the canvas dimensions and output path differ.
+# Each PNG is saved alongside a same-named .eps (vector, no dpi needed).
 VARIANTS = [
     ((15, 17.75), os.path.join(FIGURES_DIR, "gpt_model_comparison_4panel.png")),
     ((19, 13.5), os.path.join(FIGURES_DIR, "gpt_model_comparison_4panel_wide.png")),
 ]
+
+# Standalone per-panel PNGs -- one self-contained render per panel (own header,
+# and its own copy of whichever legend that panel needs to be read without the
+# other three), independent of the merged VARIANTS above.
+PANEL_PNGS = {
+    "a": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_a_confusion_mosaics.png"),
+    "b": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_b_classification_performance.png"),
+    "c": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_c_similarity_summary.png"),
+    "d": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_d_similarity_density.png"),
+}
 
 # Agentic excluded — matches model_eval.R's density_model_keys for panel d.
 APPROACHES = {
@@ -170,8 +181,135 @@ def render(figsize, out_png, dfs, approaches, colors):
 
     os.makedirs(os.path.dirname(out_png), exist_ok=True)
     fig.savefig(out_png, dpi=200)
-    plt.close(fig)
     print(f"saved {out_png}")
+    out_eps = os.path.splitext(out_png)[0] + ".eps"
+    fig.savefig(out_eps)
+    print(f"saved {out_eps}")
+    plt.close(fig)
+
+
+def _save(fig, out_png):
+    os.makedirs(os.path.dirname(out_png), exist_ok=True)
+    fig.savefig(out_png, dpi=200)
+    print(f"saved {out_png}")
+    plt.close(fig)
+
+
+def standalone_header(fig, x, y, title, subcaption):
+    """Like mcf.panel_header but without the a/b/c/d letter -- for standalone panels."""
+    fig.text(x, y, title, size=10.5, weight="bold", color=mcf.INK)
+    fig.text(x, y - 0.024, subcaption, size=7.5, color=mcf.MUTED)
+
+
+def render_panel_a(dfs, approaches, colors, out_png):
+    """Confusion mosaics -- no approach-color legend needed (columns are text-labeled)."""
+    n_rows, n_cols = len(mcf.BINARY_FIELDS), len(approaches)
+    fig = plt.figure(figsize=(2.05 * n_cols + 1.4, 1.75 * n_rows + 1.5))
+
+    standalone_header(fig, 0.06, 0.965, "Confusion mosaics",
+                       "Area encodes each cell's share of n=88")
+    cell_handles = [Patch(facecolor=mcf.MOSAIC_COLORS[k], edgecolor="none", label=k)
+                    for k in ("TN", "FP", "FN", "TP")]
+    fig.legend(cell_handles, ["TN", "FP", "FN", "TP"], loc="lower left",
+               bbox_to_anchor=(0.06, 0.895), ncol=4, frameon=False, fontsize=9,
+               handlelength=1.0, handleheight=1.0, columnspacing=1.0, handletextpad=1.0)
+
+    mosaic_top, mosaic_bot = 0.845, 0.055
+    mosaic_rows = mcf.grid_axes(fig, 0.13, 0.98, mosaic_bot, mosaic_top,
+                                nrows=n_rows, ncols=n_cols, wgap=0.022, hgap=0.06)
+    for c, label in enumerate(approaches):
+        pos = mosaic_rows[0][c].get_position()
+        fig.text((pos.x0 + pos.x1) / 2, mosaic_top + 0.018, label,
+                 ha="center", va="bottom", size=10, weight="bold", color=mcf.INK2)
+    for r, (field, (_, wrapped)) in enumerate(mcf.BINARY_FIELDS.items()):
+        pos = mosaic_rows[r][0].get_position()
+        fig.text(0.11, (pos.y0 + pos.y1) / 2, wrapped, ha="right", va="center",
+                 size=9.5, weight="bold", color=mcf.INK2)
+        for c, df in enumerate(dfs):
+            mcf.draw_mosaic(mosaic_rows[r][c], *mcf.binary_confusion(df, field))
+
+    _save(fig, out_png)
+
+
+def render_panel_b(dfs, approaches, colors, out_png):
+    """Classification performance -- carries its own approach-color legend."""
+    fig = plt.figure(figsize=(2.35 * len(mcf.BINARY_FIELDS) + 1.3, 5.3))
+
+    handles = [Line2D([0], [0], marker="o", ls="none", ms=7, mfc=c, mec=mcf._darken(c), mew=0.7)
+               for c in colors]
+    fig.legend(handles, approaches, loc="lower center", bbox_to_anchor=(0.5, 0.012),
+               ncol=len(approaches), frameon=False, fontsize=10,
+               handletextpad=0.4, columnspacing=1.6)
+
+    standalone_header(fig, 0.13, 0.935, "Classification performance",
+                       "Dots compare the approaches within binary fields.")
+    perf_top, perf_bot = 0.83, 0.165
+    perf_axes = mcf.grid_axes(fig, 0.155, 0.98, perf_bot, perf_top,
+                              nrows=1, ncols=len(mcf.BINARY_FIELDS), wgap=0.022, hgap=0)[0]
+    offsets = [-0.22, 0.0, 0.22][: len(approaches)]
+    for i, (field, (display, _)) in enumerate(mcf.BINARY_FIELDS.items()):
+        ax = perf_axes[i]
+        ax.set_title(display, size=10, weight="bold", color=mcf.INK, pad=10)
+        mcf.draw_perf_column(ax, [mcf.binary_metrics(df, field) for df in dfs],
+                             colors, offsets, first=(i == 0))
+    fig.text((0.155 + 0.98) / 2, perf_bot - 0.065, "Performance (%)", ha="center", size=9.5,
+              color=mcf.INK2)
+
+    _save(fig, out_png)
+
+
+def render_panel_c(dfs, approaches, colors, out_png):
+    """Similarity summary -- carries its own approach-color legend + encoding key."""
+    fig = plt.figure(figsize=(9.6, 5.6))
+
+    standalone_header(fig, 0.06, 0.935, "Semantic similarity summary",
+                       "Min-max, mean ± SD, mean, and median per field/approach.")
+    handles = [Line2D([0], [0], marker="o", ls="none", ms=7, mfc=c, mec=mcf._darken(c), mew=0.7)
+               for c in colors]
+    fig.legend(handles, approaches, loc="upper right", bbox_to_anchor=(0.98, 0.965),
+               frameon=False, fontsize=9.5, handletextpad=0.4, columnspacing=1.2)
+    sim_legend_handles = [
+        Line2D([0], [0], color=mcf.MUTED, lw=1.0, solid_capstyle="round"),
+        Line2D([0], [0], color=mcf.INK2, lw=4, solid_capstyle="round"),
+        Line2D([0], [0], marker="o", ls="none", ms=6, mfc=mcf.SURFACE, mec=mcf.INK2, mew=1.6),
+        Line2D([0], [0], marker="|", ls="none", ms=7, mew=1.3, color=mcf.INK),
+    ]
+    fig.legend(sim_legend_handles, ["Min-max", "Mean ± SD", "Mean", "Median"],
+               loc="lower left", bbox_to_anchor=(0.06, 0.86), ncol=4, frameon=False,
+               fontsize=8.5, handlelength=1.6, columnspacing=1.6, handletextpad=0.8)
+
+    sim_ax = fig.add_axes([0.24, 0.11, 0.60, 0.71])
+    stats_by_approach = [{f: mcf.sim_stats(df, f) for f in mcf.SIM_FIELDS} for df in dfs]
+    mcf.draw_sim_panel(sim_ax, stats_by_approach, colors, approaches)
+
+    _save(fig, out_png)
+
+
+def render_panel_d(out_png):
+    """Similarity-KDE grid -- re-embeds the same external raster with its own header."""
+    img = mpimg.imread(KDENSITIES_PNG)
+    img_h, img_w = img.shape[0], img.shape[1]
+
+    fig_w = 7.5
+    header_in = 0.75
+    fig_h = fig_w * img_h / img_w + header_in
+    fig = plt.figure(figsize=(fig_w, fig_h))
+    top_frac = header_in / fig_h
+
+    standalone_header(fig, 0.05, 1 - top_frac * 0.4, "Similarity density by field",
+                       "Per-paper cross-encoder scores (analysis/model_eval.R).")
+    d_ax = fig.add_axes([0.01, 0.01, 0.98, 1 - top_frac - 0.01])
+    d_ax.imshow(img)
+    d_ax.axis("off")
+
+    _save(fig, out_png)
+
+
+def render_panels(dfs, approaches, colors):
+    render_panel_a(dfs, approaches, colors, PANEL_PNGS["a"])
+    render_panel_b(dfs, approaches, colors, PANEL_PNGS["b"])
+    render_panel_c(dfs, approaches, colors, PANEL_PNGS["c"])
+    render_panel_d(PANEL_PNGS["d"])
 
 
 def main():
@@ -179,6 +317,7 @@ def main():
     colors = mcf.APPROACH_COLORS[: len(approaches)]
     for figsize, out_png in VARIANTS:
         render(figsize, out_png, dfs, approaches, colors)
+    render_panels(dfs, approaches, colors)
 
 
 if __name__ == "__main__":

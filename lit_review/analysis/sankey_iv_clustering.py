@@ -40,6 +40,7 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 MERGED_CSV             = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/analysis/baseline_full_corpus.csv"
 OUTPUT_HTML_ENDOG      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/sankey_baseline_gpt_rainfall_endog.html"
 OUTPUT_PNG_ENDOG       = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_baseline_gpt_rainfall_endog.png"
+OUTPUT_PNG_WIDE_ENDOG  = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_baseline_gpt_rainfall_endog_wide.png"
 OUTPUT_EPS_ENDOG       = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_baseline_gpt_rainfall_endog.eps"
 CLUSTER_SUMMARY_ENDOG  = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/cluster_baseline_gpt_summary_endog.csv"
 # Every raw ";"-split fragment clean_entry() discarded, for manual review —
@@ -701,6 +702,15 @@ ENDOG_EXCLUDE: set[str] = {"Other (Endogenous Variables)", "Not Specified (Endog
 #         links (so both sides share one inflated total).
 COUNT_INDIVIDUAL_INSTANCES = True
 
+# ─── PNG export dimensions ─────────────────────────────────────────────────
+# "Current" export keeps the figure's own layout size (see build_sankey's
+# layout_kwargs). "Wide" re-renders the same figure at a landscape size —
+# Plotly's Sankey auto-arranges node positions at render time (no manual x/y,
+# arrangement="snap"), so just changing width/height and re-exporting reflows
+# it cleanly without rebuilding the figure.
+WIDE_PNG_WIDTH  = 1500
+WIDE_PNG_HEIGHT = 700
+
 
 # ─── Sankey ────────────────────────────────────────────────────────────────
 def build_sankey(
@@ -1102,6 +1112,12 @@ def main():
     print(f"Sankey → {OUTPUT_PNG_ENDOG}")
     fig_endog.write_image(OUTPUT_EPS_ENDOG, scale=2)
     print(f"Sankey → {OUTPUT_EPS_ENDOG}")
+
+    # Re-render the same figure at landscape dimensions for the wide PNG —
+    # done last since it mutates fig_endog's layout in place.
+    fig_endog.update_layout(width=WIDE_PNG_WIDTH, height=WIDE_PNG_HEIGHT)
+    fig_endog.write_image(OUTPUT_PNG_WIDE_ENDOG, scale=2)
+    print(f"Sankey (wide) → {OUTPUT_PNG_WIDE_ENDOG}")
 
 
 if __name__ == "__main__":
