@@ -17,7 +17,7 @@ from openai import OpenAI
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-# Same base model finetune_gpt.py's fine-tuned model ("ft:gpt-4.1-2025-04-14:...")
+# Same base model finetune_gpt.py's fine-tuned model 
 # was tuned from. No fine-tuning is used here — retrieved examples replace it.
 BASE_MODEL = "gpt-4.1-2025-04-14"
 

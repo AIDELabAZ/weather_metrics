@@ -19,6 +19,7 @@ Remember to change pathnames before running on different model outputs and set e
 Run model_eval.r first to generate full corpus files.
 """
 
+import ctypes.util
 import hashlib
 import json
 import os
@@ -32,33 +33,42 @@ from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
+# cairosvg (used to rasterize the wide Sankey after its node labels are moved
+# outside the diagram — see export_wide_sankey_png) needs libcairo, which on
+# macOS is usually a Homebrew install that isn't on the default dlopen path.
+if not ctypes.util.find_library("cairo"):
+    for _prefix in ("/opt/homebrew/lib", "/usr/local/lib"):
+        if os.path.isfile(os.path.join(_prefix, "libcairo.2.dylib")):
+            os.environ.setdefault("DYLD_FALLBACK_LIBRARY_PATH", _prefix)
+            break
+import cairosvg
+
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # ─── Paths ─────────────────────────────────────────────────────────────────
 # select output file sankey creation and specify path + file names
 # One merged file per implementation. Full corpus merged files are in analysis folder. 
-MERGED_CSV             = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/analysis/baseline_full_corpus.csv"
-OUTPUT_HTML_ENDOG      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/sankey_baseline_gpt_rainfall_endog.html"
-OUTPUT_PNG_ENDOG       = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_baseline_gpt_rainfall_endog.png"
-OUTPUT_PNG_WIDE_ENDOG  = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_baseline_gpt_rainfall_endog_wide.png"
-OUTPUT_EPS_ENDOG       = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_baseline_gpt_rainfall_endog.eps"
-CLUSTER_SUMMARY_ENDOG  = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/cluster_baseline_gpt_summary_endog.csv"
+MERGED_CSV             = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/analysis/rag_full_corpus.csv"
+OUTPUT_HTML_ENDOG      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/sankey_rag_gpt_rainfall_endog.html"
+OUTPUT_PNG_ENDOG       = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_rag_gpt_rainfall_endog.png"
+OUTPUT_PNG_WIDE_ENDOG  = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_rag_gpt_rainfall_endog_wide.png"
+OUTPUT_EPS_ENDOG       = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_rag_gpt_rainfall_endog.eps"
+CLUSTER_SUMMARY_ENDOG  = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/cluster_rag_gpt_summary_endog.csv"
 # Every raw ";"-split fragment clean_entry() discarded, for manual review —
 # see the docstring on expand_column().
-REJECTED_ENTRIES_CSV   = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/rejected_entries_baseline_gpt.csv"
+REJECTED_ENTRIES_CSV   = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/rejected_entries_rag_gpt.csv"
 
 # One row per distinct cleaned rainfall-IV entry (paper, entry) — see
 # build_relationship_exports() docstring. "_raw" files have no category
 # columns (pre-classification); "_categorized" files add them and are what
 # actually feeds the Sankey link/node computation in build_sankey().
-RELATIONSHIPS_RAW_ENDOG_CSV          = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/relationships_raw_endog_baseline_gpt.csv"
-RELATIONSHIPS_CATEGORIZED_ENDOG_CSV  = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/relationships_categorized_endog_baseline_gpt.csv"
+RELATIONSHIPS_RAW_ENDOG_CSV          = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/relationships_raw_endog_rag_gpt.csv"
+RELATIONSHIPS_CATEGORIZED_ENDOG_CSV  = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/relationships_categorized_endog_rag_gpt.csv"
 
 # ─── LLM categorization params ──────────────────────────────────────────────
 # Used by the broadening/consolidation pass only (_broaden_categories_once).
 CATEGORY_MODEL = "gpt-4.1-2025-04-14"
 
-# Trial: the initial taxonomy-discovery + classification call
 # (classify_into_categories) uses its own model, independent of CATEGORY_MODEL,
 # so this can be swapped back to a non-reasoning model (set CLASSIFY_IS_REASONING
 # = False, drop CLASSIFY_REASONING_EFFORT) without touching the broadening pass.
@@ -708,8 +718,106 @@ COUNT_INDIVIDUAL_INSTANCES = True
 # Plotly's Sankey auto-arranges node positions at render time (no manual x/y,
 # arrangement="snap"), so just changing width/height and re-exporting reflows
 # it cleanly without rebuilding the figure.
-WIDE_PNG_WIDTH  = 1500
-WIDE_PNG_HEIGHT = 700
+WIDE_PNG_WIDTH  = 2400
+WIDE_PNG_HEIGHT = 1350  # 2400 * 9/16, i.e. 16:9 -- bigger canvas than a plain
+                        # rescale of the print figure so it reads well on a
+                        # projected slide, not just on a printed page.
+
+# Fraction of the plot area's width left blank on each side, pulling the two
+# node columns (and the chords between them) in from the label margins now
+# that labels no longer need to sit flush against the node — otherwise the
+# chords stretch edge-to-edge across the full wide canvas. Small -> long
+# chords stretching most of the canvas; larger -> shorter, more compact chords.
+WIDE_CHORD_INSET = 0.05
+
+# Font size and node-bar thickness for the wide export scale with how much
+# vertical room each row actually has (available height / number of rows on
+# the busier side), instead of a fixed value -- a fixed big font forced the
+# canvas to grow tall for busy diagrams, and a tall image just gets shrunk
+# back down (text and all) when scaled to fit a slide's height, undoing the
+# point. Capping the canvas at a fixed 16:9-ish size and letting font/
+# thickness flex means it's never taller than this, and reads as large as
+# the category count allows. MAX_* is build_sankey's print defaults roughly
+# doubled (font_size=13, thickness=18); MIN_* is a legibility floor.
+WIDE_MIN_FONT_SIZE      = 13
+WIDE_MAX_FONT_SIZE      = 26
+WIDE_MIN_NODE_THICKNESS = 18
+WIDE_MAX_NODE_THICKNESS = 32
+# Fraction of a row's vertical budget the font size targets, leaving the rest
+# as breathing room between adjacent outside labels.
+WIDE_FONT_TO_ROW_RATIO  = 0.5
+
+# Plotly's Sankey trace always draws node labels *inward*, toward the flow
+# bands — text-anchor is picked purely from topology (source-only nodes get
+# anchor="start" just past their right edge, sink-only nodes get anchor="end"
+# just before their left edge), regardless of x position or margin space, and
+# there's no trace attribute to override it. So for the wide export, which has
+# room to spare, we render to SVG, flip every node-label's anchor/offset so it
+# points outward into (widened) margins instead, then rasterize that
+# ourselves with cairosvg. This leaves the "current" PNG/EPS exports untouched.
+_NODE_LABEL_RE = re.compile(
+    r'<text class="node-label"([^>]*?)text-anchor="(start|end)"([^>]*?)'
+    r'transform="translate\((-?[\d.]+),(-?[\d.]+)\)"'
+)
+
+
+def _estimate_label_px(text: str, font_size: int) -> float:
+    # Rough upper-bound glyph width for a proportional sans-serif at this
+    # size — only needs to avoid underestimating so outward labels don't clip
+    # the canvas edge, not to match the real font metrics exactly.
+    return len(text) * font_size * 0.56
+
+
+def export_wide_sankey_png(
+    fig: go.Figure,
+    left_nodes: list[str],
+    out_path: str,
+    scale: int = 2,
+    chord_inset: float = WIDE_CHORD_INSET,
+    font_size: int | None = None,
+    thickness: int | None = None,
+) -> None:
+    labels = list(fig.data[0].node.label)
+    left_labels, right_labels = labels[:len(left_nodes)], labels[len(left_nodes):]
+
+    # Canvas height is fixed (whatever the caller already set, e.g.
+    # WIDE_PNG_HEIGHT) -- font size and node thickness flex to the vertical
+    # room each row actually has instead, so a busy diagram never forces the
+    # canvas taller (which would just get shrunk back down, text and all,
+    # when scaled to fit a slide).
+    n_rows = max(len(left_labels), len(right_labels), 1)
+    margin_t = fig.layout.margin.t or 0
+    margin_b = fig.layout.margin.b or 0
+    row_budget = ((fig.layout.height or 0) - margin_t - margin_b) / n_rows
+    if font_size is None:
+        font_size = int(min(max(row_budget * WIDE_FONT_TO_ROW_RATIO, WIDE_MIN_FONT_SIZE), WIDE_MAX_FONT_SIZE))
+    if thickness is None:
+        thickness = int(min(max(row_budget * 0.6, WIDE_MIN_NODE_THICKNESS), WIDE_MAX_NODE_THICKNESS))
+
+    fig.update_layout(font_size=font_size)
+    fig.data[0].node.thickness = thickness
+
+    gap = 3.25    # Plotly's own label-to-node gap in px, read off its default SVG output
+    buffer = 20   # safety margin so the longest label doesn't kiss the canvas edge
+    margin_l = int(max((_estimate_label_px(l, font_size) for l in left_labels), default=0) + gap + buffer)
+    margin_r = int(max((_estimate_label_px(l, font_size) for l in right_labels), default=0) + gap + buffer)
+    fig.update_layout(margin=dict(l=margin_l, r=margin_r, t=fig.layout.margin.t, b=fig.layout.margin.b))
+    fig.data[0].domain.x = (chord_inset, 1 - chord_inset)
+
+    svg = fig.to_image(format="svg").decode("utf-8")
+
+    def _flip(m: re.Match) -> str:
+        pre, anchor, mid, dx, dy = m.groups()
+        new_anchor = "end" if anchor == "start" else "start"
+        new_dx = thickness - float(dx)
+        return f'<text class="node-label"{pre}text-anchor="{new_anchor}"{mid}transform="translate({new_dx:.3f},{dy})"'
+
+    svg, n_flipped = _NODE_LABEL_RE.subn(_flip, svg)
+    if n_flipped != len(labels):
+        raise RuntimeError(f"Expected to flip {len(labels)} node labels, flipped {n_flipped} instead — "
+                            "Plotly's Sankey SVG markup may have changed.")
+
+    cairosvg.svg2png(bytestring=svg.encode("utf-8"), write_to=out_path, scale=scale)
 
 
 # ─── Sankey ────────────────────────────────────────────────────────────────
@@ -1096,7 +1204,7 @@ def main():
     print("Review it, add label overrides above, and rerun.")
 
     print("\nBuilding Sankey: Rainfall → Endogenous Variables...")
-    fig_endog, _ = build_sankey(
+    fig_endog, left_nodes_endog = build_sankey(
         rain_exp, endog_exp, rain_df_raw.index.unique(),
         left_label_col="rain_cluster_label",
         right_label_col="endog_cluster_label",
@@ -1114,9 +1222,11 @@ def main():
     print(f"Sankey → {OUTPUT_EPS_ENDOG}")
 
     # Re-render the same figure at landscape dimensions for the wide PNG —
-    # done last since it mutates fig_endog's layout in place.
+    # done last since it mutates fig_endog's layout in place. Node labels are
+    # pushed outside the diagram (left of the left nodes, right of the right
+    # nodes) so they clear the flow bands — see export_wide_sankey_png.
     fig_endog.update_layout(width=WIDE_PNG_WIDTH, height=WIDE_PNG_HEIGHT)
-    fig_endog.write_image(OUTPUT_PNG_WIDE_ENDOG, scale=2)
+    export_wide_sankey_png(fig_endog, left_nodes_endog, OUTPUT_PNG_WIDE_ENDOG, scale=2)
     print(f"Sankey (wide) → {OUTPUT_PNG_WIDE_ENDOG}")
 
 

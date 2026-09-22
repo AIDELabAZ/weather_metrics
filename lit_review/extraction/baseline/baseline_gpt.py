@@ -38,7 +38,7 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 # fine-tuning, no RAG reference examples: same prompts/PDF context as
 # finetune_gpt.py, only the model call differs, to isolate what fine-tuning
 # actually added.
-BASE_MODEL = "gpt-4.1-mini-2025-04-14"
+BASE_MODEL = "gpt-4.1-2025-04-14"
 
 
 DEFAULT_MAX_COMPLETION_TOKENS = 512

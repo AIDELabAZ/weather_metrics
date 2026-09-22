@@ -47,16 +47,24 @@ KDENSITIES_PNG = (
     "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/"
     "weather_iv_lit/writing/figures/similarity_kdensities.png"
 )
+# 2 rows x 3 cols (vs. the regular grid's 3 x 2) -- written by model_eval.R's
+# build_similarity_density_plot(..., ncol=3, filename="similarity_kdensities_wide.png").
+KDENSITIES_WIDE_PNG = (
+    "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/"
+    "weather_iv_lit/writing/figures/similarity_kdensities_wide.png"
+)
 FIGURES_DIR = (
     "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/"
     "weather_iv_lit/writing/figures"
 )
-# (figsize, output filename) for each orientation -- row/column fractions
-# below are shared by both; only the canvas dimensions and output path differ.
+# (figsize, output filename, wide) for each orientation -- row/column
+# fractions below are shared by both; canvas dimensions and output path
+# differ, and `wide` also transposes panel a's mosaic grid (3x4 instead of
+# 4x3) and swaps panel d to the wide KDE source image.
 # Each PNG is saved alongside a same-named .eps (vector, no dpi needed).
 VARIANTS = [
-    ((15, 17.75), os.path.join(FIGURES_DIR, "gpt_model_comparison_4panel.png")),
-    ((19, 13.5), os.path.join(FIGURES_DIR, "gpt_model_comparison_4panel_wide.png")),
+    ((15, 17.75), os.path.join(FIGURES_DIR, "gpt_model_comparison_4panel.png"), False),
+    ((19, 13.5), os.path.join(FIGURES_DIR, "gpt_model_comparison_4panel_wide.png"), True),
 ]
 
 # Standalone per-panel PNGs -- one self-contained render per panel (own header,
@@ -64,9 +72,13 @@ VARIANTS = [
 # other three), independent of the merged VARIANTS above.
 PANEL_PNGS = {
     "a": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_a_confusion_mosaics.png"),
+    # Wide: transposed -- rows = approaches (Zero-shot/RAG/SFT), cols = binary
+    # fields, so 3 x 4 instead of the regular grid's 4 x 3.
+    "a_wide": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_a_confusion_mosaics_wide.png"),
     "b": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_b_classification_performance.png"),
     "c": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_c_similarity_summary.png"),
     "d": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_d_similarity_density.png"),
+    "d_wide": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_d_similarity_density_wide.png"),
 }
 
 # Agentic excluded — matches model_eval.R's density_model_keys for panel d.
@@ -88,7 +100,7 @@ def load_data():
     return dfs, approaches
 
 
-def render(figsize, out_png, dfs, approaches, colors):
+def render(figsize, out_png, dfs, approaches, colors, wide=False):
     fig = plt.figure(figsize=figsize)
 
     # ── Shared approach legend (bottom center — a, b, c all use these colors) ──
@@ -125,20 +137,39 @@ def render(figsize, out_png, dfs, approaches, colors):
     fig.legend(cell_handles, ["TN", "FP", "FN", "TP"], loc="lower left",
                bbox_to_anchor=(A_X0, ROW1_TOP - 0.028), ncol=4, frameon=False, fontsize=7.5,
                handlelength=1.0, handleheight=1.0, columnspacing=1.0, handletextpad=1.0)
-    mosaic_top = ROW1_TOP - 0.058
+    if wide:
+        # Transposed: rows = approaches, cols = binary fields (3x4 instead of
+        # 4x3) -- column headers become the (2-line) field names, so they need
+        # more headroom below the legend than the single-line approach headers.
+        mosaic_top = ROW1_TOP - 0.09
+        n_rows, n_cols = len(approaches), len(mcf.BINARY_FIELDS)
+    else:
+        mosaic_top = ROW1_TOP - 0.058
+        n_rows, n_cols = len(mcf.BINARY_FIELDS), len(approaches)
     mosaic_rows = mcf.grid_axes(fig, A_X0 + 0.025, A_X1, ROW1_BOT, mosaic_top,
-                                nrows=len(mcf.BINARY_FIELDS), ncols=len(approaches),
-                                wgap=0.014, hgap=0.05)
-    for c, label in enumerate(approaches):
-        pos = mosaic_rows[0][c].get_position()
-        fig.text((pos.x0 + pos.x1) / 2, mosaic_top + 0.014, label,
-                 ha="center", va="bottom", size=8.5, weight="bold", color=mcf.INK2)
-    for r, (field, (_, wrapped)) in enumerate(mcf.BINARY_FIELDS.items()):
-        pos = mosaic_rows[r][0].get_position()
-        fig.text(A_X0 + 0.018, (pos.y0 + pos.y1) / 2, wrapped, ha="right", va="center",
-                 size=8.5, weight="bold", color=mcf.INK2)
-        for c, df in enumerate(dfs):
-            mcf.draw_mosaic(mosaic_rows[r][c], *mcf.binary_confusion(df, field))
+                                nrows=n_rows, ncols=n_cols, wgap=0.014, hgap=0.05)
+    if wide:
+        for c, (field, (_, wrapped)) in enumerate(mcf.BINARY_FIELDS.items()):
+            pos = mosaic_rows[0][c].get_position()
+            fig.text((pos.x0 + pos.x1) / 2, mosaic_top + 0.014, wrapped,
+                     ha="center", va="bottom", size=7.5, weight="bold", color=mcf.INK2)
+        for r, label in enumerate(approaches):
+            pos = mosaic_rows[r][0].get_position()
+            fig.text(A_X0 + 0.018, (pos.y0 + pos.y1) / 2, label, ha="right", va="center",
+                     size=8.5, weight="bold", color=mcf.INK2)
+            for c, field in enumerate(mcf.BINARY_FIELDS):
+                mcf.draw_mosaic(mosaic_rows[r][c], *mcf.binary_confusion(dfs[r], field))
+    else:
+        for c, label in enumerate(approaches):
+            pos = mosaic_rows[0][c].get_position()
+            fig.text((pos.x0 + pos.x1) / 2, mosaic_top + 0.014, label,
+                     ha="center", va="bottom", size=8.5, weight="bold", color=mcf.INK2)
+        for r, (field, (_, wrapped)) in enumerate(mcf.BINARY_FIELDS.items()):
+            pos = mosaic_rows[r][0].get_position()
+            fig.text(A_X0 + 0.018, (pos.y0 + pos.y1) / 2, wrapped, ha="right", va="center",
+                     size=8.5, weight="bold", color=mcf.INK2)
+            for c, df in enumerate(dfs):
+                mcf.draw_mosaic(mosaic_rows[r][c], *mcf.binary_confusion(df, field))
 
     # ─── Panel b: classification performance ───
     mcf.panel_header(fig, B_X0, ROW1_TOP + 0.02, "b", "   Classification performance",
@@ -176,7 +207,7 @@ def render(figsize, out_png, dfs, approaches, colors):
     mcf.panel_header(fig, D_X0, ROW2_TOP + 0.02, "d", "   Similarity density by field",
                       "Per-paper cross-encoder scores (analysis/model_eval.R).")
     d_ax = fig.add_axes([D_X0, ROW2_BOT, D_X1 - D_X0, ROW2_TOP - 0.05 - ROW2_BOT])
-    d_ax.imshow(mpimg.imread(KDENSITIES_PNG))
+    d_ax.imshow(mpimg.imread(KDENSITIES_WIDE_PNG if wide else KDENSITIES_PNG))
     d_ax.axis("off")
 
     os.makedirs(os.path.dirname(out_png), exist_ok=True)
@@ -195,26 +226,20 @@ def _save(fig, out_png):
     plt.close(fig)
 
 
-def standalone_header(fig, x, y, title, subcaption):
-    """Like mcf.panel_header but without the a/b/c/d letter -- for standalone panels."""
-    fig.text(x, y, title, size=10.5, weight="bold", color=mcf.INK)
-    fig.text(x, y - 0.024, subcaption, size=7.5, color=mcf.MUTED)
-
-
 def render_panel_a(dfs, approaches, colors, out_png):
     """Confusion mosaics -- no approach-color legend needed (columns are text-labeled)."""
     n_rows, n_cols = len(mcf.BINARY_FIELDS), len(approaches)
     fig = plt.figure(figsize=(2.05 * n_cols + 1.4, 1.75 * n_rows + 1.5))
 
-    standalone_header(fig, 0.06, 0.965, "Confusion mosaics",
-                       "Area encodes each cell's share of n=88")
+    # No standalone_header -- the legend moves up into the space it used to
+    # reserve, keeping the same gap to the grid below it.
     cell_handles = [Patch(facecolor=mcf.MOSAIC_COLORS[k], edgecolor="none", label=k)
                     for k in ("TN", "FP", "FN", "TP")]
     fig.legend(cell_handles, ["TN", "FP", "FN", "TP"], loc="lower left",
-               bbox_to_anchor=(0.06, 0.895), ncol=4, frameon=False, fontsize=9,
+               bbox_to_anchor=(0.06, 0.96), ncol=4, frameon=False, fontsize=9,
                handlelength=1.0, handleheight=1.0, columnspacing=1.0, handletextpad=1.0)
 
-    mosaic_top, mosaic_bot = 0.845, 0.055
+    mosaic_top, mosaic_bot = 0.91, 0.055
     mosaic_rows = mcf.grid_axes(fig, 0.13, 0.98, mosaic_bot, mosaic_top,
                                 nrows=n_rows, ncols=n_cols, wgap=0.022, hgap=0.06)
     for c, label in enumerate(approaches):
@@ -231,6 +256,38 @@ def render_panel_a(dfs, approaches, colors, out_png):
     _save(fig, out_png)
 
 
+def render_panel_a_wide(dfs, approaches, colors, out_png):
+    """Confusion mosaics, transposed for a landscape layout: rows = approaches,
+    cols = binary fields (3 x 4 here vs. render_panel_a's 4 x 3)."""
+    n_rows, n_cols = len(approaches), len(mcf.BINARY_FIELDS)
+    fig = plt.figure(figsize=(2.05 * n_cols + 1.4, 1.9 * n_rows + 1.6))
+
+    # No standalone_header -- legend and grid both move up into the freed space.
+    cell_handles = [Patch(facecolor=mcf.MOSAIC_COLORS[k], edgecolor="none", label=k)
+                    for k in ("TN", "FP", "FN", "TP")]
+    fig.legend(cell_handles, ["TN", "FP", "FN", "TP"], loc="lower left",
+               bbox_to_anchor=(0.06, 0.96), ncol=4, frameon=False, fontsize=9,
+               handlelength=1.0, handleheight=1.0, columnspacing=1.0, handletextpad=1.0)
+
+    # Column headers are the (2-line) field names, so the grid needs more
+    # headroom above it than render_panel_a's single-line approach headers did.
+    mosaic_top, mosaic_bot = 0.865, 0.055
+    mosaic_rows = mcf.grid_axes(fig, 0.13, 0.98, mosaic_bot, mosaic_top,
+                                nrows=n_rows, ncols=n_cols, wgap=0.022, hgap=0.06)
+    for c, (field, (_, wrapped)) in enumerate(mcf.BINARY_FIELDS.items()):
+        pos = mosaic_rows[0][c].get_position()
+        fig.text((pos.x0 + pos.x1) / 2, mosaic_top + 0.018, wrapped,
+                 ha="center", va="bottom", size=9.5, weight="bold", color=mcf.INK2)
+    for r, label in enumerate(approaches):
+        pos = mosaic_rows[r][0].get_position()
+        fig.text(0.11, (pos.y0 + pos.y1) / 2, label, ha="right", va="center",
+                 size=10, weight="bold", color=mcf.INK2)
+        for c, field in enumerate(mcf.BINARY_FIELDS):
+            mcf.draw_mosaic(mosaic_rows[r][c], *mcf.binary_confusion(dfs[r], field))
+
+    _save(fig, out_png)
+
+
 def render_panel_b(dfs, approaches, colors, out_png):
     """Classification performance -- carries its own approach-color legend."""
     fig = plt.figure(figsize=(2.35 * len(mcf.BINARY_FIELDS) + 1.3, 5.3))
@@ -241,9 +298,9 @@ def render_panel_b(dfs, approaches, colors, out_png):
                ncol=len(approaches), frameon=False, fontsize=10,
                handletextpad=0.4, columnspacing=1.6)
 
-    standalone_header(fig, 0.13, 0.935, "Classification performance",
-                       "Dots compare the approaches within binary fields.")
-    perf_top, perf_bot = 0.83, 0.165
+    # No standalone_header -- the grid (and each field's own ax.set_title
+    # above it) moves up into the freed space.
+    perf_top, perf_bot = 0.93, 0.165
     perf_axes = mcf.grid_axes(fig, 0.155, 0.98, perf_bot, perf_top,
                               nrows=1, ncols=len(mcf.BINARY_FIELDS), wgap=0.022, hgap=0)[0]
     offsets = [-0.22, 0.0, 0.22][: len(approaches)]
@@ -262,11 +319,11 @@ def render_panel_c(dfs, approaches, colors, out_png):
     """Similarity summary -- carries its own approach-color legend + encoding key."""
     fig = plt.figure(figsize=(9.6, 5.6))
 
-    standalone_header(fig, 0.06, 0.935, "Semantic similarity summary",
-                       "Min-max, mean ± SD, mean, and median per field/approach.")
+    # No standalone_header -- both legends and the axes below move up into
+    # the freed space.
     handles = [Line2D([0], [0], marker="o", ls="none", ms=7, mfc=c, mec=mcf._darken(c), mew=0.7)
                for c in colors]
-    fig.legend(handles, approaches, loc="upper right", bbox_to_anchor=(0.98, 0.965),
+    fig.legend(handles, approaches, loc="upper right", bbox_to_anchor=(0.98, 0.98),
                frameon=False, fontsize=9.5, handletextpad=0.4, columnspacing=1.2)
     sim_legend_handles = [
         Line2D([0], [0], color=mcf.MUTED, lw=1.0, solid_capstyle="round"),
@@ -275,30 +332,29 @@ def render_panel_c(dfs, approaches, colors, out_png):
         Line2D([0], [0], marker="|", ls="none", ms=7, mew=1.3, color=mcf.INK),
     ]
     fig.legend(sim_legend_handles, ["Min-max", "Mean ± SD", "Mean", "Median"],
-               loc="lower left", bbox_to_anchor=(0.06, 0.86), ncol=4, frameon=False,
+               loc="lower left", bbox_to_anchor=(0.06, 0.95), ncol=4, frameon=False,
                fontsize=8.5, handlelength=1.6, columnspacing=1.6, handletextpad=0.8)
 
-    sim_ax = fig.add_axes([0.24, 0.11, 0.60, 0.71])
+    sim_ax = fig.add_axes([0.24, 0.11, 0.60, 0.79])
     stats_by_approach = [{f: mcf.sim_stats(df, f) for f in mcf.SIM_FIELDS} for df in dfs]
     mcf.draw_sim_panel(sim_ax, stats_by_approach, colors, approaches)
 
     _save(fig, out_png)
 
 
-def render_panel_d(out_png):
-    """Similarity-KDE grid -- re-embeds the same external raster with its own header."""
-    img = mpimg.imread(KDENSITIES_PNG)
+def render_panel_d(out_png, img_path=KDENSITIES_PNG):
+    """Similarity-KDE grid -- re-embeds the same external raster, no header, so
+    no reserved header height either -- the image just fills the canvas.
+    img_path's own aspect ratio drives fig_h, so the regular (3x2) and wide
+    (2x3, see KDENSITIES_WIDE_PNG) source grids each land at a sensible size."""
+    img = mpimg.imread(img_path)
     img_h, img_w = img.shape[0], img.shape[1]
 
     fig_w = 7.5
-    header_in = 0.75
-    fig_h = fig_w * img_h / img_w + header_in
+    fig_h = fig_w * img_h / img_w
     fig = plt.figure(figsize=(fig_w, fig_h))
-    top_frac = header_in / fig_h
 
-    standalone_header(fig, 0.05, 1 - top_frac * 0.4, "Similarity density by field",
-                       "Per-paper cross-encoder scores (analysis/model_eval.R).")
-    d_ax = fig.add_axes([0.01, 0.01, 0.98, 1 - top_frac - 0.01])
+    d_ax = fig.add_axes([0.01, 0.01, 0.98, 0.98])
     d_ax.imshow(img)
     d_ax.axis("off")
 
@@ -307,16 +363,26 @@ def render_panel_d(out_png):
 
 def render_panels(dfs, approaches, colors):
     render_panel_a(dfs, approaches, colors, PANEL_PNGS["a"])
+    render_panel_a_wide(dfs, approaches, colors, PANEL_PNGS["a_wide"])
     render_panel_b(dfs, approaches, colors, PANEL_PNGS["b"])
     render_panel_c(dfs, approaches, colors, PANEL_PNGS["c"])
     render_panel_d(PANEL_PNGS["d"])
+    if os.path.exists(KDENSITIES_WIDE_PNG):
+        render_panel_d(PANEL_PNGS["d_wide"], img_path=KDENSITIES_WIDE_PNG)
+    else:
+        print(f"  WARNING: {KDENSITIES_WIDE_PNG} not found — run the updated "
+              f"model_eval.R (ncol=3 call) first, then rerun this script to get panel d's wide version")
 
 
 def main():
     dfs, approaches = load_data()
     colors = mcf.APPROACH_COLORS[: len(approaches)]
-    for figsize, out_png in VARIANTS:
-        render(figsize, out_png, dfs, approaches, colors)
+    for figsize, out_png, wide in VARIANTS:
+        if wide and not os.path.exists(KDENSITIES_WIDE_PNG):
+            print(f"  WARNING: {KDENSITIES_WIDE_PNG} not found — skipping {out_png} "
+                  f"(copy the wide KDE grid from output/gpt/ into writing/figures/ first, then rerun)")
+            continue
+        render(figsize, out_png, dfs, approaches, colors, wide=wide)
     render_panels(dfs, approaches, colors)
 
 

@@ -435,9 +435,11 @@ build_latex_comparison_table(
 # ce_score_pairs() above), not just the mean/sd already in the LaTeX table.
 # Two models can share a mean while looking completely different here (e.g.
 # a bimodal hit-or-miss model vs. a consistently-mediocre one).
-build_similarity_density_plot <- function(results, model_keys, model_labels, out_path) {
+build_similarity_density_plot <- function(results, model_keys, model_labels, out_path,
+                                           ncol = 2, width = 11,
+                                           filename = "similarity_kdensities.png") {
   if (dir.exists(out_path) || grepl("/$", out_path)) {
-    out_path <- file.path(out_path, "similarity_kdensities.png")
+    out_path <- file.path(out_path, filename)
   }
 
   field_cols <- c(
@@ -467,7 +469,7 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
   palette <- c("#08B2E3", "#484D6D", "#57A773", "#C1666B")
   model_colors <- setNames(palette[seq_along(model_keys)], unname(model_labels[model_keys]))
 
-  n_facet_rows <- ceiling(length(field_cols) / 2)
+  n_facet_rows <- ceiling(length(field_cols) / ncol)
 
   # One vertical line per (field, model) at that group's mean similarity —
   # drawn from a separate summary data frame so each facet gets its own set
@@ -501,7 +503,7 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
       hjust = 0.5, size = 2.6, fontface = "bold", show.legend = FALSE,
       bg.color = "white", bg.r = 0.2
     ) +
-    facet_wrap(~ field, ncol = 2, scales = "free_y") +
+    facet_wrap(~ field, ncol = ncol, scales = "free_y") +
     scale_color_manual(values = model_colors) +
     scale_fill_manual(values = model_colors) +
     # Extra top headroom (vs. ggplot's default ~5%) so stacked labels have
@@ -525,7 +527,7 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
   # 3.2 per facet row + 1.6 fixed for title/legend — reproduces the original
   # height=8 at 2 rows (4 fields), scales up cleanly as fields are added.
   dir.create(dirname(out_path), showWarnings = FALSE, recursive = TRUE)
-  ggsave(out_path, plot = p, width = 11, height = 3.2 * n_facet_rows + 1.6, dpi = 150, bg = "white")
+  ggsave(out_path, plot = p, width = width, height = 3.2 * n_facet_rows + 1.6, dpi = 150, bg = "white")
   cat("\nSimilarity KDE grid written to:", out_path, "\n")
 }
 
@@ -537,6 +539,17 @@ build_similarity_density_plot(
   model_keys   = density_model_keys,
   model_labels = model_display_names[density_model_keys],
   out_path     = tex_output_path
+)
+# Wide variant: 2 rows x 3 cols instead of the regular grid's 3 x 2 -- width
+# scaled up (11 * 3/2) to keep each facet column roughly as wide as before.
+build_similarity_density_plot(
+  results,
+  model_keys   = density_model_keys,
+  model_labels = model_display_names[density_model_keys],
+  out_path     = tex_output_path,
+  ncol         = 3,
+  width        = 16.5,
+  filename     = "similarity_kdensities_wide.png"
 )
 
 ############################################
@@ -702,27 +715,27 @@ full_baseline_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-Unive
 test_sft_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/gpt_finetune_output.csv")
 test_rag_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/rag_gpt_output.csv")
 test_baseline_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/baseline_gpt_output.csv")
-human_labeled <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/data_prep_all_models/train_80.csv")
+# human_labeled <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/data_prep_all_models/train_80.csv")
 
 # clean human_labeled to match column length
-human_labeled <- human_labeled |>
-  rename(
-    File.Name = filename,
-    Title = title,
-    DOI = doi,
-    Empirical.Analysis = emp_bin,
-    Dependent.Variable.s. = dep_var,
-    Endogeneity.Problem = end_bin,
-    Endogenous.Variable.s. = end_var,
-    Instrumental.Variable.Used = iv_bin,
-    Instrumental.Variable.s. = iv_var,
-    Instrumental.Variable.Rainfall = rain_bin,
-    Rainfall.Instrument = rain_var
-  ) |> 
-  select(
-    File.Name, Title, DOI, Empirical.Analysis, Dependent.Variable.s., Endogeneity.Problem, Endogenous.Variable.s.,
-    Instrumental.Variable.Used, Instrumental.Variable.s., Instrumental.Variable.Rainfall, Rainfall.Instrument
-  )
+#human_labeled <- human_labeled |>
+#  rename(
+#   File.Name = filename,
+#   Title = title,
+#    DOI = doi,
+#    Empirical.Analysis = emp_bin,
+#    Dependent.Variable.s. = dep_var,
+#    Endogeneity.Problem = end_bin,
+#    Endogenous.Variable.s. = end_var,
+#    Instrumental.Variable.Used = iv_bin,
+#    Instrumental.Variable.s. = iv_var,
+#   Instrumental.Variable.Rainfall = rain_bin,
+#    Rainfall.Instrument = rain_var
+#  ) |> 
+#  select(
+#    File.Name, Title, DOI, Empirical.Analysis, Dependent.Variable.s., Endogeneity.Problem, Endogenous.Variable.s.,
+#    Instrumental.Variable.Used, Instrumental.Variable.s., Instrumental.Variable.Rainfall, Rainfall.Instrument
+# )
 
 # full_baseline_gpt_output.csv never produced a row for
 # 10.5958/0974-0279.2022.00030.1 + and never separately extracted
@@ -736,11 +749,11 @@ drop_baseline_gap_rows <- function(df) {
 
 ## merge ##
 # sft
-corpus_output_sft <- rbind(full_sft_gpt, human_labeled, test_sft_gpt) %>% drop_baseline_gap_rows()
+corpus_output_sft <- rbind(full_sft_gpt, test_sft_gpt) %>% drop_baseline_gap_rows()
 write.csv(corpus_output_sft, "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/analysis/sft_full_corpus.csv", row.names = FALSE)
 # rag
-corpus_output_rag <- rbind(full_rag_gpt, human_labeled, test_rag_gpt) %>% drop_baseline_gap_rows()
+corpus_output_rag <- rbind(full_rag_gpt, test_rag_gpt) %>% drop_baseline_gap_rows()
 write.csv(corpus_output_rag, "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/analysis/rag_full_corpus.csv", row.names = FALSE)
 # baseline
-corpus_output_baseline <- rbind(full_baseline_gpt, human_labeled, test_baseline_gpt)
+corpus_output_baseline <- rbind(full_baseline_gpt, test_baseline_gpt)
 write.csv(corpus_output_baseline, "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/analysis/baseline_full_corpus.csv", row.names = FALSE)

@@ -17,7 +17,7 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 # Fine-tuned model ID
-fine_tuned_model_id = "ft:gpt-4.1-mini-2025-04-14:aide-lab:minjul:E2TUFmm0"
+fine_tuned_model_id = "ft:gpt-4.1-2025-04-14:aide-lab:jul:E1ciR9NY"
 
 
 DEFAULT_MAX_COMPLETION_TOKENS = 512
