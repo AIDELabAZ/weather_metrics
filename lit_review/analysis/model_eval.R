@@ -29,9 +29,14 @@ model_paths <- list(
   gpt_baseline = file.path(output_root, "gpt", "baseline", "baseline_gpt_output.csv"),
   gpt_rag      = file.path(output_root, "gpt", "rag",      "rag_gpt_output.csv"),
   gpt_finetune = file.path(output_root, "gpt", "sft",      "gpt_finetune_output.csv"),
-  agentic      = file.path(output_root, "agentic",         "agentic_output.csv")
-  # llama = "",
-  # gemma = ""
+  agentic      = file.path(output_root, "agentic",         "agentic_output.csv"),
+  gpt_sol      = file.path(output_root, "gpt", "baseline_sol", "test_baseline_sol_output.csv"),
+  gemini_baseline = file.path(output_root, "gemini", "baseline", "test_baseline_gemini_output.csv"),
+  gemma_baseline  = file.path(output_root, "gemma",  "baseline", "test_baseline_gemma_output.csv"),
+  # Keep this order -- palette slots 8/9 below and APPROACH_COLORS in
+  # model_comparison_figs.py follow it.
+  llama_baseline  = file.path(output_root, "llama",  "baseline", "test_baseline_llama_output.csv"),
+  claude_baseline = file.path(output_root, "claude", "baseline", "test_baseline_claude_output.csv")
 )
 
 # Per-model directory for that model's merged_data_<key>.csv, keyed to match
@@ -41,12 +46,31 @@ model_output_dirs <- list(
   gpt_baseline = file.path(output_root, "gpt", "baseline"),
   gpt_rag      = file.path(output_root, "gpt", "rag"),
   gpt_finetune = file.path(output_root, "gpt", "sft"),
-  agentic      = file.path(output_root, "agentic")
+  agentic      = file.path(output_root, "agentic"),
+  gpt_sol      = file.path(output_root, "gpt", "baseline_sol"),
+  gemini_baseline = file.path(output_root, "gemini", "baseline"),
+  gemma_baseline  = file.path(output_root, "gemma",  "baseline"),
+  llama_baseline  = file.path(output_root, "llama",  "baseline"),
+  claude_baseline = file.path(output_root, "claude", "baseline")
 )
 
 # Cross-approach comparison table/figures (all variants side by side) — not
 # specific to one approach, so they land in output/gpt directly.
 tex_output_path <- file.path(output_root, "gpt")
+
+# Two comparison sets, each with its own table/figures:
+#   gpt      -- main text: implementations within one model family/vintage
+#               (GPT-4.1 zero-shot, RAG, SFT, plus the agentic run)
+#   frontier -- appendix/robustness: our best model (GPT-4.1 SFT) against the
+#               newest zero-shot model from each family
+# Frontier keys missing from model_paths (runs still pending) are dropped.
+gpt_model_keys <- c("gpt_baseline", "gpt_rag", "gpt_finetune", "agentic")
+frontier_model_keys <- intersect(
+  c("gpt_finetune", "gpt_sol", "gemini_baseline", "gemma_baseline",
+    "llama_baseline", "claude_baseline"),
+  names(model_paths)
+)
+frontier_output_path <- file.path(output_root, "frontier")
 
 # Display labels for model_paths keys, used as column headers in the LaTeX table.
 # Column order in the table follows names(model_paths): Zero-shot, RAG, Fine-tuned.
@@ -54,7 +78,24 @@ model_display_names <- c(
   gpt_baseline = "Zero-shot",
   gpt_rag      = "RAG",
   gpt_finetune = "Fine-tuned",
-  agentic      = "Agentic (Claude)"
+  agentic      = "Agentic (Claude)",
+  gpt_sol      = "Zero-shot (GPT-6.1 Sol)",
+  gemini_baseline = "Zero-shot (Gemini 4 Argon)",
+  gemma_baseline  = "Zero-shot (Gemma 4 26B)",
+  llama_baseline  = "Zero-shot (Llama 4 Maverick)",
+  claude_baseline = "Zero-shot (Claude Opus 5.5)"
+)
+
+# Frontier-set labels: every column but SFT is zero-shot, so name the model
+# instead (matches the legend in model_comparison_figs.py's frontier figure,
+# which embeds this script's KDE grid).
+frontier_display_names <- c(
+  gpt_finetune    = "SFT (GPT-4.1)",
+  gpt_sol         = "GPT-6.1 Sol",
+  gemini_baseline = "Gemini 4 Argon",
+  gemma_baseline  = "Gemma 4 26B",
+  llama_baseline  = "Llama 4 Maverick",
+  claude_baseline = "Claude Opus 5.5"
 )
 
 ############################################
@@ -327,7 +368,9 @@ results <- setNames(
 # Specificity per field) on top, a semantic-similarity block (mean score per
 # field) below, models as columns throughout. Requires \usepackage{booktabs}
 # in the LaTeX document that \input{}s this file.
-build_latex_comparison_table <- function(results, model_keys, model_labels, out_path) {
+build_latex_comparison_table <- function(results, model_keys, model_labels, out_path,
+                                         caption = "Comparison of extraction performance across GPT variants",
+                                         label = "tab:model_comparison") {
   # Accept either a full file path or a directory — if out_path is (or looks
   # like) a directory, write "model_comparison.tex" inside it rather than
   # erroring on file() trying to open a directory for writing.
@@ -363,8 +406,8 @@ build_latex_comparison_table <- function(results, model_keys, model_labels, out_
   lines <- c(
     "\\begin{table}[htbp]",
     "\\centering",
-    "\\caption{Comparison of extraction performance across GPT variants}",
-    "\\label{tab:model_comparison}",
+    sprintf("\\caption{%s}", caption),
+    sprintf("\\label{%s}", label),
     sprintf("\\begin{tabular}{%s}", col_spec),
     "\\toprule",
     sprintf(" & & %s \\\\", header),
@@ -421,9 +464,17 @@ build_latex_comparison_table <- function(results, model_keys, model_labels, out_
 
 build_latex_comparison_table(
   results,
-  model_keys   = names(model_paths),
-  model_labels = model_display_names[names(model_paths)],
+  model_keys   = gpt_model_keys,
+  model_labels = model_display_names[gpt_model_keys],
   out_path     = tex_output_path
+)
+build_latex_comparison_table(
+  results,
+  model_keys   = frontier_model_keys,
+  model_labels = frontier_display_names[frontier_model_keys],
+  out_path     = file.path(frontier_output_path, "frontier_model_comparison.tex"),
+  caption      = "Fine-tuned GPT-4.1 versus the newest zero-shot model in each family",
+  label        = "tab:frontier_model_comparison"
 )
 
 ############################################
@@ -466,8 +517,11 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
 
   # Same 3-slot categorical palette used elsewhere for these models (blue/
   # orange/aqua) — validated for CVD-safety at this series count.
-  palette <- c("#08B2E3", "#484D6D", "#57A773", "#C1666B")
-  model_colors <- setNames(palette[seq_along(model_keys)], unname(model_labels[model_keys]))
+  # Indexed by position in model_paths (not in model_keys) so a model keeps
+  # its color even when others are filtered out of this plot.
+  palette <- c("#08B2E3", "#484D6D", "#57A773", "#C1666B", "#E0A458", "#8C6BB1", "#8C5A3C",
+               "#D17CB0", "#3F7F8C")
+  model_colors <- setNames(palette[match(model_keys, names(model_paths))], unname(model_labels[model_keys]))
 
   n_facet_rows <- ceiling(length(field_cols) / ncol)
 
@@ -533,7 +587,7 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
 
 # TEMP: agentic outputs excluded from the KDE grid only (still in every other
 # table/plot below). Drop the setdiff() to put it back.
-density_model_keys <- setdiff(names(model_paths), "agentic")
+density_model_keys <- setdiff(gpt_model_keys, "agentic")
 build_similarity_density_plot(
   results,
   model_keys   = density_model_keys,
@@ -551,6 +605,21 @@ build_similarity_density_plot(
   width        = 16.5,
   filename     = "similarity_kdensities_wide.png"
 )
+# Frontier set (panel d of merge_gpt_comparison_4panel.py's frontier figure).
+build_similarity_density_plot(
+  results,
+  model_keys   = frontier_model_keys,
+  model_labels = frontier_display_names[frontier_model_keys],
+  out_path     = file.path(frontier_output_path, "similarity_kdensities_frontier.png")
+)
+build_similarity_density_plot(
+  results,
+  model_keys   = frontier_model_keys,
+  model_labels = frontier_display_names[frontier_model_keys],
+  out_path     = file.path(frontier_output_path, "similarity_kdensities_frontier_wide.png"),
+  ncol         = 3,
+  width        = 16.5
+)
 
 ############################################
 # Confusion matrices LaTeX
@@ -558,7 +627,8 @@ build_similarity_density_plot(
 # Raw Prediction x Reference counts for each binary field, one table per
 # field with a column-pair per model — the counts behind the summary
 # accuracy/sensitivity/etc. already in model_comparison.tex.
-build_confusion_matrices_tex <- function(results, model_keys, model_labels, out_path) {
+build_confusion_matrices_tex <- function(results, model_keys, model_labels, out_path,
+                                         label_prefix = "tab:cm_") {
   if (dir.exists(out_path) || grepl("/$", out_path)) {
     out_path <- file.path(out_path, "confusion_matrices.tex")
   }
@@ -585,7 +655,7 @@ build_confusion_matrices_tex <- function(results, model_keys, model_labels, out_
     lines <- c(lines,
       "\\begin{table}[htbp]", "\\centering",
       sprintf("\\caption{Confusion matrix: %s}", field),
-      sprintf("\\label{tab:cm_%s}", label_slug),
+      sprintf("\\label{%s%s}", label_prefix, label_slug),
       sprintf("\\begin{tabular}{%s}", col_spec),
       "\\toprule",
       sprintf(" & %s \\\\", model_header),
@@ -614,9 +684,16 @@ build_confusion_matrices_tex <- function(results, model_keys, model_labels, out_
 
 build_confusion_matrices_tex(
   results,
-  model_keys   = names(model_paths),
-  model_labels = model_display_names[names(model_paths)],
+  model_keys   = gpt_model_keys,
+  model_labels = model_display_names[gpt_model_keys],
   out_path     = tex_output_path
+)
+build_confusion_matrices_tex(
+  results,
+  model_keys   = frontier_model_keys,
+  model_labels = frontier_display_names[frontier_model_keys],
+  out_path     = file.path(frontier_output_path, "frontier_confusion_matrices.tex"),
+  label_prefix = "tab:frontier_cm_"
 )
 
 ############################################
@@ -664,8 +741,9 @@ build_classification_scoreboard_plot <- function(results, model_keys, model_labe
 
   # Same 3-slot model palette used for the KDE density plot, so a model's
   # color means the same thing everywhere in this script's output.
-  palette      <- c("#08B2E3", "#484D6D", "#57A773", "#C1666B")
-  model_colors <- setNames(palette[seq_along(model_keys)], unname(model_labels[model_keys]))
+  palette      <- c("#08B2E3", "#484D6D", "#57A773", "#C1666B", "#E0A458", "#8C6BB1", "#8C5A3C",
+                    "#D17CB0", "#3F7F8C")
+  model_colors <- setNames(palette[match(model_keys, names(model_paths))], unname(model_labels[model_keys]))
 
   # Manual per-model y-offset (rather than ggplot's position_dodge, which
   # dodges along x by default) so dots land at fixed, predictable rows.
@@ -693,9 +771,15 @@ build_classification_scoreboard_plot <- function(results, model_keys, model_labe
 
 build_classification_scoreboard_plot(
   results,
-  model_keys   = names(model_paths),
-  model_labels = model_display_names[names(model_paths)],
+  model_keys   = gpt_model_keys,
+  model_labels = model_display_names[gpt_model_keys],
   out_path     = tex_output_path
+)
+build_classification_scoreboard_plot(
+  results,
+  model_keys   = frontier_model_keys,
+  model_labels = frontier_display_names[frontier_model_keys],
+  out_path     = file.path(frontier_output_path, "frontier_classification_scoreboard.png")
 )
 
 ##############################################

@@ -33,6 +33,8 @@ from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
+import fixed_label_classifier
+
 # cairosvg (used to rasterize the wide Sankey after its node labels are moved
 # outside the diagram — see export_wide_sankey_png) needs libcairo, which on
 # macOS is usually a Homebrew install that isn't on the default dlopen path.
@@ -64,6 +66,19 @@ REJECTED_ENTRIES_CSV   = "/Users/kieran/Library/CloudStorage/OneDrive-University
 # actually feeds the Sankey link/node computation in build_sankey().
 RELATIONSHIPS_RAW_ENDOG_CSV          = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/relationships_raw_endog_rag_gpt.csv"
 RELATIONSHIPS_CATEGORIZED_ENDOG_CSV  = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/relationships_categorized_endog_rag_gpt.csv"
+
+# Per-entry fixed-label classifier output (label, reranker score, runner-up) —
+# only written when CATEGORIZER == "fixed". Low scores / small margins are the
+# entries worth spot-checking.
+CLASSIFIER_AUDIT_CSV = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/classifier_audit_rag_gpt.csv"
+
+# ─── Categorizer ───────────────────────────────────────────────────────────
+# "fixed" → classify every entry into the fixed taxonomy in sankey_taxonomy.py
+#           (embedding retrieval + reranker, see fixed_label_classifier.py).
+#           Same labels for every extraction model, so Sankeys are comparable.
+# "llm"   → original behaviour: GPT-5 invents a taxonomy per run, followed by
+#           the merge guardrail (and optional broadening pass) below.
+CATEGORIZER = "fixed"
 
 # ─── LLM categorization params ──────────────────────────────────────────────
 # Used by the broadening/consolidation pass only (_broaden_categories_once).
@@ -1046,12 +1061,20 @@ def process_side(
     not_specified_label = f"Not Specified ({side_name})"
     unique_entries = sorted(exp["entry"].unique()) if len(exp) else []
 
-    print(f"  Classifying {len(unique_entries)} unique entries via LLM...")
-    entry_to_category = classify_into_categories(unique_entries, side_name, other_label) if unique_entries else {}
+    audit = pd.DataFrame()
+    if CATEGORIZER == "fixed":
+        print(f"  Classifying {len(unique_entries)} unique entries into the fixed taxonomy...")
+        entry_to_category, audit = (
+            fixed_label_classifier.classify(unique_entries, side_name, other_label)
+            if unique_entries else ({}, pd.DataFrame())
+        )
+    else:
+        print(f"  Classifying {len(unique_entries)} unique entries via LLM...")
+        entry_to_category = classify_into_categories(unique_entries, side_name, other_label) if unique_entries else {}
 
     category_counts = Counter(entry_to_category.values())
     n_raw = len(category_counts) - (1 if other_label in category_counts else 0)
-    print(f"  LLM proposed {n_raw} categories "
+    print(f"  {n_raw} categories used "
           f"(+ {other_label}: {category_counts.get(other_label, 0)} entries)")
 
     # Blank cells never reach here at all (they never survive expand_column/
@@ -1060,27 +1083,15 @@ def process_side(
     n_unique_real = len(unique_entries) - category_counts.get(other_label, 0)
     print(f"  Unique entries classified into a real category: {n_unique_real} / {len(unique_entries)}")
 
-    canonical_map = merge_similar_category_names(category_counts, other_label, CATEGORY_MERGE_SIM_THRESHOLD)
-    n_merged = len({v for k, v in canonical_map.items() if k != other_label})
-    if n_merged < n_raw:
-        print(f"  Merge guardrail: {n_raw} → {n_merged} categories after collapsing near-duplicates")
-
-    canonical_counts = Counter()
-    canonical_samples: dict[str, list[str]] = defaultdict(list)
-    for entry, raw_cat in entry_to_category.items():
-        canon = canonical_map.get(raw_cat, raw_cat)
-        canonical_counts[canon] += 1
-        if len(canonical_samples[canon]) < 3 and entry not in canonical_samples[canon]:
-            canonical_samples[canon].append(entry)
-
-    if skip_broadening:
-        broad_map = {c: c for c in canonical_counts}
-        print(f"  Broadening pass: skipped — keeping {n_merged} categories from the merge guardrail")
+    if CATEGORIZER == "fixed":
+        # Labels are already the fixed taxonomy — no name merging/broadening,
+        # which would make categories differ across models again.
+        canonical_map: dict[str, str] = {}
+        broad_map: dict[str, str] = {}
     else:
-        broad_map = broaden_categories(canonical_counts, canonical_samples, side_name, other_label)
-        n_broad = len({v for k, v in broad_map.items() if k != other_label})
-        if n_broad < n_merged:
-            print(f"  Broadening pass: {n_merged} → {n_broad} categories after consolidating same-theme categories")
+        canonical_map, broad_map = _consolidate_llm_categories(
+            entry_to_category, n_raw, side_name, other_label, skip_broadening
+        )
 
     exp[label_col] = (
         exp["entry"]
@@ -1112,7 +1123,42 @@ def process_side(
     for label, n in exp[label_col].value_counts().items():
         print(f"    {label}  ({n} entries)")
 
-    return exp, rejected
+    return exp, rejected, audit
+
+
+def _consolidate_llm_categories(
+    entry_to_category: dict[str, str],
+    n_raw: int,
+    side_name: str,
+    other_label: str,
+    skip_broadening: bool,
+) -> tuple[dict[str, str], dict[str, str]]:
+    """CATEGORIZER == "llm" only: merge guardrail + optional broadening pass
+    over the per-run LLM taxonomy. Returns (canonical_map, broad_map)."""
+    category_counts = Counter(entry_to_category.values())
+    canonical_map = merge_similar_category_names(category_counts, other_label, CATEGORY_MERGE_SIM_THRESHOLD)
+    n_merged = len({v for k, v in canonical_map.items() if k != other_label})
+    if n_merged < n_raw:
+        print(f"  Merge guardrail: {n_raw} → {n_merged} categories after collapsing near-duplicates")
+
+    canonical_counts = Counter()
+    canonical_samples: dict[str, list[str]] = defaultdict(list)
+    for entry, raw_cat in entry_to_category.items():
+        canon = canonical_map.get(raw_cat, raw_cat)
+        canonical_counts[canon] += 1
+        if len(canonical_samples[canon]) < 3 and entry not in canonical_samples[canon]:
+            canonical_samples[canon].append(entry)
+
+    if skip_broadening:
+        broad_map = {c: c for c in canonical_counts}
+        print(f"  Broadening pass: skipped — keeping {n_merged} categories from the merge guardrail")
+    else:
+        broad_map = broaden_categories(canonical_counts, canonical_samples, side_name, other_label)
+        n_broad = len({v for k, v in broad_map.items() if k != other_label})
+        if n_broad < n_merged:
+            print(f"  Broadening pass: {n_merged} → {n_broad} categories after consolidating same-theme categories")
+
+    return canonical_map, broad_map
 
 
 # ─── Load rainfall IV papers from the pre-merged per-implementation corpus ──
@@ -1169,7 +1215,7 @@ def main():
     # diagram with only the first classification call + the non-LLM
     # near-duplicate-name merge. Delete skip_broadening=True (or set False)
     # on both calls below to revert.
-    rain_exp, rain_rejected = process_side(
+    rain_exp, rain_rejected, rain_audit = process_side(
         rain_df_raw,
         col="Rainfall Instrument",
         label_overrides=RAIN_LABEL_OVERRIDES,
@@ -1180,7 +1226,7 @@ def main():
         skip_broadening=True,
     )
 
-    endog_exp, endog_rejected = process_side(
+    endog_exp, endog_rejected, endog_audit = process_side(
         rain_df_raw,
         col="Endogenous Variable(s)",
         label_overrides=ENDOG_LABEL_OVERRIDES,
@@ -1194,6 +1240,11 @@ def main():
     rejected_all.to_csv(REJECTED_ENTRIES_CSV, index=False)
     print(f"\nRejected raw fragments (review for real data dropped by cleaning) → "
           f"{REJECTED_ENTRIES_CSV} ({len(rejected_all)} rows)")
+
+    if CATEGORIZER == "fixed":
+        audit_all = pd.concat([rain_audit, endog_audit], ignore_index=True)
+        audit_all.to_csv(CLASSIFIER_AUDIT_CSV, index=False)
+        print(f"Fixed-label classifier audit → {CLASSIFIER_AUDIT_CSV} ({len(audit_all)} rows)")
 
     summary_endog = build_summary(
         ("endog", endog_exp, "endog_cluster_id", "endog_cluster_label"),

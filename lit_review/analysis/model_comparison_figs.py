@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Composite model-comparison figures, one per model family.
+"""Composite model-comparison figures, one per comparison set.
 
-For each family (GPT today; Gemini/Gemma/Llama when their merged CSVs exist)
-renders a single three-panel figure comparing the extraction approaches
-(Zero-shot, RAG, Fine-tuned) on the 88-paper held-out test set:
+Renders a single three-panel figure per FAMILIES entry on the 88-paper
+held-out test set: "gpt" compares the extraction approaches (Zero-shot, RAG,
+Fine-tuned) within GPT-4.1; "frontier" compares the fine-tuned GPT-4.1 against
+the newest zero-shot model in each family (appendix / robustness check):
 
   a. Confusion mosaics      — area-proportional 2x2 mosaics per binary field
   b. Classification dots    — Accuracy/Sensitivity/Specificity/Precision/F1/
@@ -18,6 +19,7 @@ Run with: /Users/kieran/.virtualenvs/bert_env/bin/python3 analysis/model_compari
 """
 
 import os
+import textwrap
 
 import numpy as np
 import pandas as pd
@@ -51,9 +53,15 @@ MERGED_DIRS = {
     "gpt_rag":      os.path.join(OUTPUT_ROOT, "gpt", "rag"),
     "gpt_finetune": os.path.join(OUTPUT_ROOT, "gpt", "sft"),
     "agentic":      os.path.join(OUTPUT_ROOT, "agentic"),
+    "gpt_sol":      os.path.join(OUTPUT_ROOT, "gpt", "baseline_sol"),
+    "gemini_baseline": os.path.join(OUTPUT_ROOT, "gemini", "baseline"),
+    "gemma_baseline":  os.path.join(OUTPUT_ROOT, "gemma", "baseline"),
+    "llama_baseline":  os.path.join(OUTPUT_ROOT, "llama", "baseline"),
+    "claude_baseline": os.path.join(OUTPUT_ROOT, "claude", "baseline"),
 }
 
-# Composite figures: OUTPUT_ROOT/<family>/<family>_figs/ (e.g. output/gpt/gpt_figs).
+# Composite figures: OUTPUT_ROOT/<family>/ (e.g. output/gpt/gpt_model_comparison.png),
+# alongside model_eval.R's other cross-approach outputs.
 OUTPUT_DIR = OUTPUT_ROOT
 
 # ─── Families and approaches ─────────────────────────────────────────────────
@@ -62,18 +70,37 @@ OUTPUT_DIR = OUTPUT_ROOT
 # a warning so pending families can be listed here ahead of their data.
 
 FAMILIES = {
+    # Main text: implementations compared within one model family and vintage.
     "gpt": {
         "display": "GPT",
         "approaches": {
             "gpt_baseline": "Zero-shot",
             "gpt_rag": "RAG",
             "gpt_finetune": "SFT",
-            "agentic": "Agentic",
+            # Agentic left out of this figure (still scored in model_eval.R):
+            # "agentic": "Agentic",
         },
         "footer": (
             "Zero-shot: gpt-4.1-2025-04-14  ·  RAG: gpt-4.1-2025-04-14 + "
-            "text-embedding-3-small  ·  SFT: ft:gpt-4.1-2025-04-14 (aide-lab)  ·  "
-            "Agentic: claude-sonnet-5 (section-router + reader/adversary + verifier + judge)"
+            "text-embedding-3-small  ·  SFT: ft:gpt-4.1-2025-04-14 (aide-lab)"
+        ),
+    },
+    # Appendix / robustness: our best model against the newest zero-shot model
+    # in each family. Llama and Claude are skipped until their runs exist.
+    "frontier": {
+        "display": "Frontier",
+        "approaches": {
+            "gpt_finetune": "SFT (GPT-4.1)",
+            "gpt_sol": "GPT-6.1 Sol",
+            "gemini_baseline": "Gemini 4 Argon",
+            "gemma_baseline": "Gemma 4 26B",
+            "llama_baseline": "Llama 4 Maverick",
+            "claude_baseline": "Claude Opus 5.5",
+        },
+        "footer": (
+            "SFT: ft:gpt-4.1-2025-04-14 (aide-lab)  ·  zero-shot: gpt-6.1-sol, "
+            "gemini-4-argon, gemma-4-26b-a4b-it-maas, "
+            "llama-4-maverick-17b-128e-instruct-maas, claude-opus-5-5"
         ),
     },
     # "gemini": {"display": "Gemini", "approaches": {"gemini_finetune": "SFT"}, "footer": ""},
@@ -122,7 +149,12 @@ SURFACE = "#ffffff"
 # existing R-generated ones. Note: the slate #484D6D is low-chroma and reads
 # close to gray, so it doesn't clear the dataviz skill's CVD-safety validator
 # the way the skill's reference trio does — kept anyway for cross-figure consistency.
-APPROACH_COLORS = ["#08B2E3", "#484D6D", "#57A773", "#C1666B"]
+# 5th-9th (amber/purple/brown/pink/teal) are gpt_sol, gemini_baseline,
+# gemma_baseline, llama_baseline, claude_baseline, matching model_eval.R's
+# palette, which is indexed by position in model_paths (same order as
+# MERGED_DIRS above).
+APPROACH_COLORS = ["#08B2E3", "#484D6D", "#57A773", "#C1666B", "#E0A458", "#8C6BB1", "#8C5A3C",
+                   "#D17CB0", "#3F7F8C"]
 
 MOSAIC_COLORS = {"TN": "#08B2E3", "FP": "#e34948", "FN": "#eda100", "TP": "#57A773"}
 
@@ -358,7 +390,7 @@ PANEL_BOT = 0.115
 
 
 def make_family_figure(family_key, cfg):
-    approaches, dfs = [], []
+    keys, approaches, dfs = [], [], []
     for key, label in cfg["approaches"].items():
         merged_dir = MERGED_DIRS.get(key)
         if merged_dir is None:
@@ -368,13 +400,16 @@ def make_family_figure(family_key, cfg):
         if not os.path.exists(path):
             print(f"  WARNING: {path} not found — skipping approach '{label}'")
             continue
+        keys.append(key)
         approaches.append(label)
         dfs.append(pd.read_csv(path))
     if not dfs:
         print(f"  WARNING: no merged data for family '{family_key}' — skipping")
         return None
 
-    colors = APPROACH_COLORS[: len(approaches)]
+    # By position in MERGED_DIRS (= model_eval.R's model_paths order) so each
+    # approach keeps the same color as in the R figures, even if one is skipped.
+    colors = [APPROACH_COLORS[list(MERGED_DIRS).index(k)] for k in keys]
 
     fig = plt.figure(figsize=(18, 9.5))
 
@@ -411,12 +446,18 @@ def make_family_figure(family_key, cfg):
                bbox_to_anchor=(0.05, 0.838), ncol=4, frameon=False, fontsize=7,
                handlelength=1.0, handleheight=1.0, columnspacing=1.0,
                handletextpad=1.0)
-    mosaic_rows = grid_axes(fig, 0.075, 0.30, PANEL_BOT, PANEL_TOP,
+    # Wrap long names (e.g. "Gemini 4 Argon") so adjacent narrow columns'
+    # headers don't run together; drop the grid one line per extra header
+    # line so wrapped headers clear the TN/FP/FN/TP legend above them.
+    headers = [textwrap.fill(label, 10) for label in approaches]
+    extra_lines = max(h.count("\n") for h in headers)
+    mosaic_top = PANEL_TOP - 0.018 * extra_lines
+    mosaic_rows = grid_axes(fig, 0.075, 0.30, PANEL_BOT, mosaic_top,
                             nrows=len(BINARY_FIELDS), ncols=len(approaches),
                             wgap=0.012, hgap=0.045)
-    for c, label in enumerate(approaches):
+    for c, header in enumerate(headers):
         pos = mosaic_rows[0][c].get_position()
-        fig.text((pos.x0 + pos.x1) / 2, PANEL_TOP + 0.017, label,
+        fig.text((pos.x0 + pos.x1) / 2, mosaic_top + 0.017, header,
                  ha="center", va="bottom", size=7.5, weight="bold", color=INK2)
     for r, (field, (_, wrapped)) in enumerate(BINARY_FIELDS.items()):
         pos = mosaic_rows[r][0].get_position()
@@ -446,7 +487,7 @@ def make_family_figure(family_key, cfg):
             stats_by_approach.append({f: sim_stats(df, f) for f in SIM_FIELDS})
     draw_sim_panel(sim_ax, stats_by_approach, colors, approaches)
 
-    out_dir = os.path.join(OUTPUT_DIR, family_key, f"{family_key}_figs")
+    out_dir = os.path.join(OUTPUT_DIR, family_key)
     os.makedirs(out_dir, exist_ok=True)
     png_path = os.path.join(out_dir, f"{family_key}_model_comparison.png")
     eps_path = os.path.join(out_dir, f"{family_key}_model_comparison.eps")

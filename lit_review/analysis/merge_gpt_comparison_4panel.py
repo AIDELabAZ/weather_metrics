@@ -1,30 +1,35 @@
 #!/usr/bin/env python3
-"""Four-panel GPT model-comparison figure.
+"""Four-panel model-comparison figures, one per comparison set.
 
 Reuses panels a-c (confusion mosaics, classification performance, similarity
 summary) from analysis/model_comparison_figs.py, re-laid-out 2x2, with the
-similarity-KDE grid from analysis/model_eval.R (writing/figures/
-similarity_kdensities.png) embedded as panel d:
+similarity-KDE grid from analysis/model_eval.R embedded as panel d:
 
     a  b
     c  d
 
-Agentic is excluded from every panel: panel d (model_eval.R's
-density_model_keys) already drops it, so a/b/c are rebuilt here from the same
-three approaches (Zero-shot, RAG, SFT) to keep the shared legend consistent
-across all four panels.
+Two comparison sets (see COMPARISONS), approaches taken from
+model_comparison_figs.FAMILIES:
+  gpt      -- main text: Zero-shot / RAG / SFT within GPT-4.1. Agentic is
+              excluded from every panel: panel d (model_eval.R's
+              density_model_keys) already drops it.
+  frontier -- appendix / robustness: SFT (GPT-4.1) against the newest
+              zero-shot model in each family. Approaches whose merged CSV
+              doesn't exist yet (Llama, Claude) are skipped with a warning.
 
-Note: analysis/model_comparison_figs.py's MERGED_DIRS points at
-output/gpt/{baseline,rag,sft}, which is currently empty -- the merged_data_*
-CSVs actually live under training/gpt/ (pre-dating the "update file structure
-and pathnames" commit). This script reads them from there directly.
+merged_data_* CSVs are read from analysis/model_comparison_figs.py's
+MERGED_DIRS, where model_eval.R writes them. Panel d's KDE PNGs are read from
+writing/figures/, so copy model_eval.R's fresh similarity_kdensities*.png
+(from output/gpt/ and output/frontier/) there before running this.
 
 Run with: /Users/kieran/.virtualenvs/bert_env/bin/python3 analysis/merge_gpt_comparison_4panel.py
 """
 
 import os
 import sys
+import textwrap
 
+import numpy as np
 import pandas as pd
 import matplotlib
 
@@ -39,68 +44,74 @@ import model_comparison_figs as mcf
 
 # ─── Paths ───────────────────────────────────────────────────────────────────
 
-TRAINING_GPT_DIR = (
-    "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/"
-    "weather_iv_lit/training/gpt"
-)
-KDENSITIES_PNG = (
-    "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/"
-    "weather_iv_lit/writing/figures/similarity_kdensities.png"
-)
-# 2 rows x 3 cols (vs. the regular grid's 3 x 2) -- written by model_eval.R's
-# build_similarity_density_plot(..., ncol=3, filename="similarity_kdensities_wide.png").
-KDENSITIES_WIDE_PNG = (
-    "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/"
-    "weather_iv_lit/writing/figures/similarity_kdensities_wide.png"
-)
 FIGURES_DIR = (
     "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/"
     "weather_iv_lit/writing/figures"
 )
-# (figsize, output filename, wide) for each orientation -- row/column
-# fractions below are shared by both; canvas dimensions and output path
-# differ, and `wide` also transposes panel a's mosaic grid (3x4 instead of
-# 4x3) and swaps panel d to the wide KDE source image.
-# Each PNG is saved alongside a same-named .eps (vector, no dpi needed).
-VARIANTS = [
-    ((15, 17.75), os.path.join(FIGURES_DIR, "gpt_model_comparison_4panel.png"), False),
-    ((19, 13.5), os.path.join(FIGURES_DIR, "gpt_model_comparison_4panel_wide.png"), True),
-]
 
-# Standalone per-panel PNGs -- one self-contained render per panel (own header,
-# and its own copy of whichever legend that panel needs to be read without the
-# other three), independent of the merged VARIANTS above.
-PANEL_PNGS = {
-    "a": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_a_confusion_mosaics.png"),
-    # Wide: transposed -- rows = approaches (Zero-shot/RAG/SFT), cols = binary
-    # fields, so 3 x 4 instead of the regular grid's 4 x 3.
-    "a_wide": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_a_confusion_mosaics_wide.png"),
-    "b": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_b_classification_performance.png"),
-    "c": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_c_similarity_summary.png"),
-    "d": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_d_similarity_density.png"),
-    "d_wide": os.path.join(FIGURES_DIR, "gpt_model_comparison_panel_d_similarity_density_wide.png"),
-}
-
-# Agentic excluded — matches model_eval.R's density_model_keys for panel d.
-APPROACHES = {
-    "gpt_baseline": "Zero-shot",
-    "gpt_rag": "RAG",
-    "gpt_finetune": "SFT",
+# Per comparison set: panel d's KDE source images (regular 3 x 2 grid and the
+# wide 2 x 3 one, both written by model_eval.R's build_similarity_density_plot)
+# and whether a missing merged CSV is an error (gpt) or a pending run that is
+# skipped (frontier). Output filenames are prefixed with the set's key.
+COMPARISONS = {
+    "gpt": {
+        "kde": os.path.join(FIGURES_DIR, "similarity_kdensities.png"),
+        "kde_wide": os.path.join(FIGURES_DIR, "similarity_kdensities_wide.png"),
+        "required": True,
+    },
+    "frontier": {
+        "kde": os.path.join(FIGURES_DIR, "similarity_kdensities_frontier.png"),
+        "kde_wide": os.path.join(FIGURES_DIR, "similarity_kdensities_frontier_wide.png"),
+        "required": False,
+    },
 }
 
 
-def load_data():
-    dfs, approaches = [], []
-    for key, label in APPROACHES.items():
-        path = os.path.join(TRAINING_GPT_DIR, f"merged_data_{key}.csv")
+def variants(prefix):
+    """(figsize, output filename, wide) for each orientation -- row/column
+    fractions in render() are shared by both; canvas dimensions and output
+    path differ, and `wide` also transposes panel a's mosaic grid (approaches
+    as rows instead of columns) and swaps panel d to the wide KDE source image.
+    Each PNG is saved alongside a same-named .eps (vector, no dpi needed)."""
+    return [
+        ((15, 17.75), os.path.join(FIGURES_DIR, f"{prefix}_model_comparison_4panel.png"), False),
+        ((19, 13.5), os.path.join(FIGURES_DIR, f"{prefix}_model_comparison_4panel_wide.png"), True),
+    ]
+
+
+def panel_pngs(prefix):
+    """Standalone per-panel PNGs -- one self-contained render per panel (own
+    header, and its own copy of whichever legend that panel needs to be read
+    without the other three), independent of the merged variants() above.
+    a_wide is transposed: rows = approaches, cols = binary fields."""
+    names = {
+        "a": "panel_a_confusion_mosaics",
+        "a_wide": "panel_a_confusion_mosaics_wide",
+        "b": "panel_b_classification_performance",
+        "c": "panel_c_similarity_summary",
+        "d": "panel_d_similarity_density",
+        "d_wide": "panel_d_similarity_density_wide",
+    }
+    return {k: os.path.join(FIGURES_DIR, f"{prefix}_model_comparison_{v}.png")
+            for k, v in names.items()}
+
+
+def load_data(approach_labels, required):
+    keys, dfs, approaches = [], [], []
+    for key, label in approach_labels.items():
+        path = os.path.join(mcf.MERGED_DIRS[key], f"merged_data_{key}.csv")
         if not os.path.exists(path):
-            raise FileNotFoundError(f"missing merged data: {path}")
+            if required:
+                raise FileNotFoundError(f"missing merged data: {path}")
+            print(f"  WARNING: {path} not found — skipping approach '{label}'")
+            continue
+        keys.append(key)
         dfs.append(pd.read_csv(path))
         approaches.append(label)
-    return dfs, approaches
+    return keys, dfs, approaches
 
 
-def render(figsize, out_png, dfs, approaches, colors, wide=False):
+def render(figsize, out_png, dfs, approaches, colors, kde_png, wide=False):
     fig = plt.figure(figsize=figsize)
 
     # ── Shared approach legend (bottom center — a, b, c all use these colors) ──
@@ -143,11 +154,15 @@ def render(figsize, out_png, dfs, approaches, colors, wide=False):
         # more headroom below the legend than the single-line approach headers.
         mosaic_top = ROW1_TOP - 0.09
         n_rows, n_cols = len(approaches), len(mcf.BINARY_FIELDS)
+        # One row per approach: keep the total gap space what it was at 3
+        # approaches (2 x 0.05), or 6+ rows get squashed to slivers.
+        hgap = min(0.05, 0.10 / max(n_rows - 1, 1))
     else:
         mosaic_top = ROW1_TOP - 0.058
         n_rows, n_cols = len(mcf.BINARY_FIELDS), len(approaches)
+        hgap = 0.05
     mosaic_rows = mcf.grid_axes(fig, A_X0 + 0.025, A_X1, ROW1_BOT, mosaic_top,
-                                nrows=n_rows, ncols=n_cols, wgap=0.014, hgap=0.05)
+                                nrows=n_rows, ncols=n_cols, wgap=0.014, hgap=hgap)
     if wide:
         for c, (field, (_, wrapped)) in enumerate(mcf.BINARY_FIELDS.items()):
             pos = mosaic_rows[0][c].get_position()
@@ -162,7 +177,8 @@ def render(figsize, out_png, dfs, approaches, colors, wide=False):
     else:
         for c, label in enumerate(approaches):
             pos = mosaic_rows[0][c].get_position()
-            fig.text((pos.x0 + pos.x1) / 2, mosaic_top + 0.014, label,
+            # Wrapped so adjacent narrow columns' headers don't run together.
+            fig.text((pos.x0 + pos.x1) / 2, mosaic_top + 0.014, textwrap.fill(label, 10),
                      ha="center", va="bottom", size=8.5, weight="bold", color=mcf.INK2)
         for r, (field, (_, wrapped)) in enumerate(mcf.BINARY_FIELDS.items()):
             pos = mosaic_rows[r][0].get_position()
@@ -177,7 +193,7 @@ def render(figsize, out_png, dfs, approaches, colors, wide=False):
     perf_top = ROW1_TOP - 0.058
     perf_axes = mcf.grid_axes(fig, B_X0, B_X1, ROW1_BOT, perf_top,
                               nrows=1, ncols=len(mcf.BINARY_FIELDS), wgap=0.016, hgap=0)[0]
-    offsets = [-0.22, 0.0, 0.22][: len(approaches)]
+    offsets = np.linspace(-0.27, 0.27, len(approaches))
     for i, (field, (display, _)) in enumerate(mcf.BINARY_FIELDS.items()):
         ax = perf_axes[i]
         ax.set_title(display, size=9, weight="bold", color=mcf.INK, pad=8)
@@ -207,7 +223,7 @@ def render(figsize, out_png, dfs, approaches, colors, wide=False):
     mcf.panel_header(fig, D_X0, ROW2_TOP + 0.02, "d", "   Similarity density by field",
                       "Per-paper cross-encoder scores (analysis/model_eval.R).")
     d_ax = fig.add_axes([D_X0, ROW2_BOT, D_X1 - D_X0, ROW2_TOP - 0.05 - ROW2_BOT])
-    d_ax.imshow(mpimg.imread(KDENSITIES_WIDE_PNG if wide else KDENSITIES_PNG))
+    d_ax.imshow(mpimg.imread(kde_png))
     d_ax.axis("off")
 
     os.makedirs(os.path.dirname(out_png), exist_ok=True)
@@ -244,7 +260,7 @@ def render_panel_a(dfs, approaches, colors, out_png):
                                 nrows=n_rows, ncols=n_cols, wgap=0.022, hgap=0.06)
     for c, label in enumerate(approaches):
         pos = mosaic_rows[0][c].get_position()
-        fig.text((pos.x0 + pos.x1) / 2, mosaic_top + 0.018, label,
+        fig.text((pos.x0 + pos.x1) / 2, mosaic_top + 0.018, textwrap.fill(label, 10),
                  ha="center", va="bottom", size=10, weight="bold", color=mcf.INK2)
     for r, (field, (_, wrapped)) in enumerate(mcf.BINARY_FIELDS.items()):
         pos = mosaic_rows[r][0].get_position()
@@ -303,7 +319,7 @@ def render_panel_b(dfs, approaches, colors, out_png):
     perf_top, perf_bot = 0.93, 0.165
     perf_axes = mcf.grid_axes(fig, 0.155, 0.98, perf_bot, perf_top,
                               nrows=1, ncols=len(mcf.BINARY_FIELDS), wgap=0.022, hgap=0)[0]
-    offsets = [-0.22, 0.0, 0.22][: len(approaches)]
+    offsets = np.linspace(-0.27, 0.27, len(approaches))
     for i, (field, (display, _)) in enumerate(mcf.BINARY_FIELDS.items()):
         ax = perf_axes[i]
         ax.set_title(display, size=10, weight="bold", color=mcf.INK, pad=10)
@@ -342,11 +358,11 @@ def render_panel_c(dfs, approaches, colors, out_png):
     _save(fig, out_png)
 
 
-def render_panel_d(out_png, img_path=KDENSITIES_PNG):
+def render_panel_d(out_png, img_path):
     """Similarity-KDE grid -- re-embeds the same external raster, no header, so
     no reserved header height either -- the image just fills the canvas.
     img_path's own aspect ratio drives fig_h, so the regular (3x2) and wide
-    (2x3, see KDENSITIES_WIDE_PNG) source grids each land at a sensible size."""
+    (2x3, see COMPARISONS' kde_wide) source grids each land at a sensible size."""
     img = mpimg.imread(img_path)
     img_h, img_w = img.shape[0], img.shape[1]
 
@@ -361,29 +377,38 @@ def render_panel_d(out_png, img_path=KDENSITIES_PNG):
     _save(fig, out_png)
 
 
-def render_panels(dfs, approaches, colors):
-    render_panel_a(dfs, approaches, colors, PANEL_PNGS["a"])
-    render_panel_a_wide(dfs, approaches, colors, PANEL_PNGS["a_wide"])
-    render_panel_b(dfs, approaches, colors, PANEL_PNGS["b"])
-    render_panel_c(dfs, approaches, colors, PANEL_PNGS["c"])
-    render_panel_d(PANEL_PNGS["d"])
-    if os.path.exists(KDENSITIES_WIDE_PNG):
-        render_panel_d(PANEL_PNGS["d_wide"], img_path=KDENSITIES_WIDE_PNG)
+def render_panels(dfs, approaches, colors, pngs, kde_png, kde_wide_png):
+    render_panel_a(dfs, approaches, colors, pngs["a"])
+    render_panel_a_wide(dfs, approaches, colors, pngs["a_wide"])
+    render_panel_b(dfs, approaches, colors, pngs["b"])
+    render_panel_c(dfs, approaches, colors, pngs["c"])
+    if os.path.exists(kde_png):
+        render_panel_d(pngs["d"], kde_png)
     else:
-        print(f"  WARNING: {KDENSITIES_WIDE_PNG} not found — run the updated "
+        print(f"  WARNING: {kde_png} not found — skipping panel d")
+    if os.path.exists(kde_wide_png):
+        render_panel_d(pngs["d_wide"], kde_wide_png)
+    else:
+        print(f"  WARNING: {kde_wide_png} not found — run the updated "
               f"model_eval.R (ncol=3 call) first, then rerun this script to get panel d's wide version")
 
 
 def main():
-    dfs, approaches = load_data()
-    colors = mcf.APPROACH_COLORS[: len(approaches)]
-    for figsize, out_png, wide in VARIANTS:
-        if wide and not os.path.exists(KDENSITIES_WIDE_PNG):
-            print(f"  WARNING: {KDENSITIES_WIDE_PNG} not found — skipping {out_png} "
-                  f"(copy the wide KDE grid from output/gpt/ into writing/figures/ first, then rerun)")
-            continue
-        render(figsize, out_png, dfs, approaches, colors, wide=wide)
-    render_panels(dfs, approaches, colors)
+    for prefix, cfg in COMPARISONS.items():
+        print(f"Building {prefix} comparison ...")
+        keys, dfs, approaches = load_data(mcf.FAMILIES[prefix]["approaches"], cfg["required"])
+        # By position in MERGED_DIRS (= model_eval.R's model_paths order), not
+        # in the approach list, so each approach matches its color in the
+        # R-rendered panel d (and SFT is the same green in both sets).
+        colors = [mcf.APPROACH_COLORS[list(mcf.MERGED_DIRS).index(k)] for k in keys]
+        for figsize, out_png, wide in variants(prefix):
+            kde_png = cfg["kde_wide"] if wide else cfg["kde"]
+            if not os.path.exists(kde_png):
+                print(f"  WARNING: {kde_png} not found — skipping {out_png} "
+                      f"(copy the KDE grid from model_eval.R's output into writing/figures/ first, then rerun)")
+                continue
+            render(figsize, out_png, dfs, approaches, colors, kde_png, wide=wide)
+        render_panels(dfs, approaches, colors, panel_pngs(prefix), cfg["kde"], cfg["kde_wide"])
 
 
 if __name__ == "__main__":
