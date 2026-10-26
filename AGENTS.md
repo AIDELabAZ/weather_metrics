@@ -4,6 +4,8 @@ This repository supports reproducible research on remote-sensing weather data an
 
 ## Scientific and coding conventions
 
+- Follow the [lab's house style](https://jdavidm.github.io/learn-stata/materials/02-house-style/) in every file. Use documented, numbered and bookmarked sections, tabs for command/object alignment and nested blocks, readable continuation lines, and lowercase commands. Preserve case-sensitive data names and existing workflow structure. Apply style corrections without redesigning the workflow.
+
 - Preserve existing estimation specifications, identifiers, output contracts, and historical replication behavior unless a task explicitly changes them. Distinguish historical specifications from newly proposed exploratory analyses.
 - Use the repository's existing Stata style, country/weather/outcome loops, and long-format `postfile` workflow. Make targeted edits; avoid unrelated refactoring or new dependencies.
 - In `analysis/reg_code/regressions.do`, the weather regressions use household-clustered standard errors (`vce(cluster hhid)`). Do not replace this with observation-level robust errors.

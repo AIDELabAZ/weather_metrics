@@ -15,23 +15,23 @@
 * TO DO:
 	* done
 
-	
+
 ***********************************************************************
 **# 0 - setup
 ***********************************************************************
 
-* define paths	
-	global root 	 "$rawlsms/uganda/wave_5/raw"
-	global export 	 "$data/refined_data/uganda/wave_5"
-	global logout 	 "$data/refined_data/uganda/logs"
-	
-* open log	
+* define paths
+	global		root 	 "$rawlsms/uganda/wave_5/raw"
+	global		export 	 "$data/refined_data/uganda/wave_5"
+	global		logout 	 "$data/refined_data/uganda/logs"
+
+* open log
 	cap log 		close
 	log using 		"$logout/2015_GSEC1", append
 
-	
+
 ***********************************************************************
-**# 1 - UNPS 2011 (Wave 5) - Section 1 
+**# 1 - unps 2011 (wave 5) - section 1
 ***********************************************************************
 
 * import wave 5 season 1
@@ -40,7 +40,7 @@
 * rename variables
 	isid 			HHID
 	rename 			HHID hhid
-	
+
 	drop 			district
 	rename 			district_name district
 	rename 			subcounty_name subcounty
@@ -52,8 +52,8 @@
 * drop if missing
 	drop if			district == ""
 	*** dropped 0 observations
-	
-	
+
+
 ***********************************************************************
 **# 2 - end matter, clean up to save
 ***********************************************************************
@@ -66,9 +66,9 @@
 	summarize
 
 * save file
-	save			"$export/2015_gsec1.dta", replace		
+	save		"$export/2015_gsec1.dta", replace
 
 * close the log
 	log	close
 
-/* END */	
+/* END */

@@ -16,27 +16,27 @@
 * TO DO:
 	* done
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 * define paths
-	loc		root	=	"$rawlsms/niger/wave_2/raw"
-	loc		export	=	"$data/refined_data/niger/wave_2"
-	loc		logout	= 	"$data/refined_data/niger/logs"
+	loc			root	=	"$rawlsms/niger/wave_2/raw"
+	loc			export	=	"$data/refined_data/niger/wave_2"
+	loc			logout	= 	"$data/refined_data/niger/logs"
 
 * open log
 	cap		log 	close
 	log 	using	"`logout'/2014_as1p1", append
 
 * **********************************************************************
-* 1 - describing plot size - self-reported and GPS
+**# 1 - describing plot size - self-reported and gps
 * **********************************************************************
 
 * import the first relevant data file
 	use				"`root'/ECVMA2_AS1P1", clear
-	
+
 * need to rename for English
 	rename 			PASSAGE visit
 	label 			var visit "number of visit"
@@ -44,34 +44,34 @@
 	label 			var clusterid "cluster number"
 	rename			MENAGE hh_num
 	label 			var hh_num "household number - not unique id"
-	rename 			EXTENSION extension 
+	rename		EXTENSION extension
 	label 			var extension "extension of household"
 	*** will need to do these in every file
-	rename 			AS01Q01 field 
+	rename		AS01Q01 field
 	label 			var field "field number"
-	rename 			AS01Q03 parcel 
+	rename		AS01Q03 parcel
 	label 			var parcel "parcel number"
-	
-* create new household id for merging with weather 
-	tostring		clusterid, replace 
+
+* create new household id for merging with weather
+	tostring	clusterid, replace
 	gen str2 		hh_num1 = string(hh_num,"%02.0f")
 	tostring		extension, replace
 	egen			hhid_y2 = concat( clusterid hh_num1 extension  )
 	destring		hhid_y2, replace
-	order			hhid_y2 clusterid hh_num hh_num1 extension 
-	
-* create new household id for merging with year 1 
+	order		hhid_y2 clusterid hh_num hh_num1 extension
+
+* create new household id for merging with year 1
 	egen			hid = concat( clusterid hh_num1  )
 	destring		hid, replace
-	order			hhid_y2 hid clusterid hh_num hh_num1 
-	
-* need to destring variables for later use in imputes 	
+	order		hhid_y2 hid clusterid hh_num hh_num1
+
+* need to destring variables for later use in imputes
 	destring 		clusterid, replace
-	
-* hhid_y2 field parcel should uniquely identify 
+
+* hhid_y2 field parcel should uniquely identify
 	describe
-	sort 			hhid_y2 field parcel 
-	isid 			hhid_y2 field parcel 
+	sort		hhid_y2 field parcel
+	isid		hhid_y2 field parcel
 
 * determine cultivated plot
 	rename 			AS01Q38 cultivated
@@ -79,42 +79,42 @@
 * drop if not cultivated
 	keep 			if cultivated == 1
 	*** 490 observations dropped
-	*** AS01Q43 asks about fallow specifically rather than did you cultivate 
-	
+	*** AS01Q43 asks about fallow specifically rather than did you cultivate
+
 * determine self reported plotsize
 	gen 			plot_size_SR = AS01Q06
 	lab	var			plot_size_SR "self reported size of plot, in square meters"
 	*** all plots measured in metre carre - square meters
-	
+
 	replace			plot_size_SR = . if plot_size_SR > 999997
-	*** 26 changed to missing 
+	*** 26 changed to missing
 
 * determine GPS plotsize
 	gen 			plot_size_GPS = AS01Q07
 	lab var			plot_size_GPS 	"GPS plot size in sq. meters"
 	*** all plots measured in metre carre - square meters
 	*** 999999 seems to be a code used to designate missing values
-	
+
 	replace			plot_size_GPS = . if plot_size_GPS > 999997
-	*** 236 changed to missing 
-	
+	*** 236 changed to missing
+
 * drop if SR and GPS both equal to 0
 	drop	 		if plot_size_GPS == 0 & plot_size_SR == 0
-	*** drops 57 values 
+	*** drops 57 values
 
-* assume 0 GPS reading should be . values 
-	replace 		plot_size_GPS = . if plot_size_GPS < 5 
+* assume 0 GPS reading should be . values
+	replace		plot_size_GPS = . if plot_size_GPS < 5
 	*** will replace 1254 values to missing
 	*** in other countries, when plot not measured with GPS coded with . - in Niger seems to be coded as 0
 
 * **********************************************************************
-* 2 - conversion to hectares
+**# 2 - conversion to hectares
 * **********************************************************************
 
-	gen 			plot_size_hec_SR = . 
+	gen			plot_size_hec_SR = .
 
-* plots measures in square meters 
-* create conversion variable 
+* plots measures in square meters
+* create conversion variable
 	gen 			sqmcon = 0.0001
 
 * convert to SR hectares
@@ -122,23 +122,23 @@
 	lab	var			plot_size_hec_SR "SR area of plot in hectares"
 
 * count missing values
-	count			if plot_size_SR == . 
+	count		if plot_size_SR == .
 	count 			if plot_size_hec_SR !=.
-	count			if plot_size_hec_SR == . 
+	count		if plot_size_hec_SR == .
 	*** 26 observations do not have plot_size_SR
 	*** 26 observations do not have plot_size_hec_SR
 	*** 5,061 observations have plot_size_hec_SR
 
 * convert gps report to hectares
-	count 			if plot_size_GPS == .  
-	*** 1490 observations have no GPS value 
+	count		if plot_size_GPS == .
+	*** 1490 observations have no GPS value
 	gen 			plot_size_2 = .
 	replace 		plot_size_2 = plot_size_GPS*sqmcon
 	rename 			plot_size_2 plot_size_hec_GPS
 	lab	var			plot_size_hec_GPS "GPS measured area of plot in hectares"
 
 	count 			if plot_size_hec_GPS !=.
-	count			if plot_size_hec_GPS == . 
+	count		if plot_size_hec_GPS == .
 	*** 1490 observations do not have plot_size_hec_GPS
 	*** 3597 observations have plot_size_hec_GPS
 
@@ -167,7 +167,7 @@
 	*** 1147 GPS which are greater than 2
 	tab				plot_size_hec_GPS 	if 	plot_size_hec_GPS > 20
 	*** 32 GPS which are greater than 20
-	*** some are fairly large... 
+	*** some are fairly large...
 	*** but looking at 2011 - it seems like this is possible, based on distribution between years
 
 * correlation at higher plot sizes
@@ -185,31 +185,31 @@
 	tab				plot_size_hec_GPS 	if 	plot_size_hec_GPS < 0.005
 	*** 13 are below 0.005
 	*** none are unrealistically small
-	
+
 *correlation at lower plot sizes
 	list 			plot_size_hec_GPS plot_size_hec_SR 	if 	///
 						plot_size_hec_GPS < 0.01, sep(0)
 	pwcorr 			plot_size_hec_GPS plot_size_hec_SR 	if ///
 						plot_size_hec_GPS < 0.01
 	*** large but negative relationship between GPS and SR plotsize, correlation = -0.4776
-	
+
 * compare GPS and SR
-* examine GPS 
+* examine GPS
 	sum 			plot_size_hec_GPS
 	sum 			plot_size_hec_SR
 	*** GPS tending to be smaller than self-reported, but only VERY slightly 2.32 v. 2.45
-	*** per conversations with WBG will not include SR in imputation - only will include GPS 
+	*** per conversations with WBG will not include SR in imputation - only will include GPS
 	** tested with both including SR and not (findings below)
 			*** IMPUTE WITH ONLY GPS - mean 2.2, sd 4.31
 			*** IMPUTE WITH GPS AND SR - mean 2.23, sd 4.57
-	
+
 * examine with histograms
-* * so they don't run every time i run this file 	
+* * so they don't run every time i run this file
 	*histogram 		plot_size_hec_GPS 	if 	plot_size_hec_GPS < 0.3
 	*histogram 		plot_size_hec_GPS 	if 	plot_size_hec_GPS < 0.2
 	*histogram 		plot_size_hec_GPS 	if 	plot_size_hec_GPS < 0.1
 	*** GPS seems only okay at all sizes
-	
+
 * impute missing plot sizes using predictive mean matching
 	mi set 			wide // declare the data to be wide.
 	mi xtset		, clear // this is a precautinary step to clear any existing xtset
@@ -233,9 +233,9 @@
 	drop 			if missing(plot_size_hec_GPS_1_)
 	*** 0 observations deleted
 
-	
+
 * **********************************************************************
-* 3 - end matter, clean up to save
+**# 3 - end matter, clean up to save
 * **********************************************************************
 
 	rename			plot_size_hec_GPS_1_ plotsize
@@ -244,11 +244,11 @@
 	keep 			hhid_y2 hid clusterid hh_num hh_num1 extension field parcel plotsize
 
 * create unique household-plot identifier
-	isid			hhid_y2 field parcel 
-	sort			hhid_y2 field parcel, stable 
+	isid		hhid_y2 field parcel
+	sort		hhid_y2 field parcel, stable
 	egen			plot_id = group(hhid_y2 field parcel)
 	lab var			plot_id "unique field and parcel identifier (hhid_y2 field parcel)"
-	
+
 	label var 		hhid_y2 "unique id - match w2 with weather"
 	label var		hid "unique id - match w2 with w1 (no extension)"
 	label var 		hh_num1 "household id - string changed, not unique"

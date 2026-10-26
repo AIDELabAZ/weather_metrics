@@ -15,23 +15,23 @@
 * TO DO:
 	* done
 
-	
+
 ************************************************************************
 **# 0 - setup
 ************************************************************************
 
-* define paths	
-	global root 		"$rawlsms/uganda/wave_2/raw"
-	global export 		"$data/refined_data/uganda/wave_2"
-	global logout 		"$data/refined_data/uganda/logs"
-	
-* open log	
+* define paths
+	global		root 		"$rawlsms/uganda/wave_2/raw"
+	global		export 		"$data/refined_data/uganda/wave_2"
+	global		logout 		"$data/refined_data/uganda/logs"
+
+* open log
 	cap log 			close
 	log using 			"$logout/2010_GSEC1", append
 
-	
+
 ************************************************************************
-**# 1 - UNPS 2009 (Wave 2) - General(?) Section 1 
+**# 1 - unps 2009 (wave 2) - general(?) section 1
 ************************************************************************
 
 * import wave 2 season 1
@@ -53,8 +53,8 @@
 * drop if missing
 	drop if			district == ""
 	*** dropped 25 observations
-	
-	
+
+
 ************************************************************************
 **# 2 - end matter, clean up to save
 ************************************************************************
@@ -72,4 +72,4 @@
 * close the log
 	log	close
 
-/* END */	
+/* END */

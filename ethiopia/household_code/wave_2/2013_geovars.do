@@ -14,23 +14,23 @@
 * TO DO:
 	* done
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
-* define paths	
-	loc root 		= "$rawlsms/ethiopia/wave_2/raw"
-	loc export 		= "$data/refined_data/ethiopia/wave_2"
-	loc logout 		= "$data/refined_data/ethiopia/logs"
-	
-* open log	
+* define paths
+	loc			root 		= "$rawlsms/ethiopia/wave_2/raw"
+	loc			export 		= "$data/refined_data/ethiopia/wave_2"
+	loc			logout 		= "$data/refined_data/ethiopia/logs"
+
+* open log
 	cap log 		close
 	log using 		"`logout'/wave_2_geovars", append
 
-	
+
 * **********************************************************************
-* 1 - ESS (Wave 2) - geovars
+**# 1 - ess (wave 2) - geovars
 * **********************************************************************
 
 * import wave 2 geovars
@@ -40,10 +40,10 @@
 	isid 			household_id2
 
 	rename 			ssa_aez09 aez
-	
-	
+
+
 * **********************************************************************
-* 2 - end matter, clean up to save
+**# 2 - end matter, clean up to save
 * **********************************************************************
 
 	keep 			household_id2 aez
@@ -58,4 +58,4 @@
 * close the log
 	log	close
 
-/* END */	
+/* END */

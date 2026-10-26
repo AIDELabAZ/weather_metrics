@@ -10,7 +10,7 @@
 	* gives location identifiers for participants
 	* hierarchy: holder > parcel > field > crop - not a concern in this dofile
 	* seems to very roughly correspond to Malawi ag-modI and ag-modO
-	
+
 * assumes
 	* raw lsms-isa data
 	* distinct.ado
@@ -18,23 +18,23 @@
 * TO DO:
 	* done
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 * define paths
-	loc root = "$rawlsms/ethiopia/wave_3/raw"
-	loc export = "$data/refined_data/ethiopia/wave_3"
-	loc logout = "$data/refined_data/ethiopia/logs"
+	loc			root = "$rawlsms/ethiopia/wave_3/raw"
+	loc			export = "$data/refined_data/ethiopia/wave_3"
+	loc			logout = "$data/refined_data/ethiopia/logs"
 
 * open log
 	cap log close
 	log using "`logout'/wv3_HHSEC1", append
 
-	
+
 * **********************************************************************
-* 1 - preparing ESS 2015/16 (Wave 3) - Household Section 1 
+**# 1 - preparing ess 2015/16 (wave 3) - household section 1
 * **********************************************************************
 
 * load data
@@ -43,7 +43,7 @@
 * dropping duplicates
 	duplicates 	drop
 
-* individual_id2 is unique identifier 
+* individual_id2 is unique identifier
 	describe
 	sort 		household_id2 individual_id2
 	isid 		individual_id2, missok
@@ -56,7 +56,7 @@
 
 
 * ***********************************************************************
-* 2 - cleaning and keeping
+**# 2 - cleaning and keeping
 * ***********************************************************************
 
 * renaming some variables of interest
@@ -71,12 +71,12 @@
 * restrict to variables of interest
 	keep  		hhid- hh_s1q00 district_id
 	order 		hhid- saq08
-	
+
 * prepare for export
 	isid		individual_id2
 	compress
 	describe
-	summarize 
+	summarize
 	sort hhid ea_id
 	save 		"`export'/HH_SEC1.dta", replace
 * close the log

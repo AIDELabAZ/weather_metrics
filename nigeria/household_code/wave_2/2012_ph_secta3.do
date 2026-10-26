@@ -19,24 +19,24 @@
 * TO DO:
 	* complete
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 * define paths
-	loc 	root	= 	"$rawlsms/nigeria/wave_2/raw"
-	loc		cnvrt	=	"$data/refined_data/nigeria/conversion_files"
-	loc 	export	= 	"$data/refined_data/nigeria/wave_2"
-	loc 	logout	= 	"$data/refined_data/nigeria/logs"
+	loc			root	= 	"$rawlsms/nigeria/wave_2/raw"
+	loc			cnvrt	=	"$data/refined_data/nigeria/conversion_files"
+	loc			export	= 	"$data/refined_data/nigeria/wave_2"
+	loc			logout	= 	"$data/refined_data/nigeria/logs"
 
 * open log
 	cap 	log 	close
 	log 	using 	"`logout'/wave_2_ph_secta3", append
 
-	
+
 * **********************************************************************
-* 1 - general clean up, renaming, etc.
+**# 1 - general clean up, renaming, etc.
 * **********************************************************************
 
 * import the first relevant data file
@@ -50,7 +50,7 @@
 	tab				sa3q3
 	tab				sa3q4
 	tab				sa3q4b
-	
+
 * drop observations in which it was not harvest season
 	drop if 		sa3q4 == 9 | sa3q4 == 10 | sa3q4 == 11
 	*** drops 2517 observations
@@ -67,21 +67,21 @@
 * replace missing quantity if value is not missing
 	replace			sa3q6a1 = 0 if sa3q6a1 == . & sa3q18 != .
 	*** 21 missing changed to zero
-	
+
 * replace missing value if quantity is not missing
 	replace			sa3q18 = 0 if sa3q18 == . & sa3q6a1 != .
 	*** 79 missing changed to zero
-	
+
 * check to see if there are missing observations for quantity and value
 	mdesc 			sa3q6a1 sa3q18
 	*** no missing values
-	
+
 	describe
 	sort 			hhid plotid cropid
 	isid 			hhid plotid cropid
-	
+
 * **********************************************************************
-* 2 - generate harvested values
+**# 2 - generate harvested values
 * **********************************************************************
 
 * create quantity harvested variable
@@ -109,7 +109,7 @@
 * replace any +3 s.d. away from median as missing
 	replace			vl_hrv = . if vl_hrv > `r(p50)'+(3*`r(sd)')
 	*** replaced 111 values, max is now 1,054
-	
+
 * impute missing values
 	mi set 			wide 	// declare the data to be wide.
 	mi xtset		, clear 	// clear any xtset that may have had in place previously
@@ -117,27 +117,27 @@
 	sort			hhid plotid cropid, stable // sort to ensure reproducability of results
 	mi impute 		pmm vl_hrv i.state i.cropid, add(1) rseed(245780) ///
 						noisily dots force knn(5) bootstrap
-	mi 				unset	
+	mi			unset
 
 * how did the imputation go?
 	tab				mi_miss
 	tabstat			vl_hrv vl_hrv_1_, by(mi_miss) ///
 						statistics(n mean min max) columns(statistics) ///
-						longstub format(%9.3g) 
+				longstub format(%9.3g)
 	replace			vl_hrv = vl_hrv_1_
 	lab var			vl_hrv "Value of harvest (2015 USD), imputed"
 	drop			vl_hrv_1_
 	*** imputed 172 values out of 10,382 total observations
-	
+
 * **********************************************************************
-* 3 - generate maize harvest quantities
+**# 3 - generate maize harvest quantities
 * **********************************************************************
 
 * merge harvest conversion file
 	merge 			m:1 cropcode harv_unit using "`cnvrt'/harvconv_wave_2.dta"
 	*** matched 9633 but didn't match 2799 (from master 749 and using 2050)
-	*** okay with mismatch in using - not every crop and unit are used in the master 
-		
+	*** okay with mismatch in using - not every crop and unit are used in the master
+
 * drop unmerged using
 	drop if			_merge == 2
 	* dropped 2050
@@ -165,7 +165,7 @@
 	replace			conversion = 1 if conversion == .
 	mdesc			conversion
 	*** no more missing
-	
+
 * converting harvest quantities to kgs
 	gen 			harv_kg = harvestq*conversion
 	mdesc 			harv_kg
@@ -173,21 +173,21 @@
 
 * replace other types of maize to all have the same crop code
 	replace			cropcode = 1080 if cropcode > 1079 & cropcode < 1084
-	
+
 * check to see if outliers can be dealt with
 	by harv_unit	, sort: sum harv_kg if 	cropcode == 1080
 	*** grams seem to be wrong (mean of 61066)
 	*** max for large sack is high too (13,000)
 	*** as are wheelbarrow and pick up (4,400; 6,000; 26,000; 15,000)
 	*** all others seem reasonable
-	
-* deal with grams 
+
+* deal with grams
 	sort 			cropcode harv_unit
 	replace			harv_kg = harv_kg/1000 if harv_unit == 2 & ///
 						sa3q6a1 > 500 & cropcode == 1080
 	*** 4 values changed
-	
-* deal with sack and barrow etc 
+
+* deal with sack and barrow etc
 	sort 			cropcode harv_unit harv_kg
 	replace			harv_kg = 3000 if sa3q6a1 == 130 & cropcode == 1080
 	*** 1 value changed, the other high values may be plausible
@@ -196,7 +196,7 @@
 	gen 			mz_hrv = harv_kg 	if 	cropcode == 1080
 	gen				mz_damaged = 1		if  cropcode == 1080 ///
 						& mz_hrv == 0
-						
+
 * summarize value of harvest
 	sum				mz_hrv, detail
 	*** median 400, mean 886, max 40,000
@@ -204,7 +204,7 @@
 * replace any +3 s.d. away from median as missing
 	replace			mz_hrv = . if mz_hrv > `r(p50)' + (3*`r(sd)')
 	*** replaced 17 values, max is now 6,600
-	
+
 * impute missing values
 	mi set 			wide 	// declare the data to be wide.
 	mi xtset		, clear 	// clear any xtset that may have had in place previously
@@ -212,28 +212,28 @@
 	sort			hhid plotid cropid, stable // sort to ensure reproducability of results
 	mi impute 		pmm mz_hrv i.state if cropcode == 1080, add(1) rseed(245780) ///
 						noisily dots force knn(5) bootstrap
-	mi 				unset	
+	mi			unset
 
 * how did the imputation go?
 	tab				mi_miss1 if cropcode == 1080
 	tabstat			mz_hrv mz_hrv_1_ if cropcode == 1080, by(mi_miss) ///
 						statistics(n mean min max) columns(statistics) ///
-						longstub format(%9.3g) 
+				longstub format(%9.3g)
 	replace			mz_hrv = mz_hrv_1_  if cropcode == 1080
 	lab var			mz_hrv "Quantity of maize harvested (kg)"
 	drop			mz_hrv_1_
-	*** imputed 17 values out of 1,422 total observations									
+	*** imputed 17 values out of 1,422 total observations
 
-	
+
 * **********************************************************************
-* 4 - end matter, clean up to save
+**# 4 - end matter, clean up to save
 * **********************************************************************
 
 * keep what we want, get rid of what we don't
 	keep 				zone state lga sector ea hhid plotid cropid ///
 							cropname cropcode cultivated ///
 							mz_hrv vl_hrv mz_damaged
-							
+
 * check for duplicates
 	duplicates		report hhid plotid cropid
 	*** there are 0 duplicates
@@ -244,12 +244,12 @@
 	sort			hhid plotid cropid
 	egen			cropplot_id = group(hhid plotid cropid)
 	lab var			cropplot_id "unique crop-plot identifier"
-	
+
 * create unique household-plot identifier
-	sort			hhid plotid 
+	sort		hhid plotid
 	egen			plot_id = group(hhid plotid)
 	lab var			plot_id "unique plot identifier"
-	
+
 	compress
 	describe
 	summarize

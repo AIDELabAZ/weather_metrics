@@ -34,49 +34,41 @@ The code in this repository is primarily for replicating the cleaning of the hou
 
 ### Running the pipeline
 
-`projectdo.do` is the entry point; `setup_paths.do` defines the shared inputs and
-project-specific outputs. Run from the repository root in Stata 18 or newer:
+`projectdo.do` keeps the original numbered sections and run blocks. Run it from
+this repository's root in Stata 18 or newer, and edit/select the relevant blocks
+as before. The original block-comment choices are preserved: weather processing,
+household processing, and panel/regression calls are commented out; the analysis
+calls in section 4 are active. Those legacy figure scripts still require their
+older result-variable contracts and have not been migrated.
+
+Section 0.1 shows the input and output globals. The shared data root defaults to
+`<USERPROFILE>/OneDrive - University of Arizona/weather_and_agriculture`, or the
+`WEATHER_AGRICULTURE_DATA` environment variable when set. Adjust the path section
+for another location; personal paths belong in local configuration rather than
+committed code. `setup_paths.do` creates the project output folders. To initialize
+paths and folders without running any analysis blocks, run:
 
 ```stata
-do projectdo.do "" "" "setup"
-do projectdo.do "" "" "packages"
-do projectdo.do "" "" "metrics"
-do projectdo.do "" "" "households"
-do projectdo.do "" "" "panel"
-do projectdo.do "" "" "regressions"
+	do			setup_paths.do
 ```
-
-The arguments are the repository root, shared data root, and stage. Empty root
-arguments use the current working directory and the `WEATHER_AGRICULTURE_DATA`
-environment variable, respectively. If that environment variable is unset, the
-shared data root defaults to
-`<USERPROFILE>/OneDrive - University of Arizona/weather_and_agriculture`.
-Paths can also be supplied explicitly; personal paths belong in local invocations,
-rather than committed code.
 
 `$rawlsms` points to `raw_lsms_data`, `$weatherdata` to `weather_data`, and `$data`
 to `weather_metrics_data`, all under the shared data root. `$weatherwork` points
 to `$data/refined_data/weather` for project-specific daily conversions and
-regenerated weather metrics, leaving shared historical weather files intact.
-Household section
-outputs go to `refined_data/<country>/wave_<n>` without another `refined` level.
-Generated Nigerian conversion tables also go under the project refined data;
-original conversion inputs stay under `raw_lsms_data`.
+regenerated weather metrics. Household outputs go to
+`refined_data/<country>/wave_<n>` without another `refined` level. Generated
+Nigerian conversion tables also go under the project refined data; original
+conversion inputs stay under `raw_lsms_data`.
 
-Run `metrics` once to regenerate weather metrics with `wxsum` from existing daily
-files. It reads project daily conversions when present, otherwise shared daily
-inputs. Nigeria wave 4's shared archive uses `raw 2` and `daily 2`; the code handles
-those archive locations explicitly. `households` then uses the project's
-regenerated weather. The separate `weather` stage also repeats CSV conversion;
-`figures` runs
-the existing visualization scripts. `all` runs weather processing, household
-cleaning/merging, panel construction, and regressions in order; it can take several
-hours. Stages stop at the first error. Legacy figures remain separate: those scripts
-still expect extraction-method metadata (`ext`) and older result-variable contracts,
-and have not been migrated to the current regression schema.
-The `packages` stage installs missing declared dependencies; ordinary runs do not
-download packages or change permanent Stata settings. `wxsum` replaces the
-deprecated weather package and is installed from its author's GitHub distribution.
+Section 1 calls the existing country weather master files. Individual wave
+`*_weather.do` files can be run directly to recompute metrics from existing daily
+files: they read project daily conversions when present, otherwise shared daily
+inputs. Nigeria wave 4's archive also supports the `raw 2` and `daily 2` locations.
+Household builds then use the project's regenerated weather.
+
+The original `$pack` switch controls package installation: keep `pack` at 0 to
+skip it, or set it to 1 to execute section 0.2. The weather dependency is now
+`wxsum`, installed from its author's GitHub distribution.
 
 #### Weather-engine migration
 
@@ -112,8 +104,8 @@ metric files.
 Path verification with synthetic input folders:
 
 ```stata
-do analysis/reg_code/tests/project_paths.do "<new-scratch-directory>"
-do analysis/reg_code/tests/wxsum_migration.do
+	do			analysis/reg_code/tests/project_paths.do "<new-scratch-directory>"
+	do			analysis/reg_code/tests/wxsum_migration.do
 ```
 
 The regression output filenames remain `reg_results.dta` and

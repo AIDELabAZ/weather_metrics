@@ -7,34 +7,34 @@
 
 * does
 	* Executes all wave specific Uganda weather .do files
-    * runs wxsum .ado file
+* runs wxsum .ado file
 	* outputs .dta rainfall data ready to merge with LSMS household data
 	* takes (15:25-) XXX minutes to convert and process weather data
 
 * assumes
-	* wxsum.ado
-	* customsave.ado 
+* wxsum.ado
+* customsave.ado
 	* subsidiary, wave-specific .do files
 
 * TO DO:
 	* completed
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 clear
 
 *set max vars
-	set maxvar 120000  // this amount is only allowed for MP editions
+	set			maxvar 120000  // this amount is only allowed for MP editions
 
 * define paths
 	loc root = "$code/uganda/weather_code"
 
 
 * **********************************************************************
-* 1 - run .do files
+**# 1 - run .do files
 * **********************************************************************
 
 * do each of the file converters
@@ -45,7 +45,7 @@ clear
 	do "`root'/wave_5/UGA_UNPSY5_converter.do"	//	convert wave 5 .csv to .dta
 	do "`root'/wave_7/UGA_UNPSY7_converter.do"	//	convert wave 7 .csv to .dta
 	do "`root'/wave_8/UGA_UNPSY8_converter.do"	//	convert wave 8 .csv to .dta
-	
+
 * do each of the weather commands
 	do "`root'/wave_1/UGA_UNPSY1_weather.do"	//	generate wave 1 weather variables
 	do "`root'/wave_2/UGA_UNPSY2_weather.do"	//	generate wave 2 weather variables

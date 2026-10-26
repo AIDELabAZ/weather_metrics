@@ -15,28 +15,28 @@
 
 * TO DO:
 	* complete
-	
-	
+
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
-	
-* define paths	
-	loc root = "$rawlsms/nigeria/wave_3/raw"
-	loc export = "$data/refined_data/nigeria/wave_3"
-	loc logout = "$data/refined_data/nigeria/logs"
-	
-* open log	
+
+* define paths
+	loc			root = "$rawlsms/nigeria/wave_3/raw"
+	loc			export = "$data/refined_data/nigeria/wave_3"
+	loc			logout = "$data/refined_data/nigeria/logs"
+
+* open log
 	cap log close
 	log using "`logout'/pp_sect11b1", append
 
-	
+
 * **********************************************************************
-* 1 - determine irrigation and plot use
+**# 1 - determine irrigation and plot use
 * **********************************************************************
-		
+
 * import the first relevant data file
-		use "`root'/sect11b1_plantingw3", clear 	
+	use			"`root'/sect11b1_plantingw3", clear
 
 describe
 sort hhid plotid
@@ -49,13 +49,13 @@ rename s11b1q39 irr_any
 * check to see if values are missing
 	mdesc			irr_any
 	***99 missing
-	
-	
+
+
 * convert missing values to "no"
 	replace			irr_any = 2 if irr_any == .
-	
+
 * **********************************************************************
-* 2 - end matter, clean up to save
+**# 2 - end matter, clean up to save
 * **********************************************************************
 
 	keep 			hhid zone state lga sector hhid ea plotid ///
@@ -66,10 +66,10 @@ rename s11b1q39 irr_any
 	sort			hhid plotid
 	egen			plot_id = group(hhid plotid)
 	lab var			plot_id "unique plot identifier"
-	
+
 	compress
 	describe
-	summarize 
+	summarize
 
 
 * save file

@@ -14,27 +14,27 @@
 * assumes
 	* raw lsms-isa data
 	* distinct.ado
-	
+
 * TO DO:
 	* done
-	
-	
+
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 * define paths
 	global		root 		 	"$rawlsms/ethiopia/wave_4/raw"
 	global		export 		 	"$data/refined_data/ethiopia/wave_4"
 	global		logout 		 	"$data/refined_data/ethiopia/logs"
-	
-* open log	
+
+* open log
 	cap log 	close
 	log 		using			"$logout/wv4_PHSEC10", append
 
 
 * **********************************************************************
-* 1 - preparing ESS (Wave 4) - Post Harvest Section 10
+**# 1 - preparing ess (wave 4) - post harvest section 10
 * **********************************************************************
 
 * load data
@@ -49,17 +49,17 @@
 	describe
 	sort 		holder_id parcel_id field_id crop_id
 	isid 		holder_id parcel_id field_id crop_id
-	
+
 * creating parcel identifier
 	rename		parcel_id parcel
 	tostring	parcel, replace
 	generate 	parcel_id = holder_id + " " + ea_id + " " + parcel
-	
+
 * creating field identifier
 	rename		field_id field
 	tostring	field, replace
 	generate 	field_id = holder_id + " " + ea_id + " " + parcel + " " + field
-	
+
 * creating unique crop identifier
 	rename		crop_id crop
 	tostring	crop, generate(crop_codeS)
@@ -75,11 +75,11 @@
 	*** 71 distinct districts
 	*** close but different from all other sections
 
-	
+
 * **********************************************************************
-* 2 - collecting labor variables
-* **********************************************************************	
-	
+**# 2 - collecting labor variables
+* **********************************************************************
+
 * following same procedure as pp_w4 for continuity
 
 * per Palacios-Lopez et al. (2017) in Food Policy, we cap labor per activity
@@ -101,7 +101,7 @@
 		where # of men = 3 and total # of days = 1 for example
 		the same dilemna/assumption applies to free labor (ph_s10q03_*)
 		this can be revised if we think this assumption is shakey */
-	replace		s10q01a = 0 if s10q01a == . 
+	replace		s10q01a = 0 if s10q01a == .
 	replace		s10q01d = 0 if s10q01d == .
 	rename	 	s10q01a laborhi_m
 	rename	 	s10q01d laborhi_f
@@ -114,61 +114,61 @@
 
 * totaling household labor
 * replace weeks worked equal to zero if missing
-	replace		s10q02b = 0 if s10q02b == . 
-	replace		s10q02f = 0 if s10q02f == . 
-	replace		s10q02j = 0 if s10q02j == . 
-	replace		s10q02n = 0 if s10q02n == . 
-	   
+	replace		s10q02b = 0 if s10q02b == .
+	replace		s10q02f = 0 if s10q02f == .
+	replace		s10q02j = 0 if s10q02j == .
+	replace		s10q02n = 0 if s10q02n == .
+
 * find average # of days worked by worker reported (most obs)
 	sum 		s10q02c s10q02g s10q02k s10q02o
 	*** s10q02c - 2.26, s10q02g - 2.27
 	*** s10q02k - 2.31, s10q02o - 2.23
-	
-* replace days per week worked equal to average if missing and weeks were worked 
-	replace		s10q02c = 2.26 if s10q02c == . &  s10q02b != 0 
-	replace		s10q02g = 2.27 if s10q02g == . &  s10q02f != 0  
-	replace		s10q02k = 2.31 if s10q02k == . &  s10q02j != 0  
-	replace		s10q02o = 2.23 if s10q02o == . &  s10q02n != 0 
-	
+
+* replace days per week worked equal to average if missing and weeks were worked
+	replace		s10q02c = 2.26 if s10q02c == . &  s10q02b != 0
+	replace		s10q02g = 2.27 if s10q02g == . &  s10q02f != 0
+	replace		s10q02k = 2.31 if s10q02k == . &  s10q02j != 0
+	replace		s10q02o = 2.23 if s10q02o == . &  s10q02n != 0
+
 * replace days per week worked equal to 0 if missing and no weeks were worked
-	replace		s10q02c = 0 if s10q02c == . &  s10q02b == 0 
-	replace		s10q02g = 0 if s10q02g == . &  s10q02f == 0  
-	replace		s10q02k = 0 if s10q02k == . &  s10q02j == 0  
-	replace		s10q02o = 0 if s10q02o == . &  s10q02n == 0 
-	
+	replace		s10q02c = 0 if s10q02c == . &  s10q02b == 0
+	replace		s10q02g = 0 if s10q02g == . &  s10q02f == 0
+	replace		s10q02k = 0 if s10q02k == . &  s10q02j == 0
+	replace		s10q02o = 0 if s10q02o == . &  s10q02n == 0
+
 	summarize	s10q02b s10q02c s10q02f s10q02g s10q02j ///
 					s10q02k s10q02n s10q02o
 	*** it looks like the above approach works
-	
+
 	generate	laborhh_1 = s10q02b * s10q02c
 	generate	laborhh_2 = s10q02f * s10q02g
 	generate	laborhh_3 = s10q02j * s10q02k
 	generate	laborhh_4 = s10q02n * s10q02o
-	
-	summarize	labor*	
+
+	summarize	labor*
 	*** maxes shouldn't be greater than 91
 	*** none have maxes > 91
-	
+
 	summarize 	laborhi_m laborfr_f laborhh_1 laborhh_2 laborhh_3, detail
 	*** no need to impute or deal with outliers
 
-* generate aggregate hh and hired labor variables	
+* generate aggregate hh and hired labor variables
 	generate 	laborday_hh = laborhh_1 + laborhh_2 + laborhh_3 + laborhh_4
 	generate 	laborday_hired = laborhi_m + laborhi_f
 	gen			laborday_free = laborfr_m + laborfr_f
-	
+
 * check to make sure things look all right
 	sum			laborday*
-	
-* combine hh and hired labor into one variable 
+
+* combine hh and hired labor into one variable
 	generate 	labordays_harv = laborday_hh + laborday_hired + laborday_free
 	drop 		laborday_hh laborday_hired laborday_free laborhh_1- laborhh_4 ///
 					laborhi_m laborhi_f laborfr_m laborfr_f
 	label var 	labordays_harv "Total Days of Harvest Labor"
 
-	
+
 * ***********************************************************************
-* 3 - cleaning and keeping
+**# 3 - cleaning and keeping
 * ***********************************************************************
 
 * renaming some variables of interest
@@ -181,7 +181,7 @@
 	lab var 		crop_code "Crop Identifier"
 	lab var			crop_id "Unique Crop ID"
 	lab var			crop "Unique Crop ID Within Plot"
-	
+
 *	Restrict to variables of interest
 	keep  		holder_id- saq09 crop_code crop_id labordays_harv
 	order 		holder_id- crop
@@ -193,7 +193,7 @@
 	summarize
 
 	sort 		holder_id ea_id parcel field crop
-	
+
 	save 		"$export/PH_SEC10.dta", replace
 
 * close the log

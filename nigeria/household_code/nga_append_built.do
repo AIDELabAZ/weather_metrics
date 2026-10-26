@@ -15,10 +15,10 @@
 
 * TO DO:
 	* complete
-	
-	
+
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 * define paths
@@ -27,33 +27,33 @@
 	global		export 	= 	"$data/regression_data/nigeria"
 	global		logout 	= 	"$data/merged_data/nigeria/logs"
 
-* open log	
-	cap 	log 	close 
+* open log
+	cap			log			close
 	log 	using 	"$logout/nga_append_built", append
 
-	
+
 * **********************************************************************
-* 1 - merge first three waves of Nigeria household data
+**# 1 - merge first three waves of nigeria household data
 * **********************************************************************
 
 * using merge rather than append
 * import wave 1 nigeria
-	
+
 	use 			"$root/wave_1/ghsy1_merged", clear
-	
+
 * append wave 2 file
-	append			using "$root/wave_2/ghsy2_merged", force	
-	
-* append wave 3 file 
-	append			using "$root/wave_3/ghsy3_merged", force		
-	
-* append wave 4 file 
-	append			using "$root/wave_4/ghsy4_merged", force	
+	append		using "$root/wave_2/ghsy2_merged", force
+
+* append wave 3 file
+	append		using "$root/wave_3/ghsy3_merged", force
+
+* append wave 4 file
+	append		using "$root/wave_4/ghsy4_merged", force
 	*** at the moment I believe that all four waves of nigeria identify hh's the same
-	
+
 * check the number of observations again
 	count
-	*** 11,621 observations 
+	*** 11,621 observations
 	count if 		year == 2010
 	*** wave 1 has 2,833
 	count if 		year == 2012
@@ -64,14 +64,14 @@
 	*** wave 4 has 3,237
 
 * **********************************************************************
-* 2 - merge in sampling weights
+**# 2 - merge in sampling weights
 * **********************************************************************
-	
+
 	merge			m:1 hhid using "$weight/HHTrack"
 	*** all but 2,317 new households matched
-	
+
 	drop			if _merge == 2
-	
+
 	gen				pw = wt_wave1 if year == 2010
 	replace			pw = wt_wave2 if year == 2012
 	replace			pw = wt_w2v2 if pw == . & year == 2012
@@ -80,9 +80,9 @@
 	replace			pw = wgt_pnl if year == 2018
 	replace			pw = wgt18 if pw == . & year == 2018
 	lab var			pw "Final household weight"
-	
+
 	drop			hhstatus_w1v1 - _merge wgt18 wgt_pnl
-	
+
 * generate panel id
 	sort			hhid year
 	egen			nga_id = group(hhid)
@@ -94,15 +94,15 @@
 	gen				dtype = "lp" if old_new != 2
 	replace			dtype = "cx" if dtype == ""
 	lab var			dtype "Data type"
-	
+
 	isid			nga_id year
 
 * drop variables
 	drop			zone state lga sector ea
-	
-	order			country dtype nga_id pw aez year 
 
-* label household variables	
+	order		country dtype nga_id pw aez year
+
+* label household variables
 	lab var			tf_lnd	"Total farmed area (ha)"
 	lab var			tf_hrv	"Total value of harvest (2015 USD)"
 	lab var			tf_yld	"value of yield (2015 USD/ha)"
@@ -119,7 +119,7 @@
 	lab var			cp_pst	"Any maize plot has pesticide"
 	lab var			cp_hrb	"Any maize plot has herbicide"
 	lab var			cp_irr	"Any maize plot has irrigation"
-	lab var 		data "Data Source"	
+	lab var		data "Data Source"
 
 * generate remote sensing product variables
 	gen				sat1 = 1
@@ -142,7 +142,7 @@
 	order			sat9, before(v15_merra)
 	lab define 		sat 1 "ARC2" 2 "CHIRPS" 3 "CPC" 4 "ERA5" 5 "MERRA-2" ///
 						6 "TAMSAT" 7 "CPC" 8 "ERA5" 9 "MERRA-2"
-						
+
 * label satellites variables
 	loc	sat			sat*
 	foreach v of varlist `sat' {
@@ -187,160 +187,160 @@ foreach var of varlist v15_merra - v27_merra {
 		loc 		dat = substr("`var'", 1, 3)
 		rename		`var' `dat'_rf9
 	}
-	
-* label rainfall variables	
+
+* label rainfall variables
 	loc	v01			v01*
 	foreach v of varlist `v01' {
-		lab var 		`v' "Mean Daily Rainfall"	
-	}	
-	
+		lab var		`v' "Mean Daily Rainfall"
+	}
+
 	loc	v02			v02*
 	foreach v of varlist `v02' {
 		lab var 		`v' "Median Daily Rainfall"
-	}					
-	
+	}
+
 	loc	v03			v03*
 	foreach v of varlist `v03' {
 		lab var 		`v' "Variance of Daily Rainfall"
-	}					
-	
+	}
+
 	loc	v04			v04*
 	foreach v of varlist `v04' {
 		lab var 		`v'  "Skew of Daily Rainfall"
-	}					
-	
+	}
+
 	loc	v05			v05*
 	foreach v of varlist `v05' {
 		lab var 		`v'  "Total Rainfall"
-	}					
-	
+	}
+
 	loc	v06			v06*
 	foreach v of varlist `v06' {
 		lab var 		`v' "Deviation in Total Rainfalll"
-	}					
-	
+	}
+
 	loc	v07			v07*
 	foreach v of varlist `v07' {
-		lab var 		`v' "Z-Score of Total Rainfall"	
-	}					
-	
+		lab var		`v' "Z-Score of Total Rainfall"
+	}
+
 	loc	v08			v08*
 	foreach v of varlist `v08' {
 		lab var 		`v' "Rainy Days"
-	}					
-	
+	}
+
 	loc	v09			v09*
 	foreach v of varlist `v09' {
-		lab var 		`v' "Deviation in Rainy Days"	
-	}					
-	
+		lab var		`v' "Deviation in Rainy Days"
+	}
+
 	loc	v10			v10*
 	foreach v of varlist `v10' {
 		lab var 		`v' "No Rain Days"
-	}					
-	
+	}
+
 	loc	v11			v11*
 	foreach v of varlist `v11' {
 		lab var 		`v' "Deviation in No Rain Days"
-	}					
-	
+	}
+
 	loc	v12			v12*
 	foreach v of varlist `v12' {
-		lab var 		`v' "% Rainy Days"	
-	}					
-	
+		lab var		`v' "% Rainy Days"
+	}
+
 	loc	v13			v13*
 	foreach v of varlist `v13' {
-		lab var 		`v' "Deviation in % Rainy Days"	
-	}					
-	
+		lab var		`v' "Deviation in % Rainy Days"
+	}
+
 	loc	v14			v14*
 	foreach v of varlist `v14' {
-		lab var 		`v' "Longest Dry Spell"	
-	}									
+		lab var		`v' "Longest Dry Spell"
+	}
 
-* label weather variables	
+* label weather variables
 	loc	v15			v15*
 	foreach v of varlist `v15' {
 		lab var 		`v' "Mean Daily Temperature"
 	}
-	
+
 	loc	v16			v16*
 	foreach v of varlist `v16' {
 		lab var 		`v' "Median Daily Temperature"
 	}
-	
+
 	loc	v17			v17*
 	foreach v of varlist `v17' {
 		lab var 		`v' "Variance of Daily Temperature"
 	}
-	
+
 	loc	v18			v18*
 	foreach v of varlist `v18' {
-		lab var 		`v' "Skew of Daily Temperature"	
+		lab var		`v' "Skew of Daily Temperature"
 	}
-	
+
 	loc	v19			v19*
 	foreach v of varlist `v19' {
-		lab var 		`v' "Growing Degree Days (GDD)"	
+		lab var		`v' "Growing Degree Days (GDD)"
 	}
-	
+
 	loc	v20			v20*
 	foreach v of varlist `v20' {
-		lab var 		`v' "Deviation in GDD"		
+		lab var		`v' "Deviation in GDD"
 	}
-	
+
 	loc	v21			v21*
 	foreach v of varlist `v21' {
-		lab var 		`v' "Z-Score of GDD"	
+		lab var		`v' "Z-Score of GDD"
 	}
-	
+
 	loc	v22			v22*
 	foreach v of varlist `v22' {
 		lab var 		`v' "Maximum Daily Temperature"
 	}
-	
+
 	loc	v23			v23*
 	foreach v of varlist `v23' {
-		lab var 		`v' "Temperature Bin 0-20"	
+		lab var		`v' "Temperature Bin 0-20"
 	}
-	
+
 	loc	v24			v24*
 	foreach v of varlist `v24' {
-		lab var 		`v' "Temperature Bin 20-40"	
+		lab var		`v' "Temperature Bin 20-40"
 	}
-	
+
 	loc	v25			v25*
 	foreach v of varlist `v25' {
 		lab var 		`v' "Temperature Bin 40-60"
 	}
-	
+
 	loc	v26			v26*
 	foreach v of varlist `v26' {
-		lab var 		`v' "Temperature Bin 60-80"		
+		lab var		`v' "Temperature Bin 60-80"
 	}
-	
+
 	loc	v27			v27*
 	foreach v of varlist `v27' {
-		lab var 		`v' "Temperature Bin 80-100"	
+		lab var		`v' "Temperature Bin 80-100"
 	}
-		
-	
+
+
 * **********************************************************************
-* 4 - End matter
+**# 4 - end matter
 * **********************************************************************
 
 * create household, country, and data identifiers
 	sort			nga_id year
 	egen			uid = seq()
 	lab var			uid "unique id"
-	
+
 * order variables
 	order			uid nga_id
-	
+
 * save file
 	qui: compress
-	save			"$export/nga_complete.dta", replace 
+	save		"$export/nga_complete.dta", replace
 
 * close the log
 	log	close

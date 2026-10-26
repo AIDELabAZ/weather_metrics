@@ -13,34 +13,34 @@
 * assumes
 	* access to all raw data
 	* mdesc.ado
-	
+
 * TO DO:
 	* complete
 
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
-	
-* define paths	
-	loc root = "$rawlsms/nigeria/wave_3/raw"
-	loc export = "$data/refined_data/nigeria/wave_3"
-	loc logout = "$data/refined_data/nigeria/logs"
 
-* open log	
+* **********************************************************************
+**# 0 - setup
+* **********************************************************************
+
+* define paths
+	loc			root = "$rawlsms/nigeria/wave_3/raw"
+	loc			export = "$data/refined_data/nigeria/wave_3"
+	loc			logout = "$data/refined_data/nigeria/logs"
+
+* open log
 	cap log close
 	log using "`logout'/ph_sect11c2", append
 
-	
+
 * **********************************************************************
-* 1 - determine pesticide, herbicide, etc.
+**# 1 - determine pesticide, herbicide, etc.
 * **********************************************************************
-		
+
 * import the first relevant data file
-		use "`root'/secta11c2_harvestw3", clear 	
+	use			"`root'/secta11c2_harvestw3", clear
 
 describe
-sort hhid plotid 
+	sort		hhid plotid
 isid hhid plotid
 
 *binary for pesticide use since the new year
@@ -54,18 +54,18 @@ isid hhid plotid
 * check if any missing values
 	mdesc			pest_any herb_any
 	*** 16 pest and 16 herb missing, change these to "no"
-	
+
 * convert missing values to "no"
 	replace			pest_any = 2 if pest_any == .
 	replace			herb_any = 2 if herb_any == .
 
 * **********************************************************************
-* 2 - end matter, clean up to save
+**# 2 - end matter, clean up to save
 * **********************************************************************
 
 	keep 			hhid zone state lga sector hhid ea plotid ///
-					pest_any herb_any 
-	
+				pest_any herb_any
+
 * create unique household-plot identifier
 	isid			hhid plotid
 	sort			hhid plotid
@@ -74,7 +74,7 @@ isid hhid plotid
 
 compress
 describe
-summarize 
+	summarize
 
 * save file
 	save 			"`export'/ph_sect11c2.dta", replace

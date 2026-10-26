@@ -14,38 +14,38 @@
 * TO DO:
 	* done
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
-* define paths	
-	global root 		"$rawlsms/uganda/wave_3/raw"
-	global export 		"$data/refined_data/uganda/wave_5"
-	global logout 		"$data/refined_data/uganda/logs"
-	
-* open log	
+* define paths
+	global		root 		"$rawlsms/uganda/wave_3/raw"
+	global		export 		"$data/refined_data/uganda/wave_5"
+	global		logout 		"$data/refined_data/uganda/logs"
+
+* open log
 	cap log 			close
 	log using 			"$logout/2015_geovars", append
 
-	
+
 * **********************************************************************
-* 1 - UNPS 2011 (wave 1) - geovars 
+**# 1 - unps 2011 (wave 1) - geovars
 * **********************************************************************
 
 * import wave 1 geovars
 	use 			"$root/UNPS_Geovars_1112.dta", clear
 	** we use the past wave geovariables because variables were not provided in 2015 data
-	
+
 * rename variables
 	isid 			HHID
 	rename 			HHID hhid
 
 	rename 			ssa_aez09 aez
-	
-	
+
+
 * **********************************************************************
-* 2 - end matter, clean up to save
+**# 2 - end matter, clean up to save
 * **********************************************************************
 
 	keep 			hhid aez
@@ -60,4 +60,4 @@
 * close the log
 	log	close
 
-/* END */	
+/* END */

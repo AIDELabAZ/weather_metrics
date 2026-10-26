@@ -11,26 +11,26 @@
 
 * assumes
 	* access to raw data
-	
+
 * TO DO:
 	* complete
 
 * **********************************************************************
-**#0 - setup
+**# 0 - setup
 * **********************************************************************
 
-* define paths	
-	global root			"$rawlsms/nigeria/wave_4/raw"
-	global export		"$data/refined_data/nigeria/wave_4"
-	global logout		"$data/refined_data/nigeria/logs"
+* define paths
+	global		root			"$rawlsms/nigeria/wave_4/raw"
+	global		export		"$data/refined_data/nigeria/wave_4"
+	global		logout		"$data/refined_data/nigeria/logs"
 
-* open log	
+* open log
 	cap log close
 	log using "$logout/pp_secta", append
 
 
 * **********************************************************************
-**#1 - determine household id panel weights etc
+**# 1 - determine household id panel weights etc
 * **********************************************************************
 
 * import the first relevant data file
@@ -44,7 +44,7 @@
 	rename 			tracked_obs track
 
 
-	
+
 ************************************************************************
 **# 2 - end matter, clean up to save
 ************************************************************************
@@ -62,4 +62,4 @@
 * close the log
 	log	close
 
-/* END */	
+/* END */

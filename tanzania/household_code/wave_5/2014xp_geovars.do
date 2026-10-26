@@ -14,21 +14,21 @@
 * TO DO:
 	* GEOVARS DOES NOT EXIST FOR THIS WAVE
 /*
-	
+
 * **********************************************************************
 * 0 - setup
 * **********************************************************************
 
-* define paths	
+* define paths
 	loc root 		= "$rawlsms/tanzania/wave_3/raw"
 	loc export 		= "$data/refined_data/tanzania/wave_3"
 	loc logout 		= "$data/refined_data/tanzania/logs"
-	
-* open log	
+
+* open log
 	cap log 		close
 	log using 		"`logout'/2012_geovars", append
 
-	
+
 * **********************************************************************
 * 1 - NPSY3 (Wave 3) - geovars
 * **********************************************************************
@@ -40,8 +40,8 @@
 	isid 			y3_hhid
 
 	rename 			land03 aez
-	
-	
+
+
 * **********************************************************************
 * 2 - end matter, clean up to save
 * **********************************************************************
@@ -58,4 +58,4 @@
 * close the log
 	log	close
 
-/* END */	
+/* END */

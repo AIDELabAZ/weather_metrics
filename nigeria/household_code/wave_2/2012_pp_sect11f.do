@@ -13,32 +13,32 @@
 * assumes
 	* access to all raw data
 	* mdesc.ado
-	
+
 * TO DO:
 	* complete
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 * define paths
-	loc		root	=	"$rawlsms/nigeria/wave_2/raw"
-	loc		export	=	"$data/refined_data/nigeria/wave_2"
-	loc		logout	=	"$data/refined_data/nigeria/logs"
+	loc			root	=	"$rawlsms/nigeria/wave_2/raw"
+	loc			export	=	"$data/refined_data/nigeria/wave_2"
+	loc			logout	=	"$data/refined_data/nigeria/logs"
 
-* open log	
+* open log
 	cap log close
 	log 	using 	"`logout'/wave_2_pp_sect11f", append
-	
-	
+
+
 * **********************************************************************
-* 1 - determine planting area
+**# 1 - determine planting area
 * **********************************************************************
-		
+
 * import the first relevant data file
-		use "`root'/sect11f_plantingw2", clear 	
-		
+	use			"`root'/sect11f_plantingw2", clear
+
 	describe
 	sort			hhid plotid cropid
 	isid			hhid plotid cropid
@@ -46,10 +46,10 @@
 * rename month and year
 	rename			s11fq3a month
 	lab var			month "planting month"
-	
+
 	rename			s11fq3b year
 	lab var			year "planting year"
-	
+
 * check that month and year make sense
 	tab				month
 	*** monthly planting pattern makes sense
@@ -59,7 +59,7 @@
 	tab				year
 	*** most report 2012 but some strange results
 	*** clearly 1994 is an error, but check 2011 and 2013
-	
+
 * month of 2011 and 2013 planting
 	tab				month if year == 2011
 	tab				month if year == 2013

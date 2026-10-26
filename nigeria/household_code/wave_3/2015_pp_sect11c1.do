@@ -13,31 +13,31 @@
 * assumes
 	* access to all raw data
 	* mdesc.ado
-	
+
 * TO DO:
 	* complete
-	
-	
+
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
-* define paths	
-	loc root 	= "$rawlsms/nigeria/wave_3/raw"
-	loc export 	= "$data/refined_data/nigeria/wave_3"
-	loc logout 	= "$data/refined_data/nigeria/logs"
-	
-* open log	
+* define paths
+	loc			root 	= "$rawlsms/nigeria/wave_3/raw"
+	loc			export 	= "$data/refined_data/nigeria/wave_3"
+	loc			logout 	= "$data/refined_data/nigeria/logs"
+
+* open log
 	cap log 	close
 	log 		using "`logout'/pp_sect11c1", append
 
-	
+
 * **********************************************************************
-* 1 - determine labor
+**# 1 - determine labor
 * **********************************************************************
-		
+
 * import the first relevant data file
-	use "`root'/sect11c1_plantingw3", clear 
+	use			"`root'/sect11c1_plantingw3", clear
 
 	describe
 	sort hhid plotid
@@ -75,16 +75,16 @@
 	gen women_days =  s11c1q6
 	replace women_days = 0 if women_days == .
 	*** we do not include child labor days
-	
+
 * **********************************************************************
-* 2 - impute labor outliers
+**# 2 - impute labor outliers
 * **********************************************************************
-	
+
 * summarize household individual labor for land prep to look for outliers
 	sum				hh_1 hh_2 hh_3 hh_4 men_days women_days
 	***none of the variables exceed the number of days possible
 
-	
+
 * generate local for variables that contain outliers
 	loc				labor hh_1 hh_2 hh_3 hh_4 men_days women_days
 
@@ -96,23 +96,23 @@
 	}
 	*** 212 changes missing
 
-* impute missing values 
+* impute missing values
 	mi set 			wide 	// declare the data to be wide.
 	mi xtset		, clear 	// clear any xtset that may have had in place previously
 
 
-* impute each variable in local		
+* impute each variable in local
 	foreach var of loc labor {
 		mi register			imputed `var' // identify variable to be imputed
 		sort				hhid plotid, stable // sort to ensure reproducability of results
 		mi impute 			pmm `var' i.state, add(1) rseed(245780) ///
 								noisily dots force knn(5) bootstrap
-	}						
-	mi 				unset	
-	
+	}
+	mi			unset
+
 * summarize imputed variables
-	sum				hh_1_1_  hh_2_2_ hh_3_3_ hh_4_4_ men_days_5_ 
-	
+	sum			hh_1_1_  hh_2_2_ hh_3_3_ hh_4_4_ men_days_5_
+
 * total labor days for harvest
 	egen			pp_labor = rowtotal(hh_1_1_  hh_2_2_ hh_3_3_ hh_4_4_ men_days_5_ women_days)
 	lab var			pp_labor "total labor for planting (days)"
@@ -124,7 +124,7 @@
 
 
 * **********************************************************************
-* 2 - end matter, clean up to save
+**# 2 - end matter, clean up to save
 * **********************************************************************
 
 	keep 			hhid zone state lga sector hhid ea plotid ///
@@ -135,10 +135,10 @@
 	sort			hhid plotid
 	egen			plot_id = group(hhid plotid)
 	lab var			plot_id "unique plot identifier"
-	
+
 	compress
 	describe
-	summarize 
+	summarize
 
 * save file
 	save 			"`export'/pp_sect11c1.dta", replace

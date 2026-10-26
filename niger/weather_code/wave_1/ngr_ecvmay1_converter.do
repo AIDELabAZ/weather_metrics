@@ -16,15 +16,15 @@
 * TO DO:
 	* completed
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 * define paths
-	loc root = "$weatherdata/niger/wave_1/raw/ecvmay1_up"
-	loc export = "$weatherwork/niger/wave_1/daily/ecvmay1_up"
-	loc logout = "$weatherwork/niger/logs"
+	loc			root = "$weatherdata/niger/wave_1/raw/ecvmay1_up"
+	loc			export = "$weatherwork/niger/wave_1/daily/ecvmay1_up"
+	loc			logout = "$weatherwork/niger/logs"
 
 * open log
 	cap log		close
@@ -32,20 +32,20 @@
 
 
 * **********************************************************************
-* 1 - converts weather data
+**# 1 - converts weather data
 * **********************************************************************
-	
-* define local with all files in each sub-folder	
+
+* define local with all files in each sub-folder
 	loc fileList : dir "`root'" files "*.csv"
-		
-* loop through each file in the above local	
+
+* loop through each file in the above local
 	foreach file in `fileList' {
-		
-	* import the .csv files - this takes time	
+
+	* import the .csv files - this takes time
 		import delimited "`root'/`file'", varnames (1) clear
 
-	* define locals to govern file naming	
-		loc dat = substr("`file'", 1, length("`file'") - 4) 
+	* define locals to govern file naming
+		loc			dat = substr("`file'", 1, length("`file'") - 4)
 
 	* save file
 		compress

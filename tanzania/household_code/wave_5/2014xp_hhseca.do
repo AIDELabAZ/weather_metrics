@@ -15,33 +15,33 @@
 * TO DO:
 	* completed
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 * define paths
-	global	root		"$rawlsms/tanzania/wave_5/raw"
-	global export		"$data/refined_data/tanzania/wave_5"
-	global logout		"$data/refined_data/tanzania/logs"
+	global		root		"$rawlsms/tanzania/wave_5/raw"
+	global		export		"$data/refined_data/tanzania/wave_5"
+	global		logout		"$data/refined_data/tanzania/logs"
 
 * open log
-	cap log close 
+	cap			log			close
 	log	using	"$logout/wv5_HHSECA", append
 
 *************************************************************************
-**#1 - TZA 2014 (Wave 4) - Household Section A
+**# 1 - tza 2014 (wave 4) - household section a
 ***********************1*************************************************
 
 * load data
 	use 		"$root/hh_sec_a", clear
-	
+
 * dropping duplicates
 	duplicates 	drop
 	*** 0 obs dropped
-	
-	drop y4_rural 
-	
+
+	drop		y4_rural
+
 * renaming some variables
 	rename		hh_a01_1 region
 	rename		hh_a02_1 district
@@ -57,9 +57,9 @@
 
 	order		y4_hhid region district ward ea y4_rural ///
 					clusterid strataid y4_weight mover2014
-	
+
 	rename		y4_weight hhweight
-	
+
 * relabel variables
 	lab var		y4_hhid "Unique Household Identification NPS Y4"
 	lab var		region "Region Code"
@@ -71,13 +71,13 @@
 	lab var		strataid "Design Strata"
 	lab var		hhweight "Household Weights (Trimmed & Post-Stratified)"
 	lab var		mover2014 "Original or split household"
-					
+
 * prepare for export
 	compress
 	describe
 	summarize
 	sort y4_hhid
-	
+
 	save 			"$export/HH_SECA.dta", replace
 
 

@@ -14,23 +14,23 @@
 * TO DO:
 	* done
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
-* define paths	
-	loc root 		= "$rawlsms/tanzania/wave_2/raw"
-	loc export 		= "$data/refined_data/tanzania/wave_2"
-	loc logout 		= "$data/refined_data/tanzania/logs"
-	
-* open log	
+* define paths
+	loc			root 		= "$rawlsms/tanzania/wave_2/raw"
+	loc			export 		= "$data/refined_data/tanzania/wave_2"
+	loc			logout 		= "$data/refined_data/tanzania/logs"
+
+* open log
 	cap log 		close
 	log using 		"`logout'/2010_geovars", append
 
-	
+
 * **********************************************************************
-* 1 - NPSY2 (Wave 2) - geovars
+**# 1 - npsy2 (wave 2) - geovars
 * **********************************************************************
 
 * import wave 2 geovars
@@ -40,10 +40,10 @@
 	isid 			y2_hhid
 
 	rename 			land03 aez
-	
-	
+
+
 * **********************************************************************
-* 2 - end matter, clean up to save
+**# 2 - end matter, clean up to save
 * **********************************************************************
 
 	keep 			y2_hhid aez
@@ -58,4 +58,4 @@
 * close the log
 	log	close
 
-/* END */	
+/* END */

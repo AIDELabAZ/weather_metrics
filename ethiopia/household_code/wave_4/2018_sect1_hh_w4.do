@@ -10,7 +10,7 @@
 	* gives location identifiers for participants
 	* hierarchy: holder > parcel > field > crop - not a concern in this dofile
 	* seems to very roughly correspond to Malawi ag-modI and ag-modO
-	
+
 * assumes
 	* access to raw data
 	* distinct.ado
@@ -18,23 +18,23 @@
 * TO DO:
 	* done
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
-* define paths	
+* define paths
 	global		root 		 	"$rawlsms/ethiopia/wave_4/raw"
 	global		export 		 	"$data/refined_data/ethiopia/wave_4"
 	global		logout 		 	"$data/refined_data/ethiopia/logs"
-	
-* open log	
+
+* open log
 	cap log 	close
 	log 		using			"$logout/wv4_HHSEC1", append
 
-	
+
 * **********************************************************************
-* 1 - preparing ESS 2018/19 (Wave 4) - Household Section 1 
+**# 1 - preparing ess 2018/19 (wave 4) - household section 1
 * **********************************************************************
 
 * load data
@@ -43,7 +43,7 @@
 * dropping duplicates
 	duplicates 	drop
 
-* individual_id2 is unique identifier 
+* individual_id2 is unique identifier
 	describe
 	sort 		household_id individual_id
 	isid 		household_id individual_id
@@ -56,7 +56,7 @@
 
 
 * ***********************************************************************
-* 2 - cleaning and keeping
+**# 2 - cleaning and keeping
 * ***********************************************************************
 
 * renaming some variables of interest
@@ -71,17 +71,17 @@
 	destring	zone, replace
 	destring	woreda, replace
 	destring	ea, replace
-	
+
 * restrict to variables of interest
 	keep  		hhid- woreda ea
-	
+
 * prepare for export
 	isid		hhid individual_id
 	compress
 	describe
-	summarize 
+	summarize
 	sort hhid ea_id
-	
+
 	save 		"$export/HH_SEC1.dta", replace
 
 * close the log

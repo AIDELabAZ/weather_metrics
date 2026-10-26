@@ -20,7 +20,7 @@
 
 
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 * define paths
@@ -30,7 +30,7 @@
 
 
 * **********************************************************************
-* 1 - move files from WB file structure to our file structure
+**# 1 - move files from wb file structure to our file structure
 * **********************************************************************
 
 * move IHS3 data to wave 1 folder
@@ -66,25 +66,25 @@
 	use			"$source/data/ihpslpnl/geo/householdgeovariables_ihps.dta", clear
 	save		"$export/wave_2/ihpslpnl_geo.dta", replace
 
-				
+
 * move IHS4 data to wave 3 folder
 	use			"$source/tmp/ihs4cx/hh/hh_final.dta", clear
 	save		"$export/wave_3/ihs4cx_hh.dta", replace
-				
+
 	use			"$source/data/ihs4cx/geo/HouseholdGeovariables_IHS4CX.dta", clear
 	save		"$export/wave_3/ihs4cx_geo.dta", replace
 
-				
+
 * move IHS4*pnl data to wave 4folder
 	use			"$source/tmp/ihs4lpnl/hh/hh_final.dta", clear
 	save		"$export/wave_4/ihs4lpnl_hh.dta", replace
-				
+
 	use			"$source/data/ihs4lpnl/geo/householdgeovariables_ihpsy3.dta", clear
 	save		"$export/wave_4/ihs4lpnl_geo.dta", replace
 
 
 * **********************************************************************
-* 2 - run wave specific cleaning .do files
+**# 2 - run wave specific cleaning .do files
 * **********************************************************************
 
 * do each IHS3 household cleaning files
@@ -104,25 +104,25 @@
 
 * do IHS5*pnl household cleaning filefiles
 	loc HHfile : dir "$dofile/wave_6" files "*hh*.do"
-	
+
 	* loop through each file in the above local
 		foreach file in `HHfile' {
-	    
+
 		* run each individual file
-			do "$dofile/wave_6/`file'"	
+		do			"$dofile/wave_6/`file'"
 	}
 	loc HHfile : dir "$dofile/wave_6" files "*ag*.do"
-	
+
 	* loop through each file in the above local
 		foreach file in `HHfile' {
-	    
+
 		* run each individual file
-			do "$dofile/wave_6/`file'"	
+		do			"$dofile/wave_6/`file'"
 	}
-	do 			"$dofile/wave_6/ihs5p_rs_plot.do"		
+	do			"$dofile/wave_6/ihs5p_rs_plot.do"
 
 * **********************************************************************
-* 3 - run wave specific .do files to merge with weather
+**# 3 - run wave specific .do files to merge with weather
 * **********************************************************************
 
 * do each IHS3 household cleaning files
@@ -146,7 +146,7 @@
 
 
 * **********************************************************************
-* 4 - run .do file to append each wave
+**# 4 - run .do file to append each wave
 * **********************************************************************
 
 	do			"$dofile/mwi_append_built.do"				// append waves

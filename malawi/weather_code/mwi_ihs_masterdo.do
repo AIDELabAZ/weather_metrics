@@ -7,33 +7,33 @@
 
 * does
 	* Executes all wave specific Malawi weather .do files
-    * runs wxsum .ado file
+* runs wxsum .ado file
 	* outputs .dta rainfall data ready to merge with LSMS household data
 	* take 210 minutes to convert and process weather data
-	
+
 * assumes
-	* wxsum.ado
+* wxsum.ado
 	* subsidiary, wave-specific .do files
 
 * TO DO:
 	* completed
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 clear
 
 * set max vars
-	set maxvar 120000  // this amount is only allowed for MP editions
+	set			maxvar 120000  // this amount is only allowed for MP editions
 
 * define paths
 	loc root = "$code/malawi/weather_code"
 
 
 * **********************************************************************
-* 1 - run .do files
+**# 1 - run .do files
 * **********************************************************************
 
 * do each of the file converters
@@ -53,5 +53,5 @@ clear
 	do "`root'/wave_5/mwi_ihs5_weather.do"		//	generate wave 5 weather variables
 	do "`root'/wave_6/mwi_ihs5p_weather.do"		//	generate wave 6 weather variables
 
-	
+
 /* END */

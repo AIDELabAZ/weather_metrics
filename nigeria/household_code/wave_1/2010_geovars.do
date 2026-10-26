@@ -14,23 +14,23 @@
 * TO DO:
 	* done
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
-* define paths	
-	loc root 		= "$rawlsms/nigeria/wave_1/raw"
-	loc export 		= "$data/refined_data/nigeria/wave_1"
-	loc logout 		= "$data/refined_data/nigeria/logs"
-	
-* open log	
+* define paths
+	loc			root 		= "$rawlsms/nigeria/wave_1/raw"
+	loc			export 		= "$data/refined_data/nigeria/wave_1"
+	loc			logout 		= "$data/refined_data/nigeria/logs"
+
+* open log
 	cap log 		close
 	log using 		"`logout'/wave_1_geovars", append
 
-	
+
 * **********************************************************************
-* 1 - GHSY1 (Wave 1) - geovars
+**# 1 - ghsy1 (wave 1) - geovars
 * **********************************************************************
 
 * import wave 1 geovars
@@ -40,10 +40,10 @@
 	isid 			hhid
 
 	rename 			ssa_aez09 aez
-	
-	
+
+
 * **********************************************************************
-* 2 - end matter, clean up to save
+**# 2 - end matter, clean up to save
 * **********************************************************************
 
 	keep 			hhid aez
@@ -58,4 +58,4 @@
 * close the log
 	log	close
 
-/* END */	
+/* END */

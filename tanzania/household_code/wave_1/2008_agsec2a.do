@@ -17,29 +17,29 @@
 * TO DO:
 	* completed
 
-	
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 * define paths
-	global root 	"$rawlsms/tanzania/wave_1/raw"
-	global export 	"$data/refined_data/tanzania/wave_1"
-	global logout 	"$data/refined_data/tanzania/logs"
+	global		root 	"$rawlsms/tanzania/wave_1/raw"
+	global		export 	"$data/refined_data/tanzania/wave_1"
+	global		logout 	"$data/refined_data/tanzania/logs"
 
-* open log 
-	cap log close 
+* open log
+	cap			log			close
 	log using "$logout/wv1_AGSEC2A", append
 
 
-	
+
 * ***********************************************************************
-* 1 - prepare TZA 2008 (Wave 1) - Agriculture Section 2A 
+**# 1 - prepare tza 2008 (wave 1) - agriculture section 2a
 * ***********************************************************************
 
 * load data
 	use				"$root/SEC_2A", clear
-	
+
 * dropping duplicates
 	duplicates 		drop
 	*** 0 obs dropped
@@ -47,7 +47,7 @@
 * renaming variables of interest
 	rename 		s2aq4 plotsize_self_ac
 	rename 		area plotsize_gps_ac
-	
+
 * check for uniquie identifiers
 	drop			if plotnum == ""
 	isid			hhid plotnum
@@ -57,7 +57,7 @@
 	gen				plot_id = hhid + " " + plotnum
 	lab var			plot_id "Unique plot identifier"
 	isid			plot_id
-	
+
 * convert from acres to hectares
 	gen				plotsize_self = plotsize_self_ac * 0.404686
 	lab var			plotsize_self "Self-reported Area (Hectares)"
@@ -65,51 +65,51 @@
 	lab var			plotsize_gps "GPS Measured Area (Hectares)"
 	drop			plotsize_gps_ac plotsize_self_ac
 
-	
+
 * ***********************************************************************
-* 2 - merge in regional ID and cultivation status
-* ***********************************************************************	
+**# 2 - merge in regional id and cultivation status
+* ***********************************************************************
 
 * must merge in regional identifiers from 2012_HHSECA to impute
 	merge			m:1 hhid using "$export/HH_SECA"
 	tab				_merge
 	*** 981 not matched, using only
-	
+
 	drop if			_merge == 2
 	drop			_merge
-	
+
 * unique district id
 	sort			region district
 	egen			uq_dist = group(region district)
 	distinct		uq_dist
 	*** 125 distinct ditricts
-	
+
 * must merge in regional identifiers from 2012_AG_SEC_3A to impute
 	merge			1:1 hhid plotnum using "$root/SEC_3A"
 	*** 2 not matched from master, 0 not matched from using
 	*** this doesn't come up in any other waves - issue?
-	
+
 	drop if			_merge == 2
 	drop			_merge
-	
+
 * record if field was cultivated during long rains
 	gen 			status = s3aq3==1 if s3aq3!=.
 	lab var			status "=1 if field cultivated during long rains"
 	*** 4,408 observations were cultivated (86%)
-	
+
 * drop observations that were not cultivated
 	drop if			status == 0
 	*** dropped 718 observations that were not cultivated in long rains
 	*** this code does not drop the 2 obs w/ missing sec 3 info
 	*** their valus will be imputed, but w/ no input info the obs are likely useless
-	
+
 	drop			s3aq2_1- status
 
 
 * ***********************************************************************
-* 3 - clean and impute plot size
+**# 3 - clean and impute plot size
 * ***********************************************************************
-	
+
 * interrogating plotsize variables
 	count 		if plotsize_gps != . & plotsize_self != .
 	*** only 856 not mising, out of 5,128
@@ -173,13 +173,13 @@
 
 	* will drop the lone '0' value, to be imputed later
 		replace 	plotsize_gps = . if plotsize_gps == 0
-		
+
 		count			if plotsize_gps < 0.05 & plotsize_gps != .
 		*** 39 obs < 0.05
 		*** I will not drop any low end values at this time
 
 * impute missing + irregular plot sizes using predictive mean matching
-* imputing 3,650 observations (out of 4,410) - 82.77% 
+* imputing 3,650 observations (out of 4,410) - 82.77%
 * including plotsize_self as control
 	mi set 		wide 	// declare the data to be wide.
 	mi xtset	, clear 	// this is a precautinary step to clear any existing xtset
@@ -197,26 +197,26 @@
 					longstub format(%9.3g)
 	rename		plotsize_gps_1_ plotsize
 	*** imputed 3,650 values out of 4,410 total observations
-	
+
 	sum				plotsize_self plotsize_gps	plotsize
 	*** self reported	:	mean 0.95 and s.d. 4.1
 	*** gps				:	mean 0.92 and s.d. 1.4
 	*** imputed			:	mean 0.91 and s.d. 1.4
-	
+
 	drop			if plotsize == . & plotsize_self ==.
 	*** no observations dropped
-	
+
 
 * **********************************************************************
-* 4 - end matter, clean up to save
-* **********************************************************************	
+**# 4 - end matter, clean up to save
+* **********************************************************************
 
 * keep what we want, get rid of the rest
 	keep		hhid plotnum plot_id plotsize clusterid strataid ///
 					hhweight region district ward ea y1_rural
 	order		hhid plotnum plot_id clusterid strataid hhweight ///
 					region district ward ea y1_rural plotsize
-	
+
 * renaming and relabelling variables
 	lab var		hhid "Unique Household Identification NPS Y1"
 	lab var		y1_rural "Cluster Type"
@@ -235,10 +235,10 @@
 	isid			hhid plotnum
 	compress
 	describe
-	summarize 
+	summarize
 	sort 			plot_id
 	save 			"$export/AG_SEC2A.dta", replace
-	
+
 * close the log
 	log	close
 

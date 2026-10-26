@@ -15,33 +15,33 @@
 	* mdesc.ado
 
 * TO DO:
-	* complete 
-	
+* complete
+
 
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
-* define paths	
-	loc root = "$rawlsms/nigeria/wave_1/raw"
-	loc export = "$data/refined_data/nigeria/wave_1"
-	loc logout = "$data/refined_data/nigeria/logs"
+* define paths
+	loc			root = "$rawlsms/nigeria/wave_1/raw"
+	loc			export = "$data/refined_data/nigeria/wave_1"
+	loc			logout = "$data/refined_data/nigeria/logs"
 
 * close log (in case still open)
 	*log close
-	
-* open log	
+
+* open log
 	cap log close
 	log using "`logout'/pp_sect11f", append
 
-	
+
 * **********************************************************************
-* 1 - general clean up, renaming, etc. 
+**# 1 - general clean up, renaming, etc.
 * **********************************************************************
-		
+
 * import the first relevant data file
-	use 	"`root'/sect11F_plantingw1", clear 	
-	
+	use			"`root'/sect11F_plantingw1", clear
+
 	describe
 	sort		hhid plotid cropid
 	isid		hhid plotid cropid
@@ -49,10 +49,10 @@
 * rename month and year
 	rename 		s11fq3a month
 	lab var		month "planting month"
-	
+
 	rename 		s11fq3b year
 	lab var		year "planting year"
-	
+
 * check that month and year make sense
 	tab			month
 	*** vast majority are in March-July, consistent with FAO planting months
@@ -61,13 +61,13 @@
 	***96% are the correct year and a small number have years that dont make sense.
 	mdesc 		year
 	***5% of observations are missing year
-	
+
 *dropping thpse years that dont make sense
 	drop if year<2009
 	*** 64 observations deleted
-	
+
 * **********************************************************************
-* 2 - end matter, clean up to save
+**# 2 - end matter, clean up to save
 * **********************************************************************
 
 * save file

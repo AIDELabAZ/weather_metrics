@@ -16,17 +16,17 @@
 	* customsave.ado
 
 * TO DO:
-	* done	
-	
-	
+* done
+
+
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 * define paths
-	loc root = "$rawlsms/ethiopia/wave_1/raw"
-	loc export = "$data/refined_data/ethiopia/wave_1"
-	loc logout = "$data/refined_data/ethiopia/logs"
+	loc			root = "$rawlsms/ethiopia/wave_1/raw"
+	loc			export = "$data/refined_data/ethiopia/wave_1"
+	loc			logout = "$data/refined_data/ethiopia/logs"
 
 * open log
 	cap log close
@@ -34,37 +34,37 @@
 
 
 * **********************************************************************
-* 1 - preparing ESS (Wave 1) - Post Planting Section 4
+**# 1 - preparing ess (wave 1) - post planting section 4
 * **********************************************************************
 
 * load data
 	use 		"`root'/sect4_pp_w1.dta", clear
-	
+
 * dropping duplicates
-	duplicates drop	
+	duplicates	drop
 
 * unique identifier can only be generated including crop code as some fields are mixed (pp_s4q02)
 	describe
 	sort 		holder_id parcel_id field_id crop_code
 	isid 		holder_id parcel_id field_id crop_code
-	
+
 * creating district identifier
 	egen 		district_id = group( saq01 saq02)
 	lab var 	district_id "Unique district identifier"
 	distinct	saq01 saq02, joint
 	*** 69 distinct districts
-	*** same as pp sect3, good	
-	
+	*** same as pp sect3, good
+
 * creating parcel identifier
 	rename		parcel_id parcel
 	tostring	parcel, replace
 	generate 	parcel_id = holder_id + " " + ea_id + " " + parcel
-	
+
 * creating field identifier
 	rename		field_id field
 	tostring	field, replace
 	generate 	field_id = holder_id + " " + ea_id + " " + parcel + " " + field
-	
+
 * creating unique crop identifier
 	tostring	crop_code, generate(crop_codeS)
 	generate 	crop_id = holder_id + " " + ea_id + " " + parcel + " " ///
@@ -76,32 +76,32 @@
 	summarize 	if missing(parcel_id,field_id,crop_code)
 	drop 		if missing(parcel_id,field_id,crop_code)
 	isid 		holder_id parcel_id field_id crop_code
-	*** 0 observations deleted 
-	
-	
+	*** 0 observations deleted
+
+
 * ***********************************************************************
-* 2 - variables of interest
+**# 2 - variables of interest
 * ***********************************************************************
 
 * ***********************************************************************
 * 2a - percent field use
-* ***********************************************************************	
-	
+* ***********************************************************************
+
 * accounting for mixed use fields - creates a multiplier
 	generate 	field_prop = 1 if pp_s4q02 == 1
 	replace 	field_prop = pp_s4q03*.01 if pp_s4q02 ==2
 	label var	field_prop "Percent field planted with crop"
-	
-	
+
+
 * ***********************************************************************
 * 2b - damage and damage preventation
-* ***********************************************************************	
+* ***********************************************************************
 
 * looking at crop damage
 	rename		pp_s4q08 damaged
 	sum 		damaged
 	*** missing info for 307 obs
-	
+
 * percent crop damaged
 	rename		pp_s4q10 damaged_pct
 	replace		damaged_pct = 0 if damaged == 2
@@ -112,7 +112,7 @@
 	generate 	pesticide_any = pp_s4q05 if pp_s4q05 >= 1
 	generate 	herbicide_any = pp_s4q06 if pp_s4q06 >= 1
 	replace 	herbicide_any = pp_s4q07 if pp_s4q06 != 1 & pp_s4q07 >= 1
-	
+
 * jeff sez "if it's missing, call it a no"
 	replace		pesticide_any = 2 if pesticide_any == .
 	replace		herbicide_any = 2 if herbicide_any == .
@@ -123,7 +123,7 @@
 
 
 * ***********************************************************************
-* 3 - cleaning and keeping
+**# 3 - cleaning and keeping
 * ***********************************************************************
 
 * renaming some variables of interest
@@ -137,13 +137,13 @@
 	keep  		holder_id- crop_code pesticide_any herbicide_any field_prop ///
 					damaged damaged_pct parcel_id field_id crop_id
 	order 		holder_id- ea
-	
+
 * final preparations to export
 	isid 		holder_id parcel field crop_code
 	isid		crop_id
 	compress
 	describe
-	summarize 
+	summarize
 	sort 		holder_id parcel field crop_code
 	save		"`export'.PP_SEC4.dta", replace
 

@@ -3,11 +3,11 @@
 * Created by: jdm
 * Edited by: jdm
 * Last edit: 28 March 2024
-* Stata v.18.0 
+* Stata v.18.0
 
 * does
 	* reads in excel file with papers
-	* makes network visualziation 
+* makes network visualziation
 
 * assumes
 	* paper data file
@@ -16,7 +16,7 @@
 * TO DO:
 	* everything
 
-	
+
 ************************************************************************
 **# 0 - setup
 ************************************************************************
@@ -24,16 +24,16 @@
 * define paths
 	global	root 	= 	"$data/output/iv_lit"
 	global	stab 	= 	"$data/results_data/tables"
-	global	xtab 	= 	"$data/results_data/tables/metric_paper"
-	global	sfig	= 	"$data/results_data/figures"	
-	global 	xfig    =   "$data/results_data/figures/metric_paper"
+	global		xtab 	= 	"$data/results_data/tables/metric_paper"
+	global		sfig	= 	"$data/results_data/figures"
+	global		xfig    =   "$data/results_data/figures/metric_paper"
 	global	logout 	= 	"$data/results_data/logs"
 
-* open log	
+* open log
 	cap log close
 	log 	using 	"$logout/network_viz", append
 
-	
+
 ************************************************************************
 **# 1 - load and transform data
 ************************************************************************
@@ -49,11 +49,11 @@
 * rename
 	rename				outcomecategory outcome
 	rename				rainfallvariable rain
-	
+
 ************************************************************************
 **# 2 - create network data
 ************************************************************************
-	
+
 * declare data a network
 	nwset				rain outcome, name(rainnet)
 	nwset,				detail
@@ -110,4 +110,4 @@
 * close the log
 	log	close
 
-/* END */		
+/* END */

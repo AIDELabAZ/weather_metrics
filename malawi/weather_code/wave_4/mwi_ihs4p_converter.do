@@ -22,13 +22,13 @@
 
 
 * **********************************************************************
-* 0 - setup
+**# 0 - setup
 * **********************************************************************
 
 * define paths
-	loc 		root 	= 	"$weatherdata/malawi/wave_4/raw/ihs4p_up"
-	loc 		export 	= 	"$weatherwork/malawi/wave_4/daily/ihs4p_up"
-	loc 		logout 	= 	"$weatherwork/malawi/logs"
+	loc			root 	= 	"$weatherdata/malawi/wave_4/raw/ihs4p_up"
+	loc			export 	= 	"$weatherwork/malawi/wave_4/daily/ihs4p_up"
+	loc			logout 	= 	"$weatherwork/malawi/logs"
 
 * open log
 	cap log		close
@@ -36,7 +36,7 @@
 
 
 * **********************************************************************
-* 1 - converts rainfall data
+**# 1 - converts rainfall data
 * **********************************************************************
 
 * define each file in the above local
@@ -50,7 +50,7 @@
 
 	* drop early and late observations
 		keep 	y3_hhid rf_19831031-rf_20160531
-		
+
 		* drop unnecessary months, this will make renaming variables easier (June-Oct)
 		foreach var of varlist rf_* {
 			if substr("`var'", 8, 2) == "06" drop `var'
@@ -118,9 +118,9 @@
 			loc nmonth = `month'-10
 			if `month' == 12 rename `var' rf_`year'0`nmonth'`day'
 		}
-		
-	* define locals to govern file naming	
-		loc dat = substr("`file'", 1, length("`file'") - 4) 
+
+	* define locals to govern file naming
+		loc			dat = substr("`file'", 1, length("`file'") - 4)
 
 	* save file
 		compress
@@ -129,7 +129,7 @@
 
 
 * **********************************************************************
-* 2 - converts temperature data
+**# 2 - converts temperature data
 * **********************************************************************
 
 * define local with all files in each sub-folder
@@ -211,9 +211,9 @@
 			loc nmonth = `month'-10
 			if `month' == 12 rename `var' tmp_`year'0`nmonth'`day'
 		}
-		
-	* define locals to govern file naming	
-		loc dat = substr("`file'", 1, length("`file'") - 4) 
+
+	* define locals to govern file naming
+		loc			dat = substr("`file'", 1, length("`file'") - 4)
 
 	* save file
 		compress

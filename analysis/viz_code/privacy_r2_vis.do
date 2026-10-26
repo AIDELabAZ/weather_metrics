@@ -2,21 +2,21 @@
 * Created on: 13 December 2021
 * Created by: jdm
 * Edited by: jdm
-* Last edit: 16 May 2022 
-* Stata v.17.0 
+* Last edit: 16 May 2022
+* Stata v.17.0
 
 * does
 	* reads in results data set
-	* makes visualziations of results 
+* makes visualziations of results
 
 * assumes
-	* you have results file 
+* you have results file
 	* grc1leg2.ado
 
 * TO DO:
 	* complete
 
-	
+
 ************************************************************************
 **# 0 - setup
 ************************************************************************
@@ -24,73 +24,73 @@
 * define paths
 	global	root 	= 	"$data/results_data"
 	global	stab 	= 	"$data/results_data/tables"
-	global	xtab 	= 	"$data/results_data/tables/privacy_paper"
-	global	sfig	= 	"$data/results_data/figures"	
-	global 	xfig    =   "$data/results_data/figures/privacy_paper"
+	global		xtab 	= 	"$data/results_data/tables/privacy_paper"
+	global		sfig	= 	"$data/results_data/figures"
+	global		xfig    =   "$data/results_data/figures/privacy_paper"
 	global	logout 	= 	"$data/results_data/logs"
 
-* open log	
+* open log
 	cap log close
 	log 	using 	"$logout/privacy_r2_vis", append
 
 
 ************************************************************************
-**# 1 - generate R^2 specification curves by extraction & model	
+**# 1 - generate r^2 specification curves by extraction & model
 ************************************************************************
 
-* load data 
+* load data
 	use 			"$root/lsms_complete_results", clear
-	
-	sort 			regname ext 
+
+	sort		regname ext
 /*
 	collapse 		(mean) r2_mu = adjustedr ///
 						(sd) r2_sd = adjustedr ///
 						(count) n = adjustedr, by(regname ext)
-	
+
 	gen 			r2_hi = r2_mu + invttail(n-1,0.025) * (r2_sd / sqrt(n))
 	gen				r2_lo = r2_mu - invttail(n-1,0.025) * (r2_sd / sqrt(n))
 */
 	collapse 		(mean) r2_mu = loglike ///
 						(sd) r2_sd = loglike ///
 						(count) n = loglike, by(regname ext)
-	
+
 	gen 			r2_hi = r2_mu + invttail(n-1,0.025) * (r2_sd / sqrt(n))
 	gen				r2_lo = r2_mu - invttail(n-1,0.025) * (r2_sd / sqrt(n))
 
-	
+
 ************************************************************************
 **## 1a - weather only
 ************************************************************************
-	
+
 preserve
 	keep			if regname == 1
-	sort 			r2_mu 
-	gen 			obs = _n	
+	sort		r2_mu
+	gen			obs = _n
 
 	global			title =		"Adjusted R-Squared"
 
 * stack values of the specification indicators
 	gen 			k1 		= 	ext
-	
+
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Extraction"
 
 	sum			 	r2_hi
 	global			bmax = r(max)
-	
+
 	sum			 	r2_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	18
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-		
+
 	twoway 			scatter k1 obs, xlab(0(1)10) xsize(10) ysize(6) ///
 						title("Weather") xtitle("") ///
 						msize(small small small) ylab(0(1)$gheight ) ///
@@ -108,11 +108,13 @@ preserve
 						(rbar r2_lo r2_hi obs, barwidth(.08) color(edkblue%40) yaxis(2) ), ///
 						legend(order(3 4) cols(2) size(small) rowgap(.5) pos(12) ///
 						label(3 "mean log likelihood") label(4 "95% C.I. on mean") ) ///
-						saving("$sfig/r2_reg1_ext", replace)	
-						
-		graph export 	"$data/results_data/figures/presentations/PacDev/r2_reg1_ext.pdf", as(pdf) replace
+				saving("$sfig/r2_reg1_ext", replace)
+
+	graph		export ///
+				"$data/results_data/figures/presentations/PacDev/r2_reg1_ext.pdf", ///
+				as(pdf) replace
 restore
-		
+
 
 ************************************************************************
 **## 1b - weather squared only
@@ -120,33 +122,33 @@ restore
 
 preserve
 	keep			if regname == 4
-	sort 			r2_mu 
-	gen 			obs = _n	
+	sort		r2_mu
+	gen			obs = _n
 
 	global			title =		"Adjusted R-Squared"
 
 * stack values of the specification indicators
 	gen 			k1 		= 	ext
-	
+
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Extraction"
 
 	sum			 	r2_hi
 	global			bmax = r(max)
-	
+
 	sum			 	r2_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	18
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-		
+
 	twoway 			scatter k1 obs, xlab(0(1)10) xsize(10) ysize(6) ///
 						title("Weather + Weather{sup:2}") xtitle("") ///
 						msize(small small small) ylab(0(1)$gheight ) ///
@@ -164,9 +166,11 @@ preserve
 						(rbar r2_lo r2_hi obs, barwidth(.08) color(edkblue%40) yaxis(2) ), ///
 						legend(order(3 4) cols(2) size(small) rowgap(.5) pos(12) ///
 						label(3 "mean log likelihood") label(4 "95% C.I. on mean") ) ///
-						saving("$sfig/r2_reg4_ext", replace)		
-						
-		graph export 	"$data/results_data/figures/presentations/PacDev/r2_reg4_ext.pdf", as(pdf) replace
+				saving("$sfig/r2_reg4_ext", replace)
+
+	graph		export ///
+				"$data/results_data/figures/presentations/PacDev/r2_reg4_ext.pdf", ///
+				as(pdf) replace
 restore
 
 
@@ -176,33 +180,33 @@ restore
 
 preserve
 	keep			if regname == 2
-	sort 			r2_mu 
-	gen 			obs = _n	
+	sort		r2_mu
+	gen			obs = _n
 
 	global			title =		"Adjusted R-Squared"
 
 * stack values of the specification indicators
 	gen 			k1 		= 	ext
-	
+
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Extraction"
 
 	sum			 	r2_hi
 	global			bmax = r(max)
-	
+
 	sum			 	r2_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	18
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-		
+
 	twoway 			scatter k1 obs, xlab(0(1)10) xsize(10) ysize(6) ///
 						title("Weather + FE")  ///
 						msize(small small small) ylab(0(1)$gheight ) ///
@@ -220,8 +224,8 @@ preserve
 						(rbar r2_lo r2_hi obs, barwidth(.08) color(edkblue%40) yaxis(2) ), ///
 						legend(order(3 4) cols(2) size(small) rowgap(.5) pos(12) ///
 						label(3 "mean log likelihood") label(4 "95% C.I. on mean") ) ///
-						saving("$sfig/r2_reg2_ext", replace)	
-restore		
+				saving("$sfig/r2_reg2_ext", replace)
+	restore
 
 
 ************************************************************************
@@ -230,33 +234,33 @@ restore
 
 preserve
 	keep			if regname == 5
-	sort 			r2_mu 
-	gen 			obs = _n	
+	sort		r2_mu
+	gen			obs = _n
 
 	global			title =		"Adjusted R-Squared"
 
 * stack values of the specification indicators
 	gen 			k1 		= 	ext
-	
+
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Extraction"
 
 	sum			 	r2_hi
 	global			bmax = r(max)
-	
+
 	sum			 	r2_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	18
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-		
+
 	twoway 			scatter k1 obs, xlab(0(1)10) xsize(10) ysize(6) ///
 						title("Weather + Weather{sup:2} + FE") ///
 						msize(small small small) ylab(0(1)$gheight ) ///
@@ -274,8 +278,8 @@ preserve
 						(rbar r2_lo r2_hi obs, barwidth(.08) color(edkblue%40) yaxis(2) ), ///
 						legend(order(3 4) cols(2) size(small) rowgap(.5) pos(12) ///
 						label(3 "mean log likelihood") label(4 "95% C.I. on mean") ) ///
-						saving("$sfig/r2_reg5_ext", replace)	
-restore			
+				saving("$sfig/r2_reg5_ext", replace)
+	restore
 
 
 ************************************************************************
@@ -284,33 +288,33 @@ restore
 
 preserve
 	keep			if regname == 3
-	sort 			r2_mu 
-	gen 			obs = _n	
+	sort		r2_mu
+	gen			obs = _n
 
 	global			title =		"Adjusted R-Squared"
 
 * stack values of the specification indicators
 	gen 			k1 		= 	ext
-	
+
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Extraction"
 
 	sum			 	r2_hi
 	global			bmax = r(max)
-	
+
 	sum			 	r2_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	18
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-		
+
 	twoway 			scatter k1 obs, xlab(0(1)10) xsize(10) ysize(6) ///
 						title("Weather + FE + Inputs") ///
 						msize(small small small) ylab(0(1)$gheight ) ///
@@ -328,8 +332,8 @@ preserve
 						(rbar r2_lo r2_hi obs, barwidth(.08) color(edkblue%40) yaxis(2) ), ///
 						legend(order(3 4) cols(2) size(small) rowgap(.5) pos(12) ///
 						label(3 "mean log likelihood") label(4 "95% C.I. on mean") ) ///
-						saving("$sfig/r2_reg3_ext", replace)	
-restore			
+				saving("$sfig/r2_reg3_ext", replace)
+	restore
 
 
 ************************************************************************
@@ -338,33 +342,33 @@ restore
 
 preserve
 	keep			if regname == 6
-	sort 			r2_mu 
-	gen 			obs = _n	
+	sort		r2_mu
+	gen			obs = _n
 
 	global			title =		"Adjusted R-Squared"
 
 * stack values of the specification indicators
 	gen 			k1 		= 	ext
-	
+
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Extraction"
 
 	sum			 	r2_hi
 	global			bmax = r(max)
-	
+
 	sum			 	r2_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	18
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-		
+
 	twoway 			scatter k1 obs, xlab(0(1)10) xsize(10) ysize(6) ///
 						title("Weather + Weather{sup:2} + FE + Inputs") ///
 						msize(small small small) ylab(0(1)$gheight ) ///
@@ -382,17 +386,17 @@ preserve
 						(rbar r2_lo r2_hi obs, barwidth(.08) color(edkblue%40) yaxis(2) ), ///
 						legend(order(3 4) cols(2) size(small) rowgap(.5) pos(12) ///
 						label(3 "mean log likelihood") label(4 "95% C.I. on mean") ) ///
-						saving("$sfig/r2_reg6_ext", replace)	
-restore	
-	
+				saving("$sfig/r2_reg6_ext", replace)
+	restore
+
 
 * combine R^2 specification curves for extration
 	grc1leg2 		"$sfig/r2_reg1_ext.gph" "$sfig/r2_reg4_ext.gph" ///
 						"$sfig/r2_reg2_ext.gph" "$sfig/r2_reg5_ext.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
+
 	graph export 	"$xfig\r2_ext.pdf", as(pdf) replace
-	
+
 ************************************************************************
 **# 2 - end matter
 ************************************************************************
@@ -401,4 +405,4 @@ restore
 * close the log
 	log	close
 
-/* END */		
+/* END */
