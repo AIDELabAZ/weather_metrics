@@ -1,6 +1,6 @@
-# Variable Selection in Economic Applications of Remotely Sensed Weather Data: Evidence from the LSMS-ISA
+# Josephson, A., 
 
-This repository contains code for replicating the statistical analysis in Agme, C., Josephson, A., Michler, J.D., Kilic, T., and Murray, S. (2024). "Variable Selection in Economic Applications of Remotely Sensed Weather Data: Evidence from the LSMS-ISA." *Unpublished*.
+This repository contains code for replicating the statistical analysis in Michler, J.D., Josephson, A., Agme, C., and Kilic, T. (2026). "Josephson, A., ." *Unpublished*.
 
 This README was last updated on 3 September 2024. 
 
