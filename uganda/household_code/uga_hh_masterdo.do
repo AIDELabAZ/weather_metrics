@@ -128,6 +128,12 @@
 			do "`dofile'/`folder'/`file'"		
 	}		
 }
+* Wave 4 is used by harvest-month construction and the merge/build stages.
+	loc uga : dir "`dofile'/wave_4" files "20*.do"
+	foreach file in `uga' {
+		do "`dofile'/wave_4/`file'"
+	}
+
 * run harvest month file
 	do			"`dofile'/wave_2/harvmonth.do"				//	generates harvest season
 	do			"`dofile'/wave_4/harvmonth.do"				//	generates harvest season

@@ -20,9 +20,9 @@
 * **********************************************************************
 
 * define paths
-	global		root 	= 	"$data/household_data/malawi/wave_6/raw"	
-	global		export 	= 	"$data/household_data/malawi/wave_6/refined"
-	global		logout 	= 	"$data/household_data/malawi/logs"
+	global		root 	= 	"$rawlsms/malawi/wave_6/raw"
+	global		export 	= 	"$data/refined_data/malawi/wave_6"
+	global		logout 	= 	"$data/refined_data/malawi/logs"
 
 * open log
 	cap 	log			close

@@ -24,9 +24,9 @@
 * define paths
 	global	root 	= 	"$data/regression_data"
 	global	stab 	= 	"$data/results_data/tables"
-	global	xtab 	= 	"$data/output/mismeasure_paper/tables"
+	global	xtab 	= 	"$data/results_data/tables/mismeasure_paper"
 	global	sfig	= 	"$data/results_data/figures"	
-	global 	xfig    =   "$data/output/mismeasure_paper/figures"
+	global 	xfig    =   "$data/results_data/figures/mismeasure_paper"
 	global	logout 	= 	"$data/results_data/logs"
 	* s indicates Stata figures, works in progress
 	* x indicates final version for paper 

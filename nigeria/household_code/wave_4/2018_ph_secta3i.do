@@ -23,10 +23,10 @@
 * **********************************************************************
 
 * define paths	
-	global root			"$data/household_data/nigeria/wave_4/raw"
-	*global cnvrt		"$data/household_data/nigeria/conversion_files"
-	global export		"$data/household_data/nigeria/wave_4/refined"
-	global logout		"$data/household_data/nigeria/logs"
+	global root			"$rawlsms/nigeria/wave_4/raw"
+	*global cnvrt		"$rawlsms/nigeria/conversion_files"
+	global export		"$data/refined_data/nigeria/wave_4"
+	global logout		"$data/refined_data/nigeria/logs"
 
 * open log	
 	cap log close

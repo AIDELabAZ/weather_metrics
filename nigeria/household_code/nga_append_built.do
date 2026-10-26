@@ -22,7 +22,7 @@
 * **********************************************************************
 
 * define paths
-	global		weight	= 	"$data/household_data/nigeria/wave_3/raw"  
+	global		weight	= 	"$rawlsms/nigeria/wave_3/raw"
 	global		root 	= 	"$data/merged_data/nigeria"
 	global		export 	= 	"$data/regression_data/nigeria"
 	global		logout 	= 	"$data/merged_data/nigeria/logs"

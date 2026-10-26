@@ -26,7 +26,7 @@
 
 * define paths
 	global		root  	= 	"$data/merged_data/tanzania"
-	global		key		=	"$data/household_data/tanzania/wave_6/refined"
+	global		key		=	"$data/refined_data/tanzania/wave_6"
 	global		export 	= 	"$data/regression_data/tanzania"
 	global		logout 	= 	"$data/merged_data/tanzania/logs"
 

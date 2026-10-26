@@ -22,7 +22,7 @@
 * **********************************************************************
 
 * define paths
-	global		raw		=	"$data/household_data/uganda/wave_7/refined"
+	global		raw		=	"$data/refined_data/uganda/wave_7"
 	global		root 	= 	"$data/merged_data/uganda"
 	global		export 	= 	"$data/regression_data/uganda"
 	global		logout 	= 	"$data/merged_data/uganda/logs"

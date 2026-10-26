@@ -7,12 +7,12 @@
 
 * does
 	* Executes all wave specific Nigeria weather .do files
-    * runs weather_command .ado file
+    * runs wxsum .ado file
 	* outputs .dta rainfall data ready to merge with LSMS household data
 	* take 100 minutes to convert and process weather data
 	
 * assumes
-	* weather_command.ado
+	* wxsum.ado
 	* subsidiary, wave-specific .do files
 
 * TO DO:
@@ -26,7 +26,7 @@
 clear
 
 *set max vars
-	set maxvar 120000, perm  // this amount is only allowed for MP editions 
+	set maxvar 120000  // this amount is only allowed for MP editions
 
 * define paths
 	loc root = "$code/nigeria/weather_code"

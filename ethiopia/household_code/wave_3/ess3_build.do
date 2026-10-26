@@ -21,8 +21,8 @@
 * **********************************************************************
 
 * define paths
-	global		rootw 	= 	"$data/weather_data/ethiopia/wave_3/refined/essy3_up"
-	global		rooth 	= 	"$data/household_data/ethiopia/wave_3/refined"
+	global		rootw 	= 	"$weatherwork/ethiopia/wave_3/refined/essy3_up"
+	global		rooth 	= 	"$data/refined_data/ethiopia/wave_3"
 	global		export 	= 	"$data/merged_data/ethiopia/wave_3"
 	global		logout 	= 	"$data/merged_data/ethiopia/logs"
 

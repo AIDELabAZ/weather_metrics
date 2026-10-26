@@ -24,10 +24,10 @@
 ************************************************************************
 
 * define paths	
-	global root 		 "$data/household_data/uganda/wave_3/raw"  
-	global export 		 "$data/household_data/uganda/wave_3/refined"
-	global logout 		 "$data/household_data/uganda/logs"
-	global conv 		 "$data/household_data/uganda/conversion_files"  
+	global root 		 "$rawlsms/uganda/wave_3/raw"
+	global export 		 "$data/refined_data/uganda/wave_3"
+	global logout 		 "$data/refined_data/uganda/logs"
+	global conv 		 "$rawlsms/uganda/conversion_files"
 
 * open log	
 	cap log 			close

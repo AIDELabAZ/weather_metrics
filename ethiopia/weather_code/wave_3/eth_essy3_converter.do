@@ -22,9 +22,9 @@
 * **********************************************************************
 
 * define paths
-	loc root = "$data/weather_data/ethiopia/wave_3/raw/essy3_up"
-	loc export = "$data/weather_data/ethiopia/wave_3/daily/essy3_up"
-	loc logout = "$data/weather_data/ethiopia/logs"
+	loc root = "$weatherdata/ethiopia/wave_3/raw/essy3_up"
+	loc export = "$weatherwork/ethiopia/wave_3/daily/essy3_up"
+	loc logout = "$weatherwork/ethiopia/logs"
 
 * open log
 	cap log		close

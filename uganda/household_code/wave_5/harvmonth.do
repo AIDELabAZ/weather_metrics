@@ -20,8 +20,8 @@
 ************************************************************************
 
 * define paths
-	global root 		 "$data/household_data/uganda"
-	global logout 		 "$data/household_data/uganda/logs"
+	global root 		 "$data/refined_data/uganda"
+	global logout 		 "$data/refined_data/uganda/logs"
 	
 	cap log 			close
 	log using 			"$logout/harvmonth", append
@@ -31,7 +31,7 @@
 **# 1 - import data and rename variables
 ************************************************************************
 	
-	use 			"$root/wave_5/refined/2015_agsec5a.dta", clear
+	use 			"$root/wave_5/2015_agsec5a.dta", clear
 			
 	gen				year = 2015
 		
@@ -40,7 +40,7 @@
 	sum 			cropid
 		
 * merge the location identification
-	merge m:1 		hhid using "$root/wave_5/refined/2015_gsec1"
+	merge m:1 		hhid using "$root/wave_5/2015_gsec1"
 	
 	keep if 		_merge == 3
 	
@@ -74,7 +74,7 @@
 	summarize
 
 * save file
-	save 			"$root/wave_5/refined/harv_month.dta", replace
+	save 			"$root/wave_5/harv_month.dta", replace
 
 * close the log
 	log	close

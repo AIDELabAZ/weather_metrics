@@ -22,8 +22,8 @@
 * **********************************************************************
 
 * define paths
-	global 	rootw  		"$data/weather_data/uganda/wave_8/refined/unpsy8_up"  
-	global  rooth 		"$data/household_data/uganda/wave_8/refined"
+	global 	rootw  		"$weatherwork/uganda/wave_8/refined/unpsy8_up"
+	global  rooth 		"$data/refined_data/uganda/wave_8"
 	global  export 		"$data/merged_data/uganda/wave_8"
 	global 	logout 		"$data/merged_data/uganda/logs"
 

@@ -23,11 +23,11 @@
 * **********************************************************************
 
 * define paths
-	global	rootw 	= 	"$data/weather_data"
-	global	rooth 	= 	"$data/household_data"
+	global	rootw 	= 	"$weatherwork"
+	global	rooth 	= 	"$data/refined_data"
 	global	export 	= 	"$data/results_data"
 	global	sfig	= 	"$data/results_data/figures"
-	global 	xfig    =   "$data/output/metric_paper/figures"
+	global 	xfig    =   "$data/results_data/figures/metric_paper"
 	global	logout 	= 	"$data/regression_data/logs"
 
 * open log	

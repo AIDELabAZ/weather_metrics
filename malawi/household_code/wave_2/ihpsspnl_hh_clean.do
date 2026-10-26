@@ -21,9 +21,9 @@
 * **********************************************************************
 
 * define paths
-	loc		root 	= 	"$data/household_data/malawi/wave_2/raw"
-	loc		export 	= 	"$data/household_data/malawi/wave_2/refined"
-	loc		logout 	= 	"$data/household_data/malawi/logs"
+	loc		root 	= 	"$rawlsms/malawi/wave_2/raw"
+	loc		export 	= 	"$data/refined_data/malawi/wave_2"
+	loc		logout 	= 	"$data/refined_data/malawi/logs"
 
 * open log
 	cap 	log			close

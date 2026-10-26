@@ -21,9 +21,9 @@
 * **********************************************************************
 
 * define paths
-	global	root		"$data/household_data/tanzania/wave_2/raw"
-	global export		"$data/household_data/tanzania/wave_2/refined"
-	global logout		"$data/household_data/tanzania/logs"
+	global	root		"$rawlsms/tanzania/wave_2/raw"
+	global export		"$data/refined_data/tanzania/wave_2"
+	global logout		"$data/refined_data/tanzania/logs"
 
 * open log
 	cap log 			close 

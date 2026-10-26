@@ -22,9 +22,9 @@
 * **********************************************************************
 
 * define paths
-	loc root = "$data/weather_data/niger/wave_2/raw/ecvmay2_up"
-	loc export = "$data/weather_data/niger/wave_2/daily/ecvmay2_up"
-	loc logout = "$data/weather_data/niger/logs"
+	loc root = "$weatherdata/niger/wave_2/raw/ecvmay2_up"
+	loc export = "$weatherwork/niger/wave_2/daily/ecvmay2_up"
+	loc logout = "$weatherwork/niger/logs"
 
 * open log
 	cap log		close

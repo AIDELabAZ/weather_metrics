@@ -6,8 +6,8 @@
 * -------------------------------------------------------------------------------*
 */
 
-global		Input "$data/household_data/malawi/wb_ihsp"
-global		Output "$data/household_data/malawi"
+global		Input "$rawlsms/malawi/wb_ihsp"
+global		Output "$data/refined_data/malawi"
 
 **************** 1) Program to identify parents and split offs 
 

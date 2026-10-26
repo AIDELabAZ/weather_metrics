@@ -7,7 +7,7 @@
 
 * does
 	* reads in Niger, wave 1 .dta files with daily values
-    * runs weather_command .ado file
+    * runs wxsum .ado file
 	* outputs .dta file of the relevant weather variables
 	* does the above for both rainfall and temperature data
 	/* 	-the growing season that we care about is defined on the FAO website:
@@ -17,7 +17,7 @@
 
 * assumes
 	* NGR_ECVMAY1_converter.do
-	* weather_command.ado
+	* wxsum.ado
 
 * TO DO:
 	* completed
@@ -28,9 +28,13 @@
 * **********************************************************************
 
 * define paths	
-	loc root = "$data/weather_data/niger/wave_1/daily/ecvmay1_up"
-	loc export = "$data/weather_data/niger/wave_1/refined/ecvmay1_up"
-	loc logout = "$data/weather_data/niger/logs"
+	loc shared_daily = "$weatherdata/niger/wave_1/daily/ecvmay1_up"
+    loc root = "$weatherwork/niger/wave_1/daily/ecvmay1_up"
+    capture local available : dir "`root'" files "*_daily.dta"
+    if _rc local available
+    if `"`available'"' == "" loc root = "`shared_daily'"
+	loc export = "$weatherwork/niger/wave_1/refined/ecvmay1_up"
+	loc logout = "$weatherwork/niger/logs"
 
 * open log	
 	cap log		close
@@ -43,6 +47,7 @@
 	
 * define local with all files in each sub-folder
 	loc fileList : dir "`root'" files "*rf_daily.dta"
+    if `"`fileList'"' == "" error 601
 	
 * loop through each file in the above local
 	foreach file in `fileList' {
@@ -57,7 +62,7 @@
 		loc dat = substr("`file'", 1, length("`file'") - 10) 
 		
 	* run the user written weather command - this takes a while
-		weather rf_ , rain_data ini_month(6) fin_month(10) day_month(1) keep(hid)
+		do "$code/analysis/reg_code/wxsum_metrics.do" rf_ rain 6 10 hid
 		
 	* save file
 		compress
@@ -71,6 +76,7 @@
 
 * define local with all files in each sub-folder	
 	loc fileList : dir "`root'/`folder'" files "*tp_daily.dta"
+    if `"`fileList'"' == "" error 601
 	
 * loop through each file in the above local
 	foreach file in `fileList' {
@@ -85,7 +91,7 @@
 		loc dat = substr("`file'", 1, length("`file'") - 10) 
 		
 		* run the user written weather command - this takes a while		
-		weather tmp_ , temperature_data growbase_low(10) growbase_high(30) ini_month(6) fin_month(10) day_month(1) keep(hid)
+		do "$code/analysis/reg_code/wxsum_metrics.do" tmp_ temp 6 10 hid
 		
 	* save file
 		compress

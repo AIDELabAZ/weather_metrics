@@ -21,8 +21,8 @@
 * 0 - setup
 * **********************************************************************
 
-	global 	rootw  		"$data/weather_data/uganda/wave_5/refined/unpsy5_up"  
-	global  rooth 		"$data/household_data/uganda/wave_5/refined"
+	global 	rootw  		"$weatherwork/uganda/wave_5/refined/unpsy5_up"
+	global  rooth 		"$data/refined_data/uganda/wave_5"
 	global  export 		"$data/merged_data/uganda/wave_5"
 	global 	logout 		"$data/merged_data/uganda/logs"
 

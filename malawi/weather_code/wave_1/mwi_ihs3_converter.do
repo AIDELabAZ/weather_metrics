@@ -26,9 +26,9 @@
 * **********************************************************************
 
 * define paths
-	loc 		root	= 	"$data/weather_data/malawi/wave_1/raw/ihs3_up"
-	loc 		export 	= 	"$data/weather_data/malawi/wave_1/daily/ihs3_up"
-	loc 		logout 	= 	"$data/weather_data/malawi/logs"
+	loc 		root	= 	"$weatherdata/malawi/wave_1/raw/ihs3_up"
+	loc 		export 	= 	"$weatherwork/malawi/wave_1/daily/ihs3_up"
+	loc 		logout 	= 	"$weatherwork/malawi/logs"
 
 * open log
 	cap log		close

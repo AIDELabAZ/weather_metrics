@@ -24,8 +24,8 @@
 * **********************************************************************
 
 * define paths
-	global		source 		"$data/household_data/malawi/wb_raw_data"
-	global		export 		"$data/household_data/malawi"
+	global		source 		"$rawlsms/malawi/wb_raw_data"
+	global		export 		"$data/refined_data/malawi"
 	global		dofile		"$code/malawi/household_code"
 
 
@@ -35,52 +35,52 @@
 
 * move IHS3 data to wave 1 folder
 	use			"$source/tmp/ihs3cx/hh/hh_final.dta", clear
-	save		"$export/wave_1/raw/ihs3cx_hh.dta", replace
+	save		"$export/wave_1/ihs3cx_hh.dta", replace
 
 	use			"$source/data/ihs3cx/geo/HouseholdGeovariables_IHS3CX.dta", clear
 	save		"$export/wave_1/ihs3cx_geo.dta", replace
 
 	use			"$source/tmp/ihs3lpnl/hh/hh_final.dta", clear
-	save		"$export/wave_1/raw/ihs3lpnl_hh.dta", replace
+	save		"$export/wave_1/ihs3lpnl_hh.dta", replace
 
 	use			"$source/data/ihs3lpnl/geo/householdgeovariables_ihs3_rerelease.dta", clear
-	save		"$export/wave_1/raw/ihs3lpnl_geo.dta", replace
+	save		"$export/wave_1/ihs3lpnl_geo.dta", replace
 
 	use			"$source/tmp/ihs3spnl/hh/hh_final.dta", clear
-	save		"$export/wave_1/raw/ihs3spnl_hh.dta", replace
+	save		"$export/wave_1/ihs3spnl_hh.dta", replace
 
 	use			"$source/data/ihs3spnl/geo/householdgeovariables_ihs3_rerelease.dta", clear
-	save		"$export/wave_1/raw/ihs3spnl_geo.dta", replace
+	save		"$export/wave_1/ihs3spnl_geo.dta", replace
 
 
 * move IHPS*pnl data to wave 2 folder
 	use			"$source/tmp/ihpsspnl/hh/hh_final.dta", clear
-	save		"$export/wave_2/raw/ihpsspnl_hh.dta", replace
+	save		"$export/wave_2/ihpsspnl_hh.dta", replace
 
 	use			"$source/data/ihpsspnl/geo/householdgeovariables_ihps.dta", clear
-	save		"$export/wave_2/raw/ihpsspnl_geo.dta", replace
+	save		"$export/wave_2/ihpsspnl_geo.dta", replace
 
 	use			"$source/tmp/ihpslpnl/hh/hh_final.dta", clear
-	save		"$export/wave_2/raw/ihpslpnl_hh.dta", replace
+	save		"$export/wave_2/ihpslpnl_hh.dta", replace
 
 	use			"$source/data/ihpslpnl/geo/householdgeovariables_ihps.dta", clear
-	save		"$export/wave_2/raw/ihpslpnl_geo.dta", replace
+	save		"$export/wave_2/ihpslpnl_geo.dta", replace
 
 				
 * move IHS4 data to wave 3 folder
 	use			"$source/tmp/ihs4cx/hh/hh_final.dta", clear
-	save		"$export/wave_3/raw/ihs4cx_hh.dta", replace
+	save		"$export/wave_3/ihs4cx_hh.dta", replace
 				
 	use			"$source/data/ihs4cx/geo/HouseholdGeovariables_IHS4CX.dta", clear
-	save		"$export/wave_3/raw/ihs4cx_geo.dta", replace
+	save		"$export/wave_3/ihs4cx_geo.dta", replace
 
 				
 * move IHS4*pnl data to wave 4folder
 	use			"$source/tmp/ihs4lpnl/hh/hh_final.dta", clear
-	save		"$export/wave_4/raw/ihs4lpnl_hh.dta", replace
+	save		"$export/wave_4/ihs4lpnl_hh.dta", replace
 				
 	use			"$source/data/ihs4lpnl/geo/householdgeovariables_ihpsy3.dta", clear
-	save		"$export/wave_4/raw/ihs4lpnl_geo.dta", replace
+	save		"$export/wave_4/ihs4lpnl_geo.dta", replace
 
 
 * **********************************************************************

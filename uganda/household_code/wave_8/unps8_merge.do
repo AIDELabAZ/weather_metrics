@@ -22,9 +22,9 @@
 * **********************************************************************
 
 * define paths	
-	global 	root  		"$data/household_data/uganda/wave_8/refined"  
-	global  export 		"$data/household_data/uganda/wave_8/refined"
-	global 	logout 		"$data/household_data/uganda/logs"
+	global 	root  		"$data/refined_data/uganda/wave_8"
+	global  export 		"$data/refined_data/uganda/wave_8"
+	global 	logout 		"$data/refined_data/uganda/logs"
 	
 * open log	
 	cap log 			close

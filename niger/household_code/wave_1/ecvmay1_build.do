@@ -21,8 +21,8 @@
 * **********************************************************************
 
 * define paths
-	loc		rootw 	= 	"$data/weather_data/niger/wave_1/refined/ecvmay1_up"
-	loc		rooth 	= 	"$data/household_data/niger/wave_1/refined"
+	loc		rootw 	= 	"$weatherwork/niger/wave_1/refined/ecvmay1_up"
+	loc		rooth 	= 	"$data/refined_data/niger/wave_1"
 	loc		export 	= 	"$data/merged_data/niger/wave_1"
 	loc		logout 	= 	"$data/merged_data/niger/logs"
 	

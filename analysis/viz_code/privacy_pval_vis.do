@@ -24,9 +24,9 @@
 * define paths
 	global	root 	= 	"$data/results_data"
 	global	stab 	= 	"$data/results_data/tables"
-	global	xtab 	= 	"$data/output/privacy_paper/tables"
+	global	xtab 	= 	"$data/results_data/tables/privacy_paper"
 	global	sfig	= 	"$data/results_data/figures"	
-	global 	xfig    =   "$data/output/privacy_paper/figures"
+	global 	xfig    =   "$data/results_data/figures/privacy_paper"
 	global	logout 	= 	"$data/results_data/logs"
 
 * open log	
@@ -116,7 +116,7 @@ preserve
 						label(2 "p>0.95") label(3 "p>0.99") label(4 "95% C.I."))  ///
 						saving("$sfig/pval_ext_rf_x", replace)
 						
-		graph export 	"$data/output/presentations/PacDev/pval_ext_rf.pdf", as(pdf) replace
+		graph export 	"$data/results_data/figures/presentations/PacDev/pval_ext_rf.pdf", as(pdf) replace
 restore
 
 * p-value graph of temperature by extraction method
@@ -175,7 +175,7 @@ preserve
 						label(2 "p>0.95") label(3 "p>0.99") label(4 "95% C.I."))  ///
 						saving("$sfig/pval_ext_tp_x", replace)
 						
-		graph export 	"$data/output/presentations/PacDev/pval_ext_tp.pdf", as(pdf) replace
+		graph export 	"$data/results_data/figures/presentations/PacDev/pval_ext_tp.pdf", as(pdf) replace
 restore
 					
 

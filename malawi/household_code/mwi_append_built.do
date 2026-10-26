@@ -43,7 +43,7 @@
 * **********************************************************************
 
 * import the long panel data frame
-	use 		"$data/household_data/malawi/trackingfiles/Frame_hhIDs_v2.dta", clear
+	use 		"$rawlsms/malawi/trackingfiles/Frame_hhIDs_v2.dta", clear
 
 * import the first cross section file	
 	preserve
@@ -101,7 +101,7 @@
 * **********************************************************************
 	
 * import the long panel data frame
-	use 		"$data/household_data/malawi/trackingfiles/Frame_hhIDs_v2.dta", clear
+	use 		"$rawlsms/malawi/trackingfiles/Frame_hhIDs_v2.dta", clear
 
 * import the first short panel file	
 	preserve
@@ -172,7 +172,7 @@
 * **********************************************************************
 	
 * import the long panel data frame
-	use 		"$data/household_data/malawi/trackingfiles/Frame_hhIDs_v2.dta", clear
+	use 		"$rawlsms/malawi/trackingfiles/Frame_hhIDs_v2.dta", clear
 	
 * import the first long panel file
 	preserve

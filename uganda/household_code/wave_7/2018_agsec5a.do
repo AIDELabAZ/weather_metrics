@@ -22,10 +22,10 @@
 * **********************************************************************
 
 * define paths	
-	loc root 		= "$data/household_data/uganda/wave_3/raw"  
-	loc export 		= "$data/household_data/uganda/wave_3/refined"
-	loc logout 		= "$data/household_data/uganda/logs"
-	loc conv 		= "$data/household_data/uganda/conversion_files"  
+	loc root 		= "$rawlsms/uganda/wave_3/raw"
+	loc export 		= "$data/refined_data/uganda/wave_3"
+	loc logout 		= "$data/refined_data/uganda/logs"
+	loc conv 		= "$rawlsms/uganda/conversion_files"
 
 * open log	
 	cap log 		close

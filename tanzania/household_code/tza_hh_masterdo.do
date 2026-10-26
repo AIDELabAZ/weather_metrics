@@ -72,6 +72,8 @@
 * 2 - run individual HH and AG cleaning .do files
 * **********************************************************************
 
+* Wave 3 still consumes the legacy key; the appended panel uses the SDD key.
+	do			"`dofile'/tza_panel_key.do"
 * run panel key cleaning file
 	do			"`dofile'/tza_sdd_panel_key.do"				// panel key
 

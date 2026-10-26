@@ -7,12 +7,12 @@
 
 * does
 	* Executes all wave specific Uganda weather .do files
-    * runs weather_command .ado file
+    * runs wxsum .ado file
 	* outputs .dta rainfall data ready to merge with LSMS household data
 	* takes (15:25-) XXX minutes to convert and process weather data
 
 * assumes
-	* weather_command.ado
+	* wxsum.ado
 	* customsave.ado 
 	* subsidiary, wave-specific .do files
 
@@ -27,7 +27,7 @@
 clear
 
 *set max vars
-	set maxvar 120000, perm  // this amount is only allowed for MP editions
+	set maxvar 120000  // this amount is only allowed for MP editions
 
 * define paths
 	loc root = "$code/uganda/weather_code"

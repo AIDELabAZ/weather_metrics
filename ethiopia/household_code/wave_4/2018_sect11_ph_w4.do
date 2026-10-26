@@ -23,9 +23,9 @@
 * **********************************************************************
 
 * define paths
-	global		root 		 	"$data/household_data/ethiopia/wave_4/raw"  
-	global		export 		 	"$data/household_data/ethiopia/wave_4/refined"
-	global		logout 		 	"$data/household_data/ethiopia/logs"
+	global		root 		 	"$rawlsms/ethiopia/wave_4/raw"
+	global		export 		 	"$data/refined_data/ethiopia/wave_4"
+	global		logout 		 	"$data/refined_data/ethiopia/logs"
 	
 * open log	
 	cap log 	close

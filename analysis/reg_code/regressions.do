@@ -48,15 +48,25 @@
 	loc 	inputscp 	lncp_lab lncp_frt cp_pst cp_hrb cp_irr
 	loc		inputstf 	lntf_lab lntf_frt tf_pst tf_hrb tf_irr
 	loc		weather 	v*
+	unab		weather_vars : `weather'
+	loc		nweather : word count `weather_vars'
+	loc		nrain = 0
+	foreach v of local weather_vars {
+		if regexm("`v'", "^v(0[1-9]|1[0-4])_rf[1-6]$") loc nrain = `nrain' + 1
+	}
 
 * create file to post results to
 	tempname 	reg_results
 	postfile 	`reg_results' country str3 sat str2 depvar str4 regname str3 varname ///
-					betarain serain adjustedr loglike dfr obs ///
+					betarain serain adjustedr loglike dfr obs str32 weather_var nclusters ///
 					using "$results/reg_results.dta", replace
 					
 * define loop through levels of the data type variable	
 levelsof 	country		, local(levels)
+	loc ncountries : word count `levels'
+	loc expected = `ncountries' * 2 * (6 * `nweather' + `nrain')
+* A complete rainfall grid has 84 variables; report incomplete input grids.
+	if `nrain' != 84 display as error "Rainfall grid: `nrain' of 84 expected variables present."
 foreach l of local levels {
 	
 	* set panel id so it varies by dtype
@@ -75,37 +85,56 @@ foreach l of local levels {
 			reg 		lntf_yld `v' if country == `l', vce(cluster hhid)
 			post 		`reg_results' (`l') ("`sat'") ("tf") ("reg1") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
 
 		* weather and fe	
 			xtreg 		lntf_yld `v' i.year if country == `l', fe vce(cluster hhid)
 			post 		`reg_results' (`l') ("`sat'") ("tf") ("reg2") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
+
+		* Cloudy: same year effects and exact reg2 estimation observations
+			if regexm("`v'", "^v(0[1-9]|1[0-4])_rf[1-6]$") {
+				tempvar paired_sample
+				gen byte `paired_sample' = e(sample)
+				reg lntf_yld `v' i.year if `paired_sample', vce(cluster hhid)
+				assert e(sample) == `paired_sample'
+				post `reg_results' (`l') ("`sat'") ("tf") ("reg7") ///
+						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
+				drop `paired_sample'
+			}
 
 		* weather and inputs and fe
 			xtreg 		lntf_yld `v' `inputstf' i.year if country == `l', fe vce(cluster hhid)
 			post 		`reg_results' (`l') ("`sat'") ("tf") ("reg3") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
 			
 		* weather and squared weather
 			reg 		lntf_yld c.`v'##c.`v' if country == `l', vce(cluster hhid)
 			post 		`reg_results' (`l') ("`sat'") ("tf") ("reg4") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
 		
 		* weather and squared weather and fe
 			xtreg 		lntf_yld c.`v'##c.`v' i.year if country == `l', fe vce(cluster hhid)
 			post 		`reg_results' (`l') ("`sat'") ("tf") ("reg5") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
 		
 		* weather and squared weather and inputs and fe
 			xtreg 		lntf_yld c.`v'##c.`v' `inputstf' i.year if country == `l', fe vce(cluster hhid)
 			post 		`reg_results' (`l') ("`sat'") ("tf") ("reg6") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
 
 		* 2.2: Quantity of Maize
 		
@@ -113,37 +142,56 @@ foreach l of local levels {
 			reg 		lncp_yld `v' if country == `l', vce(cluster hhid)
 			post 		`reg_results' (`l') ("`sat'") ("cp") ("reg1") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
 
 		* weather and fe	
 			xtreg 		lncp_yld `v' i.year if country == `l', fe vce(cluster hhid)
 			post 		`reg_results' (`l') ("`sat'") ("cp") ("reg2") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
+
+		* Cloudy: same year effects and exact reg2 estimation observations
+			if regexm("`v'", "^v(0[1-9]|1[0-4])_rf[1-6]$") {
+				tempvar paired_sample
+				gen byte `paired_sample' = e(sample)
+				reg lncp_yld `v' i.year if `paired_sample', vce(cluster hhid)
+				assert e(sample) == `paired_sample'
+				post `reg_results' (`l') ("`sat'") ("cp") ("reg7") ///
+						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
+				drop `paired_sample'
+			}
 
 		* weather and inputs and fe
 			xtreg 		lncp_yld `v' `inputscp' i.year if country == `l', fe vce(cluster hhid)
 			post 		`reg_results' (`l') ("`sat'") ("cp") ("reg3") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
 			
 		* weather and squared weather
 			reg 		lncp_yld c.`v'##c.`v' if country == `l', vce(cluster hhid)
 			post 		`reg_results' (`l') ("`sat'") ("cp") ("reg4") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
 		
 		* weather and squared weather and fe
 			xtreg 		lncp_yld c.`v'##c.`v' i.year if country == `l', fe vce(cluster hhid)
 			post 		`reg_results' (`l') ("`sat'") ("cp") ("reg5") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
 		
 		* weather and squared weather and inputs and fe
 			xtreg 		lncp_yld c.`v'##c.`v' `inputscp' i.year if country == `l', fe vce(cluster hhid)
 			post 		`reg_results' (`l') ("`sat'") ("cp") ("reg6") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)')
+						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
+						("`v'") (`=e(N_clust)')
 						
 		display `l'
 
@@ -154,8 +202,46 @@ foreach l of local levels {
 	postclose	`reg_results' 
 	use 		"$results/reg_results", clear
 
-* drop the cross section FE results
-	drop if		loglike == .
+* Keep original names and explicit specification metadata in both outputs.
+	gen str9 outcome_var = cond(depvar == "tf", "lntf_yld", "lncp_yld")
+	gen str4 spec_id = regname
+	gen byte year_fe = inlist(regname, "reg2", "reg3", "reg5", "reg6", "reg7")
+	gen byte household_fe = inlist(regname, "reg2", "reg3", "reg5", "reg6")
+	gen byte paired_sample = inlist(regname, "reg2", "reg7") & ///
+		regexm(weather_var, "^v(0[1-9]|1[0-4])_rf[1-6]$")
+	gen byte estimable = !missing(betarain, serain) & serain > 0
+	label var weather_var "Full original weather variable name"
+	label var outcome_var "Original outcome variable name"
+	label var spec_id "Original specification identifier"
+	label var nclusters "Number of household clusters"
+	label var paired_sample "reg2/reg7 comparison on identical observations"
+	label var estimable "Weather coefficient has a positive finite standard error"
+	isid country outcome_var weather_var spec_id
+	assert _N == `expected'
+	display as text "Posted " _N " regression rows; expected `expected'."
+	count if !estimable
+	if r(N) > 0 {
+		display as error "Non-estimable weather coefficients (retained and flagged):"
+		list country outcome_var weather_var spec_id betarain serain if !estimable, noobs
+	}
+	count if missing(loglike)
+	if r(N) > 0 {
+		display as error "Missing log likelihood; historical rows excluded below unless required for pairing:"
+		list country outcome_var weather_var spec_id paired_sample if missing(loglike), noobs
+	}
+* Check pair cardinality and saved sample/cluster counts, in addition to e(sample).
+	if `nrain' > 0 {
+		preserve
+			keep if paired_sample
+			bysort country outcome_var weather_var (spec_id): assert _N == 2
+			by country outcome_var weather_var: assert spec_id[1] == "reg2" & spec_id[2] == "reg7"
+			by country outcome_var weather_var: assert obs[1] == obs[2] & nclusters[1] == nclusters[2]
+		restore
+	}
+	save "$results/reg_results.dta", replace
+
+* Preserve the historical exclusion rule, while retaining both comparison rows.
+	drop if missing(loglike) & !paired_sample
 	
 * create country type variable
 	lab def		country 1 "Ethiopia" 2 "Malawi" 3 "Mali" ///
@@ -173,9 +259,9 @@ foreach l of local levels {
 	lab var		tstat "t-statistic"
 	gen 		pval = 2*ttail(dfr,abs(tstat))
 	lab var		pval "p-value"
-	gen 		ci_lo =  betarain - invttail(dfr,0.025)*serain
+	gen 		ci_lo =  betarain - invttail(dfr,0.025)*serain if estimable
 	lab var		ci_lo "Lower confidence interval"
-	gen 		ci_up =  betarain + invttail(dfr,0.025)*serain
+	gen 		ci_up =  betarain + invttail(dfr,0.025)*serain if estimable
 	lab var		ci_up "Upper confidence interval"
 
 * label variables
@@ -189,7 +275,14 @@ foreach l of local levels {
 	lab var		obs "Number of observations"
 
 * create unique id variable
-	egen 		reg_id = group(country sat depvar regname varname)
+* Assign historical IDs first so adding reg7 does not renumber reg1-reg6.
+	egen 		reg_id = group(country sat depvar regname varname) if regname != "reg7" & !missing(loglike)
+	summarize reg_id, meanonly
+	loc last_historical_id = r(max)
+	egen long new_reg_id = group(country outcome_var weather_var spec_id) if missing(reg_id)
+	replace reg_id = `last_historical_id' + new_reg_id if missing(reg_id)
+	drop new_reg_id
+	isid reg_id
 	lab var 	reg_id "unique regression id"
 	
 * create variable to record the name of the rainfall variable
@@ -245,6 +338,11 @@ foreach l of local levels {
 	lab var		aux_var "Variable name"
 	drop 		varname
 	rename 		aux_var varname
+	count if missing(varname)
+	if r(N) > 0 {
+		display as error "Unrecognized weather metrics excluded from complete results (retained in raw results):"
+		list country outcome_var weather_var spec_id if missing(varname), noobs
+	}
 	drop		if varname == .
 	
 * create variable to record the name of the satellite
@@ -289,13 +387,14 @@ foreach l of local levels {
 	replace 	aux_reg = 4 if regname == "reg4"
 	replace 	aux_reg = 5 if regname == "reg5"
 	replace 	aux_reg = 6 if regname == "reg6"
+	replace 	aux_reg = 7 if regname == "reg7"
 
 * order and label the varaiable
 	order 		aux_reg, after(regname)
 	lab def		regname 	1 "Weather Only" ///
 							2 "Weather + FE" ///
 							3 "Weather + FE + Inputs" ///
-							4 "Weather + Weather^2" ////
+							4 "Weather + Weather^2" ///
 							5 "Weather + Weather^2 + FE" ///
 							6 "Weather + Weather^2 + FE + Inputs" ///
 							7 "Weather + Year FE" ///
@@ -314,8 +413,8 @@ order	reg_id
 	replace 		b_sig = . if pval > .05
 	lab var 		b_sig "p < 0.05"
 	
-	gen 			b_ns = beta
-	replace 		b_ns= . if p <= .05
+	gen 			b_ns = beta if estimable
+	replace 		b_ns= . if pval <= .05
 	lab var 		b_ns "n.s."
 	
 * generate significance dummy

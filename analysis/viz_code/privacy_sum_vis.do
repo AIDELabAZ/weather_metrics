@@ -27,9 +27,9 @@
 * define paths
 	global	root 	= 	"$data/regression_data"
 	global	stab 	= 	"$data/results_data/tables"
-	global	xtab 	= 	"$data/output/privacy_paper/tables"
+	global	xtab 	= 	"$data/results_data/tables/privacy_paper"
 	global	sfig	= 	"$data/results_data/figures"	
-	global 	xfig    =   "$data/output/privacy_paper/figures"
+	global 	xfig    =   "$data/results_data/figures/privacy_paper"
 	global	logout 	= 	"$data/results_data/logs"
 
 * open log	

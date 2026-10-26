@@ -26,9 +26,9 @@
 * **********************************************************************
 
 * define paths
-	loc root = "$data/household_data/ethiopia/wave_1/refined"
-	loc export = "$data/household_data/ethiopia/wave_1/refined"
-	loc logout = "$data/household_data/ethiopia/logs"
+	loc root = "$data/refined_data/ethiopia/wave_1"
+	loc export = "$data/refined_data/ethiopia/wave_1"
+	loc logout = "$data/refined_data/ethiopia/logs"
 
 * open log
 	cap log close

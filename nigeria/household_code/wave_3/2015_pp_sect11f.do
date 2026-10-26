@@ -20,9 +20,9 @@
 * 0 - setup
 * **********************************************************************
 * define paths	
-	loc root = "$data/household_data/nigeria/wave_3/raw"
-	loc export = "$data/household_data/nigeria/wave_3/refined"
-	loc logout = "$data/household_data/nigeria/logs"
+	loc root = "$rawlsms/nigeria/wave_3/raw"
+	loc export = "$data/refined_data/nigeria/wave_3"
+	loc logout = "$data/refined_data/nigeria/logs"
 
 * close log (in case still open)
 	*log close

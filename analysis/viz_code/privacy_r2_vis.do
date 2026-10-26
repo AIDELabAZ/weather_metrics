@@ -24,9 +24,9 @@
 * define paths
 	global	root 	= 	"$data/results_data"
 	global	stab 	= 	"$data/results_data/tables"
-	global	xtab 	= 	"$data/output/privacy_paper/tables"
+	global	xtab 	= 	"$data/results_data/tables/privacy_paper"
 	global	sfig	= 	"$data/results_data/figures"	
-	global 	xfig    =   "$data/output/privacy_paper/figures"
+	global 	xfig    =   "$data/results_data/figures/privacy_paper"
 	global	logout 	= 	"$data/results_data/logs"
 
 * open log	
@@ -110,7 +110,7 @@ preserve
 						label(3 "mean log likelihood") label(4 "95% C.I. on mean") ) ///
 						saving("$sfig/r2_reg1_ext", replace)	
 						
-		graph export 	"$data/output/presentations/PacDev/r2_reg1_ext.pdf", as(pdf) replace
+		graph export 	"$data/results_data/figures/presentations/PacDev/r2_reg1_ext.pdf", as(pdf) replace
 restore
 		
 
@@ -166,7 +166,7 @@ preserve
 						label(3 "mean log likelihood") label(4 "95% C.I. on mean") ) ///
 						saving("$sfig/r2_reg4_ext", replace)		
 						
-		graph export 	"$data/output/presentations/PacDev/r2_reg4_ext.pdf", as(pdf) replace
+		graph export 	"$data/results_data/figures/presentations/PacDev/r2_reg4_ext.pdf", as(pdf) replace
 restore
 
 

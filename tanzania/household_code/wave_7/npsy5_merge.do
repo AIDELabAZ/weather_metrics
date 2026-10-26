@@ -22,9 +22,9 @@
 * **********************************************************************
 
 * define paths
-	global root 	"$data/household_data/tanzania/wave_7/refined"
-	global export 	"$data/household_data/tanzania/wave_7/refined"
-	global logout 	"$data/household_data/tanzania/logs"
+	global root 	"$data/refined_data/tanzania/wave_7"
+	global export 	"$data/refined_data/tanzania/wave_7"
+	global logout 	"$data/refined_data/tanzania/logs"
 
 * open log 
 	cap log 		close 

@@ -26,9 +26,9 @@
 * **********************************************************************
 
 * define paths
-	loc			root	=	"$data/weather_data/tanzania/wave_4/raw/npsy4_up"
-	loc			export	=	"$data/weather_data/tanzania/wave_4/daily/npsy4_up"
-	loc			logout	=	"$data/weather_data/tanzania/logs"
+	loc			root	=	"$weatherdata/tanzania/wave_4/raw/npsy4_up"
+	loc			export	=	"$weatherwork/tanzania/wave_4/daily/npsy4_up"
+	loc			logout	=	"$weatherwork/tanzania/logs"
 
 * open log
 	cap log		close

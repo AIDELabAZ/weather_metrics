@@ -22,10 +22,10 @@
 * **********************************************************************
 
 * define paths
-	global		cnvrt	=	"$data/household_data/tanzania/wave_6/raw"
-	global		import	=	"$data/household_data/tanzania"
-	global		export	=	"$data/household_data/tanzania/wave_6/refined"
-	global		logout 	= 	"$data/household_data/tanzania/logs"
+	global		cnvrt	=	"$rawlsms/tanzania/wave_6/raw"
+	global		import	=	"$data/refined_data/tanzania"
+	global		export	=	"$data/refined_data/tanzania/wave_6"
+	global		logout 	= 	"$data/refined_data/tanzania/logs"
 
 * open log	
 	cap log 	close 
@@ -112,7 +112,7 @@
 	
 * merge in regional variables from wave 1
 	rename		y1_hhid hhid
-	merge		m:1 hhid using "$import\wave_1\refined\HH_SECA.dta"
+	merge		m:1 hhid using "$import\wave_1\HH_SECA.dta"
 	*** only 3,880 matched, 196 not matched in using
 	*** there are 3,265 unique hh in wave 1, so we have 615 ``too many'' (movers)
 	
@@ -121,7 +121,7 @@
 	rename		hhid y1_hhid
 	
 * merge in regional variables from wave 2
-	merge		m:1 y2_hhid using "$import\wave_2\refined\HH_SECA.dta"
+	merge		m:1 y2_hhid using "$import\wave_2\HH_SECA.dta"
 	*** only 4,567 matched, 116 not matched in using
 	*** there are 3,924 unique hh in wave 2, so we have 643 ``too many'' (movers)
 	
@@ -129,7 +129,7 @@
 	drop		_merge
 	
 * merge in regional variables from wave 3
-	merge		m:1 y3_hhid using "$import\wave_3\refined\HH_SECA.dta"
+	merge		m:1 y3_hhid using "$import\wave_3\HH_SECA.dta"
 	*** only 4,532 matched, 711 not matched in using
 	*** there are 5,010 unique hh in wave 3, so we have 478 ``too many'' (movers)
 	
@@ -137,7 +137,7 @@
 	drop		_merge
 	
 * merge in regional variables from wave 4xp
-	merge		m:1 y4_hhid using "$import\wave_5\refined\HH_SECA.dta"
+	merge		m:1 y4_hhid using "$import\wave_5\HH_SECA.dta"
 	*** only 1,119 matched, 31 not matched in using
 	*** there are 989 unique hh in wave 4xp, so we have 130 ``too many'' (movers)
 	
@@ -145,7 +145,7 @@
 	drop		_merge
 	
 * merge in regional variables from wave sdd
-	merge		m:1 sdd_hhid using "$import\wave_6\refined\HH_SECA.dta"
+	merge		m:1 sdd_hhid using "$import\wave_6\HH_SECA.dta"
 	*** only 1,001 matched, 183 not matched in using
 	*** there are 1,184 unique hh in wave 5-sdd, so we have 183 ``too few'' (non-panel)
 	

@@ -22,9 +22,9 @@
 * **********************************************************************
 
 * define paths
-	loc		cnvrt	=	"$data/household_data/nigeria/conversion_files"
-	loc 	export	= 	"$data/household_data/nigeria/conversion_files"
-	loc 	logout	= 	"$data/household_data/nigeria/logs"
+	loc		cnvrt	=	"$rawlsms/nigeria/conversion_files"
+	loc 	export	= 	"$data/refined_data/nigeria/conversion_files"
+	loc 	logout	= 	"$data/refined_data/nigeria/logs"
 
 * open log
 	cap log close

@@ -24,10 +24,10 @@
 * **********************************************************************
 
 * define paths
-	loc 	root	= 	"$data/household_data/niger/wave_2/raw"
-	loc 	export	= 	"$data/household_data/niger/wave_2/refined"
-	loc 	cnvrt	= 	"$data/household_data/niger/wave_2/raw"
-	loc 	logout	= 	"$data/household_data/niger/logs"
+	loc 	root	= 	"$rawlsms/niger/wave_2/raw"
+	loc 	export	= 	"$data/refined_data/niger/wave_2"
+	loc 	cnvrt	= 	"$rawlsms/niger/wave_2/raw"
+	loc 	logout	= 	"$data/refined_data/niger/logs"
 
 * open log
 	cap log close 
