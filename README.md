@@ -1,6 +1,6 @@
-# Josephson, A., 
+# Cloudy With A Chance of Significance: Specification Search and the Illusion of Exogeneity in Remotely Sensed Weather Data
 
-This repository contains code for replicating the statistical analysis in Michler, J.D., Josephson, A., Agme, C., and Kilic, T. (2026). "Josephson, A., ." *Unpublished*.
+This repository contains code for replicating the statistical analysis in Michler, J.D., Josephson, A., Agme, C., and Kilic, T. (2026). "Cloudy With A Chance of Significance: Specification Search and the Illusion of Exogeneity in Remotely Sensed Weather Data." *Unpublished*.
 
 This README was last updated on 3 September 2024. 
 
