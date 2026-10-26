@@ -16,24 +16,24 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		rootw 	 	"$weatherwork/malawi/wave_1/refined/ihs3_up"
+	global		rootw 	 	"$wout/malawi/wave_1/refined/ihs3_up"
 	global		rooth 	 	"$data/refined_data/malawi/wave_1"
 	global			export 	 	"$data/merged_data/malawi/wave_1"
 	global			logout 	 	"$data/merged_data/malawi/logs"
 
 * open log
-	cap log 		close
+	cap log close
 	log 			using 		"$logout/ihs3spnl_build", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - merge household data with rainfall data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"$rooth/hhfinal_ihs3spnl.dta", clear
@@ -49,7 +49,7 @@
 	loc 		fileList : dir "$rootw" files "*rf.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 		* merge weather data with household data
 		merge		1:1 case_id using "$rootw/`file'"
@@ -116,15 +116,15 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - merge temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc 		fileList : dir "$rootw" files "*tp.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 case_id using "$rootw/`file'"
@@ -188,7 +188,7 @@
 	gen			wave = 1
 	rename		case_id sp1_id
 	rename		hh_id_merge case_id
-	qui: 		compress
+	qui: compress
 	save 		"$export/sp1_merged.dta", replace
 
 * close the log

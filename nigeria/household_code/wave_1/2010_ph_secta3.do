@@ -6,7 +6,7 @@
 * Stata v.18
 
 * does
-* reads in Nigeria, WAVE 1 (2010-2011), POST HARVEST, NGA SECTA3 AG
+	* reads in Nigeria, WAVE 1 (2010-2011), POST HARVEST, NGA SECTA3 AG
 	* determines primary and secondary crops, cleans harvest (quantity and value)
 	* converts to kilograms and constant 2015 USD
 	* outputs clean data file ready for combination with wave 1 plot data
@@ -20,12 +20,12 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root 		= 		"$rawlsms/nigeria/wave_1/raw"
+	loc			root 		= 		"$raw/nigeria/wave_1/raw"
 	loc			cnvrt 		=		"$data/refined_data/nigeria/conversion_files"
 	loc			export 		= 		"$data/refined_data/nigeria/wave_1"
 	loc			logout 		= 		"$data/refined_data/nigeria/logs"
@@ -38,9 +38,9 @@
 	log using "`logout'/wave_1_ph_secta3", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - harvest information
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 	use			"`root'/secta3_harvestw1", clear
@@ -88,9 +88,10 @@
 	label 			variable crop_area "what was the land area of crop harvested since the last interview? not using standardized unit"
 	rename 			sa3q5b area_unit
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - conversion to kilograms
-* **********************************************************************
+**********************************************************************
 
 * create quantity harvested variable
 	gen 			harvestq = sa3q6a
@@ -137,9 +138,10 @@
 	drop			vl_hrv_1_
 	*** imputed 1214 values out of 10,868 total observations
 
-* **********************************************************************
+
+**********************************************************************
 **# 3 - generate maize harvest quantities
-* **********************************************************************
+**********************************************************************
 
 	merge		m:1 cropcode harv_unit using "`cnvrt'/harvconv_wave_1"
 	*** 1000 did not match from master
@@ -230,9 +232,10 @@
 * replace non-maize harvest values as missing
 	replace			mz_hrv = . if mz_damaged == 0 & mz_hrv == 0
 
-* **********************************************************************
+
+**********************************************************************
 **# 4 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * keep what we want, get rid of what we don't
 	keep 				zone state lga sector ea hhid plotid cropid harv_kg ///
@@ -242,7 +245,7 @@
 	duplicates		report hhid plotid cropid
 	*** there are 3 duplicates
 	sort			hhid plotid cropid
-	quietly by hhid plotid cropid:  gen dup = cond(_N==1,0,_n)
+	quietly by hhid plotid cropid: gen dup = cond(_N==1,0,_n)
 	drop if dup>1
 	*** 2 observations deleted
 

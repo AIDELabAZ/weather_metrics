@@ -16,24 +16,24 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		rootw 	 	"$weatherwork/malawi/wave_2/refined/ihps_up"
+	global		rootw 	 	"$wout/malawi/wave_2/refined/ihps_up"
 	global		rooth 	 	"$data/refined_data/malawi/wave_2"
 	global			export 	 	"$data/merged_data/malawi/wave_2"
 	global			logout 	 	"$data/merged_data/malawi/logs"
 
 * open log
-	cap log 		close
+	cap log close
 	log 			using 		"$logout/ihpslpnl_build", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - merge household data with rainfall data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"$rooth/hhfinal_ihpslpnl.dta", clear
@@ -49,7 +49,7 @@
 	loc 		fileList : dir "$rootw" files "*rf.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 		* merge weather data with household data
 		merge		1:1 y2_hhid using "$rootw/`file'"
@@ -116,15 +116,15 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - merge temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc 		fileList : dir "$rootw" files "*tp.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 y2_hhid using "$rootw/`file'"
@@ -186,7 +186,7 @@
 
 * save file
 	gen			wave = 2
-	qui: 		compress
+	qui: compress
 	save 		"$export/lp2_merged.dta", replace
 
 * close the log

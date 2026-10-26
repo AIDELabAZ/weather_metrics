@@ -17,23 +17,23 @@
 	* completed
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root = "$weatherdata/niger/wave_1/raw/ecvmay1_up"
-	loc			export = "$weatherwork/niger/wave_1/daily/ecvmay1_up"
-	loc			logout = "$weatherwork/niger/logs"
+	loc			root = "$wraw/niger/wave_1/raw/ecvmay1_up"
+	loc			export = "$wout/niger/wave_1/daily/ecvmay1_up"
+	loc			logout = "$wout/niger/logs"
 
 * open log
-	cap log		close
+	cap log close
 	log using "`logout'/ngr_ecvmay1_converter", replace
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - converts weather data
-* **********************************************************************
+**********************************************************************
 
 * define local with all files in each sub-folder
 	loc fileList : dir "`root'" files "*.csv"

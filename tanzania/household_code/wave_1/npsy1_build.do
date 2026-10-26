@@ -16,24 +16,24 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		rootw 	= 	"$weatherwork/tanzania/wave_1/refined/npsy1_up"
+	global		rootw 	= 	"$wout/tanzania/wave_1/refined/npsy1_up"
 	global		rooth 	= 	"$data/refined_data/tanzania/wave_1"
 	global		export 	= 	"$data/merged_data/tanzania/wave_1"
 	global		logout 	= 	"$data/merged_data/tanzania/logs"
 
 * open log
-	cap			log			close
+	cap log close
 	log 		using 		"$logout/npsy1_build", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - merge rainfall data with household data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"$rooth/hhfinal_npsy1.dta", clear
@@ -46,7 +46,7 @@
 	loc 		fileList : dir "$rootw" files "*rf.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 hhid using "$rootw/`file'"
@@ -113,15 +113,15 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - merge temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc 		fileList : dir "$rootw" files "*tp.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 hhid using "$rootw/`file'"

@@ -19,12 +19,12 @@
 	* done
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root = "$rawlsms/ethiopia/wave_3/raw"
+	loc			root = "$raw/ethiopia/wave_3/raw"
 	loc			export = "$data/refined_data/ethiopia/wave_3"
 	loc			logout = "$data/refined_data/ethiopia/logs"
 
@@ -33,9 +33,9 @@
 	log using "`logout'/wv3_PPSEC3", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - preparing ess 2015/16 (wave 3) - post planting section 3
-* **********************************************************************
+**********************************************************************
 
 * load pp section 3 data
 	use 		"`root'/sect3_pp_w3.dta", clear
@@ -95,9 +95,9 @@
 	drop		if _merge == 2
 
 
-************************************************************************
+**********************************************************************
 **	2 - constructing conversion factors
-************************************************************************
+**********************************************************************
 
 * replace self-reported equal to missing if there is no conversion factor
 * will not replace sef-reported if given in hectares, meters squared
@@ -111,13 +111,13 @@
 	*** 12,948 changes
 
 
-************************************************************************
+**********************************************************************
 **	3 - constructing area measurements
-************************************************************************
+**********************************************************************
 
-************************************************************************
+**********************************************************************
 **	3a - constructing area measurements (self-reported)
-************************************************************************
+**********************************************************************
 
 * problem? There are over 12,000 obs with units of measure not included in the conversion file
 	summarize 	local_unit, detail // Quantity of land units, self-reported
@@ -127,9 +127,9 @@
 	summarize 	selfreport_ha, detail // resulting land area (hectares)
 
 
-************************************************************************
+**********************************************************************
 **	3b - constructing area measurements (gps & rope-and-compass)
-************************************************************************
+**********************************************************************
 
 * generate GPS & rope-and-compass land area of plot in hectares
 * as a starting point, we expect both to be more accurate than self-report
@@ -163,18 +163,22 @@
 	list 		gps selfreport_ha if gps<0.002, sep(0)	// GPS tends to be less than self-reported size
 
 
-************************************************************************
+**********************************************************************
 **	3c - evaluating various area measurements
-************************************************************************
+**********************************************************************
 
 * evaluating correlations between various measures
 	pwcorr		gps rap
 	*** 0.6912 correlation
 
 	pwcorr 		gps rap if !inrange(gps,0.002,4)
+
+
 **## 0.6984 - correlation outside this range similar to overall
 
 	pwcorr		gps rap if inrange(gps,0.002,4)
+
+
 **## 0.7772 - higher than outside the central range
 
 	pwcorr		selfreport_ha rap
@@ -185,15 +189,17 @@
 
 	pwcorr 		selfreport_ha gps if inrange(gps,0.002,4) ///
 					& inrange(selfreport_ha,0.002,4)
+
+
 **## 0.6811 - much much higher when range is restricted for both
 
 *	twoway 		(scatter selfreport_ha gps if inrange(gps,0.002,4) ///
 					& inrange(selfreport_ha,0.002,4))
 
 
-************************************************************************
+**********************************************************************
 **	3d - constructing overall plotsize
-************************************************************************
+**********************************************************************
 
 * make plotsize using GPS area if it is within reasonable range
 	generate 	plotsize = gps
@@ -239,13 +245,13 @@
 	*** i'm not a fan of the one negative plotsize
 
 
-************************************************************************
+**********************************************************************
 **	4 - constructing other variables of interest
-************************************************************************
+**********************************************************************
 
-************************************************************************
+**********************************************************************
 **	4a - irrigation and labor
-************************************************************************
+**********************************************************************
 
 * per Palacios-Lopez et al. (2017) in Food Policy, we cap labor per activity
 * 7 days * 13 weeks = 91 days for land prep and planting
@@ -335,9 +341,9 @@
 	label var 	labordays_plant "Total Days of Non-harvest Labor"
 
 
-************************************************************************
+**********************************************************************
 **	4b - fertilizer
-************************************************************************
+**********************************************************************
 
 * look at fertilizer use
 	generate	fert_any = 1 if pp_s3q15 == 1 | pp_s3q18 ==1 | pp_s3q20a_1 == 1 ///
@@ -403,9 +409,9 @@
 	*** 125 imputations made
 
 
-* ***********************************************************************
+**********************************************************************
 **# 5 - cleaning and keeping
-* ***********************************************************************
+**********************************************************************
 
 * renaming some variables of interest
 	rename 		household_id hhid

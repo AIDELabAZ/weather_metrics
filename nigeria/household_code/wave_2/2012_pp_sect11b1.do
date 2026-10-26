@@ -7,7 +7,7 @@
 
 * does
 	* reads in Nigeria, WAVE 2 (2012-2013), POST PLANTING, AG SECT 11B1
-* determines irrigation
+	* determines irrigation
 	* outputs clean data file ready for combination with wave 2 plot data
 
 * assumes
@@ -18,12 +18,12 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root	=	"$rawlsms/nigeria/wave_2/raw"
+	loc			root	=	"$raw/nigeria/wave_2/raw"
 	loc			export	=	"$data/refined_data/nigeria/wave_2"
 	loc			logout	=	"$data/refined_data/nigeria/logs"
 
@@ -32,9 +32,9 @@
 	log 	using 	"`logout'/wave_2_ph_sect11b1", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - describe plots and irrigation status
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 	use			"`root'/sect11b1_plantingw2", clear
@@ -55,9 +55,9 @@
 	replace			irr_any = 2 if irr_any == .
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	keep 			hhid zone state lga sector hhid ea plotid ///
 					irr_any tracked_obs

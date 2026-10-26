@@ -17,23 +17,23 @@
 	* completed
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root = "$weatherdata/nigeria/wave_1/raw/ghsy1_up"
-	loc			export = "$weatherwork/nigeria/wave_1/daily/ghsy1_up"
-	loc			logout = "$weatherwork/nigeria/logs"
+	loc			root = "$wraw/nigeria/wave_1/raw/ghsy1_up"
+	loc			export = "$wout/nigeria/wave_1/daily/ghsy1_up"
+	loc			logout = "$wout/nigeria/logs"
 
 * open log
-	cap log		close
+	cap log close
 	log using 	"`logout'/nga_ghsy1_converter", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - converts weather data
-* **********************************************************************
+**********************************************************************
 
 * define local with all files in each sub-folder
 	loc fileList : dir "`root'" files "*.csv"

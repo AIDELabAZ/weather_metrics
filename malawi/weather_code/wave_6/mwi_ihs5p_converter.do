@@ -7,7 +7,7 @@
 
 * does
 	* reads in Malawi IHS5p, which we term wave 6, .csv files
-    * drops unnecessary daily observations
+	* drops unnecessary daily observations
 	* outputs .dta file ready for processing by the weather program
 	* does the above for both rainfall and temperature data
 	/* 	-To make our weather program work, we need to run the code on data that starts on Nov 1 and ends on May 1
@@ -21,23 +21,23 @@
 	* completed
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root 	= 	"$weatherdata/malawi/wave_6/raw/ihs5p_up"
-	loc			export 	= 	"$weatherwork/malawi/wave_6/daily/ihs5p_up"
-	loc			logout 	= 	"$weatherwork/malawi/logs"
+	loc			root 	= 	"$wraw/malawi/wave_6/raw/ihs5p_up"
+	loc			export 	= 	"$wout/malawi/wave_6/daily/ihs5p_up"
+	loc			logout 	= 	"$wout/malawi/logs"
 
 * open log
-	cap log		close
+	cap log close
 	log 		using 		"`logout'/mwi_ihs5p_converter", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - converts rainfall data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc fileList : dir "`root'" files "*rf.csv"
@@ -128,9 +128,9 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - converts temperature data
-* **********************************************************************
+**********************************************************************
 
 * define local with all files in each sub-folder
 	loc fileList : dir "`root'" files "*tp.csv"

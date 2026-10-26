@@ -9,30 +9,30 @@
 	* household Location data (2019_GSEC1) for the 1st season
 
 * assumes
-* access to raw data
+	* access to raw data
 	* mdesc.ado
 
 * TO DO:
 	* done
 
 
-***********************************************************************
+**********************************************************************
 **# 0 - setup
-***********************************************************************
+**********************************************************************
 
 * define paths
-	global		root 	"$rawlsms/uganda/wave_8/raw"
+	global		root 	"$raw/uganda/wave_8/raw"
 	global		export 	"$data/refined_data/uganda/wave_8"
 	global		logout 	"$data/refined_data/uganda/logs"
 
 * open log
-	cap 			log 	close
+	cap log close
 	log 			using 	"$logout/2019_GSEC1", append
 
 
-***********************************************************************
+**********************************************************************
 **# 1 - unps 2019 (wave 8) - general(?) section 1
-***********************************************************************
+**********************************************************************
 
 * import wave 8 season 1
 	use				"$root/hh/GSEC1", clear
@@ -64,9 +64,9 @@
 	*** dropped 0 observations
 
 
-***********************************************************************
+**********************************************************************
 **# 2 - end matter, clean up to save
-***********************************************************************
+**********************************************************************
 
 	keep 			hhid hh region district county subcounty parish ///
 						wgt19 subreg

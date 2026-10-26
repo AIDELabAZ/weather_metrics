@@ -6,33 +6,34 @@
 * Stata v.18
 
 * does
-* cleans crop price / sales information
+	* cleans crop price / sales information
 	* directly follow from ag_i code - by JB
 
 * assumes
 	* access to MWI W5 raw data
 
 * TO DO:
-* done
+	* done
 
-* **********************************************************************
+
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root 	= 	"$rawlsms/malawi/wave_5/raw"
+	loc			root 	= 	"$raw/malawi/wave_5/raw"
 	loc			export 	= 	"$data/refined_data/malawi/wave_5"
 	loc			logout 	= 	"$data/refined_data/malawi/logs"
 	loc			temp 	= 	"$data/refined_data/malawi/wave_5/tmp"
 
 * open log
-	cap 	log			close
+	cap log close
 	log 	using 		"`logout'/mwi_ag_mod_i", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - setup to clean plot
-* **********************************************************************
+**********************************************************************
 
 * load data
 	use 			"`root'/ag_mod_i.dta", clear
@@ -40,7 +41,7 @@
 * describe
 	describe
 	sort 			case_id crop_code
-	capture		:			noisily : isid case_id crop_code, missok
+	capture : noisily : isid case_id crop_code, missok
 	*** not yet identified at household x plot level, but with missing plot id
 	duplicates 		report case_id crop_code
 	*** no surplus (no dups)
@@ -85,9 +86,10 @@
 	replace		conversion_other = 40 if strpos(ag_i02b_oth, "40") > 0
 	*** 1 change
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - clean for crop type
-* **********************************************************************
+**********************************************************************
 
 * make condensed crop codes
 	inspect 		crop_code
@@ -133,9 +135,10 @@ label define cropid
 	label 			values cropid cropid
 	inspect		cropid
 
-* **********************************************************************
+
+**********************************************************************
 **# 3 - clean for harvest
-* **********************************************************************
+**********************************************************************
 
 * make sale quantity
 	generate	quant = ag_i02a * conversion
@@ -164,9 +167,9 @@ label define cropid
 	drop 			median stddev croppriceoutlier
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - prices
-* **********************************************************************
+**********************************************************************
 
 * make datasets with crop price information
 * in other files "ta" exists, but that is not represented in wave 5, so omitted from this process
@@ -231,9 +234,10 @@ label define cropid
 	bysort case_id (cropid) : keep if _n==1
 	*** 1554 observations deleted
 
-* **********************************************************************
+
+**********************************************************************
 **# 5 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * restrict to variables of interest
 	keep  			case_id cropsales_value cropsales_valuei

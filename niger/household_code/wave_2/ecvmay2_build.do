@@ -16,24 +16,24 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			rootw 	= 	"$weatherwork/niger/wave_2/refined/ecvmay2_up"
+	loc			rootw 	= 	"$wout/niger/wave_2/refined/ecvmay2_up"
 	loc			rooth 	= 	"$data/refined_data/niger/wave_2"
 	loc		export 	= 	"$data/merged_data/niger/wave_2"
 	loc		logout 	= 	"$data/merged_data/niger/logs"
 
 * open log
-	cap 	log			 close
+	cap log close
 	log 	using 		"`logout'/ECVMA_2014_build", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - merge all household data with rainfall data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"`rooth'/hhfinal_ecvma2.dta", clear
@@ -46,7 +46,7 @@
 	loc 		fileList : dir "`rootw'" files "*rf.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 		* merge weather data with household data
 		merge		1:1 hhid_y2 using "`rootw'/`file'"
@@ -112,15 +112,16 @@
 			drop 		*2014
 }
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - merge temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc 		fileList : dir "`rootw'" files "*tp.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 hhid_y2 using "`rootw'/`file'"

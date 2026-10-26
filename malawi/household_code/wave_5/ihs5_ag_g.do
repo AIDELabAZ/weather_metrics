@@ -6,7 +6,7 @@
 * Stata v.18
 
 * does
-* cleans crop harvest information
+	* cleans crop harvest information
 	* directly follow from ag_g code - by JB
 
 * assumes
@@ -14,30 +14,31 @@
 
 * TO DO:
 	* complete
-* file merge issue line 100
+	* file merge issue line 100
 
-* **********************************************************************
+
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root 	= 	"$rawlsms/malawi/wave_5/raw"
+	loc			root 	= 	"$raw/malawi/wave_5/raw"
 	loc			export 	= 	"$data/refined_data/malawi/wave_5"
 	loc			logout 	= 	"$data/refined_data/malawi/logs"
 
 * open log
-	cap 	log			close
+	cap log close
 	log 	using 		"`logout'/mwi_ag_mod_g", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - clean for conversion
-* **********************************************************************
+**********************************************************************
 
 * load data
 	use 			"`root'/ag_mod_g.dta", clear
 
-	capture		:			noisily : isid case_id gardenid plotid crop_code, missok
+	capture : noisily : isid case_id gardenid plotid crop_code, missok
 	*** not yet identified at household x plot level, but with missing plot id
 	duplicates 		report case_id gardenid plotid crop_code
 * none
@@ -103,9 +104,10 @@
 	*** could drop if == 1, but we know that we have some of these, from conversion_other - so will keep
 	*** 24,274 matched, 8,403 not matched
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - clean for crop
-* **********************************************************************
+**********************************************************************
 
 * make condensed crop codes
 	inspect 		crop_code
@@ -151,9 +153,10 @@ label define cropid
 	label 		values cropid cropid
 	inspect 	cropid
 
-* **********************************************************************
+
+**********************************************************************
 **# 3 - clean for harvest
-* **********************************************************************
+**********************************************************************
 
 * make harvest quantity
 	generate 		harv = ag_g13a * conversion
@@ -186,9 +189,10 @@ label define cropid
 	bysort 			case_id plotid gardenid cropid : keep if _n==1
 	*** 9 observations deleted
 
-* **********************************************************************
+
+**********************************************************************
 **# 4 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * restrict to variables of interest
 	keep  			case_id HHID plotid gardenid cropid harvest harvest_losses intercrop_legume

@@ -18,15 +18,15 @@
 * TO DO:
 	* must find a unique ob identifier
 	* like in pp_sect3, ph_sect9, & ph_sect11, many observtions from master are not being matched
-* must finish building out data cleaning - see wave 1 maybe
+	* must finish building out data cleaning - see wave 1 maybe
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root = "$rawlsms/ethiopia/wave_3/raw"
+	loc			root = "$raw/ethiopia/wave_3/raw"
 	loc			export = "$data/refined_data/ethiopia/wave_3"
 	loc			logout = "$data/refined_data/ethiopia/logs"
 
@@ -35,9 +35,9 @@
 	log using "`logout'/wv3_PHSEC12", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - preparing ess (wave 3) - post harvest section 12
-* **********************************************************************
+**********************************************************************
 
 * load data
 	use "`root'/sect12_ph_w3.dta", clear
@@ -105,6 +105,8 @@
 	rename 		ph_s12q03_b unit_cd
 	rename		ph_s12q0b unit_sale
 	pwcorr		unit_cd unit_sale
+
+
 **## 0.9848 - very very very high
 
 * create conversion key
@@ -118,7 +120,7 @@
 
 /* *********************************************************************
 * X - dummy code
-* **********************************************************************
+**********************************************************************
 
 	gen 		hrv_wgt = mean_cf_nat * ph_s12q03_a if mean_cf_nat != .
 
@@ -142,13 +144,13 @@
 	lab var		price "Sales price (BIRR/kg)" */
 
 
-* ***********************************************************************
+**********************************************************************
 **# 2 - finding harvest weights
-* ***********************************************************************
+**********************************************************************
 
-* ***********************************************************************
+**********************************************************************
 * 2a - generating conversion factors
-* ***********************************************************************
+**********************************************************************
 
 * constructing conversion factor - same procedure as sect9_ph_w3
 * exploring conversion factors - are any the same across all regions and obs?
@@ -162,7 +164,7 @@
 	*** correlation of 0.9999
 
 	local 		units = 52
-	forvalues	i = 1/`units'{
+	forvalues i = 1/`units'{
 
 		tab		unit_cd if unitnum == `i'
 		tab 	cfavg if unitnum == `i', missing
@@ -332,9 +334,9 @@
 	*** 26 obs dropped
 
 
-* ***********************************************************************
+**********************************************************************
 * 2b - constructing harvest weights and imputing outliers
-* ***********************************************************************
+**********************************************************************
 
 * renaming key variables
 	rename		ph_s12q03_a hvst_qty
@@ -393,9 +395,9 @@
 	gen 		mz_hrv = hrvqty_selfr if crop_code == 2
 
 
-* ***********************************************************************
+**********************************************************************
 **# 3 - cleaning and keeping harvest quantities
-* ***********************************************************************
+**********************************************************************
 
 *renaming variables of interest
 	rename 		household_id hhid
@@ -422,19 +424,21 @@
 	sort 		holder_id ea_id crop_code
 	save 		"`export'/PH_SEC12.dta", replace
 
-* ***********************************************************************
-**# 4 - going after sales price info
-* ***********************************************************************
 
-* **********************************************************************
+**********************************************************************
+**# 4 - going after sales price info
+**********************************************************************
+
+
+**********************************************************************
 **## 4.0 - setup
-* **********************************************************************
+**********************************************************************
 
 * clear existing data
 	clear all
 
 * define paths
-	loc			root = "$rawlsms/ethiopia/wave_3/raw"
+	loc			root = "$raw/ethiopia/wave_3/raw"
 	loc			export = "$data/refined_data/ethiopia/wave_3"
 	loc			logout = "$data/refined_data/ethiopia/logs"
 
@@ -443,9 +447,9 @@
 	log using "`logout'/wv3_PHSEC12", append
 
 
-* **********************************************************************
+**********************************************************************
 **## 4.1 - preparing ess (wave 3) - post harvest section 12
-* **********************************************************************
+**********************************************************************
 
 * load data
 	use "`root'/sect12_ph_w3.dta", clear
@@ -518,6 +522,8 @@
 	rename		ph_s12q0b unit_sale
 	tab			unit_sale, missing
 	pwcorr		unit_cd unit_sale
+
+
 **## 0.9848 - very very very high, same as abov depsite dropped obs
 
 	drop 		unit_cd
@@ -532,13 +538,13 @@
 	drop		_merge
 
 
-* ***********************************************************************
+**********************************************************************
 **## 4.2 - constructing prices
-* ***********************************************************************
+**********************************************************************
 
-* ***********************************************************************
+**********************************************************************
 * 4.2a - generating conversion factors
-* ***********************************************************************
+**********************************************************************
 
 * constructing conversion factor - same procedure as sect9_ph_w3
 * exploring conversion factors - are any the same across all regions and obs?
@@ -555,7 +561,7 @@
 	*** correlation of 1
 
 	local 		units = 36
-	forvalues	i = 1/`units'{
+	forvalues i = 1/`units'{
 
 		tab		unit_cd if unitnum == `i'
 		tab 	cfavg if unitnum == `i', missing
@@ -634,7 +640,7 @@
 
 * using means of units w/ multiple other obs with values as cf
 	local 		units = 30
-	forvalues	i = 1/`units'{
+	forvalues i = 1/`units'{
 
 		sum		cf if unitnum == `i'
 		replace cf = `r(mean)' if unitnum == `i' & cf == .
@@ -645,9 +651,9 @@
 	*** no conversion factors missing for obs that remain
 
 
-* ***********************************************************************
+**********************************************************************
 * 4.2b - constructing harvest weights and prices
-* ***********************************************************************
+**********************************************************************
 
 * renaming key variables
 	rename		ph_s12q07 sales_qty
@@ -668,9 +674,9 @@
 	lab var		price "Sales Price (BIRR/kg)"
 
 
-* ***********************************************************************
+**********************************************************************
 **## 4.3 - generating price dataset
-* ***********************************************************************
+**********************************************************************
 
 * renaming regional variables
 	rename 		saq01 region

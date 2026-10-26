@@ -9,7 +9,7 @@
 	* household Location data (2018_GSEC1) for the 1st season
 
 * assumes
-* access to raw data
+	* access to raw data
 	* mdesc.ado
 
 * TO DO:
@@ -17,23 +17,23 @@
 	* needs to be adapted for use in cleaning wave 7
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		root 	"$rawlsms/uganda/wave_7/raw"
+	global		root 	"$raw/uganda/wave_7/raw"
 	global		export 	"$data/refined_data/uganda/wave_7"
 	global		logout 	"$data/refined_data/uganda/logs"
 
 * open log
-	cap 			log 	close
+	cap log close
 	log 			using 	"$logout/2018_GSEC1", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - unps 2011 (wave 3) - general(?) section 1
-* **********************************************************************
+**********************************************************************
 
 * import wave 7 season 1
 	use				"$root/hh/GSEC1", clear
@@ -57,9 +57,10 @@
 
 	replace				year = 2018
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	keep 			hh_7_8 HHID year region district county subcounty parish ///
 						wgt18 subreg

@@ -6,7 +6,7 @@
 * Stata v.18
 
 * does
-* identifies regional elements for use in price data contruction
+	* identifies regional elements for use in price data contruction
 	* merges in household sampling weights
 	* merges in geovariables
 	* outputs clean data file ready for combination with wave 1 data
@@ -18,23 +18,23 @@
 	* done
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root	= 	"$rawlsms/niger/wave_1/raw"
+	loc			root	= 	"$raw/niger/wave_1/raw"
 	loc			export	= 	"$data/refined_data/niger/wave_1"
 	loc			logout	= 	"$data/refined_data/niger/logs"
 
 * open log
-	cap 	log 	close
+	cap log close
 	log 	using 	"`logout'/2011_ms00p1", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - rename and identify regional variables
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 	use				"`root'/ecvmasection00_p1_en", clear
@@ -57,9 +57,10 @@
 	rename 		    ms00q14 enumeration
 	label var	enumeration "enumeration zone (instead of zd in wave 2)"
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - merge in household weights
-* **********************************************************************
+**********************************************************************
 
 	merge			m:1 grappe using "`root'/Ponderation_Finale_31_05_2013_en"
 	*** all matched
@@ -72,9 +73,9 @@
 	rename			hhweight pw
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - merge in household weights
-* **********************************************************************
+**********************************************************************
 
 	merge			1:1 hid using "`root'/NER_HouseholdGeovars_Y1"
 	*** all matched in master, 83 in using unmatched
@@ -86,9 +87,9 @@
 	rename			ssa_aez09 aez
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	keep 			hid clusterid hh_num region dept canton enumeration ///
 						aez pw

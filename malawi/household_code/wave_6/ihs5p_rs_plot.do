@@ -6,34 +6,35 @@
 * Stata v.18
 
 * does
-* cleans crop price / sales information
+	* cleans crop price / sales information
 	* directly follow from rs_plot code - by JB
 
 * assumes
 	* access to MWI W6 raw data
-* access to previous files include g, i, c, d
+	* access to previous files include g, i, c, d
 
 * TO DO:
-* done
+	* done
 
-* **********************************************************************
+
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root 	= 	"$rawlsms/malawi/wave_6/raw"
+	loc			root 	= 	"$raw/malawi/wave_6/raw"
 	loc			export 	= 	"$data/refined_data/malawi/wave_6"
 	loc			logout 	= 	"$data/refined_data/malawi/logs"
 	loc			temp 	= 	"$data/refined_data/malawi/wave_6/tmp"
 
 * open log
-	cap 	log			close
+	cap log close
 	log 	using 		"`logout'/mwi_ag_mod_rsplot_19", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - crop- and plot-level information, match to hh
-* **********************************************************************
+**********************************************************************
 
 * load data
 	use 			"`export'/ag_mod_g_19.dta", clear
@@ -45,9 +46,9 @@
 	*** dataset is identified at the household, plot, garden, crop level
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - bring in price info
-* **********************************************************************
+**********************************************************************
 
 * merge price data into dataset
 	merge m:1 cropid reside region district y4_hhid  using "`temp'/ag_i1.dta", keep (1 3) nogenerate
@@ -96,9 +97,10 @@
 * confirm that we have prices for all crops
 	assert 			!missing(croppricei)
 
-* **********************************************************************
+
+**********************************************************************
 **# 3 - construction production info
-* **********************************************************************
+**********************************************************************
 
 * construction production value, which can be aggregated across crops
 	generate 		harvest_value = harvest * croppricei
@@ -146,9 +148,10 @@
 	merge m:1 y4_hhid using "`root'/hh_mod_a_filt_19.dta", assert(2 3) keep(3) nogenerate
 	*** 5570 matched
 
-* **********************************************************************
+
+**********************************************************************
 **# 4 - yield
-* **********************************************************************
+**********************************************************************
 
 * in general, we will construct production variables on a per hectare basis, and conduct imputation on the per hectare variables. We will then create
 * 'imputed' versions of the non-per hectare variables (e.g. harvest, cropvalue) by multiplying the imputed per hectare vars by plotsize.
@@ -255,9 +258,9 @@
 	tabstat labordays labordaysimp, f(%9.0f) s(n me min p1 p50 p95 p99 max) c(s) longstub
 	*** 39 labor days, 39 imputed  (...seems low...)
 
-* **********************************************************************
+**********************************************************************
 * ? - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	compress
 	describe

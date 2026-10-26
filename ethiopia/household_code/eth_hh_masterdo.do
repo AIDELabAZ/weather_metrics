@@ -16,17 +16,17 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
 	loc dofile = "$code/ethiopia/household_code"
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - run individual hh cleaning .do files
-* **********************************************************************
+**********************************************************************
 
 * starting with running all individual hh data files
 * define local with all sub-folders in it
@@ -36,14 +36,14 @@
 	foreach folder of loc folderList {
 
 	* Wave 4 section 9 creates Crop_CF_Wave4, used by section 11.
-		if			"`folder'" == "wave_4" do "`dofile'/wave_4/2018_sect9_ph_w4.do"
+		if "`folder'" == "wave_4" do "`dofile'/wave_4/2018_sect9_ph_w4.do"
 
 	* loop through each HHSEC file in the folder local
 		loc HHfile : dir "`dofile'/`folder'" files "20*.do"
 
 	* loop through each file in the above local
 		foreach file in `HHfile' {
-			if			"`folder'" == "wave_4" & "`file'" == "2018_sect9_ph_w4.do" ///
+			if "`folder'" == "wave_4" & "`file'" == "2018_sect9_ph_w4.do" ///
 						continue
 
 		* run each individual file
@@ -52,9 +52,9 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - run wave specific .do files to merge hh data together
-* **********************************************************************
+**********************************************************************
 
 * merge each cleaned file together
 	do 			"`dofile'/wave_1/ess1_merge.do"			//	merges wv 1 hh datasets
@@ -64,9 +64,9 @@
 	do 			"`dofile'/wave_5/ess5_merge.do"			//	merges wv 5 hh datasets
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - run wave specific .do files to merge with weather
-* **********************************************************************
+**********************************************************************
 
 * merge weather data into cleaned household data
 	do 			"`dofile'/wave_1/ess1_build.do"			//	merges ESSY1 to weather
@@ -76,9 +76,9 @@
 	do 			"`dofile'/wave_5/ess5_build.do"			//	merges ESSY5 to weather
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - run .do file to append each wave
-* **********************************************************************
+**********************************************************************
 
 	do			"`dofile'/eth_append_built.do"				// append waves
 

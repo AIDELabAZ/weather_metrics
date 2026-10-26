@@ -5,105 +5,100 @@
 * edited by: codex
 * stata v.18
 * does
-* defines shared inputs and project output folders
+	* creates project output folders using the calling script's paths
 
 * assumes
-* repository and shared data roots supplied or available from the session
-* setup is recorded in the calling master or test log
+	* code, raw, wraw, data, and wout globals are defined
+	* setup is recorded in the calling master or test log
+
 
 **********************************************************************
 **# 0 - setup
 **********************************************************************
 
-* read the repository and shared data roots
+* check the roots defined by the calling master or test
 	version		18
-	args		code_root data_root
-	if			`"`code_root'"' == "" local code_root `"`c(pwd)'"'
-	if			`"`data_root'"' == "" local data_root : environment ///
-				WEATHER_AGRICULTURE_DATA
-	if			`"`data_root'"' == "" {
-		local		userprofile : environment USERPROFILE
-		local		data_root ///
-					`"`userprofile'/OneDrive - University of Arizona/weather_and_agriculture"'
+	foreach root in code raw wraw data wout {
+		if `"${`root'}"' == "" {
+			display		as error "Define `root' before running setup_paths.do."
+			error		198
+		}
 	}
-	global		code `"`code_root'"'
-	global		datahome `"`data_root'"'
-	global		rawlsms "$datahome/raw_lsms_data"
-	global		weatherdata "$datahome/weather_data"
-	global		data "$datahome/weather_metrics_data"
-	global		weatherwork "$data/refined_data/weather"
 
 	confirm		file "$code/projectdo.do"
-	foreach		input in rawlsms weatherdata {
+	foreach input in raw wraw {
 		local		folders : dir "${`input'}" dirs "*"
-		if			`"`folders'"' == "" {
+		if `"`folders'"' == "" {
 			display		as error "Input root is empty: ${`input'}"
 			error		601
 		}
 	}
+
 
 **********************************************************************
 **# 1 - create project output directories
 **********************************************************************
 
 * keep generated data within the project output root
-	capture		mkdir		"$data"
-	foreach		folder in refined_data merged_data regression_data results_data {
-		capture		mkdir		"$data/`folder'"
-		capture		mkdir		"$data/`folder'/logs"
+	capture mkdir "$data"
+	foreach folder in refined_data merged_data regression_data results_data {
+		capture mkdir "$data/`folder'"
+		capture mkdir "$data/`folder'/logs"
 	}
 * create country and wave output folders
-	foreach		country in ethiopia malawi niger nigeria tanzania uganda {
-		foreach		folder in refined_data merged_data regression_data results_data {
-			capture		mkdir		"$data/`folder'/`country'"
-			capture		mkdir		"$data/`folder'/`country'/logs"
+	foreach country in ethiopia malawi niger nigeria tanzania uganda {
+		foreach folder in refined_data merged_data regression_data results_data {
+			capture mkdir "$data/`folder'/`country'"
+			capture mkdir "$data/`folder'/`country'/logs"
 		}
 		local		waves : dir "$code/`country'/household_code" dirs "wave_*"
-		foreach		wave of local waves {
-			capture		mkdir		"$data/refined_data/`country'/`wave'"
-			capture		mkdir		"$data/refined_data/`country'/`wave'/tmp"
-			capture		mkdir		"$data/merged_data/`country'/`wave'"
+		foreach wave of local waves {
+			capture mkdir "$data/refined_data/`country'/`wave'"
+			capture mkdir "$data/refined_data/`country'/`wave'/tmp"
+			capture mkdir "$data/merged_data/`country'/`wave'"
 		}
 	}
-	capture		mkdir		"$data/refined_data/nigeria/conversion_files"
-	capture		mkdir		"$data/refined_data/malawi/trackingfiles"
-	capture		mkdir		"$weatherwork"
+	capture mkdir "$data/refined_data/nigeria/conversion_files"
+	capture mkdir "$data/refined_data/malawi/trackingfiles"
+	capture mkdir "$wout"
 * create country and wave output folders
-	foreach		country in ethiopia malawi niger nigeria tanzania uganda {
-		capture		mkdir		"$weatherwork/`country'"
-		capture		mkdir		"$weatherwork/`country'/logs"
+	foreach country in ethiopia malawi niger nigeria tanzania uganda {
+		capture mkdir "$wout/`country'"
+		capture mkdir "$wout/`country'/logs"
 		local		waves : dir "$code/`country'/weather_code" dirs "wave_*"
-		foreach		wave of local waves {
-			capture		mkdir		"$weatherwork/`country'/`wave'"
-			capture		mkdir		"$weatherwork/`country'/`wave'/daily"
-			capture		mkdir		"$weatherwork/`country'/`wave'/refined"
-			capture		local		surveys : dir ///
-						"$weatherdata/`country'/`wave'/daily" dirs ///
+		foreach wave of local waves {
+			capture mkdir "$wout/`country'/`wave'"
+			capture mkdir "$wout/`country'/`wave'/daily"
+			capture mkdir "$wout/`country'/`wave'/refined"
+			capture local surveys : dir ///
+						"$wraw/`country'/`wave'/daily" dirs ///
 						"*"
-			if			_rc local surveys
-			foreach		survey of local surveys {
-				capture		mkdir		"$weatherwork/`country'/`wave'/daily/`survey'"
-				capture		mkdir		"$weatherwork/`country'/`wave'/refined/`survey'"
+			if _rc local surveys
+			foreach survey of local surveys {
+				capture mkdir "$wout/`country'/`wave'/daily/`survey'"
+				capture mkdir "$wout/`country'/`wave'/refined/`survey'"
 			}
 		}
 	}
-	foreach		folder in tables figures {
-		capture		mkdir		"$data/results_data/`folder'"
-		foreach		paper in paper metric_paper mismeasure_paper privacy_paper {
-			capture		mkdir		"$data/results_data/`folder'/`paper'"
+	foreach folder in tables figures {
+		capture mkdir "$data/results_data/`folder'"
+		foreach paper in paper metric_paper mismeasure_paper privacy_paper {
+			capture mkdir "$data/results_data/`folder'/`paper'"
 		}
 	}
-	capture		mkdir		"$data/results_data/figures/presentations"
-	capture		mkdir		"$data/results_data/figures/presentations/PacDev"
+	capture mkdir "$data/results_data/figures/presentations"
+	capture mkdir "$data/results_data/figures/presentations/PacDev"
+
+
 **********************************************************************
 **# 2 - end matter
 **********************************************************************
 
 * report the configured roots
 	display		as text "Code: $code"
-	display		as text "Raw LSMS: $rawlsms"
-	display		as text "Weather: $weatherdata"
+	display		as text "Raw LSMS: $raw"
+	display		as text "Weather: $wraw"
 	display		as text "Project data: $data"
-	display		as text "Derived weather: $weatherwork"
+	display		as text "Derived weather: $wout"
 
 /* END */

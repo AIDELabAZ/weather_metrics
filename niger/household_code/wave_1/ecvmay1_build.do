@@ -16,24 +16,24 @@
 	* adapt the code from nigera to niger
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			rootw 	= 	"$weatherwork/niger/wave_1/refined/ecvmay1_up"
+	loc			rootw 	= 	"$wout/niger/wave_1/refined/ecvmay1_up"
 	loc			rooth 	= 	"$data/refined_data/niger/wave_1"
 	loc		export 	= 	"$data/merged_data/niger/wave_1"
 	loc		logout 	= 	"$data/merged_data/niger/logs"
 
 * open log
-	cap 	log			 close
+	cap log close
 	log 	using 		"`logout'/ECVMA_2011_build", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - merge all household data with rainfall data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"`rooth'/hhfinal_ecvma1.dta", clear
@@ -46,7 +46,7 @@
 	loc 		fileList : dir "`rootw'" files "*rf.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 		* merge weather data with household data
 		merge		1:1 hid using "`rootw'/`file'"
@@ -112,15 +112,16 @@
 			drop 		*2011
 }
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - merge temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc 		fileList : dir "`rootw'" files "*tp.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 hid using "`rootw'/`file'"

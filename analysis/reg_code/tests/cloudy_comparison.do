@@ -5,11 +5,12 @@
 * edited by: codex
 * stata v.18
 * does
-* checks matched rainfall samples, saved metadata, and historical estimates
+	* checks matched rainfall samples, saved metadata, and historical estimates
 
 * assumes
-* run from the repository root with a new scratch directory argument
-* optional second argument: original regressions.do for comparison
+	* run from the repository root with a new scratch directory argument
+	* optional second argument: original regressions.do for comparison
+
 
 **********************************************************************
 **# 0 - setup
@@ -21,15 +22,16 @@
 	set			processors 1
 	set			more off
 	args		testroot baseline
-	if			`"`testroot'"' == "" error 198
+	if `"`testroot'"' == "" error 198
 	global		code `"`c(pwd)'"'
-	capture		mkdir		"`testroot'"
-	capture		mkdir		"`testroot'/regression_data"
-	capture		mkdir		"`testroot'/regression_data/logs"
-	capture		mkdir		"`testroot'/results_data"
+	capture mkdir "`testroot'"
+	capture mkdir "`testroot'/regression_data"
+	capture mkdir "`testroot'/regression_data/logs"
+	capture mkdir "`testroot'/results_data"
 * record the comparison test
 	tempname	test_log
 	log			using "`testroot'/cloudy_comparison.log", text append name(`test_log')
+
 
 **********************************************************************
 **# 1 - create the synthetic panel
@@ -45,16 +47,16 @@
 	bysort		hhid: gen int year = 2010 + _n
 	gen double	lntf_yld = hhid/30 + rnormal() + (year-2010)/4
 	gen double	lncp_yld = hhid/40 + rnormal() + (year-2010)/5
-	foreach		prefix in tf cp {
+	foreach prefix in tf cp {
 		gen double	ln`prefix'_lab = rnormal()
 		gen double	ln`prefix'_frt = rnormal()
-		foreach		input in pst hrb irr {
+		foreach input in pst hrb irr {
 			gen byte	`prefix'_`input' = runiform() > .5
 		}
 	}
-	forvalues	metric = 1/14 {
+	forvalues metric = 1/14 {
 		local		metric_id : display %02.0f `metric'
-		forvalues	product = 1/6 {
+		forvalues product = 1/6 {
 			gen double	v`metric_id'_rf`product' = rnormal() + hhid/20 + (year-2010)/3
 		}
 	}
@@ -69,23 +71,25 @@
 	replace		lncp_lab = . in 51/55
 	save		"$data/regression_data/lsms_panel.dta", replace
 
+
 **********************************************************************
 **# 2 - calculate independent reference estimates
 **********************************************************************
 
 * retain reference estimates for the saved-result checks
 	xtset		hhid
-	quietly		xtreg		lntf_yld v05_rf1 i.year if country == 1, fe vce(cluster ///
+	quietly xtreg lntf_yld v05_rf1 i.year if country == 1, fe vce(cluster ///
 				hhid)
 	scalar		expected_fe = _b[v05_rf1]
 	scalar		expected_fe_se = _se[v05_rf1]
 	tempvar		sample
 	gen byte	`sample' = e(sample)
-	quietly		reg			lntf_yld v05_rf1 i.year if `sample', vce(cluster hhid)
+	quietly reg lntf_yld v05_rf1 i.year if `sample', vce(cluster hhid)
 	scalar		expected_pooled = _b[v05_rf1]
 	scalar		expected_pooled_se = _se[v05_rf1]
 	scalar		expected_n = e(N)
 	scalar		expected_clusters = e(N_clust)
+
 
 **********************************************************************
 **# 3 - check saved results and historical replication
@@ -93,8 +97,8 @@
 
 * compare specifications on the same synthetic observations
 	tempfile	historical_raw historical_complete
-	if			`"`baseline'"' != "" {
-		quietly		do			"`baseline'"
+	if `"`baseline'"' != "" {
+		quietly do "`baseline'"
 		use			"$data/results_data/reg_results.dta", clear
 		sort		country sat depvar regname varname
 		save		`historical_raw'
@@ -102,7 +106,7 @@
 		sort		country sat depvar regname varname
 		save		`historical_complete'
 	}
-	quietly		do			"$code/analysis/reg_code/regressions.do"
+	quietly do "$code/analysis/reg_code/regressions.do"
 	use			"$data/results_data/reg_results.dta", clear
 	assert		_N == 2*2*(6*85+84)
 	isid		country outcome_var weather_var spec_id
@@ -127,7 +131,7 @@
 	assert		obs == scalar(expected_n) & nclusters == scalar(expected_clusters) if ///
 				country == 1 & outcome_var == "lntf_yld" & weather_var == "v05_rf1" ///
 				& paired_sample
-	if			`"`baseline'"' != "" {
+	if `"`baseline'"' != "" {
 		preserve
 		keep		if spec_id != "reg7"
 		sort		country sat depvar regname varname
@@ -148,7 +152,7 @@
 	isid		country outcome_var weather_var spec_id
 	assert		regname == 7 if spec_id == "reg7"
 	assert		missing(ci_lo) & missing(ci_up) & missing(sig) if !estimable
-	if			`"`baseline'"' != "" {
+	if `"`baseline'"' != "" {
 		keep		if spec_id != "reg7"
 		sort		country sat depvar regname varname
 		cf			reg_id country sat depvar regname varname beta stdrd_err adjustedr ///
@@ -156,6 +160,7 @@
 	}
 	display		as result ///
 				"PASS: Cloudy sample matching, full grid, omitted coefficients, historical estimates and IDs."
+
 
 **********************************************************************
 **# 4 - end matter

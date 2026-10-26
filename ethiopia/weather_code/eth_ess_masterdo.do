@@ -7,21 +7,21 @@
 
 * does
 	* Executes all wave specific Ethiopia weather .do files
-* runs wxsum .ado file
+	* runs wxsum .ado file
 	* outputs .dta rainfall data ready to merge with LSMS household data
 	* take 100 minutes to convert and process weather data
 
 * assumes
-* wxsum.ado
+	* wxsum.ado
 	* subsidiary, wave-specific .do files
 
 * TO DO:
 	* completed
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 clear
 
@@ -32,9 +32,9 @@ clear
 	loc root = "$code/ethiopia/weather_code"
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - run .do files
-* **********************************************************************
+**********************************************************************
 
 * do each of the file converters
 	do "`root'/wave_1/ETH_ESSY1_converter.do"	//	convert wave 1 .csv to .dta

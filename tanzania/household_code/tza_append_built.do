@@ -18,11 +18,12 @@
 	* xfill.ado
 
 * TO DO:
-* complete
+	* complete
 
-* **********************************************************************
+
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
 	global		root  	= 	"$data/merged_data/tanzania"
@@ -31,12 +32,13 @@
 	global		logout 	= 	"$data/merged_data/tanzania/logs"
 
 * open log
-	cap			log			close
+	cap log close
 	log 	using 	"$logout/tza_append_built", append
 
-* **********************************************************************
+
+**********************************************************************
 **# 1 - merge first three waves of tanzania data
-* **********************************************************************
+**********************************************************************
 
 * using merge rather than append
 * households were differently designated in each year
@@ -86,9 +88,9 @@
 	*** 78 not matched from using - no households only in w4xp
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - reshape and format panel
-* **********************************************************************
+**********************************************************************
 
 * per https://www.stata.com/support/faqs/data-management/problems-with-reshape/
 * create local which will contain all variable names that you want to reshape
@@ -406,9 +408,9 @@ foreach var of varlist v15_merra - v27_merra {
 	save			"$export/tza_lp.dta", replace
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - generate wave 4 cross section tanzania
-* **********************************************************************
+**********************************************************************
 
 * import the first cross section file
 	use 			"$root/wave_4/npsy4_merged", clear
@@ -682,9 +684,9 @@ foreach var of varlist v15_merra - v27_merra {
 	save			"$export/tza_sp.dta", replace
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - append all tanzania data
-* **********************************************************************
+**********************************************************************
 
 * import the cross section file
 	use 			"$export/tza_lp.dta", clear

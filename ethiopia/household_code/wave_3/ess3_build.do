@@ -16,24 +16,24 @@
 	* done
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		rootw 	= 	"$weatherwork/ethiopia/wave_3/refined/essy3_up"
+	global		rootw 	= 	"$wout/ethiopia/wave_3/refined/essy3_up"
 	global		rooth 	= 	"$data/refined_data/ethiopia/wave_3"
 	global		export 	= 	"$data/merged_data/ethiopia/wave_3"
 	global		logout 	= 	"$data/merged_data/ethiopia/logs"
 
 * open log
-	cap			log			close
+	cap log close
 	log 		using 		"$logout/ess3_build", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - merge rainfall data with household data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"$rooth/hhfinal_ess3.dta", clear
@@ -45,7 +45,7 @@
 	loc 		fileList : dir "$rootw" files "*rf.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 household_id2 using "$rootw/`file'"
@@ -114,15 +114,15 @@
 	}
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - merge temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc 		fileList : dir "$rootw" files "*tp.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 household_id2 using "$rootw/`file'"
@@ -185,9 +185,9 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * drop unneeded variables
 	drop			rural

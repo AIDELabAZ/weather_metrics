@@ -6,7 +6,7 @@
 * Stata v.18
 
 * does
-* cleans crop price / sales information
+	* cleans crop price / sales information
 	* directly follow from ag_d code - by JB
 	*** plot tenure included in that file and not here
 
@@ -14,47 +14,50 @@
 	* access to MWI W5 raw data
 
 * TO DO:
-* STOP AT 264 at labor days
+	* STOP AT 264 at labor days
 
-* **********************************************************************
+
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root 	= 	"$rawlsms/malawi/wave_5/raw"
+	loc			root 	= 	"$raw/malawi/wave_5/raw"
 	loc			export 	= 	"$data/refined_data/malawi/wave_5"
 	loc			logout 	= 	"$data/refined_data/malawi/logs"
 	loc			temp 	= 	"$data/refined_data/malawi/wave_5/tmp"
 
 * open log
-	cap 	log			close
+	cap log close
 	log 	using 		"`logout'/mwi_ag_mod_d", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - setup to clean plot
-* **********************************************************************
+**********************************************************************
 
 * load data
 	use 			"`root'/ag_mod_d.dta", clear
 
 	describe
 	sort		case_id HHID gardenid plotid
-	capture 		: noisily : isid case_id gardenid plotid
+	capture : noisily : isid case_id gardenid plotid
 	duplicates	report case_id gardenid plotid
 	*** none
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - cash crop
-* **********************************************************************
+**********************************************************************
 
 	egen		crop_cash = anymatch(ag_d20a ag_d20b ag_d20c ag_d20d ag_d20e), ///
 				values(5/10 37/39 47)
 	label 			variable crop_cash	"plot is planted withcash crops (tobacco, cotton, sunflower, paprika, sugar cane)"
 
-* **********************************************************************
+
+**********************************************************************
 **# 3 - soil and erosion and slope and wetlands
-* **********************************************************************
+**********************************************************************
 
 * bring in spatial variables for merge merge to conversion factor database
 	merge m:1 case_id using "`root'/hh_mod_a_filt.dta", keepusing(region district reside) assert(2 3) keep(3) nogenerate
@@ -134,9 +137,10 @@
 	replace		dambo = 0 if dambo == .
 	label variable	dambo "plot is in swamp/wetland"
 
-* **********************************************************************
+
+**********************************************************************
 **# 4 - fertilizer
-* **********************************************************************
+**********************************************************************
 
 * omitting kgs of organic as there is no reliable conversion factor
 
@@ -162,9 +166,10 @@
 
 	drop 			fert_inorg1 fert_inorg2
 
-* **********************************************************************
+
+**********************************************************************
 **# 5 - irrigation
-* **********************************************************************
+**********************************************************************
 
 	tabulate 		ag_d28a ag_d28b, missing
 	tabulate	ag_d28_oth
@@ -172,9 +177,10 @@
 	replace			irrigation_any = 0 if ag_d28a == 7
 	label variable	irrigation_any	"plot has any system of irrigation"
 
-* **********************************************************************
+
+**********************************************************************
 **# 6 - pesticide, insecticide, fungicide
-* **********************************************************************
+**********************************************************************
 
 * pesticide, disaggregating by type (insecticide, herbicide, fungicide)
 	tabulate 		ag_d40, missing
@@ -201,9 +207,9 @@
 	label variable	pesticide_any	"any pesticide was applied on plot"
 
 
-* **********************************************************************
+**********************************************************************
 **# 7 - labor days
-* **********************************************************************
+**********************************************************************
 
 * family labor days
 	describe	ag_d42*	ag_d43* ag_d44*
@@ -334,9 +340,10 @@
 * not included here in line with that
 * and we do not really use in this project
 
-* **********************************************************************
+
+**********************************************************************
 **# 8 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	keep  			case_id plotid gardenid HHID crop_cash soiltype swc_* slope dambo irrigation_any fert_inorg_any ///
 						fert_inorg_n insecticide_any herbicide_any fungicide_any pesticide_any labordays hirelabor_any

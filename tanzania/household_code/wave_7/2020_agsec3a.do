@@ -8,7 +8,7 @@
 * does
 	* cleans Tanzania household variables, wave 7 (NPSY5) Ag sec3a
 	* plot details, inputs, 2020 long rainy season
-* generates irrigation and pesticide dummies, fertilizer variables, and labor variables
+	* generates irrigation and pesticide dummies, fertilizer variables, and labor variables
 
 * assumes
 	* access to all raw data
@@ -19,23 +19,23 @@
 	* done
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		root 	"$rawlsms/tanzania/wave_7/raw"
+	global		root 	"$raw/tanzania/wave_7/raw"
 	global		export 	"$data/refined_data/tanzania/wave_7"
 	global		logout 	"$data/refined_data/tanzania/logs"
 
 * open log
-	cap			log			close
+	cap log close
 	log using "$logout/wv7_AGSEC3A", append
 
 
-* ***********************************************************************
+**********************************************************************
 **# 1 - prepare tza 2020 (wave 7) - agriculture section 3a
-* ***********************************************************************
+**********************************************************************
 
 * load data
 	use 		"$root/ag_sec_3a", clear
@@ -74,9 +74,9 @@
 	*** 1,765 obs deleted
 
 
-* ***********************************************************************
+**********************************************************************
 **# 2 - generate fertilizer variables
-* ***********************************************************************
+**********************************************************************
 
 * constructing fertilizer variables
 	rename			ag3a_47 fert_any
@@ -121,9 +121,9 @@
 	*** imputed 60 values out of 4,795 total observations
 
 
-* ***********************************************************************
+**********************************************************************
 **# 3 - generate irrigation, pesticide, and herbicide dummies
-* ***********************************************************************
+**********************************************************************
 
 * renaming irrigation
 	rename		ag3a_18 irrigated
@@ -141,9 +141,9 @@
 	*** 605 used pesticide, 286 used herbicide_any
 
 
-* ***********************************************************************
+**********************************************************************
 **# 4 - generate labor variables
-* ***********************************************************************
+**********************************************************************
 
 * per Palacios-Lopez et al. (2017) in Food Policy, we cap labor per activity
 * 7 days * 13 weeks = 91 days for land prep and planting
@@ -264,9 +264,9 @@
 	gen				labor_days = hh_labor_days + hired_labor_days
 
 
-* **********************************************************************
+**********************************************************************
 **# 5 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * keep what we want, get rid of the rest
 	keep			y5_hhid plotnum plot_id irrigated fert_any kilo_fert ///

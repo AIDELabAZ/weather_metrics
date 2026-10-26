@@ -6,7 +6,7 @@
 * Stata v.18
 
 * does
-* identifies regional elements, for use in price data contruction
+	* identifies regional elements, for use in price data contruction
 	* merges in household sampling weights
 	* outputs clean data file ready for combination with wave 2 data
 
@@ -14,26 +14,26 @@
 	* access to all raw data
 
 * TO DO:
-* done
+	* done
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root	= 	"$rawlsms/niger/wave_2/raw"
+	loc			root	= 	"$raw/niger/wave_2/raw"
 	loc			export	= 	"$data/refined_data/niger/wave_2"
 	loc			logout	= 	"$data/refined_data/niger/logs"
 
 * open log
-	cap		log 	close
+	cap log close
 	log 	using 	"`logout'/2014_ms00p1", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - load data and merge in household weights
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 	use				"`root'/ECVMA2_MS00P1", clear
@@ -48,9 +48,9 @@
 	drop		_merge
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - rename and identify regional variables
-* **********************************************************************
+**********************************************************************
 
 * build household identifier
 * need to rename for English
@@ -89,9 +89,9 @@
 	label var	zd "ZD number"
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	keep 			hhid_y2 hid clusterid hh_num hh_num1 extension ///
 						region dept canton zd pw

@@ -9,7 +9,7 @@
 	* reads in Niger, WAVE 1 (2011), POST HARVEST, ecvmaas2e_p2_en
 	* determines primary crops, cleans harvest (quantity in kg)
 	* determines prices that are already in USD
-* determines harvest for all crops - to determine value
+	* determines harvest for all crops - to determine value
 	* outputs clean data file ready for combination with wave 1 plot data
 
 * assumes
@@ -20,23 +20,23 @@
 	* done
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root	=		"$rawlsms/niger/wave_1/raw"
+	loc			root	=		"$raw/niger/wave_1/raw"
 	loc			export	=		"$data/refined_data/niger/wave_1"
 	loc			logout	= 		"$data/refined_data/niger/logs"
 
 * open log
-	cap 	log 	close
+	cap log close
 	log 	using	"`logout'/2011_as2ep2", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - describing plot size - self-reported and gps
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 	use				"`root'/ecvmaas2e_p2_en", clear
@@ -113,9 +113,9 @@
 	isid 			hid field parcel cropid
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - generate harvested quantities
-* **********************************************************************
+**********************************************************************
 
 * examine quantity harvested variable
 	lab	var			harvkg "quantity harvested, in kilograms"
@@ -150,9 +150,9 @@
 	*** mean from 127.11 to 97.67, max unchanged at 1392
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - generate sold harvested values
-* **********************************************************************
+**********************************************************************
 
 * examine market participation
 	tab 			soldprod
@@ -217,9 +217,9 @@
 	*** total of 1273 observations
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - price information - following ag_i in malawi
-* **********************************************************************
+**********************************************************************
 
 * merge in regional information
 	merge m:1		hid using "`export'/2011_ms00p1"
@@ -269,9 +269,10 @@
 	save		"`export'/2011_as2ep2_p5.dta", replace
 	restore
 
-* **********************************************************************
+
+**********************************************************************
 **# 5 - merge back in prices
-* **********************************************************************
+**********************************************************************
 
 * merge price data back into dataset
 
@@ -378,9 +379,9 @@
 	*** mean from 21.9 to 22.6, max at 170.66 no change in max
 
 
-* **********************************************************************
+**********************************************************************
 **# 6 - examine millet harvest quantities
-* **********************************************************************
+**********************************************************************
 
 * check to see if outliers can be dealt with
 	sum 			harvkg if cropid == 1
@@ -433,9 +434,9 @@
 	*** 32 changes made
 
 
-* **********************************************************************
+**********************************************************************
 **# 7 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * create unique household-plot identifier
 	sort			hid field parcel cropid

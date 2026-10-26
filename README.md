@@ -34,26 +34,27 @@ The code in this repository is primarily for replicating the cleaning of the hou
 
 ### Running the pipeline
 
-`projectdo.do` keeps the original numbered sections and run blocks. Run it from
-this repository's root in Stata 18 or newer, and edit/select the relevant blocks
+`projectdo.do` keeps the original numbered sections and run blocks. Run it in
+Stata 18 or newer, and edit/select the relevant blocks
 as before. The original block-comment choices are preserved: weather processing,
 household processing, and panel/regression calls are commented out; the analysis
 calls in section 4 are active. Those legacy figure scripts still require their
 older result-variable contracts and have not been migrated.
 
-Section 0.1 shows the input and output globals. The shared data root defaults to
-`<USERPROFILE>/OneDrive - University of Arizona/weather_and_agriculture`, or the
-`WEATHER_AGRICULTURE_DATA` environment variable when set. Adjust the path section
-for another location; personal paths belong in local configuration rather than
-committed code. `setup_paths.do` creates the project output folders. To initialize
-paths and folders without running any analysis blocks, run:
+Section 0.1 identifies the local machine using `c(username)`, as in the original
+master. Copy an existing user block and edit the username, repository path
+(`$code`), and shared data path (`$base`) for your machine. Each user's data
+path can point to their own storage location. No environment variable is required.
+The master stops with a message if the username has no configured block.
 
-```stata
-	do			setup_paths.do
-```
+The input and output globals immediately below those blocks can also be edited
+if the inputs and project outputs live in separate locations. `setup_paths.do`
+uses these globals to create output folders; it does not choose or change paths.
+To initialize paths and folders without running analysis, select and run section
+0.1 of `projectdo.do`.
 
-`$rawlsms` points to `raw_lsms_data`, `$weatherdata` to `weather_data`, and `$data`
-to `weather_metrics_data`, all under the shared data root. `$weatherwork` points
+`$raw` points to `raw_lsms_data`, `$wraw` to `weather_data`, and `$data`
+to `weather_metrics_data`, all under the shared data root. `$wout` points
 to `$data/refined_data/weather` for project-specific daily conversions and
 regenerated weather metrics. Household outputs go to
 `refined_data/<country>/wave_<n>` without another `refined` level. Generated

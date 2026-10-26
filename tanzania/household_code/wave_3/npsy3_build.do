@@ -16,24 +16,24 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		rootw 	= 	"$weatherwork/tanzania/wave_3/refined/npsy3_up"
+	global		rootw 	= 	"$wout/tanzania/wave_3/refined/npsy3_up"
 	global		rooth 	= 	"$data/refined_data/tanzania/wave_3"
 	global		export 	= 	"$data/merged_data/tanzania/wave_3"
 	global		logout 	= 	"$data/merged_data/tanzania/logs"
 
 * open log
-	cap			log			close
+	cap log close
 	log 		using 		"$logout/npsy3_build", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - merge rainfall data with household data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"$rooth/hhfinal_npsy3.dta", clear
@@ -46,7 +46,7 @@
 	loc 		fileList : dir "$rootw" files "*rf.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 y3_hhid using "$rootw/`file'"
@@ -113,15 +113,15 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - merge temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc 		fileList : dir "$rootw" files "*tp.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 y3_hhid using "$rootw/`file'"

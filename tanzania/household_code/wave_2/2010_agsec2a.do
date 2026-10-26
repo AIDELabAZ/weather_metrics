@@ -7,7 +7,7 @@
 
 * does
 	* cleans Tanzania household variables, wave 2 Ag sec2a
-    * looks like a parcel roster, 2010 long rainy season
+	* looks like a parcel roster, 2010 long rainy season
 	* generates imputed plot sizes
 
 * assumes
@@ -18,25 +18,24 @@
 	* completed
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 
 * define paths
-	global		root 	"$rawlsms/tanzania/wave_2/raw"
+	global		root 	"$raw/tanzania/wave_2/raw"
 	global		export 	"$data/refined_data/tanzania/wave_2"
 	global		logout 	"$data/refined_data/tanzania/logs"
 
 * open log
-	cap			log			close
+	cap log close
 	log using "$logout/wv2_AGSEC2A", append
 
 
-
-* ***********************************************************************
+**********************************************************************
 **# 1 - prepare tza 2010 (wave 2) - agriculture section 2a
-* ***********************************************************************
+**********************************************************************
 
 * load data
 	use				"$root/AG_SEC2A", clear
@@ -66,9 +65,9 @@
 	drop			plotsize_gps_ac plotsize_self_ac
 
 
-* ***********************************************************************
+**********************************************************************
 **# 2 - merge in regional id and cultivation status
-* ***********************************************************************
+**********************************************************************
 
 * must merge in regional identifiers from 2012_HHSECA to impute
 	merge			m:1 y2_hhid using "$export/HH_SECA"
@@ -103,9 +102,9 @@
 	drop			ag3a_02_1- status
 
 
-* ***********************************************************************
+**********************************************************************
 **# 3 - clean and impute plot size
-* ***********************************************************************
+**********************************************************************
 
 * interrogating plotsize variables
 	count 		if plotsize_gps != . & plotsize_self != .
@@ -230,9 +229,9 @@
 	*** no observations dropped
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * keep what we want, get rid of the rest
 	keep			y2_hhid plotnum plot_id region district ward ///

@@ -6,21 +6,21 @@
 * Stata v.18
 
 * does
-* NOTE IT TAKES 22 MIN TO RUN ALL REGRESSIONS
-* loads multi country data set
-* runs rainfall and temperature regressions
-* outputs results file for analysis
+	* NOTE IT TAKES 22 MIN TO RUN ALL REGRESSIONS
+	* loads multi country data set
+	* runs rainfall and temperature regressions
+	* outputs results file for analysis
 
 * assumes
-* cleaned, merged (weather), and appended (waves) data
+	* cleaned, merged (weather), and appended (waves) data
 
 * TO DO:
-* complete
+	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
 	global		source	 	"$data/regression_data"
@@ -28,21 +28,21 @@
 	global		logout 	 	"$data/regression_data/logs"
 
 * open log
-	cap			log			close
+	cap log close
 	log			using 		"$logout/regressions", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - read in cross country panel
-* **********************************************************************
+**********************************************************************
 
 * read in data file
 	use			"$source/lsms_panel.dta", clear
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - regressions on weather data
-* **********************************************************************
+**********************************************************************
 
 * create locals for total farm and just for maize
 	loc			inputscp 	lncp_lab lncp_frt cp_pst cp_hrb cp_irr
@@ -51,8 +51,8 @@
 	unab		weather_vars : `weather'
 	loc			nweather : word count `weather_vars'
 	loc			nrain = 0
-	foreach		v of local weather_vars {
-		if			regexm("`v'", "^v(0[1-9]|1[0-4])_rf[1-6]$") loc nrain = `nrain' + 1
+	foreach v of local weather_vars {
+		if regexm("`v'", "^v(0[1-9]|1[0-4])_rf[1-6]$") loc nrain = `nrain' + 1
 	}
 
 * create file to post results to
@@ -66,19 +66,20 @@
 	loc			ncountries : word count `levels'
 	loc			expected = `ncountries' * 2 * (6 * `nweather' + `nrain')
 * A complete rainfall grid has 84 variables; report incomplete input grids.
-	if			`nrain' != 84 display as error ///
+	if `nrain' != 84 display as error ///
 				"Rainfall grid: `nrain' of 84 expected variables present."
-	foreach		l of local levels {
+	foreach l of local levels {
 
 	* set panel id so it varies by dtype
 		xtset		hhid
 
 	* rainfall
-		foreach		v of varlist `weather' {
+		foreach v of varlist `weather' {
 
 		* define locals for naming conventions
 			loc			varn = 	substr("`v'", 1, 3)
 			loc			sat = 	substr("`v'", 5, 3)
+
 
 **## 2.1 - value of harvest
 
@@ -97,7 +98,7 @@
 						("`v'") (`=e(N_clust)')
 
 		* Cloudy: same year effects and exact reg2 estimation observations
-			if			regexm("`v'", "^v(0[1-9]|1[0-4])_rf[1-6]$") {
+			if regexm("`v'", "^v(0[1-9]|1[0-4])_rf[1-6]$") {
 				tempvar		paired_sample
 				gen byte	`paired_sample' = e(sample)
 				reg			lntf_yld `v' i.year if `paired_sample', vce(cluster hhid)
@@ -140,6 +141,7 @@
 						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
 						("`v'") (`=e(N_clust)')
 
+
 **## 2.2 - quantity of maize
 
 		* weather
@@ -157,7 +159,7 @@
 						("`v'") (`=e(N_clust)')
 
 		* Cloudy: same year effects and exact reg2 estimation observations
-			if			regexm("`v'", "^v(0[1-9]|1[0-4])_rf[1-6]$") {
+			if regexm("`v'", "^v(0[1-9]|1[0-4])_rf[1-6]$") {
 				tempvar		paired_sample
 				gen byte	`paired_sample' = e(sample)
 				reg			lncp_yld `v' i.year if `paired_sample', vce(cluster hhid)
@@ -227,7 +229,7 @@
 	assert		_N == `expected'
 	display		as text "Posted " _N " regression rows; expected `expected'."
 	count		if !estimable
-	if			r(N) > 0 {
+	if r(N) > 0 {
 		display		as error ///
 					"Non-estimable weather coefficients (retained and flagged):"
 		list		country outcome_var weather_var spec_id betarain serain if ///
@@ -235,14 +237,14 @@
 					noobs
 	}
 	count		if missing(loglike)
-	if			r(N) > 0 {
+	if r(N) > 0 {
 		display		as error ///
 					"Missing log likelihood; historical rows excluded below unless required for pairing:"
 		list		country outcome_var weather_var spec_id paired_sample if ///
 					missing(loglike), noobs
 	}
 * Check pair cardinality and saved sample/cluster counts, in addition to e(sample).
-	if			`nrain' > 0 {
+	if `nrain' > 0 {
 		preserve
 		keep		if paired_sample
 		bysort		country outcome_var weather_var (spec_id): assert _N == 2
@@ -358,7 +360,7 @@
 	drop		varname
 	rename		aux_var varname
 	count		if missing(varname)
-	if			r(N) > 0 {
+	if r(N) > 0 {
 		display		as error ///
 					"Unrecognized weather metrics excluded from complete results (retained in raw results):"
 		list		country outcome_var weather_var spec_id if missing(varname), noobs

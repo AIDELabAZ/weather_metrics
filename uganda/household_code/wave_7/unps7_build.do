@@ -17,12 +17,12 @@
 	* done
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			rootw 	= 	"$weatherwork/uganda/wave_3/refined"
+	loc			rootw 	= 	"$wout/uganda/wave_3/refined"
 	loc			rooth 	= 	"$data/refined_data/uganda/wave_3"
 	loc		export 	= 	"$data/merged_data/uganda/wave_3"
 	loc		logout 	= 	"$data/merged_data/uganda/logs"
@@ -32,9 +32,9 @@
 	log 	using 		"`logout'/unps3_build", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - merge northern household data with rainfall data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"`rooth'/hhfinal_unps3.dta", clear
@@ -50,13 +50,13 @@
 	loc 		folderList : dir "`rootw'" dirs "unpsy3_rf*"
 
 * define local with all files in each sub-folder
-	foreach 	folder of local folderList {
+	foreach folder of local folderList {
 
 	* define each file in the above local
 		loc 		fileList : dir "`rootw'/`folder'" files "*_n.dta"
 
 	* loop through each file in the above local
-		foreach		file in `fileList' {
+		foreach file in `fileList' {
 
 		* merge weather data with household data
 			merge		1:1 hhid using "`rootw'/`folder'/`file'"
@@ -133,21 +133,21 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - merge northern temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define local with all sub-folders in it
 	loc 		folderList : dir "`rootw'" dirs "unpsy3_t*"
 
 * define local with all files in each sub-folder
-	foreach 	folder of local folderList {
+	foreach folder of local folderList {
 
 * define each file in the above local
 	loc 		fileList : dir "`rootw'/`folder'" files "*_n.dta"
 
 * loop through each file in the above local
-		foreach		file in `fileList' {
+		foreach file in `fileList' {
 
 	* merge weather data with household data
 			merge		1:1 hhid using "`rootw'/`folder'/`file'"
@@ -223,9 +223,9 @@
 		path("`export'") dofile(unps3_build) user($user)
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - merge southern household data with rainfall data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"`rooth'/hhfinal_unps3.dta", clear
@@ -241,13 +241,13 @@
 	loc 		folderList : dir "`rootw'" dirs "unpsy3_rf*"
 
 * define local with all files in each sub-folder
-	foreach 	folder of local folderList {
+	foreach folder of local folderList {
 
 	* define each file in the above local
 		loc 		fileList : dir "`rootw'/`folder'" files "*_s.dta"
 
 	* loop through each file in the above local
-		foreach		file in `fileList' {
+		foreach file in `fileList' {
 
 		* merge weather data with household data
 			merge		1:1 hhid using "`rootw'/`folder'/`file'"
@@ -324,21 +324,21 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - merge southern temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define local with all sub-folders in it
 	loc 		folderList : dir "`rootw'" dirs "unpsy3_t*"
 
 * define local with all files in each sub-folder
-	foreach 	folder of local folderList {
+	foreach folder of local folderList {
 
 * define each file in the above local
 	loc 		fileList : dir "`rootw'/`folder'" files "*_s.dta"
 
 * loop through each file in the above local
-		foreach		file in `fileList' {
+		foreach file in `fileList' {
 
 	* merge weather data with household data
 			merge		1:1 hhid using "`rootw'/`folder'/`file'"
@@ -414,9 +414,9 @@
 		path("`export'") dofile(ghsy3_build) user($user)
 
 
-* **********************************************************************
+**********************************************************************
 **# 5 - append northern and southern data sets
-* **********************************************************************
+**********************************************************************
 
 * import northern data
 	use 			"`export'/unps3_merged_n.dta", clear

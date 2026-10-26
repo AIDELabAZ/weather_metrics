@@ -17,12 +17,12 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		rootw 	= 	"$weatherwork/uganda/wave_1/refined/unpsy1_up"
+	global		rootw 	= 	"$wout/uganda/wave_1/refined/unpsy1_up"
 	global		rooth 	= 	"$data/refined_data/uganda/wave_1"
 	global			export 	= 	"$data/merged_data/uganda/wave_1"
 	global			logout 	= 	"$data/merged_data/uganda/logs"
@@ -32,9 +32,9 @@
 	log 	using 		"$logout/unps1_build", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - merge northern household data with rainfall data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"$rooth/hhfinal_unps1.dta", clear
@@ -50,7 +50,7 @@
 	loc 		fileList : dir "$rootw" files "*rf_n.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 		* merge weather data with household data
 		merge		1:1 hhid using "$rootw/`file'"
@@ -117,15 +117,15 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - merge northern temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc 		fileList : dir "$rootw" files "*tp_n.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 hhid using "$rootw/`file'"
@@ -193,9 +193,9 @@
 	save 			"$export/unps1_merged_n.dta", replace
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - merge southern household data with rainfall data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"$rooth/hhfinal_unps1.dta", clear
@@ -211,7 +211,7 @@
 	loc 		fileList : dir "$rootw" files "*rf_s.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 		* merge weather data with household data
 		merge		1:1 hhid using "$rootw/`file'"
@@ -278,15 +278,15 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - merge southern temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc 		fileList : dir "$rootw" files "*tp_s.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 hhid using "$rootw/`file'"
@@ -354,9 +354,9 @@
 	save 			"$export/unps1_merged_s.dta", replace
 
 
-* **********************************************************************
+**********************************************************************
 **# 5 - append northern and southern data sets
-* **********************************************************************
+**********************************************************************
 
 * import northern data
 	use 		"$export/unps1_merged_n.dta", clear

@@ -6,51 +6,51 @@
 * Stata v.18
 
 * does
-* reads in Niger, wave 1 .dta files with daily values
-* runs wxsum .ado file
-* outputs .dta file of the relevant weather variables
-* does the above for both rainfall and temperature data
+	* reads in Niger, wave 1 .dta files with daily values
+	* runs wxsum .ado file
+	* outputs .dta file of the relevant weather variables
+	* does the above for both rainfall and temperature data
 	/* 	-the growing season that we care about is defined on the FAO website:
 			http://www.fao.org/giews/countrybrief/country.jsp?code=NER
 		-we measure rainfall during the months that the FAO defines as sowing and growing
 		-we define the relevant months as 1 June - 31 October */
 
 * assumes
-* NGR_ECVMAY1_converter.do
-* wxsum.ado
+	* NGR_ECVMAY1_converter.do
+	* wxsum.ado
 
 * TO DO:
-* completed
+	* completed
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			shared_daily = "$weatherdata/niger/wave_1/daily/ecvmay1_up"
-	loc			root = "$weatherwork/niger/wave_1/daily/ecvmay1_up"
-	capture		local		available : dir "`root'" files "*_daily.dta"
-	if			_rc local available
-	if			`"`available'"' == "" loc root = "`shared_daily'"
-	loc			export = "$weatherwork/niger/wave_1/refined/ecvmay1_up"
-	loc			logout = "$weatherwork/niger/logs"
+	loc			shared_daily = "$wraw/niger/wave_1/daily/ecvmay1_up"
+	loc			root = "$wout/niger/wave_1/daily/ecvmay1_up"
+	capture local available : dir "`root'" files "*_daily.dta"
+	if _rc local available
+	if `"`available'"' == "" loc root = "`shared_daily'"
+	loc			export = "$wout/niger/wave_1/refined/ecvmay1_up"
+	loc			logout = "$wout/niger/logs"
 
 * open log
-	cap			log			close
+	cap log close
 	log			using "`logout'/ngr_ecvmay1_weather", replace
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - run command for rainfall
-* **********************************************************************
+**********************************************************************
 
 * define local with all files in each sub-folder
 	loc			fileList : dir "`root'" files "*rf_daily.dta"
-	if			`"`fileList'"' == "" error 601
+	if `"`fileList'"' == "" error 601
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* import the daily data file
 		use			"`root'/`file'", clear
@@ -70,16 +70,16 @@
 	}
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - run command for temperature
-* **********************************************************************
+**********************************************************************
 
 * define local with all files in each sub-folder
 	loc			fileList : dir "`root'/`folder'" files "*tp_daily.dta"
-	if			`"`fileList'"' == "" error 601
+	if `"`fileList'"' == "" error 601
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* import the daily data file
 		use			"`root'/`file'", clear

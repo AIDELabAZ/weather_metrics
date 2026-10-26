@@ -6,7 +6,7 @@
 * Stata v.18
 
 * does
-* reads in Nigeria wave 1 (2010-2011), POST HARVEST, NGA SECTA2 AG - Labor
+	* reads in Nigeria wave 1 (2010-2011), POST HARVEST, NGA SECTA2 AG - Labor
 	* determines harvest labor (only) for preceeding rainy season
 	* outputs clean data file ready for combination with wave 1 plot data
 
@@ -18,12 +18,12 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root 	= 	"$rawlsms/nigeria/wave_1/raw"
+	loc			root 	= 	"$raw/nigeria/wave_1/raw"
 	loc			export 	= 	"$data/refined_data/nigeria/wave_1"
 	loc			logout 	= 	"$data/refined_data/nigeria/logs"
 
@@ -35,9 +35,9 @@
 	log using "`logout'/ph_secta2", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - determine labor allocation
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 	use			"`root'/secta2_harvestw1", clear
@@ -89,9 +89,10 @@
 *total labor days, we will need the labor rate in days/hectare but will need the plotsize from other data sets to get it
 	gen labor_days = (men_days + women_days + free_days + hh_1 + hh_2 + hh_3 + hh_4)
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - impute labor outliers
-* **********************************************************************
+**********************************************************************
 
 * summarize household individual labor for land prep to look for outliers
 	sum				hh_1 hh_2 hh_3 hh_4 men_days women_days free_days
@@ -135,9 +136,9 @@
 	*** no missing values
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	keep 			hhid zone state lga sector hhid ea plotid ///
 					hrv_labor

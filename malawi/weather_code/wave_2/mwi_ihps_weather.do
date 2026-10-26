@@ -6,10 +6,10 @@
 * Stata v.18
 
 * does
-* reads in Malawi IHPS, which we term wave 2, .dta files with daily values
-* runs wxsum .ado file
-* outputs .dta file of the relevant weather variables
-* does the above for both rainfall and temperature data
+	* reads in Malawi IHPS, which we term wave 2, .dta files with daily values
+	* runs wxsum .ado file
+	* outputs .dta file of the relevant weather variables
+	* does the above for both rainfall and temperature data
 	/* 	-the growing season that we care about is defined on the FAO website:
 			http://www.fao.org/giews/countrybrief/country.jsp?code=MWI
 		-we measure rainfall during the months that the FAO defines as sowing and growing
@@ -17,41 +17,41 @@
 		-but in code below we keep the Jan 1 to Jul 1 since these are "rename" months */
 
 * assumes
-* daily data converted to .dta
-* wxsum.ado
+	* daily data converted to .dta
+	* wxsum.ado
 
 * TO DO:
-* completed
+	* completed
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			shared_daily = "$weatherdata/malawi/wave_2/daily/ihps_up"
-	loc			root = "$weatherwork/malawi/wave_2/daily/ihps_up"
-	capture		local		available : dir "`root'" files "*_daily.dta"
-	if			_rc local available
-	if			`"`available'"' == "" loc root = "`shared_daily'"
-	loc			export 	= 	"$weatherwork/malawi/wave_2/refined/ihps_up"
-	loc			logout 	= 	"$weatherwork/malawi/logs"
+	loc			shared_daily = "$wraw/malawi/wave_2/daily/ihps_up"
+	loc			root = "$wout/malawi/wave_2/daily/ihps_up"
+	capture local available : dir "`root'" files "*_daily.dta"
+	if _rc local available
+	if `"`available'"' == "" loc root = "`shared_daily'"
+	loc			export 	= 	"$wout/malawi/wave_2/refined/ihps_up"
+	loc			logout 	= 	"$wout/malawi/logs"
 
 * open log
-	cap			log			close
+	cap log close
 	log			using 		"`logout'/mwi_ihps_weather", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - run command for rainfall
-* **********************************************************************
+**********************************************************************
 
 * define local with all files in each sub-folder
 	loc			fileList : dir "`root'" files "*rf_daily.dta"
-	if			`"`fileList'"' == "" error 601
+	if `"`fileList'"' == "" error 601
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* import the daily data file
 		use			"`root'/`file'", clear
@@ -67,16 +67,17 @@
 		save		"`export'/`dat'.dta", replace
 	}
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - run command for temperature
-* **********************************************************************
+**********************************************************************
 
 * define local with all files in each sub-folder
 	loc			fileList : dir "`root'" files "*tp_daily.dta"
-	if			`"`fileList'"' == "" error 601
+	if `"`fileList'"' == "" error 601
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* import the daily data file
 		use			"`root'/`file'", clear

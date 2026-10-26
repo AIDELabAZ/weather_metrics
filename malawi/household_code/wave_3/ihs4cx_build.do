@@ -16,24 +16,24 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		rootw 	 	"$weatherwork/malawi/wave_3/refined/ihs4_up"
+	global		rootw 	 	"$wout/malawi/wave_3/refined/ihs4_up"
 	global		rooth 	 	"$data/refined_data/malawi/wave_3"
 	global			export 	 	"$data/merged_data/malawi/wave_3"
 	global			logout 	 	"$data/merged_data/malawi/logs"
 
 * open log
-	cap log 		close
+	cap log close
 	log 			using 		"$logout/ihs4cx_build", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - merge rainfall data with household data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"$rooth/hhfinal_ihs4cx.dta", clear
@@ -46,7 +46,7 @@
 	loc 		fileList : dir "$rootw" files "*rf.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 case_id using "$rootw/`file'"
@@ -128,15 +128,15 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - merge temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc 		fileList : dir "$rootw" files "*tp.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 case_id using "$rootw/`file'"
@@ -214,7 +214,7 @@
 	gen			wave = 3
 	rename		case_id cx1_id
 	rename		hh_id_merge case_id
-	qui: 		compress
+	qui: compress
 	save 		"$export/cx2_merged.dta", replace
 
 * close the log

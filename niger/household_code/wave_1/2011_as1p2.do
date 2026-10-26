@@ -7,8 +7,8 @@
 
 * does
 	* reads in Niger, WAVE 1 (2011), POST HARVEST (second passage), ecvmaas1_p2_en
-* cleans labor post planting - planting labor
-* cleans labor post harvest - harvesting labor
+	* cleans labor post planting - planting labor
+	* cleans labor post harvest - harvesting labor
 	* outputs clean data file ready for combination with wave 1 plot data
 
 * assumes
@@ -18,23 +18,23 @@
 	* done
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root	=		"$rawlsms/niger/wave_1/raw"
+	loc			root	=		"$raw/niger/wave_1/raw"
 	loc			export	=		"$data/refined_data/niger/wave_1"
 	loc			logout	= 		"$data/refined_data/niger/logs"
 
 * open log
-	cap 	log 	close
+	cap log close
 	log 	using	"`logout'/2011_as1p2", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - set up and organization
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 	use				"`root'/ecvmaas1_p2_en", clear
@@ -73,9 +73,9 @@
 	isid 			hid field parcel
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - determine planting labor allocation
-* **********************************************************************
+**********************************************************************
 
 * per Palacios-Lopez et al. (2017) in Food Policy, we cap labor per activity
 * 7 days * 13 weeks = 91 days for land prep and planting
@@ -153,9 +153,9 @@
 	*** we do not include child labor days
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - impute planting labor outliers
-* **********************************************************************
+**********************************************************************
 
 * summarize household individual labor for land prep to look for outliers
 	sum				hh_1 hh_2 hh_3 hh_4 hh_5 hh_6 hired_men hired_women mutual_men mutual_women
@@ -216,9 +216,9 @@
 	drop 			hh_1- mutual_plant_labor
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - determine harvest labor allocation
-* **********************************************************************
+**********************************************************************
 
 * create household member labor
 * as02aq36**a identified HH ID of laborer
@@ -287,9 +287,9 @@
 	*** we do not include child labor days
 
 
-* **********************************************************************
+**********************************************************************
 **# 5 - impute labor outliers
-* **********************************************************************
+**********************************************************************
 
 * summarize household individual labor for land prep to look for outliers
 	sum				hh_1 hh_2 hh_3 hh_4 hh_5 hh_6 hired_men hired_women mutual_men mutual_women
@@ -346,9 +346,9 @@
 	*** seems a little low
 
 
-* **********************************************************************
+**********************************************************************
 **# 6 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	keep 			hid clusterid hh_num field parcel plant_labor plant_labor_all ///
 					harvest_labor harvest_labor_all

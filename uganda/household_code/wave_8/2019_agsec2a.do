@@ -9,7 +9,7 @@
 	* reads Uganda wave 8 owned plot info (2019_AGSEC2A)
 	* ready to append to rented plot info (2019_AGSEC2B)
 	* owned plots are in A and rented plots are in B
-* ready to be appended to 2019_AGSEC2B to make 2019_AGSEC2
+	* ready to be appended to 2019_AGSEC2B to make 2019_AGSEC2
 
 * assumes
 	* access to the raw data
@@ -19,23 +19,23 @@
 	* done
 
 
-***********************************************************************
+**********************************************************************
 **# 0 - setup
-***********************************************************************
+**********************************************************************
 
 * define paths
-	global		root  		"$rawlsms/uganda/wave_8/raw"
+	global		root  		"$raw/uganda/wave_8/raw"
 	global		export 		"$data/refined_data/uganda/wave_8"
 	global		logout 		"$data/refined_data/uganda/logs"
 
 * open log
-	cap log 			close
+	cap log close
 	log using 			"$logout/2019_agsec2a", append
 
 
-***********************************************************************
+**********************************************************************
 **# 1 - clean up the key variables
-***********************************************************************
+**********************************************************************
 
 * import wave 8 season A
 	use 			"$root/agric/agsec2a.dta", clear
@@ -58,9 +58,9 @@
 	*** irrigation is q18 not q20 like in other rounds
 
 
-***********************************************************************
+**********************************************************************
 **# 2 - merge location data
- **********************************************************************
+**********************************************************************
 
  * merge the location identification
 	merge		m:1 hhid using "$export/2019_gsec1"
@@ -72,9 +72,9 @@
 	*** 875 observations deleted
 
 
-************************************************************************
+**********************************************************************
 **# 3 - keeping cultivated land
-************************************************************************
+**********************************************************************
 
 * what was the primary use of the parcel
 	*** activity in the first season is recorded seperately from activity in the second season
@@ -91,9 +91,9 @@
 	*** zeros in every row and column other than first row/column
 
 
-***********************************************************************
+**********************************************************************
 **# 4 - clean plotsize
-***********************************************************************
+**********************************************************************
 
 * summarize plot size
 	sum 			plotsizeGPS
@@ -177,9 +177,10 @@
 
 	drop if			plotsize == .
 
-* **********************************************************************
+
+**********************************************************************
 **# 4 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	keep 			hhid hh prcid region district county subcounty ///
 					parish wgt19 plotsize irr_any

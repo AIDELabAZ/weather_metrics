@@ -7,8 +7,8 @@
 
 * does
 	* reads in Niger, WAVE 2 (2014), POST PLANTING (first passage), ECVMA2_AS2AP2
-* cleans labor post planting - planting labor
-* cleans labor post harvest - harvesting labor
+	* cleans labor post planting - planting labor
+	* cleans labor post harvest - harvesting labor
 	* outputs clean data file ready for combination with wave 2 plot data
 
 * assumes
@@ -18,23 +18,23 @@
 	* done
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root	=		"$rawlsms/niger/wave_2/raw"
+	loc			root	=		"$raw/niger/wave_2/raw"
 	loc			export	=		"$data/refined_data/niger/wave_2"
 	loc			logout	= 		"$data/refined_data/niger/logs"
 
 * open log
-	cap		log 	close
+	cap log close
 	log 	using	"`logout'/2014_as2ap2", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - set up and organization
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 	use				"`root'/ECVMA2_AS2AP2", clear
@@ -85,9 +85,9 @@
 	*** 305 observations dropped
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - determine planting labor allocation
-* **********************************************************************
+**********************************************************************
 
 * per Palacios-Lopez et al. (2017) in Food Policy, we cap labor per activity
 * 7 days * 13 weeks = 91 days for land prep and planting
@@ -164,9 +164,9 @@
 	*** we do not include child labor days
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - impute planting labor outliers
-* **********************************************************************
+**********************************************************************
 
 * summarize household individual labor for land prep to look for outliers
 	sum				hh_1 hh_2 hh_3 hh_4 hh_5 hh_6 hired_men hired_women mutual_men mutual_women
@@ -235,9 +235,9 @@
 	drop 			hh_1- mutual_plant_labor
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - determine harvest labor allocation
-* **********************************************************************
+**********************************************************************
 
 * per Palacios-Lopez et al. (2017) in Food Policy, we cap labor per activity
 * 7 days * 13 weeks = 91 days for land prep and planting
@@ -319,9 +319,10 @@
 
 	*** we do not include child labor days
 
-* **********************************************************************
+
+**********************************************************************
 **# 5 - impute harvest labor outliers
-* **********************************************************************
+**********************************************************************
 
 * summarize household individual labor for land prep to look for outliers
 	sum				hh_1 hh_2 hh_3 hh_4 hh_5 hh_6 hired_men hired_women mutual_men mutual_women
@@ -381,9 +382,9 @@
 	*** without free labor: average = 24.1, max = 335
 
 
-* **********************************************************************
+**********************************************************************
 **# 6 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * collapse to get rid of multiple observations of same crop on same parcel
 	collapse		(sum) plant_labor plant_labor_all harvest_labor harvest_labor_all, ///

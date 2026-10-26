@@ -17,34 +17,34 @@
 	* completed
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root = "$weatherdata/nigeria/wave_4/raw/ghsy4_up"
-	loc			export = "$weatherwork/nigeria/wave_4/daily/ghsy4_up"
-	loc			logout = "$weatherwork/nigeria/logs"
+	loc			root = "$wraw/nigeria/wave_4/raw/ghsy4_up"
+	loc			export = "$wout/nigeria/wave_4/daily/ghsy4_up"
+	loc			logout = "$wout/nigeria/logs"
 
 * open log
-	cap log		close
+	cap log close
 	log using 	"`logout'/nga_ghsy4_converter", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - converts weather data
-* **********************************************************************
+**********************************************************************
 
 * define local with all files in each sub-folder
-	capture		local		fileList : dir "`root'" files "*.csv"
-	if			_rc local fileList
-	if			`"`fileList'"' == "" {
+	capture local fileList : dir "`root'" files "*.csv"
+	if _rc local fileList
+	if `"`fileList'"' == "" {
 	* Some shared archives store this wave in OneDrive's duplicate folder.
-		loc			root = "$weatherdata/nigeria/wave_4/raw 2/ghsy4_up"
+		loc			root = "$wraw/nigeria/wave_4/raw 2/ghsy4_up"
 		loc			fileList : dir "`root'" files "*.csv"
 		display		as text "Using wave 4 weather archive: `root'"
 	}
-	if			`"`fileList'"' == "" {
+	if `"`fileList'"' == "" {
 		display		as error "No wave 4 weather CSV files found in `root'."
 		error		601
 	}

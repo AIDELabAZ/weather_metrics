@@ -7,7 +7,7 @@
 
 * does
 	* reads in Nigeria, WAVE 3, (2015-2016) POST HARVEST, NIGERIA SECTA3i
-* determines harvest information (area and quantity)
+	* determines harvest information (area and quantity)
 	* maize is the second most widely cultivated crop
 	* converts to kilograms and constant 2015 USD
 	* outputs clean data file ready for combination with wave 3 hh data
@@ -19,24 +19,25 @@
 * TO DO:
 	* complete
 
-* **********************************************************************
+
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root		= 	"$rawlsms/nigeria/wave_3/raw"
+	loc			root		= 	"$raw/nigeria/wave_3/raw"
 	loc			cnvrt		=	"$data/refined_data/nigeria/conversion_files"
 	loc			export 		= 	"$data/refined_data/nigeria/wave_3"
 	loc			logout 		= 	"$data/refined_data/nigeria/logs"
 
 * open log
-	cap 	log 		close
+	cap log close
 	log 	using		"`logout'/ph_secta1", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - determine area harvested
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 	use 					"`root'/secta3i_harvestw3", clear
@@ -80,9 +81,10 @@
 	sort 			hhid plotid cropid
 	isid 			hhid plotid cropid
 
-	* **********************************************************************
+
+**********************************************************************
 **# 2 - generate harvested values
-* **********************************************************************
+**********************************************************************
 
 * create quantity harvested variable
 	gen 			harvestq = sa3iq6i
@@ -129,9 +131,10 @@
 	***imputed 149 observations out of 10,494
 	*** mean from 201 to 203, max = 1951
 
-* **********************************************************************
+
+**********************************************************************
 **# 3 - generate maize harvest quantities
-* **********************************************************************
+**********************************************************************
 
 * merge harvest conversion file
 	merge		m:1 cropcode harv_unit using "`cnvrt'/harvconv_wave_3"
@@ -240,9 +243,9 @@
 	replace			mz_hrv = . if mz_damaged == 0 & mz_hrv == 0
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * keep what we want, get rid of what we don't
 	keep 				zone state lga sector ea hhid plotid cropid ///

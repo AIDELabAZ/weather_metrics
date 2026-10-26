@@ -17,23 +17,23 @@
 	* completed
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root 	= "$weatherdata/uganda/wave_7/raw/unpsy7_up"
-	loc			export 	= "$weatherwork/uganda/wave_7/daily/unpsy7_up"
-	loc			logout 	= "$weatherwork/uganda/logs"
+	loc			root 	= "$wraw/uganda/wave_7/raw/unpsy7_up"
+	loc			export 	= "$wout/uganda/wave_7/daily/unpsy7_up"
+	loc			logout 	= "$wout/uganda/logs"
 
 * open log
-	cap log		close
+	cap log close
 	log using 	"`logout'/uga_unpsy7_converter", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - converts weather data
-* **********************************************************************
+**********************************************************************
 
 * define local with all files in each sub-folder
 	loc fileList : dir "`root'" files "*.csv"

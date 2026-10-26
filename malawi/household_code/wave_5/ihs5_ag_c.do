@@ -9,27 +9,29 @@
 	* cleans crop plot size (gps and self-report)
 
 * assumes
-* access to MWI W5 raw data
+	* access to MWI W5 raw data
 
 * TO DO:
 	* complete
 
-* **********************************************************************
+
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root 	= 	"$rawlsms/malawi/wave_5/raw"
+	loc			root 	= 	"$raw/malawi/wave_5/raw"
 	loc			export 	= 	"$data/refined_data/malawi/wave_5"
 	loc			logout 	= 	"$data/refined_data/malawi/logs"
 
 * open log
-	cap 	log			close
+	cap log close
 	log 	using 		"`logout'/mwi_ag_mod_c", append
 
-* **********************************************************************
+
+**********************************************************************
 **# 1 - clean plot area
-* **********************************************************************
+**********************************************************************
 
 * load data
 	use 			"`root'/ag_mod_c.dta", clear
@@ -86,6 +88,8 @@
 
 * correlations
 	pwcorr 			selfreport gps
+
+
 **## 0.62 - okay but not great
 	pwcorr 			selfreport gps if inrange(gps,0.005,2)
 	*** not much higher = 0.66
@@ -136,9 +140,10 @@
 	keep  			case_id HHID gardenid plotid plotsize
 	order		case_id HHID gardenid plotid plotsize
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	compress
 	describe

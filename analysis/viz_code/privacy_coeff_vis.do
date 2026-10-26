@@ -7,18 +7,19 @@
 
 * does
 	* reads in results data set
-* makes visualziations of results
+	* makes visualziations of results
 
 * assumes
-* you have results file
+	* you have results file
 	* grc1leg2.ado
 
 * TO DO:
 	* complete
 
-************************************************************************
+
+**********************************************************************
 **# 0 - setup
-************************************************************************
+**********************************************************************
 
 * define paths
 	global	root 	= 	"$data/results_data"
@@ -35,9 +36,9 @@
 	log 	using 	"$logout/privacy_coeff_vis", append
 
 
-************************************************************************
+**********************************************************************
 **# 1 - generate (non)-significant indicators
-************************************************************************
+**********************************************************************
 
 * load data
 	use 			"$root/lsms_complete_results", clear
@@ -66,20 +67,20 @@
 	lab var			b_sign "Sign on weather variable"
 
 
-************************************************************************
+**********************************************************************
 **# 2 - generate specification chart for mean rainfall
-************************************************************************
+**********************************************************************
 
 * define loop through levels of the data type variable
 	levelsof 	country, local(cty)
 	local 		ctyname: value label country
-	foreach 	l of local cty {
+	foreach l of local cty {
 		local		ctyl: label `ctyname' `l'
 
 
-************************************************************************
+**********************************************************************
 **## 2a - weather only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 1 & country == 1 & regname == 1
@@ -98,10 +99,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -137,9 +138,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 2b - weather squared only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 1 & country == `l' & regname == 4
@@ -158,10 +159,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -197,9 +198,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 2c - weather and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 1 & country == `l' & regname == 2
@@ -218,10 +219,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -259,9 +260,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 2d - weather squared and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 1 & country == `l' & regname == 5
@@ -280,10 +281,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -319,9 +320,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 2e - weather and FEs and inputs
-************************************************************************
+**********************************************************************
 /*
 preserve
 	keep			if varname == 1 & country == `l' & regname == 4
@@ -379,9 +380,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 2f - weather squared and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 1 & country == `l' & regname == 6
@@ -441,20 +442,20 @@ restore
 	}
 
 
-************************************************************************
+**********************************************************************
 **# 3 - generate specification chart for no rain days
-************************************************************************
+**********************************************************************
 
 * define loop through levels of the data type variable
 	levelsof 	country, local(cty)
 	local 		ctyname: value label country
-	foreach 	l of local cty {
+	foreach l of local cty {
 		local		ctyl: label `ctyname' `l'
 
 
-************************************************************************
+**********************************************************************
 **## 3a - weather only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 10 & country == `l' & regname == 1
@@ -473,10 +474,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -512,9 +513,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 3b - weather squared only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 10 & country == `l' & regname == 4
@@ -533,10 +534,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -572,9 +573,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 3c - weather and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 10 & country == `l' & regname == 2
@@ -593,10 +594,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -632,9 +633,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 3d - weather squared and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 10 & country == `l' & regname == 5
@@ -653,10 +654,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -692,9 +693,11 @@ preserve
 restore
 
 /*
-************************************************************************
+
+
+**********************************************************************
 **## 3e - weather and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 10 & country == `l' & regname == 4
@@ -750,9 +753,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 3f - weather squared and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 10 & country == `l' & regname == 6
@@ -810,20 +813,20 @@ restore
 	}
 
 
-************************************************************************
+**********************************************************************
 **# 4 - generate specification chart for z-score total season
-************************************************************************
+**********************************************************************
 
 * define loop through levels of the data type variable
 	levelsof 	country, local(cty)
 	local 		ctyname: value label country
-	foreach 	l of local cty {
+	foreach l of local cty {
 		local		ctyl: label `ctyname' `l'
 
 
-************************************************************************
+**********************************************************************
 **## 4a - weather only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 7 & country == `l' & regname == 1
@@ -842,10 +845,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -881,9 +884,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 4b - weather squared only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 7 & country == `l' & regname == 4
@@ -902,10 +905,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -941,9 +944,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 4c - weather and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 7 & country == `l' & regname == 2
@@ -962,10 +965,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -1001,9 +1004,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 4d - weather squared and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 7 & country == `l' & regname == 5
@@ -1022,10 +1025,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -1061,9 +1064,11 @@ preserve
 restore
 
 /*
-************************************************************************
+
+
+**********************************************************************
 **## 4e - weather and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 7 & country == `l' & regname == 4
@@ -1119,9 +1124,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 4f - weather squared and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 7 & country == `l' & regname == 6
@@ -1179,13 +1184,13 @@ restore
 	}
 
 
-************************************************************************
+**********************************************************************
 **# 5 - combine rainfall graphs
-************************************************************************
+**********************************************************************
 
 * define loop through levels of the data type variable
 	levelsof 	country, local(cty)
-	foreach 	l of local cty {
+	foreach l of local cty {
 
 * combine country graphs for linear models
 	grc1leg2 		"$sfig/v01_reg1_cty`l'.gph" "$sfig/v01_reg2_cty`l'.gph" ///
@@ -1210,18 +1215,18 @@ restore
 	}
 
 
-************************************************************************
+**********************************************************************
 **# 6 - generate specification chart for mean temperature
-************************************************************************
+**********************************************************************
 
 * define loop through levels of the data type variable
 	levelsof 	country, local(cty)
-	foreach 	l of local cty {
+	foreach l of local cty {
 
 
-************************************************************************
+**********************************************************************
 **## 6a - weather only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 15 & country ==`l' & regname == 1
@@ -1245,10 +1250,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -1283,9 +1288,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 6b - weather squared only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 15 & country == `l' & regname == 4
@@ -1309,10 +1314,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -1347,9 +1352,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 6c - weather and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 15 & country == `l' & regname == 2
@@ -1373,10 +1378,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -1411,9 +1416,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 6d - weather squared and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 15 & country == `l' & regname == 5
@@ -1437,10 +1442,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -1475,9 +1480,11 @@ preserve
 restore
 
 /*
-************************************************************************
+
+
+**********************************************************************
 **## 6e - weather and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 15 & country == `l' & regname == 4
@@ -1539,9 +1546,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 6f - weather squared and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 15 & country == `l' & regname == 6
@@ -1604,18 +1611,19 @@ restore
 */
 	}
 
-************************************************************************
+
+**********************************************************************
 **# 7 - generate specification chart for gdd
-************************************************************************
+**********************************************************************
 
 * define loop through levels of the data type variable
 	levelsof 	country, local(cty)
-	foreach 	l of local cty {
+	foreach l of local cty {
 
 
-************************************************************************
+**********************************************************************
 **## 7a - weather only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 19 & country == `l' & regname == 1
@@ -1639,10 +1647,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -1677,9 +1685,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 7b - weather squared only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 19 & country == `l' & regname == 4
@@ -1703,10 +1711,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -1741,9 +1749,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 7c - weather and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 19 & country == `l' & regname == 2
@@ -1767,10 +1775,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -1807,9 +1815,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 7d - weather squared and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 19 & country == `l' & regname == 5
@@ -1833,10 +1841,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -1871,9 +1879,11 @@ preserve
 restore
 
 /*
-************************************************************************
+
+
+**********************************************************************
 **## 7e - weather and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 19 & country == `l' & regname == 4
@@ -1935,9 +1945,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 7f - weather squared and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 19 & country == `l' & regname == 6
@@ -2001,18 +2011,18 @@ restore
 	}
 
 
-************************************************************************
+**********************************************************************
 **# 8 - generate specification chart for z-gdd
-************************************************************************
+**********************************************************************
 
 * define loop through levels of the data type variable
 	levelsof 	country, local(cty)
-	foreach 	l of local cty {
+	foreach l of local cty {
 
 
-************************************************************************
+**********************************************************************
 **## 8a - weather only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 21 & country == `l' & regname == 1
@@ -2036,10 +2046,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -2074,9 +2084,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 8b - weather squared only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 21 & country == `l' & regname == 4
@@ -2100,10 +2110,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -2138,9 +2148,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 8c - weather and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 21 & country == `l' & regname == 2
@@ -2164,10 +2174,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -2202,9 +2212,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 8d - weather squared and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 21 & country == `l' & regname == 5
@@ -2228,10 +2238,10 @@ preserve
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
 
-	qui sum			ci_lo
+	qui sum ci_lo
 	global			bmin = r(min)
 
 	global			brange	=	$bmax - $bmin
@@ -2266,9 +2276,11 @@ preserve
 restore
 
 /*
-************************************************************************
+
+
+**********************************************************************
 **## 8e - weather and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 21 & country == `l' & regname == 4
@@ -2330,9 +2342,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 8f - weather squared and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 21 & country == `l' & regname == 6
@@ -2396,13 +2408,13 @@ restore
 	}
 
 
-************************************************************************
+**********************************************************************
 **# 9 - combine graphs
-************************************************************************
+**********************************************************************
 
 * define loop through levels of the data type variable
 	levelsof 	country, local(cty)
-	foreach 	l of local cty {
+	foreach l of local cty {
 
 * combine country graphs for linear models
 	grc1leg2 		"$sfig/v15_reg1_cty`l'.gph" "$sfig/v15_reg2_cty`l'.gph" ///
@@ -2426,9 +2438,10 @@ restore
 	graph export 	"$xfig\zgdd_cty`l'_tp.pdf", as(pdf) replace
 	}
 
-************************************************************************
+
+**********************************************************************
 **# 10 - end matter
-************************************************************************
+**********************************************************************
 
 * close the log
 	log	close

@@ -18,13 +18,13 @@
 	* complete
 
 
-***********************************************************************
+**********************************************************************
 **# 0 - setup
-***********************************************************************
+**********************************************************************
 
 * define paths
-	global		root			"$rawlsms/nigeria/wave_4/raw"
-	global		cnvrt   		"$rawlsms/nigeria/conversion_files"
+	global		root			"$raw/nigeria/wave_4/raw"
+	global		cnvrt   		"$raw/nigeria/conversion_files"
 	global		export  		"$data/refined_data/nigeria/wave_4"
 	global		logout  		"$data/refined_data/nigeria/logs"
 
@@ -32,9 +32,10 @@
 	cap log close
 	log using "$logout/2018_ph_sect11a1", append
 
-***********************************************************************
+
+**********************************************************************
 **# 1 - find unique identifier and determine plot size
-***********************************************************************
+**********************************************************************
 
 * import the relevant data file
 	use			"$root/sect11a1_plantingw4", clear
@@ -52,9 +53,10 @@
 		gen plot_size_GPS = s11aq4c
 		label variable plot_size_GPS "GPS plotsize in sq. meters"
 
-***********************************************************************
+
+**********************************************************************
 **# 2 - conversions
-***********************************************************************
+**********************************************************************
 
 * merge in conversion file
 	merge 			m:1 	zone using 	"$cnvrt/land-conversion"
@@ -192,9 +194,10 @@
 	*** imputed values change VERY little - mean from 0.527 to 0.471
 	*** reasonable changes
 
-* **********************************************************************
+
+**********************************************************************
 **# 3 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	replace		plotsize = plotsize_1_
 	lab	var			plotsize	"plot size (ha)"

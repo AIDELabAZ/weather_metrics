@@ -18,12 +18,12 @@
 	* create summary tables
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		rootw 	= 	"$weatherwork"
+	global		rootw 	= 	"$wout"
 	global		rooth 	= 	"$data/refined_data"
 	global	export 	= 	"$data/results_data"
 	global	sfig	= 	"$data/results_data/figures"
@@ -31,39 +31,39 @@
 	global	logout 	= 	"$data/regression_data/logs"
 
 * open log
-	cap			log			close
+	cap log close
 	log 	using 		"$logout/sum_long", append
 
 
-************************************************************************
+**********************************************************************
 **# 1 - process rainfall data
-************************************************************************
+**********************************************************************
 
 
-************************************************************************
+**********************************************************************
 **## 1.A - ethiopia
-************************************************************************
+**********************************************************************
 
 	* define local with all waves in it
 		loc 		waveList : dir "$rootw/ethiopia" dirs "wave_*"
 		display 	`waveList'
 
 * loop through all wave folder in country folders
-		foreach 	wave of local waveList {
+		foreach wave of local waveList {
 
 		* define local with all satelites in it
 			loc 		satList : dir "$rootw/ethiopia/`wave'/refined" dirs "*_rf*"
 			display		`satList'
 
 		* loop through each satelite folder in wave in country
-			foreach 	sat of local satList {
+			foreach sat of local satList {
 
 			* define each file in the above local
 				loc 		fileList : dir "$rootw/ethiopia/`wave'/refined/`sat'" files "*_x3_rf*.dta"
 				display		`fileList'
 
 			* loop through each file
-			foreach		file in `fileList' {
+			foreach file in `fileList' {
 
 				* merge weather data with household data
 					use 		"$rootw/ethiopia/`wave'/refined/`sat'/`file'", clear
@@ -94,30 +94,30 @@
 		}
 
 
-************************************************************************
+**********************************************************************
 **## 1.B - malawi
-************************************************************************
+**********************************************************************
 
 	* define local with all waves in it
 		loc 		waveList : dir "$rootw/malawi" dirs "wave_*"
 		display 	`waveList'
 
 * loop through all wave folder in country folders
-		foreach 	wave of local waveList {
+		foreach wave of local waveList {
 
 		* define local with all satelites in it
 			loc 		satList : dir "$rootw/malawi/`wave'/refined" dirs "*_rf*"
 			display		`satList'
 
 		* loop through each satelite folder in wave in country
-			foreach 	sat of local satList {
+			foreach sat of local satList {
 
 			* define each file in the above local
 				loc 		fileList : dir "$rootw/malawi/`wave'/refined/`sat'" files "*_x3_rf*.dta"
 				display		`fileList'
 
 			* loop through each file
-			foreach		file in `fileList' {
+			foreach file in `fileList' {
 
 				* merge weather data with household data
 					use 		"$rootw/malawi/`wave'/refined/`sat'/`file'", clear
@@ -148,30 +148,30 @@
 		}
 
 
-************************************************************************
+**********************************************************************
 **## 1.D - niger
-************************************************************************
+**********************************************************************
 
 	* define local with all waves in it
 		loc 		waveList : dir "$rootw/niger" dirs "wave_*"
 		display 	`waveList'
 
 * loop through all wave folder in country folders
-		foreach 	wave of local waveList {
+		foreach wave of local waveList {
 
 		* define local with all satelites in it
 			loc 		satList : dir "$rootw/niger/`wave'/refined" dirs "*_rf*"
 			display		`satList'
 
 		* loop through each satelite folder in wave in country
-			foreach 	sat of local satList {
+			foreach sat of local satList {
 
 			* define each file in the above local
 				loc 		fileList : dir "$rootw/niger/`wave'/refined/`sat'" files "*_x3_rf*.dta"
 				display		`fileList'
 
 			* loop through each file
-			foreach		file in `fileList' {
+			foreach file in `fileList' {
 
 				* merge weather data with household data
 					use 		"$rootw/niger/`wave'/refined/`sat'/`file'", clear
@@ -202,30 +202,30 @@
 		}
 
 
-************************************************************************
+**********************************************************************
 **## 1.E - nigeria
-************************************************************************
+**********************************************************************
 
 	* define local with all waves in it
 		loc 		waveList : dir "$rootw/nigeria" dirs "wave_*"
 		display 	`waveList'
 
 * loop through all wave folder in country folders
-		foreach 	wave of local waveList {
+		foreach wave of local waveList {
 
 		* define local with all satelites in it
 			loc 		satList : dir "$rootw/nigeria/`wave'/refined" dirs "*_rf*"
 			display		`satList'
 
 		* loop through each satelite folder in wave in country
-			foreach 	sat of local satList {
+			foreach sat of local satList {
 
 			* define each file in the above local
 				loc 		fileList : dir "$rootw/nigeria/`wave'/refined/`sat'" files "*_x3_rf*_n.dta"
 				display		`fileList'
 
 			* loop through each file
-			foreach		file in `fileList' {
+			foreach file in `fileList' {
 
 				* merge weather data with household data
 					use 		"$rootw/nigeria/`wave'/refined/`sat'/`file'", clear
@@ -256,30 +256,30 @@
 		}
 
 
-************************************************************************
+**********************************************************************
 **## 1.F - tanzania
-************************************************************************
+**********************************************************************
 
 	* define local with all waves in it
 		loc 		waveList : dir "$rootw/tanzania" dirs "wave_*"
 		display 	`waveList'
 
 * loop through all wave folder in country folders
-		foreach 	wave of local waveList {
+		foreach wave of local waveList {
 
 		* define local with all satelites in it
 			loc 		satList : dir "$rootw/tanzania/`wave'/refined" dirs "*_rf*"
 			display		`satList'
 
 		* loop through each satelite folder in wave in country
-			foreach 	sat of local satList {
+			foreach sat of local satList {
 
 			* define each file in the above local
 				loc 		fileList : dir "$rootw/tanzania/`wave'/refined/`sat'" files "*_x3_rf*.dta"
 				display		`fileList'
 
 			* loop through each file
-			foreach		file in `fileList' {
+			foreach file in `fileList' {
 
 				* merge weather data with household data
 					use 		"$rootw/tanzania/`wave'/refined/`sat'/`file'", clear
@@ -310,30 +310,30 @@
 		}
 
 
-************************************************************************
+**********************************************************************
 **## 1.G - uganda
-************************************************************************
+**********************************************************************
 
 	* define local with all waves in it
 		loc 		waveList : dir "$rootw/uganda" dirs "wave_*"
 		display 	`waveList'
 
 * loop through all wave folder in country folders
-		foreach 	wave of local waveList {
+		foreach wave of local waveList {
 
 		* define local with all satelites in it
 			loc 		satList : dir "$rootw/uganda/`wave'/refined" dirs "*_rf*"
 			display		`satList'
 
 		* loop through each satelite folder in wave in country
-			foreach 	sat of local satList {
+			foreach sat of local satList {
 
 			* define each file in the above local
 				loc 		fileList : dir "$rootw/uganda/`wave'/refined/`sat'" files "*_x3_rf*_n.dta"
 				display		`fileList'
 
 			* loop through each file
-			foreach		file in `fileList' {
+			foreach file in `fileList' {
 
 				* merge weather data with household data
 					use 		"$rootw/uganda/`wave'/refined/`sat'/`file'", clear
@@ -364,9 +364,9 @@
 		}
 
 
-************************************************************************
+**********************************************************************
 **# 2 - ethiopia graphs
-************************************************************************
+**********************************************************************
 
 * open first weather file
 	use 		"$export/ethiopia/essy1_x3_rf1", clear
@@ -376,7 +376,7 @@
 	display		`fileList'
 
 * loop through each file
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		append		using "$export/ethiopia/`file'"
@@ -422,9 +422,10 @@
 * change scale of percentage
 	replace		percent_raindays_ = percent_raindays_ * 100
 
-************************************************************************
+
+**********************************************************************
 **## 2.1 - ethiopia mean daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -444,9 +445,9 @@
 	graph export 	"$xfig\eth_v01.eps", 			 replace
 
 
-************************************************************************
+**********************************************************************
 **## 2.2 - ethiopia median daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line median_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -465,9 +466,10 @@
 	graph export 	"$xfig\eth_v02.png", width(1400) replace
 	graph export 	"$xfig\eth_v02.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 2.3 - ethiopia variance daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line sd_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -486,9 +488,10 @@
 	graph export 	"$xfig\eth_v03.png", width(1400) replace
 	graph export 	"$xfig\eth_v03.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 2.4 - ethiopia skew daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line skew_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -507,9 +510,10 @@
 	graph export 	"$xfig\eth_v04.png", width(1400) replace
 	graph export 	"$xfig\eth_v04.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 2.5 - ethiopia total daily rainfall for the growing season
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -528,9 +532,10 @@
 	graph export 	"$xfig\eth_v05.png", width(1400) replace
 	graph export 	"$xfig\eth_v05.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 2.6 - ethiopia deviations in total daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -549,9 +554,10 @@
 	graph export 	"$xfig\eth_v06.png", width(1400) replace
 	graph export 	"$xfig\eth_v06.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 2.7 - ethiopia scaled deviations in total daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line z_total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -570,9 +576,10 @@
 	graph export 	"$xfig\eth_v07.png", width(1400) replace
 	graph export 	"$xfig\eth_v07.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 2.8 - ethiopia rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -591,9 +598,10 @@
 	graph export 	"$xfig\eth_v08.png", width(1400) replace
 	graph export 	"$xfig\eth_v08.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 2.9 - ethiopia deviations in rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -612,9 +620,10 @@
 	graph export 	"$xfig\eth_v09.png", width(1400) replace
 	graph export 	"$xfig\eth_v09.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 2.10 - ethiopia no rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line norain_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -633,9 +642,10 @@
 	graph export 	"$xfig\eth_v10.png", width(1400) replace
 	graph export 	"$xfig\eth_v10.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 2.11 - ethiopia deviations in no rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -654,9 +664,10 @@
 	graph export 	"$xfig\eth_v11.png", width(1400) replace
 	graph export 	"$xfig\eth_v11.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 2.12 - ethiopia share of rainy days
-************************************************************************
+**********************************************************************
 	sort		year
 	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
 				(line percent_raindays_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
@@ -674,9 +685,10 @@
 	graph export 	"$xfig\eth_v12.png", width(1400) replace
 	graph export 	"$xfig\eth_v12.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 2.13 - ethiopia deviations in share of rainy days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -695,9 +707,10 @@
 	graph export 	"$xfig\eth_v13.png", width(1400) replace
 	graph export 	"$xfig\eth_v13.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 2.14 - ethiopia intra season dry spells
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dry_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -717,9 +730,9 @@
 	graph export 	"$xfig\eth_v14.eps", 			 replace
 
 
-************************************************************************
+**********************************************************************
 **# 3 - malawi graphs
-************************************************************************
+**********************************************************************
 
 * open first weather file
 	use 		"$export/malawi/ihps_x3_rf1", clear
@@ -729,7 +742,7 @@
 	display		`fileList'
 
 * loop through each file
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		append		using "$export/malawi/`file'"
@@ -781,9 +794,9 @@
 	replace		percent_raindays_ = percent_raindays_ * 100
 
 
-************************************************************************
+**********************************************************************
 **## 3.1 - malawi mean daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -802,9 +815,10 @@
 	graph export 	"$xfig\mwi_v01.png", width(1400) replace
 	graph export 	"$xfig\mwi_v01.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 3.2 - malawi median daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line median_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -823,9 +837,10 @@
 	graph export 	"$xfig\mwi_v02.png", width(1400) replace
 	graph export 	"$xfig\mwi_v02.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 3.3 - malawi variance daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line sd_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -844,9 +859,10 @@
 	graph export 	"$xfig\mwi_v03.png", width(1400) replace
 	graph export 	"$xfig\mwi_v03.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 3.4 - malawi skew daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line skew_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -865,9 +881,10 @@
 	graph export 	"$xfig\mwi_v04.png", width(1400) replace
 	graph export 	"$xfig\mwi_v04.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 3.5 - malawi total daily rainfall for the growing season
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -886,9 +903,10 @@
 	graph export 	"$xfig\mwi_v05.png", width(1400) replace
 	graph export 	"$xfig\mwi_v05.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 3.6 - malawi deviations in total daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -907,9 +925,10 @@
 	graph export 	"$xfig\mwi_v06.png", width(1400) replace
 	graph export 	"$xfig\mwi_v06.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 3.7 - malawi scaled deviations in total daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line z_total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -928,9 +947,10 @@
 	graph export 	"$xfig\mwi_v07.png", width(1400) replace
 	graph export 	"$xfig\mwi_v07.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 3.8 - malawi rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -949,9 +969,10 @@
 	graph export 	"$xfig\mwi_v08.png", width(1400) replace
 	graph export 	"$xfig\mwi_v08.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 3.9 - malawi deviations in rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -970,9 +991,10 @@
 	graph export 	"$xfig\mwi_v09.png", width(1400) replace
 	graph export 	"$xfig\mwi_v09.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 3.10 - malawi no rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line norain_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -991,9 +1013,10 @@
 	graph export 	"$xfig\mwi_v10.png", width(1400) replace
 	graph export 	"$xfig\mwi_v10.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 3.11 - malawi deviations in no rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1012,9 +1035,10 @@
 	graph export 	"$xfig\mwi_v11.png", width(1400) replace
 	graph export 	"$xfig\mwi_v11.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 3.12 - malawi share of rainy days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1033,9 +1057,10 @@
 	graph export 	"$xfig\mwi_v12.png", width(1400) replace
 	graph export 	"$xfig\mwi_v12.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 3.13 - malawi deviations in share of rainy days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1054,9 +1079,10 @@
 	graph export 	"$xfig\mwi_v13.png", width(1400) replace
 	graph export 	"$xfig\mwi_v13.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 3.14 - malawi intra season dry spells
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dry_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1075,9 +1101,10 @@
 	graph export 	"$xfig\mwi_v14.png", width(1400) replace
 	graph export 	"$xfig\mwi_v14.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **# 4 - niger graphs
-************************************************************************
+**********************************************************************
 
 * open first weather file
 	use 		"$export/niger/ecvmay1_x3_rf1", clear
@@ -1087,7 +1114,7 @@
 	display		`fileList'
 
 * loop through each file
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		append		using "$export/niger/`file'"
@@ -1134,9 +1161,10 @@
 * change scale of percentage
 	replace		percent_raindays_ = percent_raindays_ * 100
 
-************************************************************************
+
+**********************************************************************
 **## 4.1 - niger mean daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1155,9 +1183,10 @@
 	graph export 	"$xfig\ngr_v01.png", width(1400) replace
 	graph export 	"$xfig\ngr_v01.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 4.2 - niger median daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line median_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1176,9 +1205,10 @@
 	graph export 	"$xfig\ngr_v02.png", width(1400) replace
 	graph export 	"$xfig\ngr_v02.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 4.3 - niger variance daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line sd_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1197,9 +1227,10 @@
 	graph export 	"$xfig\ngr_v03.png", width(1400) replace
 	graph export 	"$xfig\ngr_v03.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 4.4 - niger skew daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line skew_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1218,9 +1249,10 @@
 	graph export 	"$xfig\ngr_v04.png", width(1400) replace
 	graph export 	"$xfig\ngr_v04.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 4.5 - niger total daily rainfall for the growing season
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1239,9 +1271,10 @@
 	graph export 	"$xfig\ngr_v05.png", width(1400) replace
 	graph export 	"$xfig\ngr_v05.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 4.6 - niger deviations in total daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1260,9 +1293,10 @@
 	graph export 	"$xfig\ngr_v06.png", width(1400) replace
 	graph export 	"$xfig\ngr_v06.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 4.7 - niger scaled deviations in total daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line z_total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1281,9 +1315,10 @@
 	graph export 	"$xfig\ngr_v07.png", width(1400) replace
 	graph export 	"$xfig\ngr_v07.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 4.8 - niger rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1302,9 +1337,10 @@
 	graph export 	"$xfig\ngr_v08.png", width(1400) replace
 	graph export 	"$xfig\ngr_v08.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 4.9 - niger deviations in rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1323,9 +1359,10 @@
 	graph export 	"$xfig\ngr_v09.png", width(1400) replace
 	graph export 	"$xfig\ngr_v09.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 4.10 - niger no rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line norain_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1344,9 +1381,10 @@
 	graph export 	"$xfig\ngr_v10.png", width(1400) replace
 	graph export 	"$xfig\ngr_v10.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 4.11 - niger deviations in no rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1365,9 +1403,10 @@
 	graph export 	"$xfig\ngr_v11.png", width(1400) replace
 	graph export 	"$xfig\ngr_v11.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 4.12 - niger share of rainy days
-************************************************************************
+**********************************************************************
 	sort		year
 	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
 				(line percent_raindays_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
@@ -1385,9 +1424,10 @@
 	graph export 	"$xfig\ngr_v12.png", width(1400) replace
 	graph export 	"$xfig\ngr_v12.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 4.13 - niger deviations in share of rainy days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1406,9 +1446,10 @@
 	graph export 	"$xfig\ngr_v13.png", width(1400) replace
 	graph export 	"$xfig\ngr_v13.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 4.14 - niger intra season dry spells
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dry_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1427,9 +1468,10 @@
 	graph export 	"$xfig\ngr_v14.png", width(1400) replace
 	graph export 	"$xfig\ngr_v14.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **# 5 - nigeria graphs
-************************************************************************
+**********************************************************************
 
 * open first weather file
 	use 		"$export/nigeria/ghsy1_x3_rf1_n", clear
@@ -1439,7 +1481,7 @@
 	display		`fileList'
 
 * loop through each file
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		append		using "$export/nigeria/`file'"
@@ -1484,9 +1526,9 @@
 	replace		percent_raindays_ = percent_raindays_ * 100
 
 
-************************************************************************
+**********************************************************************
 **## 5.1 - nigeria mean daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1505,9 +1547,10 @@
 	graph export 	"$xfig\nga_v01.png", width(1400) replace
 	graph export 	"$xfig\nga_v01.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 5.2 - nigeria median daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line median_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1526,9 +1569,10 @@
 	graph export 	"$xfig\nga_v02.png", width(1400) replace
 	graph export 	"$xfig\nga_v02.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 5.3 - nigeria variance daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line sd_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1547,9 +1591,10 @@
 	graph export 	"$xfig\nga_v03.png", width(1400) replace
 	graph export 	"$xfig\nga_v03.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 5.4 - nigeria skew daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line skew_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1568,9 +1613,10 @@
 	graph export 	"$xfig\nga_v04.png", width(1400) replace
 	graph export 	"$xfig\nga_v04.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 5.5 - nigeria total daily rainfall for the growing season
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1589,9 +1635,10 @@
 	graph export 	"$xfig\nga_v05.png", width(1400) replace
 	graph export 	"$xfig\nga_v05.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 5.6 - nigeria deviations in total daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1610,9 +1657,10 @@
 	graph export 	"$xfig\nga_v06.png", width(1400) replace
 	graph export 	"$xfig\nga_v06.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 5.7 - nigeria scaled deviations in total daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line z_total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1631,9 +1679,10 @@
 	graph export 	"$xfig\nga_v07.png", width(1400) replace
 	graph export 	"$xfig\nga_v07.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 5.8 - nigeria rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1652,9 +1701,10 @@
 	graph export 	"$xfig\nga_v08.png", width(1400) replace
 	graph export 	"$xfig\nga_v08.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 5.9 - nigeria deviations in rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1673,9 +1723,10 @@
 	graph export 	"$xfig\nga_v09.png", width(1400) replace
 	graph export 	"$xfig\nga_v09.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 5.10 - nigeria no rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line norain_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1694,9 +1745,10 @@
 	graph export 	"$xfig\nga_v10.png", width(1400) replace
 	graph export 	"$xfig\nga_v10.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 5.11 - nigeria deviations in no rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1715,9 +1767,10 @@
 	graph export 	"$xfig\nga_v11.png", width(1400) replace
 	graph export 	"$xfig\nga_v11.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 5.12 - nigeria share of rainy days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1736,9 +1789,10 @@
 	graph export 	"$xfig\nga_v12.png", width(1400) replace
 	graph export 	"$xfig\nga_v12.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 5.13 - nigeria deviations in share of rainy days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1757,9 +1811,10 @@
 	graph export 	"$xfig\nga_v13.png", width(1400) replace
 	graph export 	"$xfig\nga_v13.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 5.14 - nigeria intra season dry spells
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dry_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1778,9 +1833,10 @@
 	graph export 	"$xfig\nga_v14.png", width(1400) replace
 	graph export 	"$xfig\nga_v14.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **# 6 - tanzania graphs
-************************************************************************
+**********************************************************************
 
 * open first weather file
 	use 		"$export/tanzania/npsy1_x3_rf1", clear
@@ -1790,7 +1846,7 @@
 	display		`fileList'
 
 * loop through each file
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		append		using "$export/tanzania/`file'"
@@ -1839,9 +1895,10 @@
 * change scale of percentage
 	replace		percent_raindays_ = percent_raindays_ * 100
 
-************************************************************************
+
+**********************************************************************
 **## 6.1 - tanzania mean daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1860,9 +1917,10 @@
 	graph export 	"$xfig\tza_v01.png", width(1400) replace
 	graph export 	"$xfig\tza_v01.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 6.2 - tanzania median daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line median_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1881,9 +1939,10 @@
 	graph export 	"$xfig\tza_v02.png", width(1400) replace
 	graph export 	"$xfig\tza_v02.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 6.3 - tanzania variance daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line sd_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1902,9 +1961,10 @@
 	graph export 	"$xfig\tza_v03.png", width(1400) replace
 	graph export 	"$xfig\tza_v03.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 6.4 - tanzania skew daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line skew_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1923,9 +1983,10 @@
 	graph export 	"$xfig\tza_v04.png", width(1400) replace
 	graph export 	"$xfig\tza_v04.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 6.5 - tanzania total daily rainfall for the growing season
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1944,9 +2005,10 @@
 	graph export 	"$xfig\tza_v05.png", width(1400) replace
 	graph export 	"$xfig\tza_v05.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 6.6 - tanzania deviations in total daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1965,9 +2027,10 @@
 	graph export 	"$xfig\tza_v06.png", width(1400) replace
 	graph export 	"$xfig\tza_v06.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 6.7 - tanzania scaled deviations in total daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line z_total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -1986,9 +2049,10 @@
 	graph export 	"$xfig\tza_v07.png", width(1400) replace
 	graph export 	"$xfig\tza_v07.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 6.8 - tanzania rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2007,9 +2071,10 @@
 	graph export 	"$xfig\tza_v08.png", width(1400) replace
 	graph export 	"$xfig\tza_v08.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 6.9 - tanzania deviations in rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2028,9 +2093,10 @@
 	graph export 	"$xfig\tza_v09.png", width(1400) replace
 	graph export 	"$xfig\tza_v09.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 6.10 - tanzania no rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line norain_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2049,9 +2115,10 @@
 	graph export 	"$xfig\tza_v10.png", width(1400) replace
 	graph export 	"$xfig\tza_v10.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 6.11 - tanzania deviations in no rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2070,9 +2137,10 @@
 	graph export 	"$xfig\tza_v11.png", width(1400) replace
 	graph export 	"$xfig\tza_v11.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 6.12 - tanzania share of rainy days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2091,9 +2159,10 @@
 	graph export 	"$xfig\tza_v12.png", width(1400) replace
 	graph export 	"$xfig\tza_v12.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 6.13 - tanzania deviations in share of rainy days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2112,9 +2181,10 @@
 	graph export 	"$xfig\tza_v13.png", width(1400) replace
 	graph export 	"$xfig\tza_v13.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 6.14 - tanzania intra season dry spells
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dry_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2133,9 +2203,10 @@
 	graph export 	"$xfig\tza_v14.png", width(1400) replace
 	graph export 	"$xfig\tza_v14.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **# 7 - uganda graphs
-************************************************************************
+**********************************************************************
 
 * open first weather file
 	use 		"$export/uganda/unpsy1_x3_rf1_n", clear
@@ -2145,7 +2216,7 @@
 	display		`fileList'
 
 * loop through each file
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		append		using "$export/uganda/`file'"
@@ -2190,9 +2261,9 @@
 	replace		percent_raindays_ = percent_raindays_ * 100
 
 
-************************************************************************
+**********************************************************************
 **## 7.1 - uganda mean daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line mean_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2211,9 +2282,10 @@
 	graph export 	"$xfig\uga_v01.png", width(1400) replace
 	graph export 	"$xfig\uga_v01.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 7.2 - uganda median daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line median_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2232,9 +2304,10 @@
 	graph export 	"$xfig\uga_v02.png", width(1400) replace
 	graph export 	"$xfig\uga_v02.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 7.3 - uganda variance daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line sd_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2253,9 +2326,10 @@
 	graph export 	"$xfig\uga_v03.png", width(1400) replace
 	graph export 	"$xfig\uga_v03.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 7.4 - uganda skew daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line skew_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2274,9 +2348,10 @@
 	graph export 	"$xfig\uga_v04.png", width(1400) replace
 	graph export 	"$xfig\uga_v04.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 7.5 - uganda total daily rainfall for the growing season
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2295,9 +2370,10 @@
 	graph export 	"$xfig\uga_v05.png", width(1400) replace
 	graph export 	"$xfig\uga_v05.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 7.6 - uganda deviations in total daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2316,9 +2392,10 @@
 	graph export 	"$xfig\uga_v06.png", width(1400) replace
 	graph export 	"$xfig\uga_v06.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 7.7 - uganda z-score in total daily rainfall
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line z_total_season_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2337,9 +2414,10 @@
 	graph export 	"$xfig\uga_v07.png", width(1400) replace
 	graph export 	"$xfig\uga_v07.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 7.8 - uganda rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2358,9 +2436,10 @@
 	graph export 	"$xfig\uga_v08.png", width(1400) replace
 	graph export 	"$xfig\uga_v08.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 7.9 - uganda deviations in rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2379,9 +2458,10 @@
 	graph export 	"$xfig\uga_v09.png", width(1400) replace
 	graph export 	"$xfig\uga_v09.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 7.10 - uganda no rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line norain_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2400,9 +2480,10 @@
 	graph export 	"$xfig\uga_v10.png", width(1400) replace
 	graph export 	"$xfig\uga_v10.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 7.11 - uganda deviations in no rainfall days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_norain_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2421,9 +2502,10 @@
 	graph export 	"$xfig\uga_v11.png", width(1400) replace
 	graph export 	"$xfig\uga_v11.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 7.12 - uganda share of rainy days
-************************************************************************
+**********************************************************************
 	sort		year
 	twoway 		(line percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
 				(line percent_raindays_ year if sat == 2, color(vermillion) lwidth(medthick) ) ///
@@ -2441,9 +2523,10 @@
 	graph export 	"$xfig\uga_v12.png", width(1400) replace
 	graph export 	"$xfig\uga_v12.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 7.13 - uganda deviations in share of rainy days
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dev_percent_raindays_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2462,9 +2545,10 @@
 	graph export 	"$xfig\uga_v13.png", width(1400) replace
 	graph export 	"$xfig\uga_v13.eps", 			 replace
 
-************************************************************************
+
+**********************************************************************
 **## 7.14 - uganda intra season dry spells
-************************************************************************
+**********************************************************************
 
 	sort		year
 	twoway 		(line dry_ year if sat == 1, lcolor(gray) lwidth(medthick) ) ///
@@ -2484,9 +2568,9 @@
 	graph export 	"$xfig\uga_v14.eps", 			 replace
 
 
-************************************************************************
+**********************************************************************
 **# 8 - end matter, clean up to save
-************************************************************************
+**********************************************************************
 
 * mean daily rainfall
 	gr combine 		"$sfig/eth_v01.gph" "$sfig/mwi_v01.gph" "$sfig/ngr_v01.gph" "$sfig/nga_v01.gph" "$sfig/tza_v01.gph" "$sfig/uga_v01.gph", col(3) iscale(.49) commonscheme

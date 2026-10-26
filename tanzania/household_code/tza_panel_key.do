@@ -6,7 +6,7 @@
 * Stata v.18
 
 * does
-* legacy wave-3 linkage required by npsy3_merge; final panels use the SDD key
+	* legacy wave-3 linkage required by npsy3_merge; final panels use the SDD key
 	* reads in panel key
 	* generates new id
 	* outputs new panel key
@@ -18,24 +18,24 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		cnvrt	=	"$rawlsms/tanzania/wave_3/raw"
+	global		cnvrt	=	"$raw/tanzania/wave_3/raw"
 	global		import	=	"$data/refined_data/tanzania"
 	global		export	=	"$data/refined_data/tanzania/wave_3"
 	global		logout 	= 	"$data/refined_data/tanzania/logs"
 
 * open log
-	cap			log			close
+	cap log close
 	log 	using 		"$logout/tza_panel_key", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - process panel id key
-* **********************************************************************
+**********************************************************************
 
 * read in data
 	use			"$cnvrt/NPSY3.PANEL.KEY.dta", clear
@@ -76,9 +76,10 @@
 					location_R2_to_R3 y1_rural y2_rural mover_R1R2 ///
 					location_R1_to_R2
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * verify unique household id
 	isid		y3_hhid

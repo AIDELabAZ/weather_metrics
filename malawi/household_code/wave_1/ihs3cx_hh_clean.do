@@ -16,24 +16,24 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			source 	= 	"$rawlsms/malawi/wb_raw_data/data/ihs3cx/ag"
-	loc			root 	= 	"$rawlsms/malawi/wave_1/raw"
+	loc			source 	= 	"$raw/malawi/wb_raw_data/data/ihs3cx/ag"
+	loc			root 	= 	"$raw/malawi/wave_1/raw"
 	loc			export 	= 	"$data/refined_data/malawi/wave_1"
 	loc			logout 	= 	"$data/refined_data/malawi/logs"
 
 * open log
-	cap 	log			close
+	cap log close
 	log 	using 		"`logout'/ihs3cx_hh_clean", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - clean household data
-* **********************************************************************
+**********************************************************************
 
 * merge cross section household files with ag season files
 	use 		"`source'/AG_MOD_A_FILT.dta", clear
@@ -116,9 +116,9 @@
 	replace 	year = 2009 if year == .
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	compress
 	describe

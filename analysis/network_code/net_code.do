@@ -7,7 +7,7 @@
 
 * does
 	* reads in excel file with papers
-* makes network visualziation
+	* makes network visualziation
 
 * assumes
 	* paper data file
@@ -17,9 +17,9 @@
 	* everything
 
 
-************************************************************************
+**********************************************************************
 **# 0 - setup
-************************************************************************
+**********************************************************************
 
 * define paths
 	global	root 	= 	"$data/output/iv_lit"
@@ -34,9 +34,9 @@
 	log 	using 	"$logout/network_viz", append
 
 
-************************************************************************
+**********************************************************************
 **# 1 - load and transform data
-************************************************************************
+**********************************************************************
 
 * load data
 	import excel		"$root/220 Papers_Outcome-rainfall.xlsx", sheet("Sheet1") ///
@@ -50,9 +50,10 @@
 	rename				outcomecategory outcome
 	rename				rainfallvariable rain
 
-************************************************************************
+
+**********************************************************************
 **# 2 - create network data
-************************************************************************
+**********************************************************************
 
 * declare data a network
 	nwset				rain outcome, name(rainnet)
@@ -102,9 +103,11 @@
 	nwplot, 			layout (grid, columns(5)) label(_nodelab) labelopt(mlabsize(vsmall) mlabcolor(red)) ///
 						edgepatternpalette (dash) edgecolorpalette (black) nodefactor(1) edgefactor(0.5) arcstyle(curved) ///
 						arrowfactor(1) arrowbarbfactor(2) scheme(s1network)
-************************************************************************
+
+
+**********************************************************************
 **# 7 - end matter
-************************************************************************
+**********************************************************************
 
 
 * close the log

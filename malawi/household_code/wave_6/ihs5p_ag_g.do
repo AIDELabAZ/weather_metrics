@@ -6,7 +6,7 @@
 * Stata v.18
 
 * does
-* cleans crop harvest information
+	* cleans crop harvest information
 	* directly follow from ag_g code - by JB
 
 * assumes
@@ -15,28 +15,29 @@
 * TO DO:
 	* complete
 
-* **********************************************************************
+
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		root 	= 	"$rawlsms/malawi/wave_6/raw"
+	global		root 	= 	"$raw/malawi/wave_6/raw"
 	global		export 	= 	"$data/refined_data/malawi/wave_6"
 	global		logout 	= 	"$data/refined_data/malawi/logs"
 
 * open log
-	cap 	log			close
+	cap log close
 	log 	using 		"$logout/mwi_ag_mod_g_19", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - clean for conversion
-* **********************************************************************
+**********************************************************************
 
 * load data
 	use 			"$root/ag_mod_g_19.dta", clear
 
-	capture		:			noisily : isid y4_hhid gardenid plotid crop_code, missok
+	capture : noisily : isid y4_hhid gardenid plotid crop_code, missok
 	duplicates 		report y4_hhid gardenid plotid crop_code
 * none
 
@@ -109,9 +110,10 @@
 	tabulate 		crop_code unit if _merge==1
 	*** could drop if == 1, but we know that we have some of these, from conversion_other - so will keep
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - clean for crop
-* **********************************************************************
+**********************************************************************
 
 * make condensed crop codes
 	inspect 		crop_code
@@ -157,9 +159,10 @@ label define cropid
 	label 		values cropid cropid
 	inspect 	cropid
 
-* **********************************************************************
+
+**********************************************************************
 **# 3 - clean for harvest
-* **********************************************************************
+**********************************************************************
 
 * make harvest quantity
 	generate 		harv = ag_g13a * conversion
@@ -192,9 +195,10 @@ label define cropid
 	bysort 			y4_hhid plotid gardenid cropid : keep if _n==1
 	*** 596 observations deleted
 
-* **********************************************************************
+
+**********************************************************************
 **# 4 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * restrict to variables of interest
 	keep  			y4_hhid plotid gardenid cropid harvest harvest_losses intercrop_legume

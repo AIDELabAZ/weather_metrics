@@ -17,23 +17,23 @@
 	* completed
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root = "$weatherdata/ethiopia/wave_4/raw/essy4_up"
-	loc			export = "$weatherwork/ethiopia/wave_4/daily/essy4_up"
-	loc			logout = "$weatherwork/ethiopia/logs"
+	loc			root = "$wraw/ethiopia/wave_4/raw/essy4_up"
+	loc			export = "$wout/ethiopia/wave_4/daily/essy4_up"
+	loc			logout = "$wout/ethiopia/logs"
 
 * open log
-	cap log		close
+	cap log close
 	log using 	"`logout'/eth_essy4_converter", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - converts weather data
-* **********************************************************************
+**********************************************************************
 
 * define local with all files in each sub-folder
 	loc fileList : dir "`root'" files "*.csv"

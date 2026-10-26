@@ -20,24 +20,24 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root	= 	"$rawlsms/nigeria/wave_2/raw"
+	loc			root	= 	"$raw/nigeria/wave_2/raw"
 	loc			cnvrt	=	"$data/refined_data/nigeria/conversion_files"
 	loc			export	= 	"$data/refined_data/nigeria/wave_2"
 	loc			logout	= 	"$data/refined_data/nigeria/logs"
 
 * open log
-	cap 	log 	close
+	cap log close
 	log 	using 	"`logout'/wave_2_ph_secta3", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - general clean up, renaming, etc.
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 	use 			"`root'\secta3_harvestw2.dta" , clear
@@ -80,9 +80,10 @@
 	sort 			hhid plotid cropid
 	isid 			hhid plotid cropid
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - generate harvested values
-* **********************************************************************
+**********************************************************************
 
 * create quantity harvested variable
 	gen 			harvestq = sa3q6a1
@@ -129,9 +130,10 @@
 	drop			vl_hrv_1_
 	*** imputed 172 values out of 10,382 total observations
 
-* **********************************************************************
+
+**********************************************************************
 **# 3 - generate maize harvest quantities
-* **********************************************************************
+**********************************************************************
 
 * merge harvest conversion file
 	merge 			m:1 cropcode harv_unit using "`cnvrt'/harvconv_wave_2.dta"
@@ -225,9 +227,9 @@
 	*** imputed 17 values out of 1,422 total observations
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * keep what we want, get rid of what we don't
 	keep 				zone state lga sector ea hhid plotid cropid ///

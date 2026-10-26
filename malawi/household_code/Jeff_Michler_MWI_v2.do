@@ -6,7 +6,7 @@
 * -------------------------------------------------------------------------------*
 */
 
-	global		Input "$rawlsms/malawi/wb_ihsp"
+	global		Input "$raw/malawi/wb_ihsp"
 	global		Output "$data/refined_data/malawi"
 
 	**************** 1) Program to identify parents and split offs
@@ -27,7 +27,7 @@ args hhid_n1 hhid_n0 wave_n1 wave_n0 year1 year0 dist_var
 			// 2) if not, parent_w`wave_n1' if hh head tracked
 			preserve
 				// generate datasets of heads
-				foreach option in same different  { // sometimes household heads swtich, but are still in the same hh
+				foreach option in same different { // sometimes household heads swtich, but are still in the same hh
 		use			"${Input}\\Malawi\\IHPS `year1'\\hh_mod_b_`year1'", clear
 				merge m:1 `hhid_n1' using "${Input}\\Malawi\\IHPS `year1'\hh_mod_a_filt_`year1'.dta", keep(master match) nogen
 				if "`option'" == "same" {

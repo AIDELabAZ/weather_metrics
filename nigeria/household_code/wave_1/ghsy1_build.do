@@ -17,24 +17,24 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		rootw 	= 	"$weatherwork/nigeria/wave_1/refined/ghsy1_up"
+	global		rootw 	= 	"$wout/nigeria/wave_1/refined/ghsy1_up"
 	global		rooth 	= 	"$data/refined_data/nigeria/wave_1"
 	global			export 	= 	"$data/merged_data/nigeria/wave_1"
 	global			logout 	= 	"$data/merged_data/nigeria/logs"
 
 * open log
-	cap log			close
+	cap log close
 	log 			using 		"$logout/ghsy1_build_wave1", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - merge northern household data with rainfall data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"$rooth/hhfinal_ghsy1.dta", clear
@@ -50,7 +50,7 @@
 	loc 		fileList : dir "$rootw" files "*rf_n.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 		* merge weather data with household data
 		merge		1:1 hhid using "$rootw/`file'"
@@ -117,15 +117,15 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - merge northern temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc 		fileList : dir "$rootw" files "*tp_n.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 hhid using "$rootw/`file'"
@@ -190,9 +190,9 @@
 	save 			"$export/ghsy1_merged_n.dta", replace
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - merge southern household data with rainfall data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"$rooth/hhfinal_ghsy1.dta", clear
@@ -208,7 +208,7 @@
 	loc 		fileList : dir "$rootw" files "*rf_s.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 		* merge weather data with household data
 		merge		1:1 hhid using "$rootw/`file'"
@@ -275,15 +275,15 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - merge northern temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc 		fileList : dir "$rootw" files "*tp_s.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 hhid using "$rootw/`file'"
@@ -348,9 +348,9 @@
 	save 			"$export/ghsy1_merged_s.dta", replace
 
 
-* **********************************************************************
+**********************************************************************
 **# 5 - append northern and southern data sets
-* **********************************************************************
+**********************************************************************
 
 * import northern data
 	use 			"$export/ghsy1_merged_n.dta", clear
@@ -371,7 +371,7 @@
 	    replace		`v' = 0 if `v' == .
 	}
 
-	qui:		compress
+	qui: compress
 	describe
 	summarize
 

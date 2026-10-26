@@ -7,7 +7,7 @@
 
 * does
 	* reads in Tanzania, wave 3 .csv files
-    * drops unnecessary daily observations
+	* drops unnecessary daily observations
 	* outputs .dta file ready for processing by the weather program
 	* does the above for both rainfall and temperature data
 	/* 	-To make our weather program work, we need to run the code on data that starts on Nov 1 and ends on May 1
@@ -21,23 +21,23 @@
 	* completed
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root	=	"$weatherdata/tanzania/wave_3/raw/npsy3_up"
-	loc			export	=	"$weatherwork/tanzania/wave_3/daily/npsy3_up"
-	loc			logout	=	"$weatherwork/tanzania/logs"
+	loc			root	=	"$wraw/tanzania/wave_3/raw/npsy3_up"
+	loc			export	=	"$wout/tanzania/wave_3/daily/npsy3_up"
+	loc			logout	=	"$wout/tanzania/logs"
 
 * open log
-	cap log		close
+	cap log close
 	log			using	"`logout'/tza_npsy3_converter", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - converts rainfall data
-* **********************************************************************
+**********************************************************************
 
 * loop through each file in the above local
 	loc fileList : dir "`root'" files "*rf.csv"
@@ -129,9 +129,9 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - converts temperature data
-* **********************************************************************
+**********************************************************************
 
 * define local with all files in each sub-folder
 		loc fileList : dir "`root'" files "*tp.csv"

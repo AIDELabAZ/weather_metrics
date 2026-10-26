@@ -7,21 +7,21 @@
 
 * does
 	* Executes all wave specific Tanzania weather .do files
-* runs wxsum .ado file
+	* runs wxsum .ado file
 	* outputs .dta rainfall data ready to merge with LSMS household data
 	* takes 80 minutes to convert and process weather data
 
 * assumes
-* wxsum.ado
+	* wxsum.ado
 	* subsidiary, wave-specific .do files
 
 * TO DO:
 	* completed
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 clear
 
@@ -32,9 +32,9 @@ clear
 	loc root = "$code/tanzania/weather_code"
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - run .do files
-* **********************************************************************
+**********************************************************************
 
 * do each of the file converters
 	do "`root'/wave_1/TZA_NPSY1_converter.do"		//	convert wave 1 .csv to .dta

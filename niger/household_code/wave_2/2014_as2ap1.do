@@ -9,7 +9,7 @@
 	* reads in Niger, WAVE 2 (2014), POST PLANTING, AG AS2AP1
 	* creates binaries for pesticide and herbicide use
 	* creates binaries and kg for fertilizer use
-* cleans labor post planting - prep labor
+	* cleans labor post planting - prep labor
 	* outputs clean data file ready for combination with wave 2 plot data
 
 * assumes
@@ -19,23 +19,24 @@
 * TO DO:
 	* complete
 
-* **********************************************************************
+
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root	=	"$rawlsms/niger/wave_2/raw"
+	loc			root	=	"$raw/niger/wave_2/raw"
 	loc			export	=	"$data/refined_data/niger/wave_2"
 	loc			logout	=	"$data/refined_data/niger/logs"
 
 * open log
-	cap		log 	close
+	cap log close
 	log 	using 	"`logout'/2014_as2ap1", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - determine pesticide and herbicide use
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 	use			"`root'/ECVMA2_AS2AP1", clear
@@ -83,9 +84,10 @@
 	keep 			if cultivated == 1
 	*** 301 observations dropped
 
-* **********************************************************************
+
+**********************************************************************
 **# 2 - determine pesticide and herbicide use - binaries
-* **********************************************************************
+**********************************************************************
 
 * binary for pesticide use
 	rename			AS02AQ13A pest_any
@@ -93,6 +95,8 @@
 	replace			pest_any = 0 if pest_any == 2
 	replace 		pest_any = . if pest_any == 9
 	tab				pest_any
+
+
 **# 341 - 6.64 percent use pesticide
 	*** pesticide == insecticide
 	*** question asked about insecticide - in dta file downloaded, designated at pesticide
@@ -118,9 +122,9 @@
 	replace			herb_any = 0 if herb_any == .
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - determine fertilizer use - binary and kg
-* **********************************************************************
+**********************************************************************
 
 * create conversion units - kgs, tiya
 	gen			kgconv = 1
@@ -233,9 +237,9 @@
 	*** 0 missing values
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - determine labor allocation
-* **********************************************************************
+**********************************************************************
 
 * per Palacios-Lopez et al. (2017) in Food Policy, we cap labor per activity
 * 7 days * 13 weeks = 91 days for land prep and planting
@@ -310,9 +314,9 @@
 	*** we do not include child labor days
 
 
-* **********************************************************************
+**********************************************************************
 **# 5 - impute labor outliers
-* **********************************************************************
+**********************************************************************
 
 * summarize household individual labor for land prep to look for outliers
 	sum				hh_1 hh_2 hh_3 hh_4 hh_5 hh_6 hired_men hired_women mutual_men mutual_women
@@ -376,9 +380,9 @@
 	*** without free labor: average = 11.4, max = 180
 
 
-* **********************************************************************
+**********************************************************************
 **# 6 - combine planting and harvest labor
-* **********************************************************************
+**********************************************************************
 
 	keep 			hhid_y2 hid clusterid hh_num hh_num1 extension field parcel pest_any ///
 					fert_any fert_use herb_any prep_labor prep_labor_all
@@ -390,9 +394,9 @@
 	lab var				plot_id "unique field and parcel identifier"
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 	label var 		hhid_y2 "unique id - match w2 with weather"
 	label var		hid "unique id - match w2 with w1 (no extension)"
 	label var 		hh_num1 "household id - string changed, not unique"

@@ -9,23 +9,24 @@
 	* outputs finished houshold data set ready to merge with weather
 
 * assumes
-* customsave.ado
+	* customsave.ado
 	* subsidiary, wave-specific .do files
 
 * TO DO:
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
 	loc dofile = "$code/uganda/household_code"
 
-* **********************************************************************
+
+**********************************************************************
 **# 1 - run individual hh cleaning .do files
-* **********************************************************************
+**********************************************************************
 
 * do each GSEC1 household cleaning files
 	do			"`dofile'/wave_1/2009_gsec1.do"			//	clean location information wv1
@@ -130,7 +131,7 @@
 }
 * Wave 4 is used by harvest-month construction and the merge/build stages.
 	loc			uga : dir "`dofile'/wave_4" files "20*.do"
-	foreach		file in `uga' {
+	foreach file in `uga' {
 		do			"`dofile'/wave_4/`file'"
 	}
 
@@ -140,9 +141,9 @@
 	do			"`dofile'/wave_5/harvmonth.do"				//	generates harvest season
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - run wave specific .do files to merge hh data together
-* **********************************************************************
+**********************************************************************
 
 * merge each cleaned file together
 	do 			"`dofile'/wave_1/unps1_merge.do"			//	merges wv 1 hh datasets
@@ -153,9 +154,9 @@
 	do 			"`dofile'/wave_8/unps8_merge.do"			//	merges wv 8 hh datasets
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - run wave specific .do files to merge with weather
-* **********************************************************************
+**********************************************************************
 
 * merge weather data into cleaned household data
 	do 			"`dofile'/wave_1/unps1_build.do"			//	merges unps1 to weather
@@ -166,9 +167,9 @@
 	do 			"`dofile'/wave_8/unps8_build.do"			//	merges unps8 to weather
 
 
-* **********************************************************************
+**********************************************************************
 **# 5 - run .do file to append each wave
-* **********************************************************************
+**********************************************************************
 
 	do			"$code/uganda/household_code/uga_append_built.do"			// append waves
 

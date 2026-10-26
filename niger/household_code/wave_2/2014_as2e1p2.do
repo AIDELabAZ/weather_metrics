@@ -9,7 +9,7 @@
 	* reads in Niger, WAVE 2 (2014), POST HARVEST, ECVMA2 AS2E1P2
 	* determines primary crops, cleans harvest (quantity in kg)
 	* merges in price files that are already in USD
-* determines harvest for all crops - to determine value
+	* determines harvest for all crops - to determine value
 	* outputs clean data file ready for combination with wave 2 plot data
 
 * assumes
@@ -19,23 +19,24 @@
 * TO DO:
 	* done
 
-* **********************************************************************
+
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root	= 	"$rawlsms/niger/wave_2/raw"
+	loc			root	= 	"$raw/niger/wave_2/raw"
 	loc			export	= 	"$data/refined_data/niger/wave_2"
 	loc			logout	= 	"$data/refined_data/niger/logs"
 
 * open log
-	cap		log 	close
+	cap log close
 	log 	using 	"`logout'/2014_as2e1p2", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - harvest information
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 	use				"`root'/ECVMA2_AS2E1P2", clear
@@ -129,9 +130,9 @@
 	isid 			hhid_y2 field parcel cropid
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - generate harvested values
-* **********************************************************************
+**********************************************************************
 
 * examine quantity harvested variable
 	lab	var			harvkg "quantity harvested, in kilograms"
@@ -165,9 +166,9 @@
 	*** mean from 219 to 227, max at 2208, min at 0 (no change in min or max)
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - prices
-* **********************************************************************
+**********************************************************************
 
 * merge in regional information
 	merge m:1		hhid_y2 using "`export'/2014_ms00p1"
@@ -282,9 +283,9 @@
 	*** mean from 51.9 to 53.2, max at 416, min at 0
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - examine millet harvest quantities
-* **********************************************************************
+**********************************************************************
 
 * check to see if outliers can be dealt with
 	sum 			harvkg if cropid == 1
@@ -332,9 +333,10 @@
 	*** 13 changes made
 	label var		mz_damaged "maize damaged"
 
-* **********************************************************************
+
+**********************************************************************
 **# 5 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * create unique household-plot-crop identifier
 	isid			hhid_y2 field parcel cropid

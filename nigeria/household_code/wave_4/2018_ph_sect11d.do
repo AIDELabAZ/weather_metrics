@@ -19,12 +19,12 @@
 	* i think this file should be combined with 2018_ph_sect11c2, going to clean fertilizer variables there
 	* variables of interest not in sect11d_harvestwv4 but in sect11c2
 /*
-* **********************************************************************
+**********************************************************************
 * 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global root = "$rawlsms/nigeria/wave_4/raw"
+	global root = "$raw/nigeria/wave_4/raw"
 	global export = "$data/refined_data/nigeria/wave_4"
 	global logout = "$data/refined_data/nigeria/logs"
 
@@ -32,9 +32,9 @@
 	cap log close
 	log using "$logout/ph_sect11d", append
 
-* **********************************************************************
+**********************************************************************
 * 1 - determine fertilizer and conversion to kgs
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 		use "$root/secta11c2_harvestw4", clear
@@ -130,9 +130,9 @@ gen fert_any = 1 if ((s11dq1a == 1) | (s11dq36 == 1))
 	replace 		fert_use	=	2	if 	fert_use	==	.
 	*** 0 changes made
 
-* **********************************************************************
+**********************************************************************
 * 3 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	keep 			hhid zone state lga sector hhid ea plotid ///
 					fert_any fert_use

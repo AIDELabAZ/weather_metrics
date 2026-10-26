@@ -16,27 +16,27 @@
 	* cleaned version of 2014_ms00p1
 
 * TO DO:
-* done
+	* done
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	loc			root	= 	"$rawlsms/niger/wave_2/raw"
+	loc			root	= 	"$raw/niger/wave_2/raw"
 	loc			export	= 	"$data/refined_data/niger/wave_2"
-	loc			cnvrt	= 	"$rawlsms/niger/wave_2/raw"
+	loc			cnvrt	= 	"$raw/niger/wave_2/raw"
 	loc			logout	= 	"$data/refined_data/niger/logs"
 
 * open log
-	cap			log			close
+	cap log close
 	log 	using 	"`logout'/2014_as2e2p2", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - harvest information
-* **********************************************************************
+**********************************************************************
 
 * import the first relevant data file
 	use				"`root'/ECVMA2_AS2E2P2", clear
@@ -100,9 +100,9 @@
 	isid		hhid_y2 cropid
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - generate sold harvested values
-* **********************************************************************
+**********************************************************************
 
 * examine quantity harvested variable sold
 	lab	var			harvkgsold "quantity harvested and sold, in kilograms"
@@ -161,9 +161,9 @@
 	*** total of 1061 observations
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - price information - following ag_i in malawi
-* **********************************************************************
+**********************************************************************
 
 * merge in regional information
 	merge m:1		hhid_y2 using "`export'/2014_ms00p1"
@@ -210,9 +210,10 @@
 	collapse 		(p50) p_crop=cropprice (count) n_crop=cropprice, by(cropid)
 	save		"`export'/2014_as2e2p2_p5.dta", replace
 
-* **********************************************************************
+
+**********************************************************************
 **# 4 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 * if directly following malawi, would be able to proceed with different process
 * however, did not work in niger

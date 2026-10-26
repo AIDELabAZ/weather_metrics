@@ -9,10 +9,10 @@
 	* reads in merged data sets
 	* appends merged data sets
 	* outputs foure data sets
-		* all Malawi data
-		* cross section
-		* short panel
-		* long panel
+	* all Malawi data
+	* cross section
+	* short panel
+	* long panel
 
 * assumes
 	* all Malawi data has been cleaned and merged with rainfall
@@ -24,9 +24,9 @@
 	* left off at building panel
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
 	global		root 		"$data/merged_data/malawi"
@@ -34,16 +34,16 @@
 	global		logout 	 	"$data/merged_data/malawi/logs"
 
 * open log
-	cap			log			close
+	cap log close
 	log 		using 		"$logout/mwi_append_built", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - append cross section
-* **********************************************************************
+**********************************************************************
 
 * import the long panel data frame
-	use			"$rawlsms/malawi/trackingfiles/Frame_hhIDs_v2.dta", clear
+	use			"$raw/malawi/trackingfiles/Frame_hhIDs_v2.dta", clear
 
 * import the first cross section file
 	preserve
@@ -96,12 +96,12 @@
 	save 			"$export/mwi_cx.dta", replace
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - append short panel
-* **********************************************************************
+**********************************************************************
 
 * import the long panel data frame
-	use			"$rawlsms/malawi/trackingfiles/Frame_hhIDs_v2.dta", clear
+	use			"$raw/malawi/trackingfiles/Frame_hhIDs_v2.dta", clear
 
 * import the first short panel file
 	preserve
@@ -167,12 +167,12 @@
 	save 			"$export/mwi_sp.dta", replace
 
 
-* **********************************************************************
+**********************************************************************
 **# 3 - append long panel
-* **********************************************************************
+**********************************************************************
 
 * import the long panel data frame
-	use			"$rawlsms/malawi/trackingfiles/Frame_hhIDs_v2.dta", clear
+	use			"$raw/malawi/trackingfiles/Frame_hhIDs_v2.dta", clear
 
 * import the first long panel file
 	preserve
@@ -257,9 +257,9 @@
 	save 			"$export/mwi_lp.dta", replace
 
 
-* **********************************************************************
+**********************************************************************
 **# 4 - append all malawi data
-* **********************************************************************
+**********************************************************************
 
 * import the cross section file
 	use 		"$export/mwi_cx.dta", clear
@@ -602,7 +602,7 @@ foreach var of varlist v15_merra - v27_merra {
 	order			uid mwi_id
 
 * save file
-	qui: 			compress
+	qui: compress
 	save 			"$export/mwi_complete.dta", replace
 
 * close the log

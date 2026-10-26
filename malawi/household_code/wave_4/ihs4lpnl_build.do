@@ -16,24 +16,24 @@
 	* complete
 
 
-* **********************************************************************
+**********************************************************************
 **# 0 - setup
-* **********************************************************************
+**********************************************************************
 
 * define paths
-	global		rootw 	 	"$weatherwork/malawi/wave_4/refined/ihs4p_up"
+	global		rootw 	 	"$wout/malawi/wave_4/refined/ihs4p_up"
 	global		rooth 	 	"$data/refined_data/malawi/wave_4"
 	global			export 	 	"$data/merged_data/malawi/wave_4"
 	global			logout 	 	"$data/merged_data/malawi/logs"
 
 * open log
-	cap log 		close
+	cap log close
 	log 			using 		"$logout/ihs4lpnl_build", append
 
 
-* **********************************************************************
+**********************************************************************
 **# 1 - merge rainfall data with household data
-* **********************************************************************
+**********************************************************************
 
 * import the .dta houeshold file
 	use 		"$rooth/hhfinal_ihs4lpnl.dta", clear
@@ -49,7 +49,7 @@
 	loc 		fileList : dir "$rootw" files "*rf.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 		* merge weather data with household data
 		merge		1:1 y3_hhid using "$rootw/`file'"
@@ -116,15 +116,15 @@
 }
 
 
-* **********************************************************************
+**********************************************************************
 **# 2 - merge temperature data with household data
-* **********************************************************************
+**********************************************************************
 
 * define each file in the above local
 	loc 		fileList : dir "$rootw" files "*tp.dta"
 
 * loop through each file in the above local
-	foreach		file in `fileList' {
+	foreach file in `fileList' {
 
 	* merge weather data with household data
 		merge		1:1 y3_hhid using "$rootw/`file'"
@@ -186,7 +186,7 @@
 
 * save file
 	gen			wave = 3
-	qui: 		compress
+	qui: compress
 	save 		"$export/lp3_merged.dta", replace
 
 * close the log
