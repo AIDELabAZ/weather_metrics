@@ -41,13 +41,10 @@
 		global		code	"C:/Users/jdmichler/git/AIDELabAZ/weather_metrics"
 		global		base	"C:/Users/jdmichler/OneDrive - University of Arizona/weather_and_agriculture"
 	}
-	else if `"`c(username)'"' == "annal" {
-		global		code	"C:/Users/annal/Documents/git/weather_metrics"
-		global		base	"C:/Users/annal/OneDrive - University of Arizona/weather_and_agriculture"
-	}
+
 	else if `"`c(username)'"' == "aljos" {
         global 		code  	"C:/Users/aljos/git/weather_metrics"
-		global 		data	"C:/Users/aljos/OneDrive - University of Arizona/weather_and_agriculture"
+		global 		base	"C:/Users/aljos/OneDrive - University of Arizona/weather_and_agriculture"
     }	
 	else if `"`c(username)'"' == "ca558" {
 		global		code	"C:/Users/ca558/Documents/GitHub/weather_metrics"
