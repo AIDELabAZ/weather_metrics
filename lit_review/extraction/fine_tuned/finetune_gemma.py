@@ -1,4 +1,5 @@
 import fitz  # PyMuPDF
+import json
 import os
 import time
 import re
@@ -43,6 +44,20 @@ STOP_SEQUENCES_BY_KEY = {
 }
 
 TEMPERATURE = 0.0
+
+# Characters of (keyword-filtered) article text sent to the model; None sends
+# the full text. Full text is the default since the Oct 2026 context test
+# (analysis/compare_context_test.py): dropping the original 40_000 cap cut
+# missed IVs/endogeneity without lowering similarity scores. The text is
+# resent with every question in the conversation (~7 per paper), so a cap
+# multiplies down input cost; 40_000 (~10k tokens) reproduces the original
+# runs. The keyword filter in extract_relevant_sections rarely removes
+# anything, since PyMuPDF output has few blank lines and each "paragraph" is
+# a whole page.
+MAX_INPUT_CHARS = None
+# Note: the fine-tuning examples used the human-selected excerpts as context,
+# not PDF text (data_prep/conversion_code_*.py), so PDF input of any length
+# here differs from what the model was trained on.
 
 # Must match conversion_code_gemma.py exactly
 SYSTEM_INSTRUCTION = (
@@ -171,6 +186,41 @@ def normalize_binary_with_justification(answer):
 
 
 def clean_variable_list(raw_text):
+    """
+    Split a variable-list answer on ';' only — the separator every prompt asks
+    for — without rewriting the variables themselves. The legacy cleaner
+    below also split on ' and ' and on commas, and cut at 'which'/'that'/
+    'for'/'where', which mangled correct answers before they were scored
+    (e.g. "rainfall in the monsoon months of june, july, august" ->
+    "...of june; july; august"; "number of months in which ..." ->
+    "number of months in").
+    """
+    if not raw_text:
+        return "n/a"
+    txt = raw_text.replace("\\n", " ").strip()
+
+    if txt.lower() in {"n/a", "na", "none"}:
+        return "n/a"
+
+    if ":" in txt:
+        head, tail = txt.split(":", 1)
+        if any(w in head.lower() for w in ["variable", "variables", "outcome", "instrument"]):
+            txt = tail.strip()
+
+    seen = set()
+    uniq = []
+    for p in txt.split(";"):
+        p = p.strip().strip(".").strip().strip("\"\"''")
+        if p and p.lower() not in {"n/a", "none"} and p.lower() not in seen:
+            seen.add(p.lower())
+            uniq.append(p)
+
+    return "; ".join(uniq) if uniq else "n/a"
+
+
+def clean_variable_list_legacy(raw_text):
+    """Original cleaner, kept so saved raw answers can be re-cleaned the old
+    way to measure what the new one changed (see RAW_ANSWERS sidecar)."""
     if not raw_text:
         return "n/a"
     txt = raw_text.strip()
@@ -202,7 +252,6 @@ def clean_variable_list(raw_text):
             seen.add(key)
             uniq.append(v)
     return "; ".join(uniq) if uniq else "n/a"
-
 
 def parse_prefixed_lines(answer, field_map):
     out = {tkey: "n/a" for _, (tkey, _) in field_map.items()}
@@ -401,6 +450,42 @@ def initial_contents(doc_context):
     ]
 
 
+class ModelCallError(Exception):
+    """A model call failed in a way retrying won't fix, or ran out of retries.
+    Raised instead of returning "n/a", so a failed call is never recorded as
+    the model's answer; process_pdfs_conditional_queries stops that paper and
+    records the error (Extraction Error column + raw-answers sidecar)."""
+
+
+def _status(e):
+    # HTTP status from whichever SDK raised: openai/anthropic set .status_code,
+    # google-genai and google-api-core set .code.
+    status = getattr(e, "status_code", None) or getattr(e, "code", None)
+    return status if isinstance(status, int) else None
+
+
+def _is_transient(e):
+    # Worth retrying: rate limits, timeouts, server errors, dropped connections.
+    status = _status(e)
+    if status is not None:
+        return status in (408, 409, 429) or status >= 500
+    return isinstance(e, (ConnectionError, TimeoutError)) or any(
+        k in type(e).__name__ for k in ("Connection", "Timeout", "Transport", "Unavailable"))
+
+
+def _aborts_run(e):
+    # Every paper would fail the same way, so stop the whole run rather than
+    # failing paper by paper: bad credentials/permissions/model name
+    # (401/403/404), exhausted credit (OpenAI reports it as a 429), or an
+    # exception that isn't an API error at all (e.g. missing credentials).
+    if "insufficient_quota" in str(e):
+        return True
+    status = _status(e)
+    if status is not None:
+        return status in (401, 403, 404)
+    return not _is_transient(e)
+
+
 def query_model_with_history(contents, q_key, max_output_tokens_override=None,
                               max_retries=4, base_delay=2.0):
     endpoint = get_endpoint()
@@ -424,13 +509,16 @@ def query_model_with_history(contents, q_key, max_output_tokens_override=None,
             answer = (prediction.get("text") if isinstance(prediction, dict) else str(prediction)).strip()
             return answer if answer else "n/a"
         except Exception as e:
+            if _aborts_run(e):
+                raise
+            if not _is_transient(e):
+                raise ModelCallError(f"{q_key}: {e}") from e
             if attempt < max_retries - 1:
                 delay = base_delay * (2 ** attempt)
                 print(f"Error querying model ({q_key}): {e}. Retrying in {delay:.0f}s...")
                 time.sleep(delay)
             else:
-                print(f"Error querying model ({q_key}) after {max_retries} attempts: {e}")
-                return "n/a"
+                raise ModelCallError(f"{q_key}: failed after {max_retries} attempts: {e}") from e
 
 
 # -------------------------------------------------------------------
@@ -441,6 +529,7 @@ FIELDNAMES = [
     "File Name", "Title", "DOI", "Empirical Analysis", "Dependent Variable(s)",
     "Endogeneity Problem", "Endogenous Variable(s)", "Instrumental Variable Used",
     "Instrumental Variable(s)", "Instrumental Variable Rainfall", "Rainfall Instrument",
+    "Extraction Error",  # empty unless a model call failed (see ModelCallError)
 ]
 
 
@@ -449,7 +538,12 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
     csv_file = open(output_csv, "w", newline="", encoding="utf-8")
     writer = _csv.DictWriter(csv_file, fieldnames=FIELDNAMES, extrasaction="ignore")
     writer.writeheader()
+    # Sidecar: every model answer before parsing/cleaning, one JSON line per
+    # paper, so cleaning can be changed (or the legacy cleaner re-applied)
+    # without re-running the API calls.
+    raw_file = open(os.path.splitext(output_csv)[0] + "_raw_answers.jsonl", "w", encoding="utf-8")
 
+    failed = []  # (filename, error) for papers a model call failed on
     for filename in os.listdir(pdf_folder):
         if not filename.endswith(".pdf"):
             continue
@@ -459,7 +553,9 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
         relevant_sections = extract_relevant_sections(pdf_path)
         print(f"Extracted relevant sections length: {len(relevant_sections)} characters")
 
-        doc_context = relevant_sections[:40000]
+        doc_context = relevant_sections if MAX_INPUT_CHARS is None else relevant_sections[:MAX_INPUT_CHARS]
+        raw_answers = {}  # q_key -> model's answer before any parsing/cleaning
+        error = None  # set if a model call fails (ModelCallError)
 
         info_dict = {
             "File Name": filename,
@@ -482,112 +578,138 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
         # and the multi-turn `contents` structure used in the training data).
         contents = initial_contents(doc_context)
 
-        for q in questions:
-            q_key = q["key"]
-            q_text = q["question"]
+        try:
+            for q in questions:
+                q_key = q["key"]
+                q_text = q["question"]
 
-            dep = q.get("dependency")
-            if dep is not None:
-                dep_key = dep["key"]
-                dep_val = dep["value"]
-                current_dep_answer = temp_answers.get(dep_key)
-                current_dep_binary = (
-                    current_dep_answer[0]
-                    if current_dep_answer and current_dep_answer[0] in {"0", "1"}
-                    else current_dep_answer
-                )
-                if current_dep_binary != dep_val:
-                    print(f"Skipping '{q_key}' due to unmet dependency "
-                          f"({dep_key}={current_dep_binary} != {dep_val})")
-                    if "field_map" in q:
-                        for _, (tkey, _) in q["field_map"].items():
-                            temp_answers[tkey] = "n/a"
-                            info_dict[tkey] = "n/a"
-                    else:
-                        temp_answers[q_key] = "n/a"
-                        info_dict[q_key] = "n/a"
+                dep = q.get("dependency")
+                if dep is not None:
+                    dep_key = dep["key"]
+                    dep_val = dep["value"]
+                    current_dep_answer = temp_answers.get(dep_key)
+                    current_dep_binary = (
+                        current_dep_answer[0]
+                        if current_dep_answer and current_dep_answer[0] in {"0", "1"}
+                        else current_dep_answer
+                    )
+                    if current_dep_binary != dep_val:
+                        print(f"Skipping '{q_key}' due to unmet dependency "
+                              f"({dep_key}={current_dep_binary} != {dep_val})")
+                        if "field_map" in q:
+                            for _, (tkey, _) in q["field_map"].items():
+                                temp_answers[tkey] = "n/a"
+                                info_dict[tkey] = "n/a"
+                        else:
+                            temp_answers[q_key] = "n/a"
+                            info_dict[q_key] = "n/a"
+                        temp_answers = enforce_dependency_consistency(
+                            temp_answers, justifications, verbose=True)
+                        continue
+
+                print(f"Querying: {q_key} "
+                      f"(max_output_tokens={MAX_OUTPUT_TOKENS_BY_KEY.get(q_key, DEFAULT_MAX_OUTPUT_TOKENS)})")
+
+                question_text = f"Question key: {q_key}.\n{q_text}{QUESTION_SUFFIX}"
+                contents.append({"role": "user", "parts": _part(question_text)})
+
+                answer = query_model_with_history(contents, q_key)
+
+                # Append the model's raw answer to the conversation (matches finetune_gpt.py)
+                contents.append({"role": "model", "parts": _part(answer)})
+                raw_answers[q_key] = answer
+
+                if "field_map" in q:
+                    parsed, bundle_just = parse_prefixed_lines(answer, q["field_map"])
+                    for col, val in parsed.items():
+                        temp_answers[col] = val
+                        info_dict[col] = val
+                    for col, jtxt in bundle_just.items():
+                        justifications[col] = jtxt
                     temp_answers = enforce_dependency_consistency(
                         temp_answers, justifications, verbose=True)
+                    for col in parsed.keys():
+                        print(f"Answer for {col}: {info_dict[col]}")
+
+                    # Rainfall instrument re-ask when rain=1 but instrument still missing
+                    if q_key == "Rainfall IV Bundle":
+                        if (temp_answers.get("Instrumental Variable Rainfall") == "1"
+                                and temp_answers.get("Rainfall Instrument", "n/a") == "n/a"):
+                            focused = extract_rainfall_iv_snippets(doc_context)
+                            if focused:
+                                print("Re-asking rainfall instrument detail with focused context...")
+                                reask_q_text = (
+                                    "Now focus only on the following rainfall- and IV-related snippets "
+                                    f"from the article:\n\n{focused}\n\n"
+                                    "Provide EXACTLY one line in this format:\n"
+                                    "RAINFALL_INSTRUMENT: <detailed semicolon-separated description(s); or n/a>\n\n"
+                                    "Do not include any other lines or text."
+                                )
+                                contents.append({"role": "user", "parts": _part(reask_q_text)})
+                                retry = query_model_with_history(
+                                    contents, "Rainfall Instrument Reask",
+                                    max_output_tokens_override=MAX_OUTPUT_TOKENS_BY_KEY["Rainfall Instrument Reask"],
+                                )
+                                contents.append({"role": "model", "parts": _part(retry)})
+                                raw_answers["Rainfall Instrument Reask"] = retry
+                                parsed2, _ = parse_prefixed_lines(
+                                    retry,
+                                    {"RAINFALL_INSTRUMENT": ("Rainfall Instrument", "var_list")}
+                                )
+                                temp_answers["Rainfall Instrument"] = parsed2.get("Rainfall Instrument", "n/a")
+                                info_dict["Rainfall Instrument"] = temp_answers["Rainfall Instrument"]
+                                temp_answers = enforce_dependency_consistency(
+                                    temp_answers, justifications, verbose=True)
+                                print(f"Answer for Rainfall Instrument (reask): {info_dict['Rainfall Instrument']}")
+
                     continue
 
-            print(f"Querying: {q_key} "
-                  f"(max_output_tokens={MAX_OUTPUT_TOKENS_BY_KEY.get(q_key, DEFAULT_MAX_OUTPUT_TOKENS)})")
+                is_binary = q_key == "Empirical Analysis"
+                if is_binary:
+                    binary_val, justification = normalize_binary_with_justification(answer)
+                    temp_answers[q_key] = binary_val
+                    if justification:
+                        justifications[q_key] = justification
+                        print(f"  Binary: {binary_val}, Justification: {justification[:100]}...")
+                else:
+                    if q_key == "Dependent Variable(s)":
+                        answer = clean_variable_list(answer)
+                    temp_answers[q_key] = answer
 
-            question_text = f"Question key: {q_key}.\n{q_text}{QUESTION_SUFFIX}"
-            contents.append({"role": "user", "parts": _part(question_text)})
-
-            answer = query_model_with_history(contents, q_key)
-
-            # Append the model's raw answer to the conversation (matches finetune_gpt.py)
-            contents.append({"role": "model", "parts": _part(answer)})
-
-            if "field_map" in q:
-                parsed, bundle_just = parse_prefixed_lines(answer, q["field_map"])
-                for col, val in parsed.items():
-                    temp_answers[col] = val
-                    info_dict[col] = val
-                for col, jtxt in bundle_just.items():
-                    justifications[col] = jtxt
                 temp_answers = enforce_dependency_consistency(
                     temp_answers, justifications, verbose=True)
-                for col in parsed.keys():
-                    print(f"Answer for {col}: {info_dict[col]}")
+                info_dict[q_key] = temp_answers[q_key]
+                print(f"Answer for {q_key}: {info_dict[q_key]}")
+        except ModelCallError as e:
+            # Every remaining question resends the same article, so it would fail
+            # the same way. Stop this paper and keep what was already answered;
+            # unanswered fields stay n/a, flagged by the Extraction Error column.
+            error = str(e)
+            failed.append((filename, error))
+            print(f"  [FAILED] {filename}: {error}")
 
-                # Rainfall instrument re-ask when rain=1 but instrument still missing
-                if q_key == "Rainfall IV Bundle":
-                    if (temp_answers.get("Instrumental Variable Rainfall") == "1"
-                            and temp_answers.get("Rainfall Instrument", "n/a") == "n/a"):
-                        focused = extract_rainfall_iv_snippets(doc_context)
-                        if focused:
-                            print("Re-asking rainfall instrument detail with focused context...")
-                            reask_q_text = (
-                                "Now focus only on the following rainfall- and IV-related snippets "
-                                f"from the article:\n\n{focused}\n\n"
-                                "Provide EXACTLY one line in this format:\n"
-                                "RAINFALL_INSTRUMENT: <detailed semicolon-separated description(s); or n/a>\n\n"
-                                "Do not include any other lines or text."
-                            )
-                            contents.append({"role": "user", "parts": _part(reask_q_text)})
-                            retry = query_model_with_history(
-                                contents, "Rainfall Instrument Reask",
-                                max_output_tokens_override=MAX_OUTPUT_TOKENS_BY_KEY["Rainfall Instrument Reask"],
-                            )
-                            contents.append({"role": "model", "parts": _part(retry)})
-                            parsed2, _ = parse_prefixed_lines(
-                                retry,
-                                {"RAINFALL_INSTRUMENT": ("Rainfall Instrument", "var_list")}
-                            )
-                            temp_answers["Rainfall Instrument"] = parsed2.get("Rainfall Instrument", "n/a")
-                            info_dict["Rainfall Instrument"] = temp_answers["Rainfall Instrument"]
-                            temp_answers = enforce_dependency_consistency(
-                                temp_answers, justifications, verbose=True)
-                            print(f"Answer for Rainfall Instrument (reask): {info_dict['Rainfall Instrument']}")
-
-                continue
-
-            is_binary = q_key == "Empirical Analysis"
-            if is_binary:
-                binary_val, justification = normalize_binary_with_justification(answer)
-                temp_answers[q_key] = binary_val
-                if justification:
-                    justifications[q_key] = justification
-                    print(f"  Binary: {binary_val}, Justification: {justification[:100]}...")
-            else:
-                if q_key == "Dependent Variable(s)":
-                    answer = clean_variable_list(answer)
-                temp_answers[q_key] = answer
-
-            temp_answers = enforce_dependency_consistency(
-                temp_answers, justifications, verbose=True)
-            info_dict[q_key] = temp_answers[q_key]
-            print(f"Answer for {q_key}: {info_dict[q_key]}")
 
         info_dict = enforce_dependency_consistency(info_dict, justifications, verbose=False)
         print(f"Final extracted info for {filename}: {info_dict}")
+        info_dict["Extraction Error"] = error or ""
         writer.writerow(info_dict)
         csv_file.flush()
+        raw_file.write(json.dumps({
+            "File Name": filename,
+            "max_input_chars": MAX_INPUT_CHARS,
+            "full_chars": len(relevant_sections),
+            "input_chars": len(doc_context),
+            "raw_answers": raw_answers,
+            "error": error,
+        }) + "\n")
+        raw_file.flush()
 
+    if failed:
+        print(f"\n{len(failed)} paper(s) FAILED — these rows are incomplete, not model answers; rerun them:")
+        for fn, err in failed:
+            print(f"  {fn}: {err}")
     csv_file.close()
+    raw_file.close()
     print(f"Data saved to {output_csv}")
 
 

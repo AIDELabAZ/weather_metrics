@@ -278,7 +278,10 @@ READER_ORDER = ["abstract", "introduction", "background", "data", "methods",
                 "results", "discussion", "conclusion", "appendix", "full text", "other"]
 
 
-def reader_input(sections, cap=46000):
+def reader_input(sections, cap=None):
+    # cap=None sends every section (relevant ones first, per READER_ORDER),
+    # consistent with the other extractors' full-text default; 46000
+    # reproduces the original agentic runs.
     if "full text" in sections and len(sections) == 1:
         return sections["full text"][:cap]
     chunks = []
@@ -402,7 +405,10 @@ def norm_list(s):
     for p in re.split(r"\s*;\s*", s):
         p = p.strip().strip('"').strip("-").strip()
         p = re.sub(r"^(the\s+)?(dependent|outcome|endogenous|instrument(al)?)\s+variable[s]?\s+(is|are|:)\s+", "", p, flags=re.I)
-        if not p or len(p.split()) > 12:
+        # No length filter: dropping items over 12 words silently discarded
+        # long-but-correct descriptions, the same failure the other
+        # extractors' legacy cleaner had.
+        if not p:
             continue
         if p.lower() in seen:
             continue

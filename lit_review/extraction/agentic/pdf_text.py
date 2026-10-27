@@ -10,7 +10,10 @@ import time
 
 import fitz  # PyMuPDF
 
-MAX_CHARS = 60_000
+# None = full text, matching MAX_INPUT_CHARS in the baseline/fine-tune/RAG
+# extractors (see analysis/compare_context_test.py). 60_000 reproduces the
+# original agentic runs.
+MAX_CHARS = None
 
 
 def extract_pages(pdf_path, max_retries=4, base_delay=3.0):
@@ -44,7 +47,7 @@ def build_document(pdf_path, max_chars=MAX_CHARS):
         parts.append(f"[[page {i}]]\n{txt}")
     full = "\n\n".join(parts)
 
-    truncated = len(full) > max_chars
+    truncated = max_chars is not None and len(full) > max_chars
     if truncated:
         full = full[:max_chars]
     return full, {

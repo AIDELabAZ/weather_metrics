@@ -217,6 +217,21 @@ evaluate_model <- function(model_path, model_label,
 
   model_data <- read_csv(model_path, na = c("n/a", "NA", ""))
 
+  # Extractors record a failed model call (bad request, auth, exhausted
+  # retries) in "Extraction Error" instead of writing n/a. Those rows are
+  # incomplete, not the model's answers, so they're dropped here rather than
+  # scored as if the model had answered n/a. Older outputs lack the column.
+  if ("Extraction Error" %in% names(model_data)) {
+    failed <- !is.na(model_data$`Extraction Error`)
+    if (any(failed)) {
+      warning(sprintf("%s: dropping %d paper(s) with a failed model call (rerun them): %s",
+                      model_label, sum(failed),
+                      paste(model_data$`File Name`[failed], collapse = ", ")),
+              call. = FALSE)
+    }
+    model_data <- model_data[!failed, ]
+  }
+
   model_data_clean <- model_data %>%
     rename(
       filename = `File Name`,
