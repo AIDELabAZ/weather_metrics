@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: May 2024
 * Created by: jdm
-* edited by: jdm
-* edited on: 18 May 2024
+* edited by: codex
+* edited on: 27 Oct 2026
 * Stata v.18
 
 * does
@@ -27,8 +27,8 @@
 
 * define paths
 	loc			root 	= 	"$wraw/malawi/wave_5/raw/ihs5_up"
-	loc			export 	= 	"$wout/malawi/wave_5/daily/ihs5_up"
-	loc			logout 	= 	"$wout/malawi/logs"
+	loc			export 	= 	"$wraw/malawi/wave_5/daily/ihs5_up"
+	loc			logout 	= 	"$wraw/malawi/logs"
 
 * open log
 	cap log close

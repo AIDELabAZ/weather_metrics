@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: May 2020
 * Created by: jdm
-* Edited on: 23 May 2024
-* Edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -22,7 +22,7 @@
 **********************************************************************
 
 * define paths
-	global		rootw 	= 	"$wout/nigeria/wave_3/refined/ghsy3_up"
+	global		rootw 	= 	"$wraw/nigeria/wave_3/refined/ghsy3_up"
 	global		rooth 	= 	"$data/refined_data/nigeria/wave_3"
 	global			export 	= 	"$data/merged_data/nigeria/wave_3"
 	global			logout 	= 	"$data/merged_data/nigeria/logs"

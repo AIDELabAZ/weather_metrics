@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: Aug 2020
 * Created by: jdm
-* Edited on: 24 May 24
-* Edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -21,7 +21,7 @@
 **# 0 - setup
 **********************************************************************
 
-	global		rootw  		"$wout/uganda/wave_5/refined/unpsy5_up"
+	global		rootw  		"$wraw/uganda/wave_5/refined/unpsy5_up"
 	global		rooth 		"$data/refined_data/uganda/wave_5"
 	global  export 		"$data/merged_data/uganda/wave_5"
 	global 	logout 		"$data/merged_data/uganda/logs"

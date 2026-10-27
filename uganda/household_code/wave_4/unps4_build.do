@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: Aug 2020
 * Created by: jdm
-* Edited on: 24 May 24
-* Edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -23,7 +23,7 @@
 **********************************************************************
 
 * define paths
-	global		rootw  		"$wout/uganda/wave_4/refined/unpsy4_up"
+	global		rootw  		"$wraw/uganda/wave_4/refined/unpsy4_up"
 	global		rooth 		"$data/refined_data/uganda/wave_4"
 	global  export 		"$data/merged_data/uganda/wave_4"
 	global 	logout 		"$data/merged_data/uganda/logs"

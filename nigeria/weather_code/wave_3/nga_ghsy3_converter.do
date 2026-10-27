@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: April 2020
 * Created by: alj
-* edited on: 20 May 2024
-* edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -23,8 +23,8 @@
 
 * define paths
 	loc			root = "$wraw/nigeria/wave_3/raw/ghsy3_up"
-	loc			export = "$wout/nigeria/wave_3/daily/ghsy3_up"
-	loc			logout = "$wout/nigeria/logs"
+	loc			export = "$wraw/nigeria/wave_3/daily/ghsy3_up"
+	loc			logout = "$wraw/nigeria/logs"
 
 * open log
 	cap log close

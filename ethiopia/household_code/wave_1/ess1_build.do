@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: Aug 2020
 * Created by: mcg
-* Edited on: 20 May 2024
-* Edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -22,7 +22,7 @@
 **********************************************************************
 
 * define paths
-	global		rootw 	= 	"$wout/ethiopia/wave_1/refined/erssy1_up"
+	global		rootw 	= 	"$wraw/ethiopia/wave_1/refined/erssy1_up"
 	global		rooth 	= 	"$data/refined_data/ethiopia/wave_1"
 	global		export 	= 	"$data/merged_data/ethiopia/wave_1"
 	global		logout 	= 	"$data/merged_data/ethiopia/logs"

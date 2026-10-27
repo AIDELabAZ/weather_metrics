@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: April 2020
 * Created by: jdm
-* edited on: 20 May 2024
-* edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -27,8 +27,8 @@
 
 * define paths
 	loc			root	=	"$wraw/tanzania/wave_4/raw/npsy4_up"
-	loc			export	=	"$wout/tanzania/wave_4/daily/npsy4_up"
-	loc			logout	=	"$wout/tanzania/logs"
+	loc			export	=	"$wraw/tanzania/wave_4/daily/npsy4_up"
+	loc			logout	=	"$wraw/tanzania/logs"
 
 * open log
 	cap log close

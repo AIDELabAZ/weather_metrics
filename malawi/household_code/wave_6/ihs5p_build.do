@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: June 2024
 * Created by: jdm
-* Edited on: 17 June 2024
-* Edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -21,7 +21,7 @@
 **********************************************************************
 
 * define paths
-	global		rootw 	 	"$wout/malawi/wave_6/refined/ihs5p_up"
+	global		rootw 	 	"$wraw/malawi/wave_6/refined/ihs5p_up"
 	global		rooth 	 	"$data/refined_data/malawi/wave_6"
 	global			export 	 	"$data/merged_data/malawi/wave_6"
 	global			logout 	 	"$data/merged_data/malawi/logs"

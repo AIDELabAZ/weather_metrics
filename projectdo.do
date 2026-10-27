@@ -1,7 +1,7 @@
 * project: wb weather - metric
 * created on: jan 2024
 * created by: cda
-* edited on: 26 oct 2026
+* edited on: 27 Oct 2026
 * edited by: codex
 * stata v.18.0
 
@@ -28,7 +28,7 @@
 	global		pack 	0
 
 * specify the stata version in use
-	global		stataVersion	18.0
+	global		stataVersion	19.5
 	version		$stataVersion
 
 
@@ -58,7 +58,6 @@
 	global		raw		"$base/raw_lsms_data"
 	global		wraw	"$base/weather_data"
 	global		data	"$base/weather_metrics_data"
-	global		wout	"$data/refined_data/weather"
 
 * create the project output folders
 	do			"$code/setup_paths.do"
@@ -107,7 +106,6 @@
 
 	* install -xfill and nwcommands packages
 		net install xfill, replace from(https://www.sealedenvelope.com/)
-		net from "https://raw.githubusercontent.com/ThomasGrund/nwcommands/master"
 
 	* update all ado files
 		ado update, update
@@ -164,8 +162,8 @@
 **# 4 - run analysis .do files
 **********************************************************************
 
-	do			"$code/analysis/viz_code/metric_sum.do"
-	do			"$code/analysis/viz_code/metric_pval.do"
-	do			"$code/analysis/viz_code/metric_coeff_vis.do"
+*	do			"$code/analysis/viz_code/metric_sum.do"
+*	do			"$code/analysis/viz_code/metric_pval.do"
+*	do			"$code/analysis/viz_code/metric_coeff_vis.do"
 
 /* END */

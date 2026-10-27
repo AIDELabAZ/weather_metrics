@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: April 2024
 * Created by: jdm
-* Edited by: jdm
-* Last edit: 11 Sep 2024
+* edited by: codex
+* edited on: 27 Oct 2026
 * Stata v.18.0
 
 * does
@@ -23,7 +23,7 @@
 **********************************************************************
 
 * define paths
-	global		rootw 	= 	"$wout"
+	global		rootw 	= 	"$wraw"
 	global		rooth 	= 	"$data/refined_data"
 	global	export 	= 	"$data/results_data"
 	global	sfig	= 	"$data/results_data/figures"

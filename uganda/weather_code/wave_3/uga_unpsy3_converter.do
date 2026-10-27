@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: April 2020
 * Created by: jdm
-* edited on: 20 May 2024
-* edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -23,8 +23,8 @@
 
 * define paths
 	loc			root 	= "$wraw/uganda/wave_3/raw/unpsy3_up"
-	loc			export 	= "$wout/uganda/wave_3/daily/unpsy3_up"
-	loc			logout 	= "$wout/uganda/logs"
+	loc			export 	= "$wraw/uganda/wave_3/daily/unpsy3_up"
+	loc			logout 	= "$wraw/uganda/logs"
 
 * open log
 	cap log close

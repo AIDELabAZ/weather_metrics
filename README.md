@@ -2,7 +2,9 @@
 
 This repository contains code for replicating the statistical analysis in Michler, J.D., Josephson, A., Agme, C., and Kilic, T. (2026). "Cloudy With A Chance of Significance: Specification Search and the Illusion of Exogeneity in Remotely Sensed Weather Data." *Unpublished*.
 
-This README was last updated on 26 October 2026.
+<!-- edited by: codex; edited on: 27 Oct 2026 -->
+
+This README was last updated on 27 Oct 2026.
 
  ## Index
 
@@ -54,18 +56,24 @@ To initialize paths and folders without running analysis, select and run section
 0.1 of `projectdo.do`.
 
 `$raw` points to `raw_lsms_data`, `$wraw` to `weather_data`, and `$data`
-to `weather_metrics_data`, all under the shared data root. `$wout` points
-to `$data/refined_data/weather` for project-specific daily conversions and
-regenerated weather metrics. Household outputs go to
+to `weather_metrics_data`, all under the shared data root. Weather processing
+uses the shared `$wraw/<country>/wave_<n>` tree throughout: converters read CSV
+files from `raw/<source>` and save daily Stata files to `daily/<source>`;
+the wxsum scripts read those daily files and save metrics to `refined/<source>`.
+Directory setup discovers source names from the raw folders and creates the
+corresponding daily and refined folders. Projects read the shared refined files
+without making additional weather copies. Run weather processing when creating
+or deliberately rebuilding the shared files, rather than for every project.
+Household outputs go to
 `refined_data/<country>/wave_<n>` without another `refined` level. Generated
 Nigerian conversion tables also go under the project refined data; original
 conversion inputs stay under `raw_lsms_data`.
 
 Section 1 calls the existing country weather master files. Individual wave
-`*_weather.do` files can be run directly to recompute metrics from existing daily
-files: they read project daily conversions when present, otherwise shared daily
-inputs. Nigeria wave 4's archive also supports the `raw 2` and `daily 2` locations.
-Household builds then use the project's regenerated weather.
+`*_weather.do` files can be run directly to recompute shared metrics from existing
+shared daily files. Household builds read the corresponding shared refined files.
+Inputs must follow the documented folder structure; duplicate archive folders
+such as `raw 2` and `daily 2` are not selected automatically.
 
 The original `$pack` switch controls package installation: keep `pack` at 0 to
 skip it, or set it to 1 to execute section 0.2. The weather dependency is now
@@ -73,14 +81,16 @@ skip it, or set it to 1 to execute section 0.2. The weather dependency is now
 
 #### Weather-engine migration
 
-All 84 weather calls in 31 wave scripts use `wxsum` through
-`analysis/reg_code/wxsum_metrics.do`. The adapter retains file names, household
-identifiers, wide variable names, and year-major ordering consumed by wave builds.
+All 84 weather calls use `wxsum` directly inside the 31 country-wave weather
+scripts. Those scripts retain file names, household identifiers, wide variable
+names, and year-major ordering consumed by wave builds.
 Season endpoints remain day 1 of the first and final month, inclusive. Deviations
 and z-scores retain the full available period as their reference, with at least
 two nonmissing seasons; they do not use wxsum's default rolling ten-year reference.
+All countries use GDD bounds of 10°C and 30°C and a heat threshold of 30°C.
+Rainfall calls use a rainy-day threshold of 1 in the rainfall data's units.
 
-The migration intentionally adopts corrected wxsum definitions and can change
+The migration adopts wxsum definitions and can change
 estimates relative to historical weather outputs:
 
 - GDD is a sum of degrees above 10°C, capped at 30°C, rather than a count of days
@@ -93,10 +103,10 @@ estimates relative to historical weather outputs:
 The old percentile-bin columns remain available for wave-file compatibility;
 their shares exclude missing days. These are within-season percentile bins,
 not wxsum's absolute-temperature bins. The final panel already excludes them.
-Derived weather datasets retain wxsum's version/settings characteristics and
-adapter provenance. Historical shared weather outputs remain available for
-comparison, and should not be mixed with regenerated inputs.
-The adapter retains `sd_season_*`, so the existing `v03`/`v17` mappings remain
+Derived weather datasets retain wxsum's version/settings characteristics.
+Rebuilding shared refined files replaces the previous
+metrics at those paths; projects using them should use the same weather version.
+The weather scripts retain `sd_season_*`, so the existing `v03`/`v17` mappings remain
 standard deviations despite their historical "Variance" labels.
 `panel_build.do` retains its historical zero fill for missing weather metrics
 before estimation; weather-level missing values are preserved in the regenerated
@@ -106,7 +116,7 @@ Path verification with synthetic input folders:
 
 ```stata
 	do			analysis/reg_code/tests/project_paths.do "<new-scratch-directory>"
-	do			analysis/reg_code/tests/wxsum_migration.do
+	do			tests/weather/shared_weather.do "<another-new-scratch-directory>"
 ```
 
 The regression output filenames remain `reg_results.dta` and
@@ -152,14 +162,15 @@ weather_and_agriculture/
 |-- raw_lsms_data/                  shared household inputs
 |   `-- <country>/wave_<n>/raw/
 |-- weather_data/                   shared raw, daily, and refined weather
-|   `-- <country>/wave_<n>/
+|   `-- <country>/
+|       |-- wave_<n>/
+|       |   |-- raw/<source>/       CSV inputs
+|       |   |-- daily/<source>/     daily Stata files
+|       |   `-- refined/<source>/   wxsum metrics
+|       `-- logs/
 `-- weather_metrics_data/           project-specific outputs
     |-- refined_data/<country>/
     |   |-- wave_<n>/
-    |   `-- logs/
-    |-- refined_data/weather/<country>/
-    |   |-- wave_<n>/daily/<survey>/
-    |   |-- wave_<n>/refined/<survey>/
     |   `-- logs/
     |-- merged_data/<country>/
     |   |-- wave_<n>/

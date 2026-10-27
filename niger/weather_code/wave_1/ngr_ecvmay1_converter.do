@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: April 2020
 * Created by: jdm
-* Edited on: 7 June 2024
-* Edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -23,8 +23,8 @@
 
 * define paths
 	loc			root = "$wraw/niger/wave_1/raw/ecvmay1_up"
-	loc			export = "$wout/niger/wave_1/daily/ecvmay1_up"
-	loc			logout = "$wout/niger/logs"
+	loc			export = "$wraw/niger/wave_1/daily/ecvmay1_up"
+	loc			logout = "$wraw/niger/logs"
 
 * open log
 	cap log close

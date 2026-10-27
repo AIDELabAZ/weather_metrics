@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: Aug 2020
 * Created by: ek
-* Edited on: 4 June 2024
-* Edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -22,7 +22,7 @@
 **********************************************************************
 
 * define paths
-	global		raw		=	"$data/refined_data/uganda/wave_7"
+	loc			key		"$data/refined_data/uganda/wave_7"
 	global		root 	= 	"$data/merged_data/uganda"
 	global		export 	= 	"$data/regression_data/uganda"
 	global		logout 	= 	"$data/merged_data/uganda/logs"
@@ -55,7 +55,7 @@
 	append			using "$root/wave_5/unps5_merged", force
 
 * append wave 7 household key file
-	append		using "$raw/2018_gsec1.dta", force
+	append		using "`key'/2018_gsec1.dta", force
 
 	rename			HHID hh_4_7
 	lab var 		hh_4_7 "Panel ID for waves 4-7"

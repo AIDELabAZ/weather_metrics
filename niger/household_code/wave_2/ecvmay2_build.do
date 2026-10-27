@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: May 2020
 * Created by: ek
-* Edited on: 7 June 2024
-* Edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -21,7 +21,7 @@
 **********************************************************************
 
 * define paths
-	loc			rootw 	= 	"$wout/niger/wave_2/refined/ecvmay2_up"
+	loc			rootw 	= 	"$wraw/niger/wave_2/refined/ecvmay2_up"
 	loc			rooth 	= 	"$data/refined_data/niger/wave_2"
 	loc		export 	= 	"$data/merged_data/niger/wave_2"
 	loc		logout 	= 	"$data/merged_data/niger/logs"

@@ -1,14 +1,14 @@
 * project: wb weather - metric
 * created on: 26 oct 2026
 * created by: codex
-* edited on: 26 oct 2026
+* edited on: 27 Oct 2026
 * edited by: codex
 * stata v.18
 * does
-	* creates project output folders using the calling script's paths
+	* creates shared weather and project output folders
 
 * assumes
-	* code, raw, wraw, data, and wout globals are defined
+	* code, raw, wraw, and data globals are defined
 	* setup is recorded in the calling master or test log
 
 
@@ -18,7 +18,7 @@
 
 * check the roots defined by the calling master or test
 	version		18
-	foreach root in code raw wraw data wout {
+	foreach root in code raw wraw data {
 		if `"${`root'}"' == "" {
 			display		as error "Define `root' before running setup_paths.do."
 			error		198
@@ -60,23 +60,19 @@
 	}
 	capture mkdir "$data/refined_data/nigeria/conversion_files"
 	capture mkdir "$data/refined_data/malawi/trackingfiles"
-	capture mkdir "$wout"
-* create country and wave output folders
+
+* create shared daily and refined folders for the existing raw sources
 	foreach country in ethiopia malawi niger nigeria tanzania uganda {
-		capture mkdir "$wout/`country'"
-		capture mkdir "$wout/`country'/logs"
+		capture mkdir "$wraw/`country'/logs"
 		local		waves : dir "$code/`country'/weather_code" dirs "wave_*"
 		foreach wave of local waves {
-			capture mkdir "$wout/`country'/`wave'"
-			capture mkdir "$wout/`country'/`wave'/daily"
-			capture mkdir "$wout/`country'/`wave'/refined"
-			capture local surveys : dir ///
-						"$wraw/`country'/`wave'/daily" dirs ///
-						"*"
-			if _rc local surveys
-			foreach survey of local surveys {
-				capture mkdir "$wout/`country'/`wave'/daily/`survey'"
-				capture mkdir "$wout/`country'/`wave'/refined/`survey'"
+			capture mkdir "$wraw/`country'/`wave'/daily"
+			capture mkdir "$wraw/`country'/`wave'/refined"
+			capture local sources : dir "$wraw/`country'/`wave'/raw" dirs "*"
+			if _rc local sources
+			foreach source of local sources {
+				capture mkdir "$wraw/`country'/`wave'/daily/`source'"
+				capture mkdir "$wraw/`country'/`wave'/refined/`source'"
 			}
 		}
 	}
@@ -99,6 +95,5 @@
 	display		as text "Raw LSMS: $raw"
 	display		as text "Weather: $wraw"
 	display		as text "Project data: $data"
-	display		as text "Derived weather: $wout"
 
 /* END */

@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created by: jdm
 * Created on: April 2020
-* edited by: jdm
-* edited on: 15 May 2024
+* edited by: codex
+* edited on: 27 Oct 2026
 * Stata v.18
 
 * does
@@ -23,8 +23,8 @@
 
 * define paths
 	loc			root = "$wraw/ethiopia/wave_4/raw/essy4_up"
-	loc			export = "$wout/ethiopia/wave_4/daily/essy4_up"
-	loc			logout = "$wout/ethiopia/logs"
+	loc			export = "$wraw/ethiopia/wave_4/daily/essy4_up"
+	loc			logout = "$wraw/ethiopia/logs"
 
 * open log
 	cap log close

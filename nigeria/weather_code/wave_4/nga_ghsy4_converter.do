@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: April 2020
 * Created by: alj
-* edited on: 20 May 2024
-* edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -23,8 +23,8 @@
 
 * define paths
 	loc			root = "$wraw/nigeria/wave_4/raw/ghsy4_up"
-	loc			export = "$wout/nigeria/wave_4/daily/ghsy4_up"
-	loc			logout = "$wout/nigeria/logs"
+	loc			export = "$wraw/nigeria/wave_4/daily/ghsy4_up"
+	loc			logout = "$wraw/nigeria/logs"
 
 * open log
 	cap log close
@@ -38,12 +38,6 @@
 * define local with all files in each sub-folder
 	capture local fileList : dir "`root'" files "*.csv"
 	if _rc local fileList
-	if `"`fileList'"' == "" {
-	* Some shared archives store this wave in OneDrive's duplicate folder.
-		loc			root = "$wraw/nigeria/wave_4/raw 2/ghsy4_up"
-		loc			fileList : dir "`root'" files "*.csv"
-		display		as text "Using wave 4 weather archive: `root'"
-	}
 	if `"`fileList'"' == "" {
 		display		as error "No wave 4 weather CSV files found in `root'."
 		error		601

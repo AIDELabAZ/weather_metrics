@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: May 2020
 * Created by: mcg
-* Edited on: 21 May 2024
-* Edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -21,7 +21,7 @@
 **********************************************************************
 
 * define paths
-	global		rootw 	= 	"$wout/tanzania/wave_1/refined/npsy1_up"
+	global		rootw 	= 	"$wraw/tanzania/wave_1/refined/npsy1_up"
 	global		rooth 	= 	"$data/refined_data/tanzania/wave_1"
 	global		export 	= 	"$data/merged_data/tanzania/wave_1"
 	global		logout 	= 	"$data/merged_data/tanzania/logs"

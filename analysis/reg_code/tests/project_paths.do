@@ -1,7 +1,7 @@
 * project: wb weather - metric
 * created on: 26 oct 2026
 * created by: codex
-* edited on: 26 oct 2026
+* edited on: 27 Oct 2026
 * edited by: codex
 * stata v.18
 * does
@@ -24,12 +24,16 @@
 	global		raw		"`scratch'/household_inputs"
 	global		wraw	"`scratch'/weather_inputs"
 	global		data	"`scratch'/project_outputs"
-	global		wout	"$data/refined_data/weather"
 	capture mkdir "`scratch'"
 	capture mkdir "$raw"
 	capture mkdir "$raw/ethiopia"
 	capture mkdir "$wraw"
 	capture mkdir "$wraw/ethiopia"
+	capture mkdir "$wraw/ethiopia/wave_1"
+	capture mkdir "$wraw/ethiopia/wave_1/raw"
+	foreach source in source_a source_b {
+		capture mkdir "$wraw/ethiopia/wave_1/raw/`source'"
+	}
 * record the path test without closing the calling log
 	tempname	test_log
 	log			using "`scratch'/project_paths.log", text append name(`test_log')
@@ -50,8 +54,19 @@
 	assert		`"$raw"' == `"`scratch'/household_inputs"'
 	assert		`"$wraw"' == `"`scratch'/weather_inputs"'
 	assert		`"$data"' == `"`scratch'/project_outputs"'
-	assert		`"$wout"' == ///
-				`"`scratch'/project_outputs/refined_data/weather"'
+
+* create shared weather outputs for sources discovered in the raw tree
+	foreach source in source_a source_b {
+		foreach stage in daily refined {
+			save		"$wraw/ethiopia/wave_1/`stage'/`source'/output_sentinel.dta"
+			confirm		file ///
+				"$wraw/ethiopia/wave_1/`stage'/`source'/output_sentinel.dta"
+		}
+	}
+	local		copies : dir "$data/refined_data" dirs "weather"
+	assert		`"`copies'"' == ""
+
+* keep household and analysis outputs in the project tree
 	foreach destination in refined_data/ethiopia/wave_1 merged_data/ethiopia/wave_1 ///
 				regression_data results_data {
 		save		"$data/`destination'/output_sentinel.dta"
@@ -60,7 +75,7 @@
 	use			"$raw/input_sentinel.dta", clear
 	assert		_N == 1 & input_sentinel == 73
 	display		as result ///
-				"PASS: shared input roots, isolated project outputs, directory creation, input preservation."
+				"PASS: shared weather outputs, project outputs, and unchanged inputs."
 
 
 **********************************************************************
