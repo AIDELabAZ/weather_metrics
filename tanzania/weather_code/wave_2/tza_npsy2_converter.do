@@ -1,13 +1,13 @@
 * Project: WB Weather
 * Created on: April 2020
 * Created by: jdm
-* edited on: 20 May 2024
-* edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
 	* reads in Tanzania, wave 2 .csv files
-    * drops unnecessary daily observations
+	* drops unnecessary daily observations
 	* outputs .dta file ready for processing by the weather program
 	* does the above for both rainfall and temperature data
 	/* 	-To make our weather program work, we need to run the code on data that starts on Nov 1 and ends on May 1
@@ -20,31 +20,31 @@
 * TO DO:
 	* completed
 
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+
+**********************************************************************
+**# 0 - setup
+**********************************************************************
 
 * define paths
-	loc			root 	=	"$data/weather_data/tanzania/wave_2/raw/npsy2_up"
-	loc			export	=	"$data/weather_data/tanzania/wave_2/daily/npsy2_up"
-	loc			logout	=	"$data/weather_data/tanzania/logs"
+	loc			root 	=	"$wraw/tanzania/wave_2/raw/npsy2_up"
+	loc			export	=	"$wraw/tanzania/wave_2/daily/npsy2_up"
+	loc			logout	=	"$wraw/tanzania/logs"
 
 * open log
-	cap log		close
+	cap log close
 	log			using	"`logout'/tza_npsy2_converter", append
 
 
-* **********************************************************************
-* 1 - converts rainfall data
-* **********************************************************************
+**********************************************************************
+**# 1 - converts rainfall data
+**********************************************************************
 
 * loop through each file in the above local
 	loc fileList : dir "`root'" files "*rf.csv"
-	
+
 * loop through each file in the above local
 	foreach file in `fileList' {
-		
+
 		* import the .csv files - this takes time
 		import delimited "`root'/`file'", varnames (1)  ///
 			encoding(Big5) stringcols(1) clear
@@ -68,7 +68,7 @@
 			loc cyear = `year'-1
 			if `month' < 11 rename `var' rf_`cyear'`month'`day'
 		}
-		* rename the five early month variables			
+	* rename the five early month variables
 		foreach var of varlist rf_* {
 			loc year = substr("`var'", 4, 4)
 			loc month = substr("`var'", 8, 2)
@@ -104,7 +104,7 @@
 			loc nmonth = `month'+2
 			if `month' == 01 rename `var' rf_`year'0`nmonth'`day'
 		}
-		* rename the two later month variables			
+	* rename the two later month variables
 		foreach var of varlist rf_* {
 			loc year = substr("`var'", 4, 4)
 			loc month = substr("`var'", 8, 2)
@@ -119,9 +119,9 @@
 			loc nmonth = `month'-10
 			if `month' == 12 rename `var' rf_`year'0`nmonth'`day'
 		}
-		
-	* define locals to govern file naming	
-		loc dat = substr("`file'", 1, length("`file'") - 4) 
+
+	* define locals to govern file naming
+		loc			dat = substr("`file'", 1, length("`file'") - 4)
 
 	* save file
 		compress
@@ -129,17 +129,17 @@
 }
 
 
-* **********************************************************************
-* 2 - converts temperature data
-* **********************************************************************
-	
-* define local with all files in each sub-folder	
+**********************************************************************
+**# 2 - converts temperature data
+**********************************************************************
+
+* define local with all files in each sub-folder
 		loc fileList : dir "`root'/`folder'" files "*tp.csv"
-		
-* loop through each file in the above local	
+
+* loop through each file in the above local
 	foreach file in `fileList' {
-		
-		* import the .csv files - this takes time	
+
+	* import the .csv files - this takes time
 		import delimited "`root'/`file'", varnames(1)  ///
 			encoding(Big5) stringcols(1) clear
 
@@ -162,7 +162,7 @@
 			loc cyear = `year'-1
 			if `month' < 11 rename `var' tmp_`cyear'`month'`day'
 		}
-		* rename the five early month variables			
+	* rename the five early month variables
 		foreach var of varlist tmp_* {
 			loc year = substr("`var'", 5, 4)
 			loc month = substr("`var'", 9, 2)
@@ -198,7 +198,7 @@
 			loc nmonth = `month'+2
 			if `month' == 01 rename `var' tmp_`year'0`nmonth'`day'
 		}
-		* rename the two later month variables			
+	* rename the two later month variables
 		foreach var of varlist tmp_* {
 			loc year = substr("`var'", 5, 4)
 			loc month = substr("`var'", 9, 2)
@@ -213,9 +213,9 @@
 			loc nmonth = `month'-10
 			if `month' == 12 rename `var' tmp_`year'0`nmonth'`day'
 		}
-		
-	* define locals to govern file naming	
-		loc dat = substr("`file'", 1, length("`file'") - 4) 
+
+	* define locals to govern file naming
+		loc			dat = substr("`file'", 1, length("`file'") - 4)
 
 	* save file
 		compress

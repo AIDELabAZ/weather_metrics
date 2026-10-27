@@ -14,24 +14,24 @@
 * TO DO:
 	* done
 
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
 
-* define paths	
-	loc root 		= "$data/household_data/nigeria/wave_3/raw"  
-	loc export 		= "$data/household_data/nigeria/wave_3/refined"
-	loc logout 		= "$data/household_data/nigeria/logs"
-	
-* open log	
-	cap log 		close
+**********************************************************************
+**# 0 - setup
+**********************************************************************
+
+* define paths
+	loc			root 		= "$raw/nigeria/wave_3/raw"
+	loc			export 		= "$data/refined_data/nigeria/wave_3"
+	loc			logout 		= "$data/refined_data/nigeria/logs"
+
+* open log
+	cap log close
 	log using 		"`logout'/wave_3_geovars", append
 
-	
-* **********************************************************************
-* 1 - GHSY3 (Wave 3) - geovars
-* **********************************************************************
+
+**********************************************************************
+**# 1 - ghsy3 (wave 3) - geovars
+**********************************************************************
 
 * import wave 3 geovars
 	use 			"`root'/NGA_HouseholdGeovars_Y3.dta", clear
@@ -40,11 +40,11 @@
 	isid 			hhid
 
 	rename 			ssa_aez09 aez
-	
-	
-* **********************************************************************
-* 2 - end matter, clean up to save
-* **********************************************************************
+
+
+**********************************************************************
+**# 2 - end matter, clean up to save
+**********************************************************************
 
 	keep 			hhid aez
 
@@ -58,4 +58,4 @@
 * close the log
 	log	close
 
-/* END */	
+/* END */

@@ -1,13 +1,13 @@
 * Project: WB Weather
 * Created on: April 2020
 * Created by: jdm
-* edited by: jdm
-* edited on: 18 May 2024
+* edited by: codex
+* edited on: 27 Oct 2026
 * Stata v.18
 
 * does
 	* reads in Malawi IHS4p, which we term wave 4, .csv files
-    * drops unnecessary daily observations
+	* drops unnecessary daily observations
 	* outputs .dta file ready for processing by the weather program
 	* does the above for both rainfall and temperature data
 	/* 	-To make our weather program work, we need to run the code on data that starts on Nov 1 and ends on May 1
@@ -21,23 +21,23 @@
 	* completed
 
 
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+**********************************************************************
+**# 0 - setup
+**********************************************************************
 
 * define paths
-	loc 		root 	= 	"$data/weather_data/malawi/wave_4/raw/ihs4p_up"
-	loc 		export 	= 	"$data/weather_data/malawi/wave_4/daily/ihs4p_up"
-	loc 		logout 	= 	"$data/weather_data/malawi/logs"
+	loc			root 	= 	"$wraw/malawi/wave_4/raw/ihs4p_up"
+	loc			export 	= 	"$wraw/malawi/wave_4/daily/ihs4p_up"
+	loc			logout 	= 	"$wraw/malawi/logs"
 
 * open log
-	cap log		close
+	cap log close
 	log 		using 		"`logout'/mwi_ihs4p_converter", append
 
 
-* **********************************************************************
-* 1 - converts rainfall data
-* **********************************************************************
+**********************************************************************
+**# 1 - converts rainfall data
+**********************************************************************
 
 * define each file in the above local
 	loc fileList : dir "`root'" files "*rf.csv"
@@ -50,7 +50,7 @@
 
 	* drop early and late observations
 		keep 	y3_hhid rf_19831031-rf_20160531
-		
+
 		* drop unnecessary months, this will make renaming variables easier (June-Oct)
 		foreach var of varlist rf_* {
 			if substr("`var'", 8, 2) == "06" drop `var'
@@ -118,9 +118,9 @@
 			loc nmonth = `month'-10
 			if `month' == 12 rename `var' rf_`year'0`nmonth'`day'
 		}
-		
-	* define locals to govern file naming	
-		loc dat = substr("`file'", 1, length("`file'") - 4) 
+
+	* define locals to govern file naming
+		loc			dat = substr("`file'", 1, length("`file'") - 4)
 
 	* save file
 		compress
@@ -128,9 +128,9 @@
 }
 
 
-* **********************************************************************
-* 2 - converts temperature data
-* **********************************************************************
+**********************************************************************
+**# 2 - converts temperature data
+**********************************************************************
 
 * define local with all files in each sub-folder
 	loc fileList : dir "`root'" files "*tp.csv"
@@ -211,9 +211,9 @@
 			loc nmonth = `month'-10
 			if `month' == 12 rename `var' tmp_`year'0`nmonth'`day'
 		}
-		
-	* define locals to govern file naming	
-		loc dat = substr("`file'", 1, length("`file'") - 4) 
+
+	* define locals to govern file naming
+		loc			dat = substr("`file'", 1, length("`file'") - 4)
 
 	* save file
 		compress

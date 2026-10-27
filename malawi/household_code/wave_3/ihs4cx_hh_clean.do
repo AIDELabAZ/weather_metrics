@@ -16,24 +16,24 @@
 	* complete
 
 
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+**********************************************************************
+**# 0 - setup
+**********************************************************************
 
 * define paths
-	loc		source 	= 	"$data/household_data/malawi/wb_raw_data/data/ihs4cx/hh"
-	loc		root 	= 	"$data/household_data/malawi/wave_3/raw"
-	loc		export 	= 	"$data/household_data/malawi/wave_3/refined"
-	loc		logout 	= 	"$data/household_data/malawi/logs"
+	loc			source 	= 	"$raw/malawi/wb_raw_data/data/ihs4cx/hh"
+	loc			root 	= 	"$raw/malawi/wave_3/raw"
+	loc			export 	= 	"$data/refined_data/malawi/wave_3"
+	loc			logout 	= 	"$data/refined_data/malawi/logs"
 
 * open log
-	cap 	log			close
+	cap log close
 	log 	using 		"`logout'/ihs4cx_hh_clean", append
 
 
-* **********************************************************************
-* 1 - clean household data
-* **********************************************************************
+**********************************************************************
+**# 1 - clean household data
+**********************************************************************
 
 * merge cross section household files with ag season files
 	use 		"`source'/hh_mod_x.dta", clear
@@ -56,7 +56,7 @@
 				rsmz_pesticide* ds_fert* ds_insecticide* ds_herbicide* ///
 				ds_fungicide* ds_pesticide* dsmz_fert* dsmz_insecticide* ///
 				dsmz_herbicide* dsmz_fungicide* dsmz_pesticide* ///
-				rs_irrigation* rsmz_irrigation* ds_irrigation* dsmz_irrigation* /// 
+				rs_irrigation* rsmz_irrigation* ds_irrigation* dsmz_irrigation* ///
 				rs_fert_inorgkg rsmz_fert_kg
 
 * generate indicator variables for herbicide and fungicide
@@ -96,11 +96,11 @@
 				dsmz_pesticideany dsmz_insecticideany
 
 * merge in geovariables
-	merge 		1:1 case_id using "`root'/ihs4cx_geo.dta", generate(_geo)				
+	merge		1:1 case_id using "`root'/ihs4cx_geo.dta", generate(_geo)
 	keep		if _geo == 3
-	
+
 	rename		ssa_aez09 aez
-	
+
 	drop		lat_modified - fsrad3_lcmaj srtm_1k - _geo
 
 * reanme unique household indicator
@@ -116,15 +116,15 @@
 	gen			hh_id_merge = case_id
 	destring 	case_id, replace
 
-	
-* **********************************************************************
-* 2 - end matter, clean up to save
-* **********************************************************************
-	
+
+**********************************************************************
+**# 2 - end matter, clean up to save
+**********************************************************************
+
 	compress
 	describe
-	summarize 	
-	
+	summarize
+
 * save data
 	save		"`export'/hhfinal_ihs4cx.dta", replace
 

@@ -3,11 +3,11 @@
 * Created by: jdm
 * Edited by: jdm
 * Last edit: 28 March 2024
-* Stata v.18.0 
+* Stata v.18.0
 
 * does
 	* reads in excel file with papers
-	* makes network visualziation 
+	* makes network visualziation
 
 * assumes
 	* paper data file
@@ -16,27 +16,27 @@
 * TO DO:
 	* everything
 
-	
-************************************************************************
+
+**********************************************************************
 **# 0 - setup
-************************************************************************
+**********************************************************************
 
 * define paths
 	global	root 	= 	"$data/output/iv_lit"
 	global	stab 	= 	"$data/results_data/tables"
-	global	xtab 	= 	"$data/output/metric_paper/tables"
-	global	sfig	= 	"$data/results_data/figures"	
-	global 	xfig    =   "$data/output/metric_paper/figures"
+	global		xtab 	= 	"$data/results_data/tables/metric_paper"
+	global		sfig	= 	"$data/results_data/figures"
+	global		xfig    =   "$data/results_data/figures/metric_paper"
 	global	logout 	= 	"$data/results_data/logs"
 
-* open log	
+* open log
 	cap log close
 	log 	using 	"$logout/network_viz", append
 
-	
-************************************************************************
+
+**********************************************************************
 **# 1 - load and transform data
-************************************************************************
+**********************************************************************
 
 * load data
 	import excel		"$root/220 Papers_Outcome-rainfall.xlsx", sheet("Sheet1") ///
@@ -49,11 +49,12 @@
 * rename
 	rename				outcomecategory outcome
 	rename				rainfallvariable rain
-	
-************************************************************************
+
+
+**********************************************************************
 **# 2 - create network data
-************************************************************************
-	
+**********************************************************************
+
 * declare data a network
 	nwset				rain outcome, name(rainnet)
 	nwset,				detail
@@ -102,12 +103,14 @@
 	nwplot, 			layout (grid, columns(5)) label(_nodelab) labelopt(mlabsize(vsmall) mlabcolor(red)) ///
 						edgepatternpalette (dash) edgecolorpalette (black) nodefactor(1) edgefactor(0.5) arcstyle(curved) ///
 						arrowfactor(1) arrowbarbfactor(2) scheme(s1network)
-************************************************************************
+
+
+**********************************************************************
 **# 7 - end matter
-************************************************************************
+**********************************************************************
 
 
 * close the log
 	log	close
 
-/* END */		
+/* END */

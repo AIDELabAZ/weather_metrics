@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created by: jdm
 * Created on: April 2020
-* edited by: jdm
-* edited on: 15 May 2024
+* edited by: codex
+* edited on: 27 Oct 2026
 * Stata v.18
 
 * does
@@ -16,41 +16,41 @@
 * TO DO:
 	* completed
 
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+
+**********************************************************************
+**# 0 - setup
+**********************************************************************
 
 * define paths
-	loc root = "$data/weather_data/ethiopia/wave_3/raw/essy3_up"
-	loc export = "$data/weather_data/ethiopia/wave_3/daily/essy3_up"
-	loc logout = "$data/weather_data/ethiopia/logs"
+	loc			root = "$wraw/ethiopia/wave_3/raw/essy3_up"
+	loc			export = "$wraw/ethiopia/wave_3/daily/essy3_up"
+	loc			logout = "$wraw/ethiopia/logs"
 
 * open log
-	cap log		close
+	cap log close
 	log using "`logout'/eth_essy3_converter", append
 
 
-* **********************************************************************
-* 1 - converts weather data
-* **********************************************************************
+**********************************************************************
+**# 1 - converts weather data
+**********************************************************************
 
-* define local with all files in each sub-folder	
+* define local with all files in each sub-folder
 	loc fileList : dir "`root'" files "*.csv"
-		
-* loop through each file in the above local	
+
+* loop through each file in the above local
 foreach file in `fileList' {
-		
-	* import the .csv files - this takes time	
+
+	* import the .csv files - this takes time
 	import delimited "`root'/`file'", varnames (1)  ///
 		encoding(Big5) stringcols(1) clear
 
 	* drop duplicates
 		duplicates 		drop
 		drop if 		household_id == ""
-		
-	* define locals to govern file naming	
-		loc dat = substr("`file'", 1, length("`file'") - 4) 
+
+	* define locals to govern file naming
+		loc			dat = substr("`file'", 1, length("`file'") - 4)
 
 
 	* save file

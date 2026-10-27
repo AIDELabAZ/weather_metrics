@@ -14,24 +14,24 @@
 * TO DO:
 	* GEOVARS DOES NOT EXIST FOR THIS WAVE
 	/*
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
 
-* define paths	
-	loc root 		= "$data/household_data/tanzania/wave_3/raw"  
-	loc export 		= "$data/household_data/tanzania/wave_3/refined"
-	loc logout 		= "$data/household_data/tanzania/logs"
-	
-* open log	
+**********************************************************************
+* 0 - setup
+**********************************************************************
+
+* define paths
+	loc root 		= "$raw/tanzania/wave_3/raw"
+	loc export 		= "$data/refined_data/tanzania/wave_3"
+	loc logout 		= "$data/refined_data/tanzania/logs"
+
+* open log
 	cap log 		close
 	log using 		"`logout'/2012_geovars", append
 
-	
-* **********************************************************************
+
+**********************************************************************
 * 1 - NPSY3 (Wave 3) - geovars
-* **********************************************************************
+**********************************************************************
 
 * import wave 3 geovars
 	use 			"`root'/HouseholdGeovars_Y3.dta", clear
@@ -40,11 +40,11 @@
 	isid 			y3_hhid
 
 	rename 			land03 aez
-	
-	
-* **********************************************************************
+
+
+**********************************************************************
 * 2 - end matter, clean up to save
-* **********************************************************************
+**********************************************************************
 
 	keep 			y3_hhid aez
 
@@ -58,4 +58,4 @@
 * close the log
 	log	close
 
-/* END */	
+/* END */

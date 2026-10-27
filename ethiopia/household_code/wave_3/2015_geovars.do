@@ -14,24 +14,24 @@
 * TO DO:
 	* done
 
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
 
-* define paths	
-	loc root 		= "$data/household_data/ethiopia/wave_3/raw"  
-	loc export 		= "$data/household_data/ethiopia/wave_3/refined"
-	loc logout 		= "$data/household_data/ethiopia/logs"
-	
-* open log	
-	cap log 		close
+**********************************************************************
+**# 0 - setup
+**********************************************************************
+
+* define paths
+	loc			root 		= "$raw/ethiopia/wave_3/raw"
+	loc			export 		= "$data/refined_data/ethiopia/wave_3"
+	loc			logout 		= "$data/refined_data/ethiopia/logs"
+
+* open log
+	cap log close
 	log using 		"`logout'/wave_3_geovars", append
 
-	
-* **********************************************************************
-* 1 - ESS (Wave 3) - geovars
-* **********************************************************************
+
+**********************************************************************
+**# 1 - ess (wave 3) - geovars
+**********************************************************************
 
 * import wave 3 geovars
 	use 			"`root'/ETH_HouseholdGeovars_y3.dta", clear
@@ -40,11 +40,11 @@
 	isid 			household_id2
 
 	rename 			ssa_aez09 aez
-	
-	
-* **********************************************************************
-* 2 - end matter, clean up to save
-* **********************************************************************
+
+
+**********************************************************************
+**# 2 - end matter, clean up to save
+**********************************************************************
 
 	keep 			household_id2 aez
 
@@ -58,4 +58,4 @@
 * close the log
 	log	close
 
-/* END */	
+/* END */

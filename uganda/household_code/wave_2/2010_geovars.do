@@ -14,24 +14,24 @@
 * TO DO:
 	* done
 
-	
-************************************************************************
-**# 0 - setup
-************************************************************************
 
-* define paths	
-	global root 		"$data/household_data/uganda/wave_2/raw"  
-	global export 		"$data/household_data/uganda/wave_2/refined"
-	global logout 		"$data/household_data/uganda/logs"
-	
-* open log	
-	cap log 			close
+**********************************************************************
+**# 0 - setup
+**********************************************************************
+
+* define paths
+	global		root 		"$raw/uganda/wave_2/raw"
+	global		export 		"$data/refined_data/uganda/wave_2"
+	global		logout 		"$data/refined_data/uganda/logs"
+
+* open log
+	cap log close
 	log using 			"$logout/2010_geovars", append
 
-	
-************************************************************************
-**# 1 - UNPS 2010 (wave 1) - geovars 
-************************************************************************
+
+**********************************************************************
+**# 1 - unps 2010 (wave 1) - geovars
+**********************************************************************
 
 * import wave 1 geovars
 	use 			"$root/UNPS_Geovars_1011.dta", clear
@@ -41,11 +41,11 @@
 	rename 			HHID hhid
 
 	rename 			ssa_aez09 aez
-	
-	
-************************************************************************
+
+
+**********************************************************************
 **# 2 - end matter, clean up to save
-************************************************************************
+**********************************************************************
 
 	keep 			hhid aez
 
@@ -55,8 +55,8 @@
 
 * save file
 	save 			"$export/2010_geovars.dta", replace
-	
+
 * close the log
 	log	close
 
-/* END */	
+/* END */

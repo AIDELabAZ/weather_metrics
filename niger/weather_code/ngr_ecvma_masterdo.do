@@ -7,33 +7,33 @@
 
 * does
 	* Executes all wave specific Niger weather .do files
-    * runs weather_command .ado file
+	* runs wxsum .ado file
 	* outputs .dta rainfall data ready to merge with LSMS household data
 
 * assumes
-	* weather_command.ado
+	* wxsum.ado
 	* subsidiary, wave-specific .do files
 
 * TO DO:
 	* completed
 
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+
+**********************************************************************
+**# 0 - setup
+**********************************************************************
 
 clear
 
 * set max vars
-	set maxvar 120000, perm  // this amount is only allowed for MP editions 
-	
+	set			maxvar 120000  // this amount is only allowed for MP editions
+
 * define paths
 	loc root = "$code/niger/weather_code"
 
 
-* **********************************************************************
-* 1 - run .do files
-* **********************************************************************
+**********************************************************************
+**# 1 - run .do files
+**********************************************************************
 
 
 * do each of the file converters
@@ -45,5 +45,5 @@ clear
 	do "`root'/wave_1/NGR_ECVMAY1_weather.do"		//	generate wave 1 .weather variables
 	do "`root'/wave_2/NGR_ECVMAY2_weather.do"		//	generate wave 2 .weather variables
 
-	
+
 /* END */

@@ -16,23 +16,23 @@
 	* complete
 
 
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+**********************************************************************
+**# 0 - setup
+**********************************************************************
 
 * define paths
-	loc		root 	= 	"$data/household_data/malawi/wave_2/raw"
-	loc		export 	= 	"$data/household_data/malawi/wave_2/refined"
-	loc		logout 	= 	"$data/household_data/malawi/logs"
+	loc			root 	= 	"$raw/malawi/wave_2/raw"
+	loc			export 	= 	"$data/refined_data/malawi/wave_2"
+	loc			logout 	= 	"$data/refined_data/malawi/logs"
 
 * open log
-	cap 	log			close
+	cap log close
 	log 	using 		"`logout'/ihpsspnl_hh_clean", append
 
 
-* **********************************************************************
-* 1 - clean household data
-* **********************************************************************
+**********************************************************************
+**# 1 - clean household data
+**********************************************************************
 
 * load data
 	use 		"`root'/ihpsspnl_hh_new.dta", clear
@@ -50,7 +50,7 @@
 				rsmz_pesticide* ds_fert* ds_insecticide* ds_herbicide* ///
 				ds_fungicide* ds_pesticide* dsmz_fert* dsmz_insecticide* ///
 				dsmz_herbicide* dsmz_fungicide* dsmz_pesticide* ///
-				rs_irrigation* rsmz_irrigation* ds_irrigation* dsmz_irrigation* /// 
+				rs_irrigation* rsmz_irrigation* ds_irrigation* dsmz_irrigation* ///
 				rs_fert_inorgkg rsmz_fert_kg
 
 * generate indicator variables for herbicide and fungicide
@@ -90,22 +90,22 @@
 				dsmz_pesticideany dsmz_insecticideany
 
 * merge in geovariables
-	merge 		1:1 y2_hhid using "`root'/ihpsspnl_geo.dta", generate(_geo)				
+	merge		1:1 y2_hhid using "`root'/ihpsspnl_geo.dta", generate(_geo)
 	keep		if _geo == 3
-	
+
 	rename		ssa_aez09 aez
-	
+
 	drop		dist_road - fsrad3_lcmaj srtm_1k - _geo
 
-	
-* **********************************************************************
-* 2 - end matter, clean up to save
-* **********************************************************************
-	
+
+**********************************************************************
+**# 2 - end matter, clean up to save
+**********************************************************************
+
 	compress
 	describe
-	summarize 
-	
+	summarize
+
 * save data
 	save		"`export'/hhfinal_ihpsspnl.dta", replace
 

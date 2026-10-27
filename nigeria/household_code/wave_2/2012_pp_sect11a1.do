@@ -17,25 +17,25 @@
 * TO DO:
 	* complete
 
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+
+**********************************************************************
+**# 0 - setup
+**********************************************************************
 
 * define paths
-	loc		root	=		"$data/household_data/nigeria/wave_2/raw"
-	loc		cnvrt	=		"$data/household_data/nigeria/conversion_files"
-	loc		export	=		"$data/household_data/nigeria/wave_2/refined"
-	loc		logout	= 		"$data/household_data/nigeria/logs"
+	loc			root	=		"$raw/nigeria/wave_2/raw"
+	loc			cnvrt	=		"$raw/nigeria/conversion_files"
+	loc			export	=		"$data/refined_data/nigeria/wave_2"
+	loc			logout	= 		"$data/refined_data/nigeria/logs"
 
 * open log
 	cap log close
 	log 	using	"`logout'/wave_2_pp_sect11a1", append
 
-	
-* **********************************************************************
-* 1 - describing plot size - self-reported and GPS
-* **********************************************************************
+
+**********************************************************************
+**# 1 - describing plot size - self-reported and gps
+**********************************************************************
 
 * import the first relevant data file
 	use				"`root'/sect11a1_plantingw2", clear
@@ -55,10 +55,10 @@
 	gen 			plot_size_GPS = s11aq4c
 	lab var			plot_size_GPS 	"GPS plot size in sq. meters"
 
-	
-* **********************************************************************
-* 2 - conversion to hectares
-* **********************************************************************
+
+**********************************************************************
+**# 2 - conversion to hectares
+**********************************************************************
 
 * merge in conversion file
 	merge 			m:1 	zone using 	"`cnvrt'/land-conversion.dta"
@@ -85,38 +85,38 @@
 	*hec
 	replace 		plot_size_hec = plot_size_SR			if plot_unit == 6
 
-	count			if plot_size_SR == . 
+	count		if plot_size_SR == .
 	*** 29 observations have . for plot_size_SR
 	*** only losing 2 observations by not including "other" units
 	rename 			plot_size_hec plot_size_hec_SR
 	lab var			plot_size_hec_SR 	"SR plot size converted to hectares"
-	
+
 	count 			if plot_size_hec_SR !=.
-	count			if plot_size_hec_SR == . 
+	count		if plot_size_hec_SR == .
 	*** 60 observations do not have plot_size_hec_SR
 	*** only 2 observations not converted - not including "other" units
-	*** these 58 other observations have no unit given and so cannot be converted 
+	*** these 58 other observations have no unit given and so cannot be converted
 	*** will impute missing
 	*** 5,833 observations have plot_size_hec_SR
 
 * convert gps report to hectares
-	count 			if plot_size_GPS == .  
-	*** 738 observations have no GPS value 
+	count		if plot_size_GPS == .
+	*** 738 observations have no GPS value
 	gen 			plot_size_2 = .
 	replace 		plot_size_2 = plot_size_GPS*sqmcon
 	rename 			plot_size_2 plot_size_hec_GPS
 	lab	var			plot_size_hec_GPS "GPS measured area of plot in hectares"
 	*** 738 observations do not have plot_size_hec_GPS
-	*** these 738 observations have no value of GPS given so cannot be converted 
+	*** these 738 observations have no value of GPS given so cannot be converted
 	*** will impute missing
 	*** 5,155 observations have plot_size_hec_GPS
-	
+
 * replace missing self reported with GPS
 	replace			plot_size_hec_SR = plot_size_hec_GPS if plot_size_hec_SR == .
 	*** 30 changes made
 
 	count 			if plot_size_hec_GPS !=.
-	count			if plot_size_hec_GPS == . 
+	count		if plot_size_hec_GPS == .
 
 	count	 		if plot_size_hec_SR != . & plot_size_hec_GPS != .
 	*** 5155 observations have both self reported and GPS plot size in hectares
@@ -144,8 +144,8 @@
 	tab				plot_size_hec_GPS 	if 	plot_size_hec_GPS > 2
 	*** 198 GPS which are greater than 2
 	tab				plot_size_hec_GPS 	if 	plot_size_hec_GPS > 20
-	*** but none which are greater than 20 
-	*** no wholly unreasonably GPS values 
+	*** but none which are greater than 20
+	*** no wholly unreasonably GPS values
 
 * correlation at higher plot sizes
 *	list 			plot_size_hec_GPS plot_size_hec_SR 	if ///
@@ -155,7 +155,7 @@
 	*** correlation at higher plot sizes is higher - but still lower than overall: 0.1157
 
 * compare GPS and SR
-* examine GPS 
+* examine GPS
 	sum 			plot_size_hec_GPS, detail
 	sum 			plot_size_hec_SR, detail
 	*** GPS tending to be smaller than self-reported - and more realistic
@@ -165,21 +165,21 @@
 	replace			plot_size_hec_SR = plot_size_hec_GPS if plot_size_hec_GPS < 0.009 ///
 						& plot_size_hec_SR > .1
 	*** 3 changes made
-	
+
 	* need to get rid of a couple outliers
 	*twoway			(scatter plot_size_hec_GPS plot_size_hec_SR	if plot_size_hec_GPS > 5 ///
 						& plot_size_hec_SR < 20)
 	replace			plot_size_hec_GPS = . if plot_size_hec_GPS > 20 & plot_size_hec_SR < 20
 	replace			plot_size_hec_SR = plot_size_hec_GPS if plot_size_hec_SR > 200
 	*** 2 changes made
-	
+
 * replace bottom 5%  and top 1% as missing
 	gen				plotsize = plot_size_hec_GPS if plot_size_hec_GPS > 0.023 ///
 						& plot_size_hec_GPS < 4.1
 	replace			plotsize = plot_size_hec_GPS if plot_size_hec_SR > 3 ///
 						& plot_size_hec_GPS >= 3
-	*** 1,041 missing then 25 real changes made	
-	
+	*** 1,041 missing then 25 real changes made
+
 	list 			plot_size_hec_GPS plot_size_hec_SR plotsize 	if ///
 						plot_size_hec_GPS > 3 & !missing(plot_size_hec_GPS), sep(0)
 
@@ -199,14 +199,15 @@
 						longstub format(%9.3g)
 	*** imputed values change VERY little - mean from 0.51 to 0.469
 	*** reasonable changes
-	
-* **********************************************************************
-* 3 - end matter, clean up to save
-* **********************************************************************
 
-	replace			plotsize = plotsize_1_ 
+
+**********************************************************************
+**# 3 - end matter, clean up to save
+**********************************************************************
+
+	replace		plotsize = plotsize_1_
 	lab	var			plotsize	"plot size (ha)"
-	
+
 	keep 			hhid zone state lga hhid ea plotid plotsize
 
 * create unique household-plot identifier

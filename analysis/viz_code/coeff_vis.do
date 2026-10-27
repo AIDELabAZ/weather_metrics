@@ -3,14 +3,14 @@
 * Created by: jdm
 * Edited by: jdm
 * Last edit: 30 August 2021
-* Stata v.17.0 
+* Stata v.17.0
 
 * does
 	* reads in results data set
-	* makes visualziations of results 
+	* makes visualziations of results
 
 * assumes
-	* you have results file 
+	* you have results file
 	* customsave.ado
 	* grc1leg2.ado
 	* tabout.ado
@@ -18,42 +18,42 @@
 * TO DO:
 	* complete
 
-	
-************************************************************************
+
+**********************************************************************
 **# 0 - setup
-************************************************************************
+**********************************************************************
 
 * define paths
 	global	root 	= 	"$data/results_data"
 	global	stab 	= 	"$data/results_data/tables"
-	global	xtab 	= 	"$data/output/paper/tables"
-	global	sfig	= 	"$data/results_data/figures"	
-	global 	xfig    =   "$data/output/paper/figures"
+	global		xtab 	= 	"$data/results_data/tables/paper"
+	global		sfig	= 	"$data/results_data/figures"
+	global		xfig    =   "$data/results_data/figures/paper"
 	global	logout 	= 	"$data/results_data/logs"
 
-* open log	
+* open log
 	cap log close
 	log 	using 	"$logout/resultsvis", append
 
-* load data 
+* load data
 	use 			"$root/lsms_complete_results", clear
 
 
-************************************************************************
+**********************************************************************
 **# 1 - generate serrbar graphs by extraction
-************************************************************************
+**********************************************************************
 
 
-************************************************************************
+**********************************************************************
 **# 1a - generate serrbar graphs by rainfall variable and extraction
-************************************************************************
+**********************************************************************
 
 * mean daily rainfall
 preserve
 	keep			if varname == 1
 	sort 			varname ext beta
-	gen 			obs = _n	
-	
+	gen			obs = _n
+
 	serrbar 		beta stdrd_err obs, lcolor(edkblue%10) ///
 						mvopts(recast(scatter) mcolor(edkblue%5) ///
 						mfcolor(edkblue%5) mlcolor(edkblue%5)) ///
@@ -77,7 +77,7 @@ preserve
 	keep			if varname == 2
 	sort 			varname ext beta
 	gen 			obs = _n
-	
+
 	serrbar 		beta stdrd_err obs, lcolor(emidblue%10) ///
 						mvopts(recast(scatter) mcolor(emidblue%5) ///
 						mfcolor(emidblue%5) mlcolor(emidblue%5)) ///
@@ -94,14 +94,14 @@ preserve
 						1728 "1,728" 2160 "2,160" 2592 "2,592" 3024 "3,024" ///
 						3456 "3,456" 3888 "3,888" 4320 "4,320") xtitle("") ) ///
 						legend(off) saving("$sfig/v02_ext", replace)
-restore	
+	restore
 
 * variance of daily rainfall
 preserve
 	keep			if varname == 3
 	sort 			varname ext beta
 	gen 			obs = _n
-	
+
 	serrbar 		beta stdrd_err obs, lcolor(eltblue%10) ///
 						mvopts(recast(scatter) mcolor(eltblue%5) ///
 						mfcolor(eltblue%5) mlcolor(eltblue%5)) ///
@@ -119,13 +119,13 @@ preserve
 						3456 "3,456" 3888 "3,888" 4320 "4,320") xtitle("") ) ///
 						legend(off) saving("$sfig/v03_ext", replace)
 restore
-	
+
 * skew of daily rainfall
 preserve
 	keep			if varname == 4
 	sort 			varname ext beta
 	gen 			obs = _n
-	
+
 	serrbar 		beta stdrd_err obs, lcolor(emerald%10) ///
 						mvopts(recast(scatter) mcolor(emerald%5) ///
 						mfcolor(emerald%5) mlcolor(emerald%5)) ///
@@ -149,7 +149,7 @@ preserve
 	keep			if varname == 5
 	sort 			varname ext beta
 	gen 			obs = _n
-	
+
 	serrbar 		beta stdrd_err obs, lcolor(erose%10) ///
 						mvopts(recast(scatter) mcolor(erose%5) ///
 						mfcolor(erose%5) mlcolor(erose%5)) ///
@@ -173,7 +173,7 @@ preserve
 	keep			if varname == 6
 	sort 			varname ext beta
 	gen 			obs = _n
-	
+
 	serrbar 		beta stdrd_err obs, lcolor(ebblue%10) ///
 						mvopts(recast(scatter) mcolor(ebblue%5) ///
 						mfcolor(ebblue%5) mlcolor(ebblue%5)) ///
@@ -197,7 +197,7 @@ preserve
 	keep			if varname == 7
 	sort 			varname ext beta
 	gen 			obs = _n
-	
+
 	serrbar 		beta stdrd_err obs, lcolor(eltgreen%10) ///
 						mvopts(recast(scatter) mcolor(eltgreen%5) ///
 						mfcolor(eltgreen%5) mlcolor(eltgreen%5)) ///
@@ -221,7 +221,7 @@ preserve
 	keep			if varname == 8
 	sort 			varname ext beta
 	gen 			obs = _n
-	
+
 	serrbar 		beta stdrd_err obs, lcolor(stone%10) ///
 						mvopts(recast(scatter) mcolor(stone%5) ///
 						mfcolor(stone%5) mlcolor(stone%5)) ///
@@ -245,7 +245,7 @@ preserve
 	keep			if varname == 9
 	sort 			varname ext beta
 	gen 			obs = _n
-	
+
 	serrbar 		beta stdrd_err obs, lcolor(navy%10) ///
 						mvopts(recast(scatter) mcolor(navy%5) ///
 						mfcolor(navy%5) mlcolor(navy%5)) ///
@@ -269,7 +269,7 @@ preserve
 	keep			if varname == 10
 	sort 			varname ext beta
 	gen 			obs = _n
-	
+
 	serrbar 		beta stdrd_err obs, lcolor(brown%10) ///
 						mvopts(recast(scatter) mcolor(brown%5) ///
 						mfcolor(brown%5) mlcolor(brown%5)) ///
@@ -293,7 +293,7 @@ preserve
 	keep			if varname == 11
 	sort 			varname ext beta
 	gen 			obs = _n
-	
+
 	serrbar 		beta stdrd_err obs, lcolor(lavender%10) ///
 						mvopts(recast(scatter) mcolor(lavender%5) ///
 						mfcolor(lavender%5) mlcolor(lavender%5)) ///
@@ -317,7 +317,7 @@ preserve
 	keep			if varname == 12
 	sort 			varname ext beta
 	gen 			obs = _n
-	
+
 	serrbar 		beta stdrd_err obs, lcolor(teal%10) ///
 						mvopts(recast(scatter) mcolor(teal%5) ///
 						mfcolor(teal%5) mlcolor(teal%5)) ///
@@ -341,7 +341,7 @@ preserve
 	keep			if varname == 13
 	sort 			varname ext beta
 	gen 			obs = _n
-	
+
 	serrbar 		beta stdrd_err obs, lcolor(cranberry%10) ///
 						mvopts(recast(scatter) mcolor(cranberry%5) ///
 						mfcolor(cranberry%5) mlcolor(cranberry%5)) ///
@@ -365,7 +365,7 @@ preserve
 	keep			if varname == 14
 	sort 			varname ext beta
 	gen 			obs = _n
-	
+
 	serrbar 		beta stdrd_err obs, lcolor(khaki%10) ///
 						mvopts(recast(scatter) mcolor(khaki%5) ///
 						mfcolor(khaki%5) mlcolor(khaki%5)) ///
@@ -387,37 +387,37 @@ restore
 * combine moments graphs
 	gr combine 		"$sfig/v01_ext.gph" "$sfig/v02_ext.gph" "$sfig/v03_ext.gph" ///
 						"$sfig/v04_ext.gph", col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\ext_moment_rf.png", width(1400) replace
-	
+
 * combine total graphs
 	gr combine 		"$sfig/v05_ext.gph" "$sfig/v06_ext.gph" "$sfig/v07_ext.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\ext_total_rf.png", width(1400) replace
-	
+
 * combine rainy days
 	gr combine 		"$sfig/v08_ext.gph" "$sfig/v09_ext.gph" "$sfig/v12_ext.gph" ///
 						"$sfig/v13_ext.gph", col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\ext_rain_rf.png", width(1400) replace
-	
+
 * combine total graphs
 	gr combine 		"$sfig/v10_ext.gph" "$sfig/v11_ext.gph" "$sfig/v14_ext.gph", ///
 						col(2) iscale(.5) commonscheme
-						
-	graph export 	"$xfig/ext_none_rf.png", width(1400) replace
-	
 
-************************************************************************
+	graph export 	"$xfig/ext_none_rf.png", width(1400) replace
+
+
+**********************************************************************
 **# 1b - generate serrbar graphs by temperature variable and extraction
-************************************************************************
+**********************************************************************
 
 * mean daily temperature
 preserve
 	keep			if varname == 15
 	sort 			varname ext beta
-	gen 			obs = _n	
+	gen			obs = _n
 
 	serrbar 		beta stdrd_err obs, lcolor(edkblue%10) ///
 						mvopts(recast(scatter) mcolor(edkblue%5) ///
@@ -441,7 +441,7 @@ restore
 preserve
 	keep			if varname == 16
 	sort 			varname ext beta
-	gen 			obs = _n	
+	gen			obs = _n
 
 	serrbar 		beta stdrd_err obs, lcolor(emidblue%10) ///
 						mvopts(recast(scatter) mcolor(emidblue%5) ///
@@ -465,7 +465,7 @@ restore
 preserve
 	keep			if varname == 17
 	sort 			varname ext beta
-	gen 			obs = _n	
+	gen			obs = _n
 
 	serrbar 		beta stdrd_err obs, lcolor(eltblue%10) ///
 						mvopts(recast(scatter) mcolor(eltblue%5) ///
@@ -489,7 +489,7 @@ restore
 preserve
 	keep			if varname == 18
 	sort 			varname ext beta
-	gen 			obs = _n	
+	gen			obs = _n
 
 	serrbar 		beta stdrd_err obs, lcolor(emerald%10) ///
 						mvopts(recast(scatter) mcolor(emerald%5) ///
@@ -513,7 +513,7 @@ restore
 preserve
 	keep			if varname == 19
 	sort 			varname ext beta
-	gen 			obs = _n	
+	gen			obs = _n
 
 	serrbar 		beta stdrd_err obs, lcolor(erose%10) ///
 						mvopts(recast(scatter) mcolor(erose%5) ///
@@ -537,7 +537,7 @@ restore
 preserve
 	keep			if varname == 20
 	sort 			varname ext beta
-	gen 			obs = _n	
+	gen			obs = _n
 
 	serrbar 		beta stdrd_err obs, lcolor(ebblue%10) ///
 						mvopts(recast(scatter) mcolor(ebblue%5) ///
@@ -561,7 +561,7 @@ restore
 preserve
 	keep			if varname == 21
 	sort 			varname ext beta
-	gen 			obs = _n	
+	gen			obs = _n
 
 	serrbar 		beta stdrd_err obs, lcolor(eltgreen%10) ///
 						mvopts(recast(scatter) mcolor(eltgreen%5) ///
@@ -585,7 +585,7 @@ restore
 preserve
 	keep			if varname == 22
 	sort 			varname ext beta
-	gen 			obs = _n	
+	gen			obs = _n
 
 	serrbar 		beta stdrd_err obs, lcolor(stone%10) ///
 						mvopts(recast(scatter) mcolor(stone%5) ///
@@ -608,19 +608,19 @@ restore
 * combine moments graphs
 	gr combine 		"$sfig/var15_ext.gph" "$sfig/var16_ext.gph" "$sfig/var17_ext.gph" ///
 						"$sfig/var18_ext.gph", col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\ext_moment_tp.png", width(1400) replace
-	
+
 * combine total graphs
 	gr combine 		"$sfig/var19_ext.gph" "$sfig/var20_ext.gph" "$sfig/var21_ext.gph" ///
 						"$sfig/var22_ext.gph", col(2) iscale(.5) commonscheme
-						
-	graph export 	"$xfig/ext_total_tp.png", width(1400) replace
-	
 
-************************************************************************
+	graph export 	"$xfig/ext_total_tp.png", width(1400) replace
+
+
+**********************************************************************
 **# 2 - generate random number to select extraction method
-************************************************************************
+**********************************************************************
 
 * prior to the posting of the anonymized paper on arXiv the following random extraction was used
 
@@ -631,48 +631,49 @@ preserve
 	set seed		3317230
 	gen double 		u = (10-1) * runiform() + 1
 	gen 			i = round(u)
-	sum		 		u i 
-restore	
+	sum		 		u i
+restore
 *** random number was 3, so we proceed with extraction method 3
 */
 
 * after the data was de-anonymized, we replace the above method of selection
 * with the "true" or preferred extraction method household bilinear (ext 1)
 
-		
-************************************************************************
-**# 3 - generate serrbar graphs by metric
-************************************************************************
 
-* keep HH Bilinear	
+**********************************************************************
+**# 3 - generate serrbar graphs by metric
+**********************************************************************
+
+* keep HH Bilinear
 	keep			if ext == 1
-	
+
 *generate different betas based on signficance
 	gen 			b_sig = beta
 	replace 		b_sig = . if pval > .05
 	lab var 		b_sig "p < 0.05"
-	
+
 	gen 			b_ns = beta
 	replace 		b_ns= . if p <= .05
 	lab var 		b_ns "n.s."
-	
+
 * generate significance dummy
 	gen				sig = 1 if b_sig != .
 	replace			sig = 0 if b_ns != .
 	lab	def			yesno 0 "Not Significant" 1 "Significant"
 	lab val			sig yesno
 	lab var			sig "Weather variable is significant"
-	
+
 * generate sign dummy
 	gen 			b_sign = 1 if b_sig > 0 & b_sig != .
 	replace 		b_sign = 0 if b_sig < 0 & b_sig != .
 	lab	def			posneg 0 "Negative" 1 "Positive"
 	lab val			b_sign posneg
 	lab var			b_sign "Sign on weather variable"
-	
-************************************************************************
+
+
+**********************************************************************
 **# 3a - generate serrbar graphs by rainfall variable and country
-************************************************************************
+**********************************************************************
 
 *** mean daily rainfall ***
 
@@ -684,18 +685,18 @@ preserve
 
 * stack values of the specification indicators
 	gen 			k1 		= 	regname
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - .5*$brange
 	global			gheight	=	20
@@ -703,7 +704,7 @@ preserve
 	twoway 			scatter k1 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Ethiopia") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
 						ylabel(1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						20 " ", angle(0) ///
 						labsize(vsmall) tstyle(notick)) || ///
@@ -728,18 +729,18 @@ preserve
 
 * stack values of the specification indicators
 	gen 			k1 		= 	regname
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - .5*$brange
 	global			gheight	=	20
@@ -747,7 +748,7 @@ preserve
 	twoway 			scatter k1 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Malawi") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
 						ylabel(1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						20 " ", angle(0) ///
 						labsize(vsmall) tstyle(notick)) || ///
@@ -772,18 +773,18 @@ preserve
 
 * stack values of the specification indicators
 	gen 			k1 		= 	regname
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - .5*$brange
 	global			gheight	=	20
@@ -791,7 +792,7 @@ preserve
 	twoway 			scatter k1 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Niger") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
 						ylabel(1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						20 " ", angle(0) ///
 						labsize(vsmall) tstyle(notick)) || ///
@@ -816,18 +817,18 @@ preserve
 
 * stack values of the specification indicators
 	gen 			k1 		= 	regname
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - .5*$brange
 	global			gheight	=	20
@@ -835,7 +836,7 @@ preserve
 	twoway 			scatter k1 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Nigeria") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
 						ylabel(1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						20 " ", angle(0) ///
 						labsize(vsmall) tstyle(notick)) || ///
@@ -860,18 +861,18 @@ preserve
 
 * stack values of the specification indicators
 	gen 			k1 		= 	regname
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - .5*$brange
 	global			gheight	=	20
@@ -879,7 +880,7 @@ preserve
 	twoway 			scatter k1 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Tanzania") ylab(0(1)$gheight ) ytitle("") ///
 						ylabel(1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						20 " ", angle(0) ///
 						labsize(vsmall) tstyle(notick)) || ///
@@ -904,18 +905,18 @@ preserve
 
 * stack values of the specification indicators
 	gen 			k1 		= 	regname
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - .5*$brange
 	global			gheight	=	20
@@ -923,7 +924,7 @@ preserve
 	twoway 			scatter k1 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Uganda") ylab(0(1)$gheight ) ytitle("") ///
 						ylabel(1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						20 " ", angle(0) ///
 						labsize(vsmall) tstyle(notick)) || ///
@@ -943,19 +944,19 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 1
 	tab				b_sign if varname == 1
-	
+
 	bys country: 	tab	sig if varname == 1
 	bys country:	tab	b_sign if varname == 1
 
-	
+
 * combine mean daily rain
 	grc1leg2 		"$sfig/v01_eth.gph" "$sfig/v01_mwi.gph" "$sfig/v01_ngr.gph" ///
 						"$sfig/v01_nga.gph" "$sfig/v01_tza.gph" "$sfig/v01_uga.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
+
 	graph export 	"$xfig\v01_cty.png", width(1400) replace
 
-	
+
 *** median daily rainfall ***
 
 * ethiopia
@@ -1069,19 +1070,19 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 2
 	tab				b_sign if varname == 2
-	
+
 	bys country: 	tab	sig if varname == 2
 	bys country:	tab	b_sign if varname == 2
 
-	
+
 * combine median daily rain
 	gr combine 		"$sfig/v02_eth.gph" "$sfig/v02_mwi.gph" "$sfig/v02_ngr.gph" ///
 						"$sfig/v02_nga.gph" "$sfig/v02_tza.gph" "$sfig/v02_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v02_cty.png", width(1400) replace
 
-	
+
 *** variance daily rainfall ***
 
 * ethiopia
@@ -1195,18 +1196,18 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 3
 	tab				b_sign if varname == 3
-	
+
 	bys country: 	tab	sig if varname == 3
 	bys country:	tab	b_sign if varname == 3
-	
+
 * combine variance daily rain
 	gr combine 		"$sfig/v03_eth.gph" "$sfig/v03_mwi.gph" "$sfig/v03_ngr.gph" ///
 						"$sfig/v03_nga.gph" "$sfig/v03_tza.gph" "$sfig/v03_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v03_cty.png", width(1400) replace
-		
-	
+
+
 *** skew daily rainfall ***
 
 * ethiopia
@@ -1320,19 +1321,19 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 4
 	tab				b_sign if varname == 4
-	
+
 	bys country: 	tab	sig if varname == 4
 	bys country:	tab	b_sign if varname == 4
 
-	
+
 * combine skew daily rain
 	gr combine 		"$sfig/v04_eth.gph" "$sfig/v04_mwi.gph" "$sfig/v04_ngr.gph" ///
 						"$sfig/v04_nga.gph" "$sfig/v04_tza.gph" "$sfig/v04_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v04_cty.png", width(1400) replace
-			
-		
+
+
 *** total seasonal rainfall ***
 
 * ethiopia
@@ -1446,18 +1447,18 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 5
 	tab				b_sign if varname == 5
-	
+
 	bys country: 	tab	sig if varname == 5
 	bys country:	tab	b_sign if varname == 5
-	
+
 * combine total seasonal rain
 	gr combine 		"$sfig/v05_eth.gph" "$sfig/v05_mwi.gph" "$sfig/v05_ngr.gph" ///
 						"$sfig/v05_nga.gph" "$sfig/v05_tza.gph" "$sfig/v05_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v05_cty.png", width(1400) replace
-			
-		
+
+
 *** deviation in total seasonal rainfall ***
 
 * ethiopia
@@ -1571,19 +1572,19 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 6
 	tab				b_sign if varname == 6
-	
+
 	bys country: 	tab	sig if varname == 6
 	bys country:	tab	b_sign if varname == 6
-	
-	
+
+
 * combine deviation in total seasonal rain
 	gr combine 		"$sfig/v06_eth.gph" "$sfig/v06_mwi.gph" "$sfig/v06_ngr.gph" ///
 						"$sfig/v06_nga.gph" "$sfig/v06_tza.gph" "$sfig/v06_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v06_cty.png", width(1400) replace
-		
-			
+
+
 *** z-score total seasonal rainfall ***
 
 * ethiopia
@@ -1697,19 +1698,19 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 7
 	tab				b_sign if varname == 7
-	
+
 	bys country: 	tab	sig if varname == 7
 	bys country:	tab	b_sign if varname == 7
-	
-	
+
+
 * combine z-score of total seasonal rain
 	gr combine 		"$sfig/v07_eth.gph" "$sfig/v07_mwi.gph" "$sfig/v07_ngr.gph" ///
 						"$sfig/v07_nga.gph" "$sfig/v07_tza.gph" "$sfig/v07_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v07_cty.png", width(1400) replace
 
-			
+
 *** number of days with rain ***
 
 * ethiopia
@@ -1823,19 +1824,19 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 8
 	tab				b_sign if varname == 8
-	
+
 	bys country: 	tab	sig if varname == 8
 	bys country:	tab	b_sign if varname == 8
-	
-	
+
+
 * combine number of days with rain
 	gr combine 		"$sfig/v08_eth.gph" "$sfig/v08_mwi.gph" "$sfig/v08_ngr.gph" ///
 						"$sfig/v08_nga.gph" "$sfig/v08_tza.gph" "$sfig/v08_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v08_cty.png", width(1400) replace
-		
-		
+
+
 *** deviation in number of days with rain ***
 
 * ethiopia
@@ -1949,19 +1950,19 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 9
 	tab				b_sign if varname == 9
-	
+
 	bys country: 	tab	sig if varname == 9
 	bys country:	tab	b_sign if varname == 9
 
-	
+
 * combine deviation in number of days with rain
 	gr combine 		"$sfig/v09_eth.gph" "$sfig/v09_mwi.gph" "$sfig/v09_ngr.gph" ///
 						"$sfig/v09_nga.gph" "$sfig/v09_tza.gph" "$sfig/v09_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v09_cty.png", width(1400) replace
 
-	
+
 *** number of days without rain ***
 
 * ethiopia
@@ -2075,19 +2076,19 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 10
 	tab				b_sign if varname == 10
-	
+
 	bys country: 	tab	sig if varname == 10
 	bys country:	tab	b_sign if varname == 10
 
-	
+
 * combine number of days without rain
 	gr combine 		"$sfig/v10_eth.gph" "$sfig/v10_mwi.gph" "$sfig/v10_ngr.gph" ///
 						"$sfig/v10_nga.gph" "$sfig/v10_tza.gph" "$sfig/v10_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v10_cty.png", width(1400) replace
 
-	
+
 *** deviation in no rain days ***
 
 * ethiopia
@@ -2201,19 +2202,19 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 11
 	tab				b_sign if varname == 11
-	
+
 	bys country: 	tab	sig if varname == 11
 	bys country:	tab	b_sign if varname == 11
 
-	
+
 * combine deviation in no rain days
 	gr combine 		"$sfig/v11_eth.gph" "$sfig/v11_mwi.gph" "$sfig/v11_ngr.gph" ///
 						"$sfig/v11_nga.gph" "$sfig/v11_tza.gph" "$sfig/v11_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v11_cty.png", width(1400) replace
-				
-	
+
+
 *** percentage of days with rain ***
 
 * ethiopia
@@ -2327,19 +2328,19 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 12
 	tab				b_sign if varname == 12
-	
+
 	bys country: 	tab	sig if varname == 12
 	bys country:	tab	b_sign if varname == 12
 
-	
+
 * combine percentage of days with rain
 	gr combine 		"$sfig/v12_eth.gph" "$sfig/v12_mwi.gph" "$sfig/v12_ngr.gph" ///
 						"$sfig/v12_nga.gph" "$sfig/v12_tza.gph" "$sfig/v12_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v12_cty.png", width(1400) replace
-				
-	
+
+
 *** deviation in % of days with rain ***
 
 * ethiopia
@@ -2453,19 +2454,19 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 13
 	tab				b_sign if varname == 13
-	
+
 	bys country: 	tab	sig if varname == 13
 	bys country:	tab	b_sign if varname == 13
 
-	
+
 * combine deviation in percentage of days with rain
 	gr combine 		"$sfig/v13_eth.gph" "$sfig/v13_mwi.gph" "$sfig/v13_ngr.gph" ///
 						"$sfig/v13_nga.gph" "$sfig/v13_tza.gph" "$sfig/v13_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v13_cty.png", width(1400) replace
-				
-	
+
+
 *** longest dry spell ***
 
 * ethiopia
@@ -2579,24 +2580,24 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 14
 	tab				b_sign if varname == 14
-	
+
 	bys country: 	tab	sig if varname == 14
 	bys country:	tab	b_sign if varname == 14
 
-	
+
 * combine longest dry spell
 	gr combine 		"$sfig/v14_eth.gph" "$sfig/v14_mwi.gph" "$sfig/v14_ngr.gph" ///
 						"$sfig/v14_nga.gph" "$sfig/v14_tza.gph" "$sfig/v14_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v14_cty.png", width(1400) replace
-	
 
-************************************************************************
+
+**********************************************************************
 **# 3b - generate serrbar graphs by temperature variable and country
-************************************************************************
+**********************************************************************
 
-*** mean daily temperature ***		
+	*** mean daily temperature ***
 
 * ethiopia
 preserve
@@ -2709,20 +2710,20 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 15
 	tab				b_sign if varname == 15
-	
+
 	bys country: 	tab	sig if varname == 15
 	bys country:	tab	b_sign if varname == 15
 
-	
+
 * combine mean daily temperature
 	gr combine 		"$sfig/v15_eth.gph" "$sfig/v15_mwi.gph" "$sfig/v15_ngr.gph" ///
 						"$sfig/v15_nga.gph" "$sfig/v15_tza.gph" "$sfig/v15_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v15_cty.png", width(1400) replace
 
-	
-*** median daily temperature ***		
+
+	*** median daily temperature ***
 
 * ethiopia
 preserve
@@ -2835,20 +2836,20 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 16
 	tab				b_sign if varname == 16
-	
+
 	bys country: 	tab	sig if varname == 16
 	bys country:	tab	b_sign if varname == 16
 
-	
+
 * combine median daily temperature
 	gr combine 		"$sfig/v16_eth.gph" "$sfig/v16_mwi.gph" "$sfig/v16_ngr.gph" ///
 						"$sfig/v16_nga.gph" "$sfig/v16_tza.gph" "$sfig/v16_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v16_cty.png", width(1400) replace
-	
-	
-*** variance of daily temperature ***		
+
+
+	*** variance of daily temperature ***
 
 * ethiopia
 preserve
@@ -2961,20 +2962,20 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 17
 	tab				b_sign if varname == 17
-	
+
 	bys country: 	tab	sig if varname == 17
 	bys country:	tab	b_sign if varname == 17
 
-	
+
 * combine variance of daily temperature
 	gr combine 		"$sfig/v17_eth.gph" "$sfig/v17_mwi.gph" "$sfig/v17_ngr.gph" ///
 						"$sfig/v17_nga.gph" "$sfig/v17_tza.gph" "$sfig/v17_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v17_cty.png", width(1400) replace
-	
-	
-*** skew of daily temperature ***		
+
+
+	*** skew of daily temperature ***
 
 * ethiopia
 preserve
@@ -3087,20 +3088,20 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 18
 	tab				b_sign if varname == 18
-	
+
 	bys country: 	tab	sig if varname == 18
 	bys country:	tab	b_sign if varname == 18
 
-	
+
 * combine skew of daily temperature
 	gr combine 		"$sfig/v18_eth.gph" "$sfig/v18_mwi.gph" "$sfig/v18_ngr.gph" ///
 						"$sfig/v18_nga.gph" "$sfig/v18_tza.gph" "$sfig/v18_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v18_cty.png", width(1400) replace
 
-	
-*** growing degree days (gdd) ***		
+
+	*** growing degree days (gdd) ***
 
 * ethiopia
 preserve
@@ -3213,20 +3214,20 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 19
 	tab				b_sign if varname == 19
-	
+
 	bys country: 	tab	sig if varname == 19
 	bys country:	tab	b_sign if varname == 19
 
-	
+
 * combine growing degree days (gdd)
 	gr combine 		"$sfig/v19_eth.gph" "$sfig/v19_mwi.gph" "$sfig/v19_ngr.gph" ///
 						"$sfig/v19_nga.gph" "$sfig/v19_tza.gph" "$sfig/v19_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v19_cty.png", width(1400) replace
 
-	
-*** deviation in growing degree days (gdd) ***		
+
+	*** deviation in growing degree days (gdd) ***
 
 * ethiopia
 preserve
@@ -3339,20 +3340,20 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 20
 	tab				b_sign if varname == 20
-	
+
 	bys country: 	tab	sig if varname == 20
 	bys country:	tab	b_sign if varname == 20
 
-	
+
 * combine deviation in growing degree days (gdd)
 	gr combine 		"$sfig/v20_eth.gph" "$sfig/v20_mwi.gph" "$sfig/v20_ngr.gph" ///
 						"$sfig/v20_nga.gph" "$sfig/v20_tza.gph" "$sfig/v20_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v20_cty.png", width(1400) replace
 
-	
-*** z-score of growing degree days (gdd) ***		
+
+	*** z-score of growing degree days (gdd) ***
 
 * ethiopia
 preserve
@@ -3465,20 +3466,20 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 21
 	tab				b_sign if varname == 21
-	
+
 	bys country: 	tab	sig if varname == 21
 	bys country:	tab	b_sign if varname == 21
 
-	
+
 * combine z-score of growing degree days (gdd)
 	gr combine 		"$sfig/v21_eth.gph" "$sfig/v21_mwi.gph" "$sfig/v21_ngr.gph" ///
 						"$sfig/v21_nga.gph" "$sfig/v21_tza.gph" "$sfig/v21_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v21_cty.png", width(1400) replace
-						
-	
-*** max daily temp ***		
+
+
+	*** max daily temp ***
 
 * ethiopia
 preserve
@@ -3591,27 +3592,27 @@ restore
 * generate summary stats for discussion in paper
 	tab				sig if varname == 22
 	tab				b_sign if varname == 22
-	
+
 	bys country: 	tab	sig if varname == 22
 	bys country:	tab	b_sign if varname == 22
 
-	
+
 * combine max daily temp
 	gr combine 		"$sfig/v22_eth.gph" "$sfig/v22_mwi.gph" "$sfig/v22_ngr.gph" ///
 						"$sfig/v22_nga.gph" "$sfig/v22_tza.gph" "$sfig/v22_uga.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v22_cty.png", width(1400) replace
-						
-						
-************************************************************************
+
+
+**********************************************************************
 **# 4 - generate serrbar graphs by satellite
-************************************************************************
+**********************************************************************
 
 
-************************************************************************
+**********************************************************************
 **# 4a - generate serrbar graphs by rainfall variable and satellite
-************************************************************************
+**********************************************************************
 
 * mean daily rainfall
 preserve
@@ -3655,7 +3656,7 @@ preserve
 						288 "288" 324 "ERA5" 360 "360" 396 "TAMSAT" ///
 						432 "432", alt) xtitle("") ), legend(pos(12) col(2) ///
 						order(1 2))  saving("$sfig/v02_sat", replace)
-restore	
+	restore
 
 * variance of daily rainfall
 preserve
@@ -3678,7 +3679,7 @@ preserve
 						432 "432", alt) xtitle("") ), legend(pos(12) col(2) ///
 						order(1 2))  saving("$sfig/v03_sat", replace)
 restore
-	
+
 * skew of daily rainfall
 preserve
 	keep			if varname == 4
@@ -3924,31 +3925,31 @@ restore
 * combine moments graphs
 	gr combine 		"$sfig/v01_sat.gph" "$sfig/v02_sat.gph" "$sfig/v03_sat.gph" ///
 						"$sfig/v04_sat.gph", col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\sat_moment_rf.png", width(1400) replace
-	
+
 * combine total graphs
 	gr combine 		"$sfig/v05_sat.gph" "$sfig/v06_sat.gph" "$sfig/v07_sat.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\sat_total_rf.png", width(1400) replace
-	
+
 * combine rainy days
 	gr combine 		"$sfig/v08_sat.gph" "$sfig/v09_sat.gph" "$sfig/v12_sat.gph" ///
 						"$sfig/v13_sat.gph", col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\sat_rain_rf.png", width(1400) replace
-	
+
 * combine total graphs
 	gr combine 		"$sfig/v10_sat.gph" "$sfig/v11_sat.gph" "$sfig/v14_sat.gph", ///
 						col(2) iscale(.5) commonscheme
-						
-	graph export 	"$xfig\sat_none_rf.png", width(1400) replace
-	
 
-************************************************************************
+	graph export 	"$xfig\sat_none_rf.png", width(1400) replace
+
+
+**********************************************************************
 **# 4b - generate serrbar graphs by temperature variable and satellite
-************************************************************************
+**********************************************************************
 
 * mean daily temperature
 preserve
@@ -4121,18 +4122,19 @@ restore
 * combine moments graphs
 	gr combine 		"$sfig/v15_sat.gph" "$sfig/v16_sat.gph" "$sfig/v17_sat.gph" ///
 						"$sfig/v18_sat.gph", col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\sat_moment_tp.png", width(1400) replace
-	
+
 * combine total graphs
 	gr combine 		"$sfig/v19_sat.gph" "$sfig/v20_sat.gph" "$sfig/v21_sat.gph" ///
 						"$sfig/v22_sat.gph", col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\sat_total_tp.png", width(1400) replace
-	
-************************************************************************
+
+
+**********************************************************************
 **# 4c - generate table of significant values
-************************************************************************
+**********************************************************************
 
 * redefine var lab for LaTeX
 	lab def		varname 	1 "Mean Daily Rainfall" ///
@@ -4162,12 +4164,12 @@ restore
 preserve
 
 	keep if			varname < 15
-	
-* define loop through levels of countries	
+
+* define loop through levels of countries
 	levelsof 	country		, local(lc)
 	foreach c of local lc {
-	    
-	* define loop through levels of countries	
+
+	* define loop through levels of countries
 		levelsof 	sat		, local(ls)
 		foreach s of local ls {
 			estpost 		tabstat sig if country == `c' & sat == `s', by(varname) nototal ///
@@ -4176,7 +4178,7 @@ preserve
 		}
 	}
 
-			
+
 * output table - rainfall ethiopia
 	esttab 				sig_1* ///
 							using "$xtab/var_sig_eth_rf.tex", ///
@@ -4184,7 +4186,7 @@ preserve
 							mtitle("CHIRPS" "CPC" "MERRA-2" ///
 							"ARC2" "ERA5" "TAMSAT") ///
 							nonum collabels(none) booktabs f replace
-							
+
 * output table - rainfall malawi
 	esttab 				sig_2* ///
 							using "$xtab/var_sig_mwi_rf.tex", ///
@@ -4192,7 +4194,7 @@ preserve
 							mtitle("CHIRPS" "CPC" "MERRA-2" ///
 							"ARC2" "ERA5" "TAMSAT") ///
 							nonum collabels(none) booktabs f replace
-							
+
 * output table - rainfall niger
 	esttab 				sig_4* ///
 							using "$xtab/var_sig_ngr_rf.tex", ///
@@ -4200,7 +4202,7 @@ preserve
 							mtitle("CHIRPS" "CPC" "MERRA-2" ///
 							"ARC2" "ERA5" "TAMSAT") ///
 							nonum collabels(none) booktabs f replace
-							
+
 * output table - rainfall nigeria
 	esttab 				sig_5* ///
 							using "$xtab/var_sig_nga_rf.tex", ///
@@ -4208,7 +4210,7 @@ preserve
 							mtitle("CHIRPS" "CPC" "MERRA-2" ///
 							"ARC2" "ERA5" "TAMSAT") ///
 							nonum collabels(none) booktabs f replace
-							
+
 * output table - rainfall tanzania
 	esttab 				sig_6* ///
 							using "$xtab/var_sig_tza_rf.tex", ///
@@ -4216,7 +4218,7 @@ preserve
 							mtitle("CHIRPS" "CPC" "MERRA-2" ///
 							"ARC2" "ERA5" "TAMSAT") ///
 							nonum collabels(none) booktabs f replace
-							
+
 * output table - rainfall uganda
 	esttab 				sig_7* ///
 							using "$xtab/var_sig_uga_rf.tex", ///
@@ -4232,12 +4234,12 @@ est clear
 preserve
 
 	keep if			varname > 14
-	
-* define loop through levels of countries	
+
+* define loop through levels of countries
 	levelsof 	country		, local(lc)
 	foreach c of local lc {
-	    
-	* define loop through levels of countries	
+
+	* define loop through levels of countries
 		levelsof 	sat		, local(ls)
 		foreach s of local ls {
 			estpost 		tabstat sig if country == `c' & sat == `s', by(varname) nototal ///
@@ -4246,7 +4248,7 @@ preserve
 		}
 	}
 
-			
+
 * output table - temperature ethiopia
 	esttab 				sig_1* ///
 							using "$xtab/var_sig_eth_tp.tex", ///
@@ -4254,7 +4256,7 @@ preserve
 							mtitle("MERRA-2" "ERA5" ///
 							"CPC") nonum collabels(none) ///
 							booktabs f replace
-							
+
 * output table - temperature malawi
 	esttab 				sig_2* ///
 							using "$xtab/var_sig_mwi_tp.tex", ///
@@ -4262,7 +4264,7 @@ preserve
 							mtitle("MERRA-2" "ERA5" ///
 							"CPC") nonum collabels(none) ///
 							booktabs f replace
-							
+
 * output table - temperature niger
 	esttab 				sig_4* ///
 							using "$xtab/var_sig_ngr_tp.tex", ///
@@ -4270,7 +4272,7 @@ preserve
 							mtitle("MERRA-2" "ERA5" ///
 							"CPC") nonum collabels(none) ///
 							booktabs f replace
-							
+
 * output table - temperature nigeria
 	esttab 				sig_5* ///
 							using "$xtab/var_sig_nga_tp.tex", ///
@@ -4278,7 +4280,7 @@ preserve
 							mtitle("MERRA-2" "ERA5" ///
 							"CPC") nonum collabels(none) ///
 							booktabs f replace
-							
+
 * output table - temperature tanzania
 	esttab 				sig_6* ///
 							using "$xtab/var_sig_tza_tp.tex", ///
@@ -4286,7 +4288,7 @@ preserve
 							mtitle("MERRA-2" "ERA5" ///
 							"CPC") nonum collabels(none) ///
 							booktabs f replace
-							
+
 * output table - temperature uganda
 	esttab 				sig_7* ///
 							using "$xtab/var_sig_uga_tp.tex", ///
@@ -4294,12 +4296,12 @@ preserve
 							mtitle("MERRA-2" "ERA5" ///
 							"CPC") nonum collabels(none) ///
 							booktabs f replace
-restore	
+	restore
 
 
-************************************************************************
+**********************************************************************
 **# 5 - select weather metrics to investigate
-************************************************************************
+**********************************************************************
 
 * based on above analysis we will proceed with following rainfall metrics
 	* mean rainfall (varname == 1)
@@ -4311,23 +4313,23 @@ restore
 	* median temperature (varname == 16)
 
 
-************************************************************************
+**********************************************************************
 **# 5a - specification curves for ethiopia
-************************************************************************
+**********************************************************************
 
 * summary stats
 	bys sat:	tab b_sign  if country == 1 & varname == 1
-	
+
 	bys sat:	tab b_sign  if country == 1 & varname == 5
-	
+
 	bys sat:	tab b_sign  if country == 1 & varname == 8
-	
+
 	bys sat:	tab b_sign  if country == 1 & varname == 12
-	
+
 	bys sat:	tab b_sign  if country == 1 & varname == 15
-	
+
 	bys sat:	tab b_sign  if country == 1 & varname == 16
-	
+
 	bys sat:	tab b_sign  if country == 1 & varname == 17
 
 * mean daily rainfall
@@ -4340,8 +4342,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -4350,23 +4352,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Ethiopia") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -4384,11 +4386,11 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/eth_v01_sat", replace)
-						
+
 	graph export 	"$xfig\eth_v01_sat.png", replace
-	
+
 restore
-	
+
 * total seasonal rainfall
 preserve
 	keep			if varname == 5 & country == 1
@@ -4399,8 +4401,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -4409,23 +4411,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Ethiopia") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -4443,9 +4445,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/eth_v05_sat", replace)
-						
+
 	graph export 	"$xfig\eth_v05_sat.png", width(1400) replace
-	
+
 restore
 
 * rainy days
@@ -4458,8 +4460,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -4468,23 +4470,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Ethiopia") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -4501,11 +4503,11 @@ preserve
 						barwidth(.2) color(stone%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
-						saving("$sfig/eth_v08_sat", replace)	
-						
+				saving("$sfig/eth_v08_sat", replace)
+
 	graph export 	"$xfig\eth_v08_sat.png", width(1400) replace
-						
-restore	
+
+	restore
 
 * percent rainy days
 preserve
@@ -4517,8 +4519,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -4527,23 +4529,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Ethiopia") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -4561,10 +4563,10 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/eth_v12_sat", replace)
-						
+
 	graph export 	"$xfig\eth_v12_sat.png", width(1400) replace
-							
-restore	
+
+	restore
 
 * mean daily temperature
 preserve
@@ -4576,13 +4578,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -4591,23 +4593,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Ethiopia") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -4624,9 +4626,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/eth_v15_sat", replace)
-						
+
 	graph export 	"$xfig\eth_v15_sat.png", width(1400) replace
-	
+
 restore
 
 * median daily temperature
@@ -4639,13 +4641,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -4654,23 +4656,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Ethiopia") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -4687,9 +4689,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/eth_v16_sat", replace)
-						
+
 	graph export 	"$xfig\eth_v16_sat.png", width(1400) replace
-	
+
 restore
 
 * variance daily temperature
@@ -4702,13 +4704,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -4717,23 +4719,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Ethiopia") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -4750,31 +4752,31 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/eth_v17_sat", replace)
-						
+
 	graph export 	"$xfig\eth_v17_sat.png", width(1400) replace
-	
+
 restore
-	
-	
-************************************************************************
+
+
+**********************************************************************
 **# 5b - specification curves for malawi
-************************************************************************
+**********************************************************************
 
 * summary stats
 	bys sat:	tab b_sign  if country == 2 & varname == 1
-	
+
 	bys sat:	tab b_sign  if country == 2 & varname == 5
-	
+
 	bys sat:	tab b_sign  if country == 2 & varname == 8
-	
+
 	bys sat:	tab b_sign  if country == 2 & varname == 12
-	
+
 	bys sat:	tab b_sign  if country == 2 & varname == 15
-	
+
 	bys sat:	tab b_sign  if country == 2 & varname == 16
-	
+
 	bys sat:	tab b_sign  if country == 2 & varname == 17
-	
+
 * mean daily rainfall
 preserve
 	keep			if varname == 1 & country == 2
@@ -4785,8 +4787,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -4795,23 +4797,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Malawi") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -4829,11 +4831,11 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/mwi_v01_sat", replace)
-						
+
 	graph export 	"$xfig\mwi_v01_sat.png", width(1400) replace
-							
+
 restore
-	
+
 * total seasonal rainfall
 preserve
 	keep			if varname == 5 & country == 2
@@ -4844,8 +4846,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -4854,23 +4856,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Malawi") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -4888,9 +4890,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/mwi_v05_sat", replace)
-						
+
 	graph export 	"$xfig\mwi_v05_sat.png", width(1400) replace
-													
+
 restore
 
 * rainy days
@@ -4903,8 +4905,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -4913,23 +4915,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
-	di $gheight	
-		
+	di			$gheight
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Malawi") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -4946,10 +4948,10 @@ preserve
 						barwidth(.2) color(stone%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
-						saving("$sfig/mwi_v08_sat", replace)	
-						
+				saving("$sfig/mwi_v08_sat", replace)
+
 	graph export 	"$xfig\mwi_v08_sat.png", width(1400) replace
-												
+
 restore
 
 * percent rainy days
@@ -4962,8 +4964,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -4972,23 +4974,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
-	di $gheight	
-		
+	di			$gheight
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Malawi") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -5005,10 +5007,10 @@ preserve
 						barwidth(.2) color(teal%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
-						saving("$sfig/mwi_v12_sat", replace)	
-						
+				saving("$sfig/mwi_v12_sat", replace)
+
 	graph export 	"$xfig\mwi_v12_sat.png", width(1400) replace
-												
+
 restore
 
 * mean daily temperature
@@ -5021,13 +5023,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5036,23 +5038,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Malawi") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -5069,9 +5071,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/mwi_v15_sat", replace)
-						
+
 	graph export 	"$xfig\mwi_v15_sat.png", width(1400) replace
-	
+
 restore
 
 * median daily temperature
@@ -5084,13 +5086,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5099,23 +5101,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Malawi") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -5132,9 +5134,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/mwi_v16_sat", replace)
-						
+
 	graph export 	"$xfig\mwi_v16_sat.png", width(1400) replace
-	
+
 restore
 
 * variance daily temperature
@@ -5147,13 +5149,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5162,23 +5164,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Malawi") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -5195,29 +5197,29 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/mwi_v17_sat", replace)
-						
+
 	graph export 	"$xfig\mwi_v17_sat.png", width(1400) replace
-	
+
 restore
 
 
-************************************************************************
+**********************************************************************
 **# 5c - specification curves for niger
-************************************************************************
+**********************************************************************
 
 * summary stats
 	bys sat:	tab b_sign  if country == 4 & varname == 1
-	
+
 	bys sat:	tab b_sign  if country == 4 & varname == 5
-	
+
 	bys sat:	tab b_sign  if country == 4 & varname == 8
-	
+
 	bys sat:	tab b_sign  if country == 4 & varname == 12
-	
+
 	bys sat:	tab b_sign  if country == 4 & varname == 15
-	
+
 	bys sat:	tab b_sign  if country == 4 & varname == 16
-	
+
 	bys sat:	tab b_sign  if country == 4 & varname == 17
 
 * mean daily rainfall
@@ -5230,8 +5232,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5240,23 +5242,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Niger") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -5274,11 +5276,11 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/ngr_v01_sat", replace)
-						
+
 	graph export 	"$xfig\ngr_v01_sat.png", width(1400) replace
-													
+
 restore
-	
+
 * total seasonal rainfall
 preserve
 	keep			if varname == 5 & country == 4
@@ -5289,8 +5291,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5299,23 +5301,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
-	di $gheight	
-		
+	di			$gheight
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Niger") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -5333,9 +5335,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/ngr_v05_sat", replace)
-						
+
 	graph export 	"$xfig\ngr_v05_sat.png", width(1400) replace
-																			
+
 restore
 
 * rainy days
@@ -5348,8 +5350,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5358,23 +5360,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
-	di $gheight	
-		
+	di			$gheight
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Niger") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -5391,10 +5393,10 @@ preserve
 						barwidth(.2) color(stone%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
-						saving("$sfig/ngr_v08_sat", replace)	
-						
+				saving("$sfig/ngr_v08_sat", replace)
+
 	graph export 	"$xfig\ngr_v08_sat.png", width(1400) replace
-																		
+
 restore
 
 * percent rainy days
@@ -5407,8 +5409,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5417,23 +5419,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
-	di $gheight	
-		
+	di			$gheight
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Niger") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -5450,10 +5452,10 @@ preserve
 						barwidth(.2) color(teal%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
-						saving("$sfig/ngr_v12_sat", replace)	
-						
+				saving("$sfig/ngr_v12_sat", replace)
+
 	graph export 	"$xfig\ngr_v12_sat.png", width(1400) replace
-																		
+
 restore
 
 * mean daily temperature
@@ -5466,13 +5468,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5481,23 +5483,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Niger") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -5514,9 +5516,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/ngr_v15_sat", replace)
-						
+
 	graph export 	"$xfig\ngr_v15_sat.png", width(1400) replace
-	
+
 restore
 
 * median daily temperature
@@ -5529,13 +5531,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5544,23 +5546,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Niger") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -5577,9 +5579,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/ngr_v16_sat", replace)
-						
+
 	graph export 	"$xfig\ngr_v16_sat.png", width(1400) replace
-	
+
 restore
 
 * variance daily temperature
@@ -5592,13 +5594,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5607,23 +5609,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Niger") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -5640,29 +5642,29 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/ngr_v17_sat", replace)
-						
+
 	graph export 	"$xfig\ngr_v17_sat.png", width(1400) replace
-	
+
 restore
 
-	
-************************************************************************
+
+**********************************************************************
 **# 5d - specification curves for nigeria
-************************************************************************
+**********************************************************************
 
 * summary stats
 	bys sat:	tab b_sign  if country == 5 & varname == 1
-	
+
 	bys sat:	tab b_sign  if country == 5 & varname == 5
-	
+
 	bys sat:	tab b_sign  if country == 5 & varname == 8
-	
+
 	bys sat:	tab b_sign  if country == 5 & varname == 12
-	
+
 	bys sat:	tab b_sign  if country == 5 & varname == 15
-	
+
 	bys sat:	tab b_sign  if country == 5 & varname == 16
-	
+
 	bys sat:	tab b_sign  if country == 5 & varname == 17
 
 * mean daily rainfall
@@ -5675,8 +5677,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5685,14 +5687,14 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
@@ -5701,7 +5703,7 @@ preserve
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Nigeria") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -5719,11 +5721,11 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/nga_v01_sat", replace)
-						
+
 	graph export 	"$xfig\nga_v01_sat.png", width(1400) replace
-																			
+
 restore
-	
+
 * total seasonal rainfall
 preserve
 	keep			if varname == 5 & country == 5
@@ -5734,8 +5736,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5744,23 +5746,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
-	di $gheight	
-		
+	di			$gheight
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Nigeria") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -5777,10 +5779,10 @@ preserve
 						barwidth(.2) color(erose%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
-						saving("$sfig/nga_v05_sat", replace)	
-						
+				saving("$sfig/nga_v05_sat", replace)
+
 	graph export 	"$xfig\nga_v05_sat.png", width(1400) replace
-																						
+
 restore
 
 * rainy days
@@ -5793,8 +5795,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5803,23 +5805,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-		
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Nigeria") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -5837,9 +5839,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/nga_v08_sat", replace)
-						
+
 	graph export 	"$xfig\nga_v08_sat.png", width(1400) replace
-																							
+
 restore
 
 * percent rainy days
@@ -5852,8 +5854,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5862,23 +5864,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-		
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Nigeria") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -5896,9 +5898,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/nga_v12_sat", replace)
-						
+
 	graph export 	"$xfig\nga_v12_sat.png", width(1400) replace
-																							
+
 restore
 
 * mean daily temperature
@@ -5911,13 +5913,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5926,23 +5928,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Nigeria") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -5959,9 +5961,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/nga_v15_sat", replace)
-						
+
 	graph export 	"$xfig\nga_v15_sat.png", width(1400) replace
-	
+
 restore
 
 * median daily temperature
@@ -5974,13 +5976,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -5989,23 +5991,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Nigeria") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -6022,9 +6024,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/nga_v16_sat", replace)
-						
+
 	graph export 	"$xfig\nga_v16_sat.png", width(1400) replace
-	
+
 restore
 
 * variance daily temperature
@@ -6037,13 +6039,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6052,23 +6054,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Nigeria") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -6085,31 +6087,31 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/nga_v17_sat", replace)
-						
+
 	graph export 	"$xfig\nga_v17_sat.png", width(1400) replace
-	
+
 restore
 
-	
-************************************************************************
+
+**********************************************************************
 **# 5e - specification curves for tanzania
-************************************************************************
+**********************************************************************
 
 * summary stats
 	bys sat:	tab b_sign  if country == 6 & varname == 1
-	
+
 	bys sat:	tab b_sign  if country == 6 & varname == 5
-	
+
 	bys sat:	tab b_sign  if country == 6 & varname == 8
-	
+
 	bys sat:	tab b_sign  if country == 6 & varname == 12
-	
+
 	bys sat:	tab b_sign  if country == 6 & varname == 15
-	
+
 	bys sat:	tab b_sign  if country == 6 & varname == 16
-	
+
 	bys sat:	tab b_sign  if country == 6 & varname == 17
-	
+
 * mean daily rainfall
 preserve
 	keep			if varname == 1 & country == 6
@@ -6120,8 +6122,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6130,23 +6132,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Tanzania") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -6163,12 +6165,12 @@ preserve
 						barwidth(.2) color(edkblue%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
-						saving("$sfig/tza_v01_sat", replace)	
-						
+				saving("$sfig/tza_v01_sat", replace)
+
 	graph export 	"$xfig\tza_v01_sat.png", width(1400) replace
-																						
+
 restore
-	
+
 * total seasonal rainfall
 preserve
 	keep			if varname == 5 & country == 6
@@ -6179,8 +6181,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6189,23 +6191,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Tanzania") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -6223,9 +6225,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/tza_v05_sat", replace)
-						
+
 	graph export 	"$xfig\tza_v05_sat.png", width(1400) replace
-																							
+
 restore
 
 * rainy days
@@ -6238,8 +6240,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6248,23 +6250,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Tanzania") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -6281,10 +6283,10 @@ preserve
 						barwidth(.2) color(stone%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
-						saving("$sfig/tza_v08_sat", replace)	
-						
+				saving("$sfig/tza_v08_sat", replace)
+
 	graph export 	"$xfig\tza_v08_sat.png", width(1400) replace
-																						
+
 restore
 
 * percent rainy days
@@ -6297,8 +6299,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6307,23 +6309,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Tanzania") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -6341,9 +6343,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/tza_v12_sat", replace)
-						
+
 	graph export 	"$xfig\tza_v12_sat.png", width(1400) replace
-																							
+
 restore
 
 * mean daily temperature
@@ -6356,13 +6358,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6371,23 +6373,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Tanzania") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -6404,9 +6406,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/tza_v15_sat", replace)
-						
+
 	graph export 	"$xfig\tza_v15_sat.png", width(1400) replace
-	
+
 restore
 
 * median daily temperature
@@ -6419,13 +6421,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6434,23 +6436,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Tanzania") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -6467,9 +6469,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/tza_v16_sat", replace)
-						
+
 	graph export 	"$xfig\tza_v16_sat.png", width(1400) replace
-	
+
 restore
 
 * variance daily temperature
@@ -6482,13 +6484,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6497,23 +6499,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Tanzania") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -6530,31 +6532,31 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/tza_v17_sat", replace)
-						
+
 	graph export 	"$xfig\tza_v17_sat.png", width(1400) replace
-	
+
 restore
 
-	
-************************************************************************
+
+**********************************************************************
 **# 5f - specification curves for uganda
-************************************************************************
+**********************************************************************
 
 * summary stats
 	bys sat:	tab b_sign  if country == 7 & varname == 1
-	
+
 	bys sat:	tab b_sign  if country == 7 & varname == 5
-	
+
 	bys sat:	tab b_sign  if country == 7 & varname == 8
-	
+
 	bys sat:	tab b_sign  if country == 7 & varname == 12
-	
+
 	bys sat:	tab b_sign  if country == 7 & varname == 15
-	
+
 	bys sat:	tab b_sign  if country == 7 & varname == 16
-	
+
 	bys sat:	tab b_sign  if country == 7 & varname == 17
-	
+
 * mean daily rainfall
 preserve
 	keep			if varname == 1 & country == 7
@@ -6565,8 +6567,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6575,25 +6577,25 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-	
+
 	bys sat:		tab sig
-	
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Uganda") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -6610,12 +6612,12 @@ preserve
 						barwidth(.2) color(edkblue%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
-						saving("$sfig/uga_v01_sat", replace)		
-						
+				saving("$sfig/uga_v01_sat", replace)
+
 	graph export 	"$xfig\uga_v01_sat.png", width(1400) replace
-																					
+
 restore
-	
+
 * total seasonal rainfall
 preserve
 	keep			if varname == 5 & country == 7
@@ -6626,8 +6628,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6636,23 +6638,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-		
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Uganda") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -6669,10 +6671,10 @@ preserve
 						barwidth(.2) color(erose%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
-						saving("$sfig/uga_v05_sat", replace)	
-						
+				saving("$sfig/uga_v05_sat", replace)
+
 	graph export 	"$xfig\uga_v05_sat.png", width(1400) replace
-																							
+
 restore
 
 * rainy days
@@ -6685,8 +6687,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6695,23 +6697,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Uganda") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -6728,10 +6730,10 @@ preserve
 						barwidth(.2) color(stone%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
-						saving("$sfig/uga_v08_sat", replace)	
-						
+				saving("$sfig/uga_v08_sat", replace)
+
 	graph export 	"$xfig\uga_v08_sat.png", width(1400) replace
-																							
+
 restore
 
 * percent rainy days
@@ -6744,8 +6746,8 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6754,23 +6756,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Uganda") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "CHIRPS" 14 "CPC" 15 "MERRA-2" ///
@@ -6787,10 +6789,10 @@ preserve
 						barwidth(.2) color(teal%50) yaxis(2)  ///
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
-						saving("$sfig/uga_v12_sat", replace)	
-						
+				saving("$sfig/uga_v12_sat", replace)
+
 	graph export 	"$xfig\uga_v12_sat.png", width(1400) replace
-																							
+
 restore
 
 * mean daily temperature
@@ -6803,13 +6805,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6818,23 +6820,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Uganda") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -6851,9 +6853,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/uga_v15_sat", replace)
-						
+
 	graph export 	"$xfig\uga_v15_sat.png", width(1400) replace
-	
+
 restore
 
 * median daily temperature
@@ -6866,13 +6868,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6881,23 +6883,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Uganda") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -6914,9 +6916,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/uga_v16_sat", replace)
-						
+
 	graph export 	"$xfig\uga_v16_sat.png", width(1400) replace
-	
+
 restore
 
 * variance daily temperature
@@ -6929,13 +6931,13 @@ preserve
 	gen 			k1 		= 	regname
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	sat + 6 + 2 + 2 + 2
-	
+
 * subtract values of off k3 because of varname numbering
 		replace			k3		=	13 if k3 == 19
 		replace			k3		=	14 if k3 == 20
 		replace			k3		=	15 if k3 == 21
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Model"
@@ -6944,23 +6946,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	25
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(2)36) xsize(10) ysize(6) msize(small small small)  ///
 						title("Uganda") ylab(0(1)$gheight ) ylabel(1 "Weather" ///
 						2 "Weather + FE" 3 "Weather + FE + Inputs" ///
-						4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" /// 
+				4 "Weather + Weather{sup:2}" 5 "Weather + Weather{sup:2} + FE" ///
 						6 "Weather + Weather{sup:2} + FE + Inputs" 7 "*{bf:Model}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "MERRA-2" 14 "ERA5" 15 "CPC" ///
@@ -6977,67 +6979,67 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/uga_v17_sat", replace)
-						
+
 	graph export 	"$xfig\uga_v17_sat.png", width(1400) replace
-	
+
 restore
 
-	
-************************************************************************
+
+**********************************************************************
 **# 5g - combine specification curves by country
-************************************************************************
+**********************************************************************
 
 * combine varname specification curves ethiopia rainfall
 	grc1leg2 		"$sfig/eth_v01_sat.gph" "$sfig/eth_v05_sat.gph"  ///
 						"$sfig/eth_v08_sat.gph" "$sfig/eth_v12_sat.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
+
 	graph export 	"$xfig\eth_rain_sat.pdf", as(pdf) replace
-	
+
 * combine varname specification curves malawi rainfall
 	grc1leg2 		"$sfig/mwi_v01_sat.gph" "$sfig/mwi_v05_sat.gph"  ///
 						"$sfig/mwi_v08_sat.gph" "$sfig/mwi_v12_sat.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
+
 	graph export 	"$xfig\mwi_rain_sat.pdf", as(pdf) replace
-	
+
 * combine varname specification curves niger rainfall
 	grc1leg2 		"$sfig/ngr_v01_sat.gph" "$sfig/ngr_v05_sat.gph"  ///
 						"$sfig/ngr_v08_sat.gph" "$sfig/ngr_v12_sat.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
+
 	graph export 	"$xfig\ngr_rain_sat.pdf", as(pdf) replace
 
 * combine varname specification curves nigeria rainfall
 	grc1leg2 		"$sfig/nga_v01_sat.gph" "$sfig/nga_v05_sat.gph"  ///
 						"$sfig/nga_v08_sat.gph" "$sfig/nga_v12_sat.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
-	graph export 	"$xfig\nga_rain_sat.pdf", as(pdf) replace		
-	
+
+	graph		export 	"$xfig\nga_rain_sat.pdf", as(pdf) replace
+
 * combine varname specification curves tanzania rainfall
 	grc1leg2 		"$sfig/tza_v01_sat.gph" "$sfig/tza_v05_sat.gph"  ///
 						"$sfig/tza_v08_sat.gph" "$sfig/tza_v12_sat.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
-	graph export 	"$xfig\tza_rain_sat.pdf", as(pdf) replace			
+
+	graph		export 	"$xfig\tza_rain_sat.pdf", as(pdf) replace
 
 * combine varname specification curves uganda rainfall
 	grc1leg2 		"$sfig/uga_v01_sat.gph" "$sfig/uga_v05_sat.gph"  ///
 						"$sfig/uga_v08_sat.gph" "$sfig/uga_v12_sat.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
+
 	graph export 	"$xfig\uga_rain_sat.pdf", as(pdf) replace
 
-					
-************************************************************************
+
+**********************************************************************
 **# 6 - generate serrbar graphs by specification
-************************************************************************
+**********************************************************************
 
 
-************************************************************************
+**********************************************************************
 **# 6a - generate serrbar graphs by rainfall variable and specification
-************************************************************************
+**********************************************************************
 
 
 *** mean daily rainfall ***
@@ -7053,8 +7055,8 @@ preserve
 	gen 			k1 		= 	sat
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	country + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Weather Product"
@@ -7063,23 +7065,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Weather") ylab(0(1)$gheight ) ylabel(1 "CHIRPS" ///
 						2 "CPC" 3 "MERRA-2" ///
-						4 "ARC2" 5 "ERA5" /// 
+				4 "ARC2" 5 "ERA5" ///
 						6 "TAMSAT" 7 "*{bf:Rainfall Product}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "Ethiopia" 14 "Malawi" 15 "Niger" ///
@@ -7097,9 +7099,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/reg1_v01", replace)
-						
+
 	graph export 	"$xfig\reg1_v01.png", as(pdf) replace
-	
+
 restore
 
 * weather + fe
@@ -7113,8 +7115,8 @@ preserve
 	gen 			k1 		= 	sat
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	country + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Weather Product"
@@ -7123,23 +7125,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Weather + FE") ylab(0(1)$gheight ) ylabel(1 "CHIRPS" ///
 						2 "CPC" 3 "MERRA-2" ///
-						4 "ARC2" 5 "ERA5" /// 
+				4 "ARC2" 5 "ERA5" ///
 						6 "TAMSAT" 7 "*{bf:Rainfall Product}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "Ethiopia" 14 "Malawi" 15 "Niger" ///
@@ -7157,9 +7159,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/reg2_v01", replace)
-						
+
 	graph export 	"$xfig\reg2_v01.png", as(pdf) replace
-	
+
 restore
 
 * weather + fe + inputs
@@ -7173,8 +7175,8 @@ preserve
 	gen 			k1 		= 	sat
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	country + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Weather Product"
@@ -7183,23 +7185,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Weather + FE + Inputs") ylab(0(1)$gheight ) ylabel(1 "CHIRPS" ///
 						2 "CPC" 3 "MERRA-2" ///
-						4 "ARC2" 5 "ERA5" /// 
+				4 "ARC2" 5 "ERA5" ///
 						6 "TAMSAT" 7 "*{bf:Rainfall Product}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "Ethiopia" 14 "Malawi" 15 "Niger" ///
@@ -7217,9 +7219,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/reg3_v01", replace)
-						
+
 	graph export 	"$xfig\reg3_v01.png", as(pdf) replace
-	
+
 restore
 
 * weather + weather^2
@@ -7233,8 +7235,8 @@ preserve
 	gen 			k1 		= 	sat
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	country + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Weather Product"
@@ -7243,23 +7245,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Weather + Weather{sup:2}") ylab(0(1)$gheight ) ylabel(1 "CHIRPS" ///
 						2 "CPC" 3 "MERRA-2" ///
-						4 "ARC2" 5 "ERA5" /// 
+				4 "ARC2" 5 "ERA5" ///
 						6 "TAMSAT" 7 "*{bf:Rainfall Product}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "Ethiopia" 14 "Malawi" 15 "Niger" ///
@@ -7277,9 +7279,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/reg4_v01", replace)
-						
+
 	graph export 	"$xfig\reg4_v01.png", as(pdf) replace
-	
+
 restore
 
 * weather + weather^2 + fe
@@ -7293,8 +7295,8 @@ preserve
 	gen 			k1 		= 	sat
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	country + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Weather Product"
@@ -7303,23 +7305,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Weather + Weather{sup:2} + FE") ylab(0(1)$gheight ) ylabel(1 "CHIRPS" ///
 						2 "CPC" 3 "MERRA-2" ///
-						4 "ARC2" 5 "ERA5" /// 
+				4 "ARC2" 5 "ERA5" ///
 						6 "TAMSAT" 7 "*{bf:Rainfall Product}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "Ethiopia" 14 "Malawi" 15 "Niger" ///
@@ -7337,9 +7339,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/reg5_v01", replace)
-						
+
 	graph export 	"$xfig\reg5_v01.png", as(pdf) replace
-	
+
 restore
 
 * weather + weather^2 + fe + inputs
@@ -7353,8 +7355,8 @@ preserve
 	gen 			k1 		= 	sat
 	gen 			k2 		= 	depvar + 6 + 2
 	gen				k3		=	country + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Weather Product"
@@ -7363,23 +7365,23 @@ preserve
 
 	sum			 	ci_up
 	global			bmax = r(max)
-	
+
 	sum			 	ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	28
-	  
+
 	di $bmin
 	di $brange
 	di $from_y
 	di $gheight
-			
+
 	twoway 			scatter k1 k2 k3 obs, xlab(0(4)72) xsize(10) ysize(6) msize(small small small)  ///
 						title("Weather + Weather{sup:2} + FE + Inputs") ylab(0(1)$gheight ) ylabel(1 "CHIRPS" ///
 						2 "CPC" 3 "MERRA-2" ///
-						4 "ARC2" 5 "ERA5" /// 
+				4 "ARC2" 5 "ERA5" ///
 						6 "TAMSAT" 7 "*{bf:Rainfall Product}*" ///
 						9 "Quantity" 10 "Value" 11 "*{bf:Dependant Variable}*" ///
 						13 "Ethiopia" 14 "Malawi" 15 "Niger" ///
@@ -7397,9 +7399,9 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/reg6_v01", replace)
-						
+
 	graph export 	"$xfig\reg6_v01.png", as(pdf) replace
-	
+
 restore
 
 * combine varname specification curves ethiopia rainfall
@@ -7407,18 +7409,16 @@ restore
 						"$sfig/reg2_v01.gph" "$sfig/reg5_v01.gph"  ///
 						"$sfig/reg3_v01.gph" "$sfig/reg6_v01.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
+
 	graph export 	"$xfig\reg_v01.pdf", as(pdf) replace
 
 
-
-	
-************************************************************************
+**********************************************************************
 **# 7 - end matter
-************************************************************************
+**********************************************************************
 
 
 * close the log
 	log	close
 
-/* END */		
+/* END */

@@ -14,24 +14,24 @@
 * TO DO:
 	* done
 
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
 
-* define paths	
-	global	root 		= 	"$data/household_data/ethiopia/wave_4/raw"  
-	global	export 		= 	"$data/household_data/ethiopia/wave_4/refined"
-	global	logout 		= 	"$data/household_data/ethiopia/logs"
-	
-* open log	
-	cap log 		close
+**********************************************************************
+**# 0 - setup
+**********************************************************************
+
+* define paths
+	global		root 		= 	"$raw/ethiopia/wave_4/raw"
+	global		export 		= 	"$data/refined_data/ethiopia/wave_4"
+	global		logout 		= 	"$data/refined_data/ethiopia/logs"
+
+* open log
+	cap log close
 	log using 		"$logout/wave_4_geovars", append
 
-	
-* **********************************************************************
-* 1 - ESS (Wave 4) - geovars
-* **********************************************************************
+
+**********************************************************************
+**# 1 - ess (wave 4) - geovars
+**********************************************************************
 
 * import wave 4 geovars
 	use 			"$root/ETH_HouseholdGeovariables_Y4.dta", clear
@@ -40,11 +40,11 @@
 	isid 			household_id
 
 	rename 			ssa_aez09 aez
-	
-	
-* **********************************************************************
-* 2 - end matter, clean up to save
-* **********************************************************************
+
+
+**********************************************************************
+**# 2 - end matter, clean up to save
+**********************************************************************
 
 	keep 			household_id aez
 
@@ -58,4 +58,4 @@
 * close the log
 	log	close
 
-/* END */	
+/* END */

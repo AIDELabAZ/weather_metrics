@@ -10,24 +10,24 @@
 	* outputs finished houshold data set ready to merge with weather
 
 * assumes
-	* customsave.ado 
+	* customsave.ado
 	* subsidiary, wave-specific .do files
 
 * TO DO:
 	* complete
 
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+
+**********************************************************************
+**# 0 - setup
+**********************************************************************
 
 * define paths
 	loc dofile = "$code/tanzania/household_code"
 
 
-* **********************************************************************
-* 1 - run individual HH and AG cleaning .do files
-* **********************************************************************
+**********************************************************************
+**# 1 - run individual hh and ag cleaning .do files
+**********************************************************************
 
 * loops through four waves of tza hh code
 
@@ -40,45 +40,47 @@
 
 	* loop through each HHSEC file in the folder local
 		loc HHfile : dir "`dofile'/`folder'" files "*hhsec*.do"
-	
+
 	* loop through each file in the above local
 		foreach file in `HHfile' {
-	    
+
 		* run each individual file
-			do "`dofile'/`folder'/`file'"	
+			do			"`dofile'/`folder'/`file'"
 	}
 	* loop through each HHSEC file in the folder local
 		loc GEOfile : dir "`dofile'/`folder'" files "*geo*.do"
-	
+
 	* loop through each file in the above local
 		foreach file in `GEOfile' {
-	    
+
 		* run each individual file
-			do "`dofile'/`folder'/`file'"	
+			do			"`dofile'/`folder'/`file'"
 	}
 	* loop through each AGSEC file in the folder local
 		loc AGfile : dir "`dofile'/`folder'" files "*agsec*.do"
-	
+
 	* loop through each file in the above local
 		foreach file in `AGfile' {
-	    
+
 		* run each individual file
-			do "`dofile'/`folder'/`file'"		
-	}		
+			do			"`dofile'/`folder'/`file'"
+		}
 }
 
 
-* **********************************************************************
-* 2 - run individual HH and AG cleaning .do files
-* **********************************************************************
+**********************************************************************
+**# 2 - run individual hh and ag cleaning .do files
+**********************************************************************
 
+* Wave 3 still consumes the legacy key; the appended panel uses the SDD key.
+	do			"`dofile'/tza_panel_key.do"
 * run panel key cleaning file
 	do			"`dofile'/tza_sdd_panel_key.do"				// panel key
 
-	
-* **********************************************************************
-* 3 - run wave specific .do files to merge hh data together
-* **********************************************************************
+
+**********************************************************************
+**# 3 - run wave specific .do files to merge hh data together
+**********************************************************************
 
 * merge each cleaned file together
 	do 			"`dofile'/wave_1/npsy1_merge.do"			//	merges wv 1 hh datasets
@@ -90,9 +92,9 @@
 	do 			"`dofile'/wave_7/npsy5_merge.do"			//	merges wv 7 hh datasets
 
 
-* **********************************************************************
-* 4 - run wave specific .do files to merge with weather
-* **********************************************************************
+**********************************************************************
+**# 4 - run wave specific .do files to merge with weather
+**********************************************************************
 
 * merge weather data into cleaned household data
 	do 			"`dofile'/wave_1/npsy1_build.do"			//	merges NPSY1 to weather
@@ -104,11 +106,11 @@
 	do 			"`dofile'/wave_7/npsy5_build.do"			//	merges NPSY5 to weather
 
 
-* **********************************************************************
-* 5 - run .do file to append each wave
-* **********************************************************************
+**********************************************************************
+**# 5 - run .do file to append each wave
+**********************************************************************
 
 	do			"`dofile'/tza_append_built.do"				// append waves
-	
+
 /* END */
 

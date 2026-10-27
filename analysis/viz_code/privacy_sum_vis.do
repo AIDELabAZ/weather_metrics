@@ -3,14 +3,14 @@
 * Created by: alj
 * Edited by: jdm
 * Last edit: 16 May 2022
-* Stata v.17.0 
+* Stata v.17.0
 
 * does
 	* reads in lsms data set
-	* makes visualziations of summary statistics  
+	* makes visualziations of summary statistics
 
 * assumes
-	* you have results file 
+	* you have results file
 	* customsave.ado
 	* grc1leg2.ado
 	* palettes
@@ -19,36 +19,36 @@
 * TO DO:
 	* complete
 
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+
+**********************************************************************
+**# 0 - setup
+**********************************************************************
 
 * define paths
 	global	root 	= 	"$data/regression_data"
 	global	stab 	= 	"$data/results_data/tables"
-	global	xtab 	= 	"$data/output/privacy_paper/tables"
-	global	sfig	= 	"$data/results_data/figures"	
-	global 	xfig    =   "$data/output/privacy_paper/figures"
+	global		xtab 	= 	"$data/results_data/tables/privacy_paper"
+	global		sfig	= 	"$data/results_data/figures"
+	global		xfig    =   "$data/results_data/figures/privacy_paper"
 	global	logout 	= 	"$data/results_data/logs"
 
-* open log	
+* open log
 	cap log close
 	log 	using 		"$logout/privacy_sum_vis", append
 
-		
-* **********************************************************************
-* 1 - load and process data
-* **********************************************************************
 
-* load data 
+**********************************************************************
+**# 1 - load and process data
+**********************************************************************
+
+* load data
 	use 			"$root/lsms_panel", clear
 
 * replace missing values as zeros for rainfall variables 1-9
 	forval j = 1/9 {
 	    forval i = 1/6 {
 		    forval k = 0/9 {
-				qui: replace		v0`j'_rf`i'_x`k' = 0 if v0`j'_rf`i'_x`k' == .    
+				qui: replace v0`j'_rf`i'_x`k' = 0 if v0`j'_rf`i'_x`k' == .
 			}
 		}
 	}
@@ -57,7 +57,7 @@
 	forval j = 10/14 {
 	    forval i = 1/6 {
 		    forval k = 0/9 {
-				qui: replace		v`j'_rf`i'_x`k' = 0 if v`j'_rf`i'_x`k' == .    
+				qui: replace v`j'_rf`i'_x`k' = 0 if v`j'_rf`i'_x`k' == .
 			}
 		}
 	}
@@ -66,15 +66,15 @@
 	forval j = 15/22 {
 	    forval i = 1/3 {
 		    forval k = 0/9 {
-				qui: replace		v`j'_tp`i'_x`k' = 0 if v`j'_tp`i'_x`k' == .    
+				qui: replace v`j'_tp`i'_x`k' = 0 if v`j'_tp`i'_x`k' == .
 			}
 		}
 	}
 
 
-* **********************************************************************
-* 2 - generate mean daily rainfall distribution graphs by extraction
-* **********************************************************************
+**********************************************************************
+**# 2 - generate mean daily rainfall distribution graphs by extraction
+**********************************************************************
 
 	colorpalette	economist
 
@@ -134,7 +134,7 @@
 			label(6 "EA modified simple") label(7 "Admin bilinear") ///
 			label(8 "Admin simple") label(9 "EA zone") ///
 			label(10 "Admin area")) saving("$sfig/v01_rf3_density", replace)
-			
+
 * total seasonal rainfall - ARC2
 	twoway	(kdensity v01_rf4_x1, color(edkblue) lpattern(dash) ) ///
 			(kdensity v01_rf4_x2, color(eltblue) lpattern(dot) ) ///
@@ -153,7 +153,7 @@
 			label(6 "EA modified simple") label(7 "Admin bilinear") ///
 			label(8 "Admin simple") label(9 "EA zone") ///
 			label(10 "Admin area")) saving("$sfig/v01_rf4_density", replace)
-			
+
 * total seasonal rainfall - ERA5
 	twoway	(kdensity v01_rf5_x1, color(edkblue) lpattern(dash) ) ///
 			(kdensity v01_rf5_x2, color(eltblue) lpattern(dot) ) ///
@@ -172,7 +172,7 @@
 			label(6 "EA modified simple") label(7 "Admin bilinear") ///
 			label(8 "Admin simple") label(9 "EA zone") ///
 			label(10 "Admin area")) saving("$sfig/v01_rf5_density", replace)
-			
+
 * total seasonal rainfall - TAMSAT
 	twoway	(kdensity v01_rf6_x1, color(edkblue) lpattern(dash) ) ///
 			(kdensity v01_rf6_x2, color(eltblue) lpattern(dot) ) ///
@@ -191,18 +191,18 @@
 			label(6 "EA modified simple") label(7 "Admin bilinear") ///
 			label(8 "Admin simple") label(9 "EA zone") ///
 			label(10 "Admin area")) saving("$sfig/v01_rf6_density", replace)
-			
+
 	grc1leg2 		"$sfig/v01_rf1_density.gph" "$sfig/v01_rf2_density.gph" ///
 						"$sfig/v01_rf3_density.gph" "$sfig/v01_rf4_density.gph"   ///
 						"$sfig/v01_rf5_density.gph" "$sfig/v01_rf6_density.gph", ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v01_density_x.pdf", replace
 
-	
-* **********************************************************************
-* 3 - generate mean temperature distribution graphs by extraction
-* **********************************************************************
+
+**********************************************************************
+**# 3 - generate mean temperature distribution graphs by extraction
+**********************************************************************
 
 * mean temp - MERRA-2
 	twoway	(kdensity v15_tp1_x1, color(edkblue) lpattern(dash) ) ///
@@ -222,7 +222,7 @@
 			label(6 "EA modified simple") label(7 "Admin bilinear") ///
 			label(8 "Admin simple") label(9 "EA zone") ///
 			label(10 "Admin area")) saving("$sfig/v15_tp1_density", replace)
-			
+
 * mean temp - ERA5
 	twoway	(kdensity v15_tp2_x1, color(edkblue) lpattern(dash) ) ///
 			(kdensity v15_tp2_x2, color(eltblue) lpattern(dot) ) ///
@@ -260,17 +260,17 @@
 			label(6 "EA modified simple") label(7 "Admin bilinear") ///
 			label(8 "Admin simple") label(9 "EA zone") ///
 			label(10 "Admin area")) saving("$sfig/v15_tp3_density", replace)
-			
+
 	grc1leg2 		"$sfig/v15_tp1_density.gph" "$sfig/v15_tp2_density.gph" ///
 						"$sfig/v15_tp3_density.gph" , ring(0) pos(4) holes(4) ///
 						col(2) iscale(.5) commonscheme
-						
-	graph export 	"$xfig\v15_density_x.pdf", replace
-	
 
-* **********************************************************************
-* 4 - generate days without rain line graphs by extraction
-* **********************************************************************
+	graph export 	"$xfig\v15_density_x.pdf", replace
+
+
+**********************************************************************
+**# 4 - generate days without rain line graphs by extraction
+**********************************************************************
 
 * days without rain - CHIRPS
 	twoway	(fpfitci v10_rf1_x1 year, color(edkblue) lpattern(dash) ) ///
@@ -291,7 +291,7 @@
 			label(16 "Admin simple") label(18 "EA zone") ///
 			label(20 "Admin area") order(2 4 6 8 10 12 14 16 18 20)) ///
 			saving("$sfig/v10_rf1_density", replace)
-			
+
 * days without rain - CPC
 	twoway	(fpfitci v10_rf2_x1 year, color(edkblue) lpattern(dash) ) ///
 			(fpfitci v10_rf2_x2 year, color(eltblue) lpattern(dot) ) ///
@@ -310,8 +310,8 @@
 			label(12 "EA modified simple") label(14 "Admin bilinear") ///
 			label(16 "Admin simple") label(18 "EA zone") ///
 			label(20 "Admin area") order(2 4 6 8 10 12 14 16 18 20)) ///
-			saving("$sfig/v10_rf2_density", replace)	
-			
+				saving("$sfig/v10_rf2_density", replace)
+
 * days without rain - MERRA-2
 	twoway	(fpfitci v10_rf3_x1 year, color(edkblue) lpattern(dash) ) ///
 			(fpfitci v10_rf3_x2 year, color(eltblue) lpattern(dot) ) ///
@@ -331,7 +331,7 @@
 			label(16 "Admin simple") label(18 "EA zone") ///
 			label(20 "Admin area") order(2 4 6 8 10 12 14 16 18 20)) ///
 			saving("$sfig/v10_rf3_density", replace)
-			
+
 * days without rain - ARC2
 	twoway	(fpfitci v10_rf4_x1 year, color(edkblue) lpattern(dash) ) ///
 			(fpfitci v10_rf4_x2 year, color(eltblue) lpattern(dot) ) ///
@@ -350,8 +350,8 @@
 			label(12 "EA modified simple") label(14 "Admin bilinear") ///
 			label(16 "Admin simple") label(18 "EA zone") ///
 			label(20 "Admin area") order(2 4 6 8 10 12 14 16 18 20)) ///
-			saving("$sfig/v10_rf4_density", replace)	
-			
+				saving("$sfig/v10_rf4_density", replace)
+
 * days without rain - ERA5
 	twoway	(fpfitci v10_rf5_x1 year, color(edkblue) lpattern(dash) ) ///
 			(fpfitci v10_rf5_x2 year, color(eltblue) lpattern(dot) ) ///
@@ -371,7 +371,7 @@
 			label(16 "Admin simple") label(18 "EA zone") ///
 			label(20 "Admin area") order(2 4 6 8 10 12 14 16 18 20)) ///
 			saving("$sfig/v10_rf5_density", replace)
-			
+
 * days without rain - TAMSAT
 	twoway	(fpfitci v10_rf6_x1 year, color(edkblue) lpattern(dash) ) ///
 			(fpfitci v10_rf6_x2 year, color(eltblue) lpattern(dot) ) ///
@@ -390,19 +390,19 @@
 			label(12 "EA modified simple") label(14 "Admin bilinear") ///
 			label(16 "Admin simple") label(18 "EA zone") ///
 			label(20 "Admin area") order(2 4 6 8 10 12 14 16 18 20)) ///
-			saving("$sfig/v10_rf6_density", replace)			
-		
+				saving("$sfig/v10_rf6_density", replace)
+
 	grc1leg2 		"$sfig/v10_rf1_density.gph" "$sfig/v10_rf2_density.gph" ///
 						"$sfig/v10_rf3_density.gph" "$sfig/v10_rf4_density.gph"   ///
 						"$sfig/v10_rf5_density.gph" "$sfig/v10_rf6_density.gph", ///
 						col(2) iscale(.5) commonscheme
-						
-	graph export 	"$xfig\v10_density_x.pdf", replace
-			
 
-* **********************************************************************
-* 5 - generate GDD line graphs by extraction
-* **********************************************************************
+	graph export 	"$xfig\v10_density_x.pdf", replace
+
+
+**********************************************************************
+**# 5 - generate gdd line graphs by extraction
+**********************************************************************
 
 * growing degree days - MERRA-2
 	twoway	(fpfitci v19_tp1_x1 year, color(edkblue) lpattern(dash) ) ///
@@ -423,7 +423,7 @@
 			label(16 "Admin simple") label(18 "EA zone") ///
 			label(20 "Admin area") order(2 4 6 8 10 12 14 16 18 20)) ///
 			saving("$sfig/v19_tp1_density", replace)
-			
+
 * growing degree days - ERA5
 	twoway	(fpfitci v19_tp2_x1 year, color(edkblue) lpattern(dash) ) ///
 			(fpfitci v19_tp2_x2 year, color(eltblue) lpattern(dot) ) ///
@@ -463,17 +463,17 @@
 			label(16 "Admin simple") label(18 "EA zone") ///
 			label(20 "Admin area") order(2 4 6 8 10 12 14 16 18 20)) ///
 			saving("$sfig/v19_tp3_density", replace)
-			
+
 	grc1leg2 		"$sfig/v19_tp1_density.gph" "$sfig/v19_tp2_density.gph" ///
 						"$sfig/v19_tp3_density.gph" , ring(0) pos(4) holes(4) ///
 						col(2) iscale(.5) commonscheme
-						
+
 	graph export 	"$xfig\v19_density_x.pdf", replace
-	
-			
-* **********************************************************************
-* 7 - end matter
-* **********************************************************************
+
+
+**********************************************************************
+**# 7 - end matter
+**********************************************************************
 
 * close the log
 	log	close
