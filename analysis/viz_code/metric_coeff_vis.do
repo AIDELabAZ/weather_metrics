@@ -1,14 +1,14 @@
 * Project: WB Weather
 * Created on: September 2019
 * Created by: jdm
-* Edited by: jdm
-* Last edit:  11 Sep 2024
-* Stata v.18.0
+* Edited by: cda
+* Last edit:  8 Jan 2025
+* Stata v.18.0 
 
 * does
 	* reads in results data set
-	* makes visualziations of results
-
+	* makes visualziations of results 
+	
 * assumes
 	* you have results file
 	* customsave.ado
@@ -44,46 +44,49 @@
 **********************************************************************
 
 *generate different betas based on signficance
-	gen 			b_sig = beta
+	replace 		b_sig = beta
 	replace 		b_sig = . if pval > .05
 	lab var 		b_sig "p < 0.05"
-
-	gen 			b_ns = beta
+	replace 		b_ns = beta
 	replace 		b_ns= . if p <= .05
 	lab var 		b_ns "n.s."
 
 * generate significance dummy
-	gen				sig = 1 if b_sig != .
+	replace			sig = 1 if b_sig != .
 	replace			sig = 0 if b_ns != .
-	lab	def			yesno 0 "Not Significant" 1 "Significant"
+	lab	def			yesno 0 "Not Significant" 1 "Significant", replace
 	lab val			sig yesno
 	lab var			sig "Weather variable is significant"
 
 * generate sign dummy
-	gen 			b_sign = 1 if b_sig > 0 & b_sig != .
+	replace 		b_sign = 1 if b_sig > 0 & b_sig != .
 	replace 		b_sign = 0 if b_sig < 0 & b_sig != .
-	lab	def			posneg 0 "Negative" 1 "Positive"
+	lab	def			posneg 0 "Negative" 1 "Positive", replace
 	lab val			b_sign posneg
 	lab var			b_sign "Sign on weather variable"
 
 * rename satellites to actual name
 	lab	def			sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" 4 "ARC2" 5 "ERA5" ///
 						6 "TAMSAT" 7 "MERRA-2-T" 8 "ERA5-T" 9 "CPC-T", replace
-
+						
 
 **********************************************************************
 **# 2 - generate coef plots by rainfall variable and satellite
 **********************************************************************
 
+
+***************************************************************************************
+**# 2a - generate coef plots by rainfall variable and satellite, weather + FE + inputs
+***************************************************************************************
+	
 *** ethiopia ***
 preserve
 	keep			if country == 1
-	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 		obs = _n
 
 * stack values of the specification indicators
 	gen 			k1 		= 	depvar
@@ -139,12 +142,11 @@ restore
 *** malawi ***
 preserve
 	keep			if country == 2
-	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 		obs = _n
 
 * stack values of the specification indicators
 	gen 			k1 		= 	depvar
@@ -200,12 +202,11 @@ restore
 *** niger ***
 preserve
 	keep			if country == 4
-	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 		obs = _n
 
 * stack values of the specification indicators
 	gen 			k1 		= 	depvar
@@ -261,12 +262,11 @@ restore
 *** nigeria ***
 preserve
 	keep			if country == 5
-	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 		obs = _n
 
 * stack values of the specification indicators
 	gen 			k1 		= 	depvar
@@ -321,12 +321,11 @@ restore
 *** tanzania ***
 preserve
 	keep			if country == 6
-	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 		obs = _n
 
 * stack values of the specification indicators
 	gen 			k1 		= 	depvar
@@ -382,12 +381,11 @@ restore
 *** uganda ***
 preserve
 	keep			if country == 7
-	keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
+	replace 		obs = _n
 
 * stack values of the specification indicators
 	gen 			k1 		= 	depvar
@@ -440,7 +438,733 @@ preserve
 restore
 
 
-**********************************************************************
+******************************************************************************
+**# 2b - generate coef plots by rainfall variable and satellite, weather + FE
+******************************************************************************
+	
+*** ethiopia ***
+preserve
+	keep			if country == 1
+	keep 			if regname == 2
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	replace 		obs = _n
+
+* stack values of the specification indicators
+	gen 			k1 		= 	depvar
+	gen				k2      =   sat + 4			
+	gen 			k3		=	varname + 12
+	
+* label new variables	
+	lab				var obs "Specification # - sorted by effect size"
+
+	lab 			var k1 "Dependent Variable"
+	lab 			var k2 "Remote Sensing Product"
+	lab 			var k3 "Rainfall Metric"
+
+	sum			 	ci_up
+	global			bmax = r(max)
+	
+	sum			 	ci_lo
+	global			bmin = r(min)
+	
+	global			brange	=	$bmax - $bmin
+	global			from_y	=	$bmin - 3*$brange
+	global			gheight	=	40
+
+	twoway 			scatter k1 k2 k3 obs, xlab(0(8)168) xsize(10) ysize(4) msize(vsmall vsmall vsmall)  ///
+						title(" ") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
+						ylabel(1 "Quantity" ///
+						2 "Value" 3 "*{bf:Dependant Variable}*" ///
+						5 "CHIRPS" 6 "CPC" 7 "MERRA-2" 8 "ARC2" 9 "ERA5" 10 "TAMSAT" ///
+						11 "*{bf:Remote Sensing Product}*" 12 " " 13 "Mean Daily Rainfall" ///
+						14 "Median Daily Rainfall" 15 "Variance of Daily Rainfall" 16 "Skew of Daily Rainfall" ///
+						17 "Total Rainfall" 18 "Deviation in Total Rainfall" 19 "Z-Score of Total Rainfall" ///
+						20 "Rainy Days" 21 "Deviation in Rainy Days" 22 "No Rain Days" 23 "Deviation in No Rain Days" ///
+						24 "Percent Rainy Days" 25 "Deviation in Percent Rainy Days" ///
+						26 "Longest Dry Spell" 27 "*{bf:Rainfall Variables}*" 40 " ", angle(0) ///
+						labsize(vsmall) tstyle(notick)) || ///
+						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig == ., ///
+						barwidth(.2) color(black%50) yaxis(2) xline(88, lcolor(maroon) lstyle(solid))) || ///
+						(rbar ci_lo ci_up obs if b_sig != ., ///
+						barwidth(.2) color(edkblue%50) yaxis(2)  ///
+						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
+						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
+						saving("$sfig/eth_all2", replace)
+
+	graph export 	"$xfig\eth_all2.png", width(1400) replace	
+	graph export 	"$xfig\eth_all2.eps", 			 replace
+	
+restore
+
+*** malawi ***
+preserve
+	keep			if country == 2
+	keep 			if regname == 2
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	replace 		obs = _n
+
+* stack values of the specification indicators
+	gen 			k1 		= 	depvar
+	gen				k2      =   sat + 4			
+	gen 			k3		=	varname + 12
+	
+* label new variables	
+	lab				var obs "Specification # - sorted by effect size"
+
+	lab 			var k1 "Dependent Variable"
+	lab 			var k2 "Remote Sensing Product"
+	lab 			var k3 "Rainfall Metric"
+
+	sum			 	ci_up
+	global			bmax = r(max)
+	
+	sum			 	ci_lo
+	global			bmin = r(min)
+	
+	global			brange	=	$bmax - $bmin
+	global			from_y	=	$bmin - 3*$brange
+	global			gheight	=	40
+
+	twoway 			scatter k1 k2 k3 obs, xlab(0(8)168) xsize(10) ysize(4) msize(vsmall vsmall vsmall)  ///
+						title(" ") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
+						ylabel(1 "Quantity" ///
+						2 "Value" 3 "*{bf:Dependant Variable}*" ///
+						5 "CHIRPS" 6 "CPC" 7 "MERRA-2" 8 "ARC2" 9 "ERA5" 10 "TAMSAT" ///
+						11 "*{bf:Remote Sensing Product}*" 12 " " 13 "Mean Daily Rainfall" ///
+						14 "Median Daily Rainfall" 15 "Variance of Daily Rainfall" 16 "Skew of Daily Rainfall" ///
+						17 "Total Rainfall" 18 "Deviation in Total Rainfall" 19 "Z-Score of Total Rainfall" ///
+						20 "Rainy Days" 21 "Deviation in Rainy Days" 22 "No Rain Days" 23 "Deviation in No Rain Days" ///
+						24 "Percent Rainy Days" 25 "Deviation in Percent Rainy Days" ///
+						26 "Longest Dry Spell" 27 "*{bf:Rainfall Variables}*" 40 " ", angle(0) ///
+						labsize(vsmall) tstyle(notick)) || ///
+						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig == ., ///
+						barwidth(.2) color(black%50) yaxis(2) xline(70, lcolor(maroon) lstyle(solid))) || ///
+						(rbar ci_lo ci_up obs if b_sig != ., ///
+						barwidth(.2) color(edkblue%50) yaxis(2)  ///
+						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
+						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
+						saving("$sfig/mwi_all2", replace)
+
+	graph export 	"$xfig\mwi_all2.png", width(1400) replace	
+	graph export 	"$xfig\mwi_all2.eps", 			 replace
+	
+restore
+
+*** niger ***
+preserve
+	keep			if country == 4
+	keep 			if regname == 2
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	replace 		obs = _n
+
+* stack values of the specification indicators
+	gen 			k1 		= 	depvar
+	gen				k2      =   sat + 4			
+	gen 			k3		=	varname + 12
+	
+* label new variables	
+	lab				var obs "Specification # - sorted by effect size"
+
+	lab 			var k1 "Dependent Variable"
+	lab 			var k2 "Remote Sensing Product"
+	lab 			var k3 "Rainfall Metric"
+
+	sum			 	ci_up
+	global			bmax = r(max)
+	
+	sum			 	ci_lo
+	global			bmin = r(min)
+	
+	global			brange	=	$bmax - $bmin
+	global			from_y	=	$bmin - 3*$brange
+	global			gheight	=	40
+
+	twoway 			scatter k1 k2 k3 obs, xlab(0(8)168) xsize(10) ysize(4) msize(vsmall vsmall vsmall)  ///
+						title(" ") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
+						ylabel(1 "Quantity" ///
+						2 "Value" 3 "*{bf:Dependant Variable}*" ///
+						5 "CHIRPS" 6 "CPC" 7 "MERRA-2" 8 "ARC2" 9 "ERA5" 10 "TAMSAT" ///
+						11 "*{bf:Remote Sensing Product}*" 12 " " 13 "Mean Daily Rainfall" ///
+						14 "Median Daily Rainfall" 15 "Variance of Daily Rainfall" 16 "Skew of Daily Rainfall" ///
+						17 "Total Rainfall" 18 "Deviation in Total Rainfall" 19 "Z-Score of Total Rainfall" ///
+						20 "Rainy Days" 21 "Deviation in Rainy Days" 22 "No Rain Days" 23 "Deviation in No Rain Days" ///
+						24 "Percent Rainy Days" 25 "Deviation in Percent Rainy Days" ///
+						26 "Longest Dry Spell" 27 "*{bf:Rainfall Variables}*" 40 " ", angle(0) ///
+						labsize(vsmall) tstyle(notick)) || ///
+						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig == ., ///
+						barwidth(.2) color(black%50) yaxis(2) xline(54, lcolor(maroon) lstyle(solid))) || ///
+						(rbar ci_lo ci_up obs if b_sig != ., ///
+						barwidth(.2) color(edkblue%50) yaxis(2)  ///
+						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
+						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
+						saving("$sfig/ner_all2", replace)
+
+	graph export 	"$xfig\ner_all2.png", width(1400) replace	
+	graph export 	"$xfig\ner_all2.eps", 			 replace
+	
+restore
+
+*** nigeria ***
+preserve
+	keep			if country == 5
+	keep 			if regname == 2
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	replace 		obs = _n
+
+* stack values of the specification indicators
+	gen 			k1 		= 	depvar
+	gen				k2      =   sat + 4			
+	gen 			k3		=	varname + 12
+	
+* label new variables	
+	lab				var obs "Specification # - sorted by effect size"
+
+	lab 			var k1 "Dependent Variable"
+	lab 			var k2 "Remote Sensing Product"
+	lab 			var k3 "Rainfall Metric"
+
+	sum			 	ci_up
+	global			bmax = r(max)
+	
+	sum			 	ci_lo
+	global			bmin = r(min)
+	
+	global			brange	=	$bmax - $bmin
+	global			from_y	=	$bmin - 3*$brange
+	global			gheight	=	40
+
+	twoway 			scatter k1 k2 k3 obs, xlab(0(8)168) xsize(10) ysize(4) msize(vsmall vsmall vsmall)  ///
+						title(" ") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
+						ylabel(1 "Quantity" ///
+						2 "Value" 3 "*{bf:Dependant Variable}*" ///
+						5 "CHIRPS" 6 "CPC" 7 "MERRA-2" 8 "ARC2" 9 "ERA5" 10 "TAMSAT" ///
+						11 "*{bf:Remote Sensing Product}*" 12 " " 13 "Mean Daily Rainfall" ///
+						14 "Median Daily Rainfall" 15 "Variance of Daily Rainfall" 16 "Skew of Daily Rainfall" ///
+						17 "Total Rainfall" 18 "Deviation in Total Rainfall" 19 "Z-Score of Total Rainfall" ///
+						20 "Rainy Days" 21 "Deviation in Rainy Days" 22 "No Rain Days" 23 "Deviation in No Rain Days" ///
+						24 "Percent Rainy Days" 25 "Deviation in Percent Rainy Days" ///
+						26 "Longest Dry Spell" 27 "*{bf:Rainfall Variables}*" 40 " ", angle(0) ///
+						labsize(vsmall) tstyle(notick)) || ///
+						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig == ., ///
+						barwidth(.2) color(black%50) yaxis(2) xline(92, lcolor(maroon) lstyle(solid)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig != ., ///
+						barwidth(.2) color(edkblue%50) yaxis(2)  ///
+						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
+						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
+						saving("$sfig/nga_all2", replace)
+
+	graph export 	"$xfig\nga_all2.png", width(1400) replace	
+	graph export 	"$xfig\nga_all2.eps", 			 replace					
+restore
+
+*** tanzania ***
+preserve
+	keep			if country == 6
+	keep 			if regname == 2
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	replace 		obs = _n
+
+* stack values of the specification indicators
+	gen 			k1 		= 	depvar
+	gen				k2      =   sat + 4			
+	gen 			k3		=	varname + 12
+	
+* label new variables	
+	lab				var obs "Specification # - sorted by effect size"
+
+	lab 			var k1 "Dependent Variable"
+	lab 			var k2 "Remote Sensing Product"
+	lab 			var k3 "Rainfall Metric"
+
+	sum			 	ci_up
+	global			bmax = r(max)
+	
+	sum			 	ci_lo
+	global			bmin = r(min)
+	
+	global			brange	=	$bmax - $bmin
+	global			from_y	=	$bmin - 3*$brange
+	global			gheight	=	40
+
+	twoway 			scatter k1 k2 k3 obs, xlab(0(8)168) xsize(10) ysize(4) msize(vsmall vsmall vsmall)  ///
+						title(" ") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
+						ylabel(1 "Quantity" ///
+						2 "Value" 3 "*{bf:Dependant Variable}*" ///
+						5 "CHIRPS" 6 "CPC" 7 "MERRA-2" 8 "ARC2" 9 "ERA5" 10 "TAMSAT" ///
+						11 "*{bf:Remote Sensing Product}*" 12 " " 13 "Mean Daily Rainfall" ///
+						14 "Median Daily Rainfall" 15 "Variance of Daily Rainfall" 16 "Skew of Daily Rainfall" ///
+						17 "Total Rainfall" 18 "Deviation in Total Rainfall" 19 "Z-Score of Total Rainfall" ///
+						20 "Rainy Days" 21 "Deviation in Rainy Days" 22 "No Rain Days" 23 "Deviation in No Rain Days" ///
+						24 "Percent Rainy Days" 25 "Deviation in Percent Rainy Days" ///
+						26 "Longest Dry Spell" 27 "*{bf:Rainfall Variables}*" 40 " ", angle(0) ///
+						labsize(vsmall) tstyle(notick)) || ///
+						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig == ., ///
+						barwidth(.2) color(black%50) yaxis(2) xline(60, lcolor(maroon) lstyle(solid))) || ///
+						(rbar ci_lo ci_up obs if b_sig != ., ///
+						barwidth(.2) color(edkblue%50) yaxis(2)  ///
+						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
+						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
+						saving("$sfig/tza_all2", replace)
+
+	graph export 	"$xfig\tza_all2.png", width(1400) replace	
+	graph export 	"$xfig\tza_all2.eps", 			 replace
+	
+restore
+
+*** uganda ***
+preserve
+	keep			if country == 7
+	keep 			if regname == 2
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	replace 		obs = _n
+
+* stack values of the specification indicators
+	gen 			k1 		= 	depvar
+	gen				k2      =   sat + 4			
+	gen 			k3		=	varname + 12
+	
+* label new variables	
+	lab				var obs "Specification # - sorted by effect size"
+
+	lab 			var k1 "Dependent Variable"
+	lab 			var k2 "Remote Sensing Product"
+	lab 			var k3 "Rainfall Metric"
+
+	sum			 	ci_up
+	global			bmax = r(max)
+	
+	sum			 	ci_lo
+	global			bmin = r(min)
+	
+	global			brange	=	$bmax - $bmin
+	global			from_y	=	$bmin - 3*$brange
+	global			gheight	=	40
+
+	twoway 			scatter k1 k2 k3 obs, xlab(0(8)168) xsize(10) ysize(4) msize(vsmall vsmall vsmall)  ///
+						title(" ") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
+						ylabel(1 "Quantity" ///
+						2 "Value" 3 "*{bf:Dependant Variable}*" ///
+						5 "CHIRPS" 6 "CPC" 7 "MERRA-2" 8 "ARC2" 9 "ERA5" 10 "TAMSAT" ///
+						11 "*{bf:Remote Sensing Product}*" 12 " " 13 "Mean Daily Rainfall" ///
+						14 "Median Daily Rainfall" 15 "Variance of Daily Rainfall" 16 "Skew of Daily Rainfall" ///
+						17 "Total Rainfall" 18 "Deviation in Total Rainfall" 19 "Z-Score of Total Rainfall" ///
+						20 "Rainy Days" 21 "Deviation in Rainy Days" 22 "No Rain Days" 23 "Deviation in No Rain Days" ///
+						24 "Percent Rainy Days" 25 "Deviation in Percent Rainy Days" ///
+						26 "Longest Dry Spell" 27 "*{bf:Rainfall Variables}*" 40 " ", angle(0) ///
+						labsize(vsmall) tstyle(notick)) || ///
+						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig == ., ///
+						barwidth(.2) color(black%50) yaxis(2) xline(58, lcolor(maroon) lstyle(solid)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig != ., ///
+						barwidth(.2) color(edkblue%50) yaxis(2)  ///
+						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
+						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
+						saving("$sfig/uga_all2", replace)
+
+	graph export 	"$xfig\uga_all2.png", width(1400) replace	
+	graph export 	"$xfig\uga_all2.eps", 			 replace					
+restore
+
+******************************************************************************
+**# 2c - generate coef plots by rainfall variable and satellite, weather only
+******************************************************************************
+	
+*** ethiopia ***
+preserve
+	keep			if country == 1
+	keep 			if regname == 1
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	replace 		obs = _n
+
+* stack values of the specification indicators
+	gen 			k1 		= 	depvar
+	gen				k2      =   sat + 4			
+	gen 			k3		=	varname + 12
+	
+* label new variables	
+	lab				var obs "Specification # - sorted by effect size"
+
+	lab 			var k1 "Dependent Variable"
+	lab 			var k2 "Remote Sensing Product"
+	lab 			var k3 "Rainfall Metric"
+
+	sum			 	ci_up
+	global			bmax = r(max)
+	
+	sum			 	ci_lo
+	global			bmin = r(min)
+	
+	global			brange	=	$bmax - $bmin
+	global			from_y	=	$bmin - 3*$brange
+	global			gheight	=	40
+
+	twoway 			scatter k1 k2 k3 obs, xlab(0(8)168) xsize(10) ysize(4) msize(vsmall vsmall vsmall)  ///
+						title(" ") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
+						ylabel(1 "Quantity" ///
+						2 "Value" 3 "*{bf:Dependant Variable}*" ///
+						5 "CHIRPS" 6 "CPC" 7 "MERRA-2" 8 "ARC2" 9 "ERA5" 10 "TAMSAT" ///
+						11 "*{bf:Remote Sensing Product}*" 12 " " 13 "Mean Daily Rainfall" ///
+						14 "Median Daily Rainfall" 15 "Variance of Daily Rainfall" 16 "Skew of Daily Rainfall" ///
+						17 "Total Rainfall" 18 "Deviation in Total Rainfall" 19 "Z-Score of Total Rainfall" ///
+						20 "Rainy Days" 21 "Deviation in Rainy Days" 22 "No Rain Days" 23 "Deviation in No Rain Days" ///
+						24 "Percent Rainy Days" 25 "Deviation in Percent Rainy Days" ///
+						26 "Longest Dry Spell" 27 "*{bf:Rainfall Variables}*" 40 " ", angle(0) ///
+						labsize(vsmall) tstyle(notick)) || ///
+						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig == ., ///
+						barwidth(.2) color(black%50) yaxis(2) xline(88, lcolor(maroon) lstyle(solid))) || ///
+						(rbar ci_lo ci_up obs if b_sig != ., ///
+						barwidth(.2) color(edkblue%50) yaxis(2)  ///
+						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
+						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
+						saving("$sfig/eth_all3", replace)
+
+	graph export 	"$xfig\eth_all3.png", width(1400) replace	
+	graph export 	"$xfig\eth_all3.eps", 			 replace
+	
+restore
+
+*** malawi ***
+preserve
+	keep			if country == 2
+	keep 			if regname == 1
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	replace 		obs = _n
+
+* stack values of the specification indicators
+	gen 			k1 		= 	depvar
+	gen				k2      =   sat + 4			
+	gen 			k3		=	varname + 12
+	
+* label new variables	
+	lab				var obs "Specification # - sorted by effect size"
+
+	lab 			var k1 "Dependent Variable"
+	lab 			var k2 "Remote Sensing Product"
+	lab 			var k3 "Rainfall Metric"
+
+	sum			 	ci_up
+	global			bmax = r(max)
+	
+	sum			 	ci_lo
+	global			bmin = r(min)
+	
+	global			brange	=	$bmax - $bmin
+	global			from_y	=	$bmin - 3*$brange
+	global			gheight	=	40
+
+	twoway 			scatter k1 k2 k3 obs, xlab(0(8)168) xsize(10) ysize(4) msize(vsmall vsmall vsmall)  ///
+						title(" ") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
+						ylabel(1 "Quantity" ///
+						2 "Value" 3 "*{bf:Dependant Variable}*" ///
+						5 "CHIRPS" 6 "CPC" 7 "MERRA-2" 8 "ARC2" 9 "ERA5" 10 "TAMSAT" ///
+						11 "*{bf:Remote Sensing Product}*" 12 " " 13 "Mean Daily Rainfall" ///
+						14 "Median Daily Rainfall" 15 "Variance of Daily Rainfall" 16 "Skew of Daily Rainfall" ///
+						17 "Total Rainfall" 18 "Deviation in Total Rainfall" 19 "Z-Score of Total Rainfall" ///
+						20 "Rainy Days" 21 "Deviation in Rainy Days" 22 "No Rain Days" 23 "Deviation in No Rain Days" ///
+						24 "Percent Rainy Days" 25 "Deviation in Percent Rainy Days" ///
+						26 "Longest Dry Spell" 27 "*{bf:Rainfall Variables}*" 40 " ", angle(0) ///
+						labsize(vsmall) tstyle(notick)) || ///
+						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig == ., ///
+						barwidth(.2) color(black%50) yaxis(2) xline(70, lcolor(maroon) lstyle(solid))) || ///
+						(rbar ci_lo ci_up obs if b_sig != ., ///
+						barwidth(.2) color(edkblue%50) yaxis(2)  ///
+						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
+						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
+						saving("$sfig/mwi_all3", replace)
+
+	graph export 	"$xfig\mwi_all3.png", width(1400) replace	
+	graph export 	"$xfig\mwi_all3.eps", 			 replace
+	
+restore
+
+*** niger ***
+preserve
+	keep			if country == 4
+	keep 			if regname == 1
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	replace 		obs = _n
+
+* stack values of the specification indicators
+	gen 			k1 		= 	depvar
+	gen				k2      =   sat + 4			
+	gen 			k3		=	varname + 12
+	
+* label new variables	
+	lab				var obs "Specification # - sorted by effect size"
+
+	lab 			var k1 "Dependent Variable"
+	lab 			var k2 "Remote Sensing Product"
+	lab 			var k3 "Rainfall Metric"
+
+	sum			 	ci_up
+	global			bmax = r(max)
+	
+	sum			 	ci_lo
+	global			bmin = r(min)
+	
+	global			brange	=	$bmax - $bmin
+	global			from_y	=	$bmin - 3*$brange
+	global			gheight	=	40
+
+	twoway 			scatter k1 k2 k3 obs, xlab(0(8)168) xsize(10) ysize(4) msize(vsmall vsmall vsmall)  ///
+						title(" ") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
+						ylabel(1 "Quantity" ///
+						2 "Value" 3 "*{bf:Dependant Variable}*" ///
+						5 "CHIRPS" 6 "CPC" 7 "MERRA-2" 8 "ARC2" 9 "ERA5" 10 "TAMSAT" ///
+						11 "*{bf:Remote Sensing Product}*" 12 " " 13 "Mean Daily Rainfall" ///
+						14 "Median Daily Rainfall" 15 "Variance of Daily Rainfall" 16 "Skew of Daily Rainfall" ///
+						17 "Total Rainfall" 18 "Deviation in Total Rainfall" 19 "Z-Score of Total Rainfall" ///
+						20 "Rainy Days" 21 "Deviation in Rainy Days" 22 "No Rain Days" 23 "Deviation in No Rain Days" ///
+						24 "Percent Rainy Days" 25 "Deviation in Percent Rainy Days" ///
+						26 "Longest Dry Spell" 27 "*{bf:Rainfall Variables}*" 40 " ", angle(0) ///
+						labsize(vsmall) tstyle(notick)) || ///
+						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig == ., ///
+						barwidth(.2) color(black%50) yaxis(2) xline(54, lcolor(maroon) lstyle(solid))) || ///
+						(rbar ci_lo ci_up obs if b_sig != ., ///
+						barwidth(.2) color(edkblue%50) yaxis(2)  ///
+						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
+						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
+						saving("$sfig/ner_all3", replace)
+
+	graph export 	"$xfig\ner_all3.png", width(1400) replace	
+	graph export 	"$xfig\ner_all3.eps", 			 replace
+	
+restore
+
+*** nigeria ***
+preserve
+	keep			if country == 5
+	keep 			if regname == 1
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	replace 		obs = _n
+
+* stack values of the specification indicators
+	gen 			k1 		= 	depvar
+	gen				k2      =   sat + 4			
+	gen 			k3		=	varname + 12
+	
+* label new variables	
+	lab				var obs "Specification # - sorted by effect size"
+
+	lab 			var k1 "Dependent Variable"
+	lab 			var k2 "Remote Sensing Product"
+	lab 			var k3 "Rainfall Metric"
+
+	sum			 	ci_up
+	global			bmax = r(max)
+	
+	sum			 	ci_lo
+	global			bmin = r(min)
+	
+	global			brange	=	$bmax - $bmin
+	global			from_y	=	$bmin - 3*$brange
+	global			gheight	=	40
+
+	twoway 			scatter k1 k2 k3 obs, xlab(0(8)168) xsize(10) ysize(4) msize(vsmall vsmall vsmall)  ///
+						title(" ") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
+						ylabel(1 "Quantity" ///
+						2 "Value" 3 "*{bf:Dependant Variable}*" ///
+						5 "CHIRPS" 6 "CPC" 7 "MERRA-2" 8 "ARC2" 9 "ERA5" 10 "TAMSAT" ///
+						11 "*{bf:Remote Sensing Product}*" 12 " " 13 "Mean Daily Rainfall" ///
+						14 "Median Daily Rainfall" 15 "Variance of Daily Rainfall" 16 "Skew of Daily Rainfall" ///
+						17 "Total Rainfall" 18 "Deviation in Total Rainfall" 19 "Z-Score of Total Rainfall" ///
+						20 "Rainy Days" 21 "Deviation in Rainy Days" 22 "No Rain Days" 23 "Deviation in No Rain Days" ///
+						24 "Percent Rainy Days" 25 "Deviation in Percent Rainy Days" ///
+						26 "Longest Dry Spell" 27 "*{bf:Rainfall Variables}*" 40 " ", angle(0) ///
+						labsize(vsmall) tstyle(notick)) || ///
+						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig == ., ///
+						barwidth(.2) color(black%50) yaxis(2) xline(92, lcolor(maroon) lstyle(solid)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig != ., ///
+						barwidth(.2) color(edkblue%50) yaxis(2)  ///
+						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
+						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
+						saving("$sfig/nga_all3", replace)
+
+	graph export 	"$xfig\nga_all3.png", width(1400) replace	
+	graph export 	"$xfig\nga_all3.eps", 			 replace					
+restore
+
+*** tanzania ***
+preserve
+	keep			if country == 6
+	keep 			if regname == 1
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	replace 		obs = _n
+
+* stack values of the specification indicators
+	gen 			k1 		= 	depvar
+	gen				k2      =   sat + 4			
+	gen 			k3		=	varname + 12
+	
+* label new variables	
+	lab				var obs "Specification # - sorted by effect size"
+
+	lab 			var k1 "Dependent Variable"
+	lab 			var k2 "Remote Sensing Product"
+	lab 			var k3 "Rainfall Metric"
+
+	sum			 	ci_up
+	global			bmax = r(max)
+	
+	sum			 	ci_lo
+	global			bmin = r(min)
+	
+	global			brange	=	$bmax - $bmin
+	global			from_y	=	$bmin - 3*$brange
+	global			gheight	=	40
+
+	twoway 			scatter k1 k2 k3 obs, xlab(0(8)168) xsize(10) ysize(4) msize(vsmall vsmall vsmall)  ///
+						title(" ") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
+						ylabel(1 "Quantity" ///
+						2 "Value" 3 "*{bf:Dependant Variable}*" ///
+						5 "CHIRPS" 6 "CPC" 7 "MERRA-2" 8 "ARC2" 9 "ERA5" 10 "TAMSAT" ///
+						11 "*{bf:Remote Sensing Product}*" 12 " " 13 "Mean Daily Rainfall" ///
+						14 "Median Daily Rainfall" 15 "Variance of Daily Rainfall" 16 "Skew of Daily Rainfall" ///
+						17 "Total Rainfall" 18 "Deviation in Total Rainfall" 19 "Z-Score of Total Rainfall" ///
+						20 "Rainy Days" 21 "Deviation in Rainy Days" 22 "No Rain Days" 23 "Deviation in No Rain Days" ///
+						24 "Percent Rainy Days" 25 "Deviation in Percent Rainy Days" ///
+						26 "Longest Dry Spell" 27 "*{bf:Rainfall Variables}*" 40 " ", angle(0) ///
+						labsize(vsmall) tstyle(notick)) || ///
+						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig == ., ///
+						barwidth(.2) color(black%50) yaxis(2) xline(60, lcolor(maroon) lstyle(solid))) || ///
+						(rbar ci_lo ci_up obs if b_sig != ., ///
+						barwidth(.2) color(edkblue%50) yaxis(2)  ///
+						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
+						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
+						saving("$sfig/tza_all3", replace)
+
+	graph export 	"$xfig\tza_all3.png", width(1400) replace	
+	graph export 	"$xfig\tza_all3.eps", 			 replace
+	
+restore
+
+*** uganda ***
+preserve
+	keep			if country == 7
+	keep 			if regname == 1
+	keep			if varname < 15
+	keep			if sat < 7
+	sort 			beta
+	replace 		obs = _n
+
+* stack values of the specification indicators
+	gen 			k1 		= 	depvar
+	gen				k2      =   sat + 4			
+	gen 			k3		=	varname + 12
+	
+* label new variables	
+	lab				var obs "Specification # - sorted by effect size"
+
+	lab 			var k1 "Dependent Variable"
+	lab 			var k2 "Remote Sensing Product"
+	lab 			var k3 "Rainfall Metric"
+
+	sum			 	ci_up
+	global			bmax = r(max)
+	
+	sum			 	ci_lo
+	global			bmin = r(min)
+	
+	global			brange	=	$bmax - $bmin
+	global			from_y	=	$bmin - 3*$brange
+	global			gheight	=	40
+
+	twoway 			scatter k1 k2 k3 obs, xlab(0(8)168) xsize(10) ysize(4) msize(vsmall vsmall vsmall)  ///
+						title(" ") ylab(0(1)$gheight ) xtitle("") ytitle("") ///
+						ylabel(1 "Quantity" ///
+						2 "Value" 3 "*{bf:Dependant Variable}*" ///
+						5 "CHIRPS" 6 "CPC" 7 "MERRA-2" 8 "ARC2" 9 "ERA5" 10 "TAMSAT" ///
+						11 "*{bf:Remote Sensing Product}*" 12 " " 13 "Mean Daily Rainfall" ///
+						14 "Median Daily Rainfall" 15 "Variance of Daily Rainfall" 16 "Skew of Daily Rainfall" ///
+						17 "Total Rainfall" 18 "Deviation in Total Rainfall" 19 "Z-Score of Total Rainfall" ///
+						20 "Rainy Days" 21 "Deviation in Rainy Days" 22 "No Rain Days" 23 "Deviation in No Rain Days" ///
+						24 "Percent Rainy Days" 25 "Deviation in Percent Rainy Days" ///
+						26 "Longest Dry Spell" 27 "*{bf:Rainfall Variables}*" 40 " ", angle(0) ///
+						labsize(vsmall) tstyle(notick)) || ///
+						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(scatter b_sig obs, yaxis(2) mcolor(edkblue%75) ylab(, axis(2) ///
+						labsize(vsmall) angle(0) ) yscale(range($from_y $bmax ) axis(2)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig == ., ///
+						barwidth(.2) color(black%50) yaxis(2) xline(58, lcolor(maroon) lstyle(solid)) ) || ///
+						(rbar ci_lo ci_up obs if b_sig != ., ///
+						barwidth(.2) color(edkblue%50) yaxis(2)  ///
+						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
+						legend(order(4 5) cols(2) size(small) rowgap(.5) pos(12)) ///
+						saving("$sfig/uga_all3", replace)
+
+	graph export 	"$xfig\uga_all3.png", width(1400) replace	
+	graph export 	"$xfig\uga_all3.eps", 			 replace					
+restore
+
+
+
+************************************************************************
 **# 3 - generate coef plots by rainfall variable, country and satellite
 **********************************************************************
 
@@ -1171,22 +1895,22 @@ restore
 *** ethiopia ***
 preserve
 	keep			if country == 1
-	keep			if ext == 3
+	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
-
-*dropping non-significant coefficients
-
+	replace 			obs = _n
+	
+*dropping non-significant coefficients 
 	tabulate 		sig, generate (significant)
 	drop 			significant1
 	rename 			significant2 significant
 	drop 			if significant == 0
 
 *tabulating number of significant rainfall metrics and satellites
-	tabulate 		varname sat
+	tabulate 		varname sat if b_sign == 0
+	tabulate 		varname sat if b_sign == 1
 
 *tabulating number of significant rainfall metrics and with their sign
 	tabulate 		varname b_sign
@@ -1199,23 +1923,23 @@ restore
 *** malawi ***
 preserve
 	keep			if country == 2
-	keep			if ext == 3
+	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
-
-*dropping non-significant coefficients
-
+	replace 			obs = _n
+	
+*dropping non-significant coefficients 
 	tabulate 		sig, generate (significant)
 	drop 			significant1
 	rename 			significant2 significant
 	drop 			if significant == 0
 
 *tabulating number of significant rainfall metrics and satellites
-	tabulate 		varname sat
-
+	tabulate 		varname sat if b_sign == 0
+	tabulate 		varname sat if b_sign == 1
+	
 *tabulating number of significant rainfall metrics and with their sign
 	tabulate 		varname b_sign
 
@@ -1227,22 +1951,22 @@ restore
 *** niger ***
 preserve
 	keep			if country == 4
-	keep			if ext == 3
+	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
-
-*dropping non-significant coefficients
-
+	replace			obs = _n
+	
+*dropping non-significant coefficients 
 	tabulate 		sig, generate (significant)
 	drop 			significant1
 	rename 			significant2 significant
 	drop 			if significant == 0
 
 *tabulating number of significant rainfall metrics and satellites
-	tabulate 		varname sat
+	tabulate 		varname sat if b_sign == 0
+	tabulate 		varname sat if b_sign == 1
 
 *tabulating number of significant rainfall metrics and with their sign
 	tabulate 		varname b_sign
@@ -1255,22 +1979,22 @@ restore
 *** nigeria ***
 preserve
 	keep			if country == 5
-	keep			if ext == 3
+	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
-
-*dropping non-significant coefficients
-
+	replace 			obs = _n
+	
+*dropping non-significant coefficients 
 	tabulate 		sig, generate (significant)
 	drop 			significant1
 	rename 			significant2 significant
 	drop 			if significant == 0
 
 *tabulating number of significant rainfall metrics and satellites
-	tabulate 		varname sat
+	tabulate 		varname sat if b_sign == 0
+	tabulate 		varname sat if b_sign == 1
 
 *tabulating number of significant rainfall metrics and with their sign
 	tabulate 		varname b_sign
@@ -1283,22 +2007,22 @@ restore
 *** tanzania ***
 preserve
 	keep			if country == 6
-	keep			if ext == 3
+	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
-
-*dropping non-significant coefficients
-
+	replace 			obs = _n
+	
+*dropping non-significant coefficients 
 	tabulate 		sig, generate (significant)
 	drop 			significant1
 	rename 			significant2 significant
 	drop 			if significant == 0
 
 *tabulating number of significant rainfall metrics and satellites
-	tabulate 		varname sat
+	tabulate 		varname sat if b_sign == 0
+	tabulate 		varname sat if b_sign == 1
 
 *tabulating number of significant rainfall metrics and with their sign
 	tabulate 		varname b_sign
@@ -1311,23 +2035,23 @@ restore
 *** uganda ***
 preserve
 	keep			if country == 7
-	keep			if ext == 3
+	*keep			if ext == 3
 	keep 			if regname == 3
 	keep			if varname < 15
 	keep			if sat < 7
 	sort 			beta
-	gen 			obs = _n
-
-*dropping non-significant coefficients
-
+	replace 		obs = _n
+	
+*dropping non-significant coefficients 
 	tabulate 		sig, generate (significant)
 	drop 			significant1
 	rename 			significant2 significant
 	drop 			if significant == 0
 
 *tabulating number of significant rainfall metrics and satellites
-	tabulate 		varname sat
-
+	tabulate 		varname sat if b_sign == 0
+	tabulate 		varname sat if b_sign == 1
+	
 *tabulating number of significant rainfall metrics and with their sign
 	tabulate 		varname b_sign
 
