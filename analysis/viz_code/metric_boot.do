@@ -14,7 +14,7 @@
 	* the panel and completed regression results describe the same sample
 
 * TO DO:
-	* select full mode explicitly for the production run
+	* done
 
 
 **********************************************************************
@@ -28,12 +28,13 @@
 	cap log close
 	log using	"$logout/cloudy_rainfall_fe_bootstrap", append
 
-* arguments: mode, replications, countries, outcomes, weather variables
+* run without arguments for all pairs and 1,000 replications per pair
+* optional arguments: mode, replications, countries, outcomes, weather variables
 *	do metric_boot.do pilot 30 "1" "lncp_yld" "v01_rf1"
 *	do metric_boot.do pilot 99 "1" "lncp_yld lntf_yld" "v01_rf*"
 *	do metric_boot.do full 1000
 	args mode reps countries outcomes weather
-	if "`mode'" == "" loc mode pilot
+	if "`mode'" == "" loc mode full
 	if !inlist("`mode'", "pilot", "full") error 198
 	if "`reps'" == "" loc reps = cond("`mode'" == "pilot", 30, 1000)
 	if "`countries'" == "" {
@@ -138,6 +139,7 @@
 	drop		selected
 	isid		country outcome_var weather_var
 	loc			pairs = _N
+	display		"Run mode: `mode'; replications per pair: `reps'"
 	display		"Selected paired specifications: `pairs'"
 
 * store point estimates, interval endpoints and the settings with every pair

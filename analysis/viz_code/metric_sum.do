@@ -23,10 +23,10 @@
 * define paths
 	global		rootw 	= 	"$wraw"
 	global		rooth 	= 	"$data/refined_data"
-	global	export 	= 	"$data/results_data"
-	global	sfig	= 	"$data/results_data/figures"
+	global		export 	= 	"$data/results_data"
+	global		sfig	= 	"$data/results_data/figures"
 	global		xfig    =   "$data/results_data/figures/metric_paper"
-	global	logout 	= 	"$data/regression_data/logs"
+	global		logout 	= 	"$data/regression_data/logs"
 
 * load the shared product palette and figure styles
 	include		"$code/analysis/viz_code/metric_style.do"
