@@ -54,7 +54,8 @@
 	gen 		double	abs_t_reg7 = abs(beta_reg7 / stdrd_err_reg7)
 	gen 		double	abs_t_reg2 = abs(beta_reg2 / stdrd_err_reg2)
 
-* define the shared graph appearance
+* load product colors and define the shared graph appearance
+	include		"$code/analysis/viz_code/metric_palette.do"
 	loc			teal "34 127 144"
 	loc			copper "190 118 64"
 	loc			frame scheme(stcolor) ///
@@ -92,11 +93,20 @@
 		label define rain_country `labels', replace
 		label values country rain_country
 
-	* color outcomes and draw the unchanged-|t| diagonal inside the axes
-		twoway		(scatter y_se x_beta if outcome_var == "lncp_yld", ///
-					mcolor("`teal'%60") mlcolor(none) msymbol(O) msize(1.1)) ///
-					(scatter y_se x_beta if outcome_var == "lntf_yld", ///
-					mcolor("`copper'%60") mlcolor(none) msymbol(D) msize(1.1)) ///
+	* color both outcomes by the product identified by the regression suffix
+		gen byte	product = real(substr(weather_var, -1, 1))
+		twoway		(scatter y_se x_beta if product == 1, ///
+					mcolor("`arc2'%60") mlcolor(none) msymbol(O) msize(1.1)) ///
+					(scatter y_se x_beta if product == 2, ///
+					mcolor("`chirps'%60") mlcolor(none) msymbol(O) msize(1.1)) ///
+					(scatter y_se x_beta if product == 3, ///
+					mcolor("`cpc'%60") mlcolor(none) msymbol(O) msize(1.1)) ///
+					(scatter y_se x_beta if product == 4, ///
+					mcolor("`era5'%60") mlcolor(none) msymbol(O) msize(1.1)) ///
+					(scatter y_se x_beta if product == 5, ///
+					mcolor("`merra2'%60") mlcolor(none) msymbol(O) msize(1.1)) ///
+					(scatter y_se x_beta if product == 6, ///
+					mcolor("`tamsat'%60") mlcolor(none) msymbol(O) msize(1.1)) ///
 					(function y = x, range(`dmin' `dmax') ///
 					lcolor("112 119 125") lpattern(dash) lwidth(thin)), ///
 					`frame' xscale(range(-`xr' `xr')) ///
@@ -109,8 +119,9 @@
 					size(3) color("38 43 47")) ///
 					ytitle("Change in standard error (log2 ratio)", ///
 					size(3) color("38 43 47")) ///
-					legend(order(1 "Cereal quantity" 2 "Farm production value") ///
-					cols(2) size(3) color("38 43 47") region(lstyle(none))) ///
+					legend(order(1 "ARC2" 2 "CHIRPS" 3 "CPC" ///
+					4 "ERA5" 5 "MERRA-2" 6 "TAMSAT") cols(6) size(2.7) color("38 43 47") ///
+					region(lstyle(none))) ///
 					subtitle(, size(3.8) color("38 43 47") nobox fcolor(white)) ///
 					by(country, cols(3) iscale(1) legend(pos(6)) note("") ///
 					imargin(small) graphregion(color(white) margin(small))) ///

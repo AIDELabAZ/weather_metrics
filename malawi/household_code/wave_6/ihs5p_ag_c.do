@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: Feb 2024
 * Created by: alj
-* Edited on: 17 June 2024
-* Edited by: alj
+* Edited on: 27 Oct 2026
+* Edited by: codex
 * Stata v.18
 
 * does
@@ -101,7 +101,7 @@
 	*** tested down to 0.001 to 1 - really no differences, always around same value
 	*** my inclincation, in reviewing, is to not trust gps
 	*** but wb says to trust gps
-	scatter			selfreport gps
+	* scatter		selfreport gps
 
 * make plotsize using GPS area if it is within reasonable range
 	generate 		plotsize = gps if gps>0.001 & gps<3

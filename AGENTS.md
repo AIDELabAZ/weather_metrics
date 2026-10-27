@@ -6,6 +6,7 @@ This repository supports reproducible research on remote-sensing weather data an
 
 ## Scientific and coding conventions
 
+- Use brief, descriptive code filenames. Files for this project in `analysis/viz_code/` must start with `metric_`; retain other projects' prefixes, such as `privacy_` and `mismeasure_`.
 - Follow the [lab's house style](https://jdavidm.github.io/learn-stata/materials/02-house-style/) in every file. Use documented, numbered and bookmarked sections, tabs for command/object alignment and nested blocks, readable continuation lines, and lowercase commands. Preserve case-sensitive data names and existing workflow structure. Apply style corrections without redesigning the workflow.
 - Indent entries under `* does`, `* assumes`, and `* TO DO:` by one tab. Section borders must contain only stars, with no embedded spaces. Leave two blank lines before the start of each section.
 - Preserve the username-based path blocks in `projectdo.do`. Users must be able to copy a block and edit their own paths. Do not replace them with automatic OneDrive defaults or environment-variable configuration.

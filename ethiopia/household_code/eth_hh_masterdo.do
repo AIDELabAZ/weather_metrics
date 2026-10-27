@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: May 2020
 * Created by: McG
-* Edited on: 20 May 2024
-* Edited by: jdm
+* Edited on: 27 Oct 2026
+* Edited by: codex
 * Stata v.18
 
 * does
@@ -35,8 +35,9 @@
 * define local with all files in each sub-folder
 	foreach folder of loc folderList {
 
-	* Wave 4 section 9 creates Crop_CF_Wave4, used by section 11.
+	* run section 9 before section 11 to prepare crop conversion factors
 		if "`folder'" == "wave_4" do "`dofile'/wave_4/2018_sect9_ph_w4.do"
+		if "`folder'" == "wave_5" do "`dofile'/wave_5/2021_sect9_ph_w5.do"
 
 	* loop through each HHSEC file in the folder local
 		loc HHfile : dir "`dofile'/`folder'" files "20*.do"
@@ -44,6 +45,8 @@
 	* loop through each file in the above local
 		foreach file in `HHfile' {
 			if "`folder'" == "wave_4" & "`file'" == "2018_sect9_ph_w4.do" ///
+						continue
+			if "`folder'" == "wave_5" & "`file'" == "2021_sect9_ph_w5.do" ///
 						continue
 
 		* run each individual file

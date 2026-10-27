@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: July 2020
 * Created by: mcg
-* Edited on: 20 May 2024
-* Edited by: jdm
+* Edited on: 27 Oct 2026
+* Edited by: codex
 * Stata v.18
 
 * does
@@ -661,7 +661,7 @@
 	summarize
 
 * saving production dataset
-	save 			"`export'.hhfinal_ess2.dta", replace
+	save 			"`export'/hhfinal_ess2.dta", replace
 * close the log
 	log	close
 

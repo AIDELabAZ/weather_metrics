@@ -46,6 +46,10 @@
         global 		code  	"C:/Users/aljos/git/weather_metrics"
 		global 		base	"C:/Users/aljos/OneDrive - University of Arizona/weather_and_agriculture"
     }	
+	else if `"`c(username)'"' == "annal" {
+		global		code	"C:/Users/annal/Documents/git/weather_metrics"
+		global		base	"C:/Users/annal/OneDrive - University of Arizona/weather_and_agriculture"
+	}
 	else if `"`c(username)'"' == "ca558" {
 		global		code	"C:/Users/ca558/Documents/GitHub/weather_metrics"
 		global		base	"C:/Users/ca558/OneDrive - University of Arizona/weather_and_agriculture"
@@ -140,7 +144,7 @@
 
 /*	this code requires a user to have downloaded the publically available
 	household data sets and placed them into the folder structure detailed
-	in the readme file accompanying this repo.
+	in the readme file accompanying this repo. 
 
 	do			"$code/ethiopia/household_code/eth_hh_masterdo.do"
 	do			"$code/malawi/household_code/mwi_hh_masterdo.do"

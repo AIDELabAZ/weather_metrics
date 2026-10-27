@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: July 2020
 * Created by: McG
-* Edited on: 20 May 2024
-* Edited by: jdm
+* Edited on: 27 Oct 2026
+* Edited by: codex
 * Stata v.18
 
 * does
@@ -145,7 +145,7 @@
 	describe
 	summarize
 	sort 		holder_id parcel field crop_code
-	save		"`export'.PP_SEC4.dta", replace
+	save		"`export'/PP_SEC4.dta", replace
 
 * close the log
 	log	close

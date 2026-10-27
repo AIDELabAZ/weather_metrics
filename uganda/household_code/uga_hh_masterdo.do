@@ -1,7 +1,8 @@
 * Project: WB Weather
 * Created on: Aug 2020
 * Created by: jdm
-* Edtied by: ek
+* Edited on: 27 Oct 2026
+* Edited by: codex
 * Stata v.16
 
 * does
@@ -33,6 +34,7 @@
 	do			"`dofile'/wave_2/2010_gsec1.do"			//	clean location information wv2
 	do			"`dofile'/wave_3/2011_gsec1.do"			//	clean location information wv3
 	do			"`dofile'/wave_5/2015_gsec1.do"			//	clean location information wv3
+	do			"`dofile'/wave_7/2018_gsec1.do"			//	create the wave 7 household key
 	do			"`dofile'/wave_8/2019_gsec1.do"			//	clean location information wv8
 
 
