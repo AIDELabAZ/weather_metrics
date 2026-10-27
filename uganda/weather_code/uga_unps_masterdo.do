@@ -35,13 +35,13 @@ clear
 **********************************************************************
 
 * do each of the file converters
-	*do "`root'/wave_1/UGA_UNPSY1_converter.do"	//	convert wave 1 .csv to .dta
-	*do "`root'/wave_2/UGA_UNPSY2_converter.do"	//	convert wave 2 .csv to .dta
-	*do "`root'/wave_3/UGA_UNPSY3_converter.do"	//	convert wave 3 .csv to .dta
-	*do "`root'/wave_4/UGA_UNPSY4_converter.do"	//	convert wave 4 .csv to .dta
-	*do "`root'/wave_5/UGA_UNPSY5_converter.do"	//	convert wave 5 .csv to .dta
-	*do "`root'/wave_7/UGA_UNPSY7_converter.do"	//	convert wave 7 .csv to .dta
-	*do "`root'/wave_8/UGA_UNPSY8_converter.do"	//	convert wave 8 .csv to .dta
+	do "`root'/wave_1/UGA_UNPSY1_converter.do"	//	convert wave 1 .csv to .dta
+	do "`root'/wave_2/UGA_UNPSY2_converter.do"	//	convert wave 2 .csv to .dta
+	do "`root'/wave_3/UGA_UNPSY3_converter.do"	//	convert wave 3 .csv to .dta
+	do "`root'/wave_4/UGA_UNPSY4_converter.do"	//	convert wave 4 .csv to .dta
+	do "`root'/wave_5/UGA_UNPSY5_converter.do"	//	convert wave 5 .csv to .dta
+	do "`root'/wave_7/UGA_UNPSY7_converter.do"	//	convert wave 7 .csv to .dta
+	do "`root'/wave_8/UGA_UNPSY8_converter.do"	//	convert wave 8 .csv to .dta
 
 * do each of the weather commands
 	do "`root'/wave_1/UGA_UNPSY1_weather.do"	//	generate wave 1 weather variables
