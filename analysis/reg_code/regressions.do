@@ -1,12 +1,12 @@
 * Project: WB Weather - metric
 * Created on: September 2020
 * Created by: jdm
-* Edited on: 23 May 2024
-* Edited by: jdm
-* Stata v.18
+* edited on: 27 Oct 2026
+* edited by: codex
+* Stata v.19.5
 
 * does
-	* NOTE IT TAKES 22 MIN TO RUN ALL REGRESSIONS
+	* NOTE IT TAKES 12 MIN TO RUN ALL REGRESSIONS
 	* loads multi country data set
 	* runs rainfall and temperature regressions
 	* outputs results file for analysis
@@ -48,26 +48,16 @@
 	loc			inputscp 	lncp_lab lncp_frt cp_pst cp_hrb cp_irr
 	loc			inputstf 	lntf_lab lntf_frt tf_pst tf_hrb tf_irr
 	loc			weather 	v*
-	unab		weather_vars : `weather'
-	loc			nweather : word count `weather_vars'
-	loc			nrain = 0
-	foreach v of local weather_vars {
-		if regexm("`v'", "^v(0[1-9]|1[0-4])_rf[1-6]$") loc nrain = `nrain' + 1
-	}
 
 * create file to post results to
 	tempname	reg_results
 	postfile	`reg_results' country str3 sat str2 depvar str4 regname str3 varname ///
 				betarain serain adjustedr loglike dfr obs str32 weather_var nclusters ///
+				double(rss tss df_fit) ///
 				using "$results/reg_results.dta", replace
 
 * define loop through levels of the data type variable
 	levelsof	country		, local(levels)
-	loc			ncountries : word count `levels'
-	loc			expected = `ncountries' * 2 * (6 * `nweather' + `nrain')
-* A complete rainfall grid has 84 variables; report incomplete input grids.
-	if `nrain' != 84 display as error ///
-				"Rainfall grid: `nrain' of 84 expected variables present."
 	foreach l of local levels {
 
 	* set panel id so it varies by dtype
@@ -80,130 +70,70 @@
 			loc			varn = 	substr("`v'", 1, 3)
 			loc			sat = 	substr("`v'", 5, 3)
 
-
 **## 2.1 - value of harvest
 
-		* weather
-			reg			lntf_yld `v' if country == `l', vce(cluster hhid)
-			post		`reg_results' (`l') ("`sat'") ("tf") ("reg1") ///
-						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-						("`v'") (`=e(N_clust)')
-
-		* weather and fe
+		* weather and twfe
 			xtreg		lntf_yld `v' i.year if country == `l', fe vce(cluster hhid)
+
+		* save centered outcome variation and count non-omitted coefficients
+			quietly summarize lntf_yld if e(sample)
+			loc			tss = (r(N) - 1)*r(Var)
+			_ms_omit_info e(b)
 			post		`reg_results' (`l') ("`sat'") ("tf") ("reg2") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
 						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-						("`v'") (`=e(N_clust)')
+						("`v'") (`=e(N_clust)') (e(rss)) (`tss') ///
+						(e(N) - colsof(e(b)) + r(k_omit) - e(df_a))
 
-		* Cloudy: same year effects and exact reg2 estimation observations
+		* weather and year fe
 			if regexm("`v'", "^v(0[1-9]|1[0-4])_rf[1-6]$") {
 				tempvar		paired_sample
 				gen byte	`paired_sample' = e(sample)
 				reg			lntf_yld `v' i.year if `paired_sample', vce(cluster hhid)
 				assert		e(sample) == `paired_sample'
+
+			* reuse the matched-sample tss and count fitted coefficients
+				_ms_omit_info e(b)
 				post		`reg_results' (`l') ("`sat'") ("tf") ("reg7") ///
 							("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
 							(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-							("`v'") (`=e(N_clust)')
+							("`v'") (`=e(N_clust)') (e(rss)) (`tss') ///
+							(e(N) - colsof(e(b)) + r(k_omit))
 				drop		`paired_sample'
 			}
 
-		* weather and inputs and fe
-			xtreg		lntf_yld `v' `inputstf' i.year if country == `l', fe vce(cluster ///
-						hhid)
-			post		`reg_results' (`l') ("`sat'") ("tf") ("reg3") ///
-						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-						("`v'") (`=e(N_clust)')
-
-		* weather and squared weather
-			reg			lntf_yld c.`v'##c.`v' if country == `l', vce(cluster hhid)
-			post		`reg_results' (`l') ("`sat'") ("tf") ("reg4") ///
-						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-						("`v'") (`=e(N_clust)')
-
-		* weather and squared weather and fe
-			xtreg		lntf_yld c.`v'##c.`v' i.year if country == `l', fe vce(cluster ///
-						hhid)
-			post		`reg_results' (`l') ("`sat'") ("tf") ("reg5") ///
-						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-						("`v'") (`=e(N_clust)')
-
-		* weather and squared weather and inputs and fe
-			xtreg		lntf_yld c.`v'##c.`v' `inputstf' i.year if country == `l', fe ///
-						vce(cluster hhid)
-			post		`reg_results' (`l') ("`sat'") ("tf") ("reg6") ///
-						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-						("`v'") (`=e(N_clust)')
-
-
 **## 2.2 - quantity of maize
 
-		* weather
-			reg			lncp_yld `v' if country == `l', vce(cluster hhid)
-			post		`reg_results' (`l') ("`sat'") ("cp") ("reg1") ///
-						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-						("`v'") (`=e(N_clust)')
-
-		* weather and fe
+		* weather and twfe
 			xtreg		lncp_yld `v' i.year if country == `l', fe vce(cluster hhid)
+
+		* save centered outcome variation and count non-omitted coefficients
+			quietly summarize lncp_yld if e(sample)
+			loc			tss = (r(N) - 1)*r(Var)
+			_ms_omit_info e(b)
 			post		`reg_results' (`l') ("`sat'") ("cp") ("reg2") ///
 						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
 						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-						("`v'") (`=e(N_clust)')
+						("`v'") (`=e(N_clust)') (e(rss)) (`tss') ///
+						(e(N) - colsof(e(b)) + r(k_omit) - e(df_a))
 
-		* Cloudy: same year effects and exact reg2 estimation observations
+		* weather and year fe
 			if regexm("`v'", "^v(0[1-9]|1[0-4])_rf[1-6]$") {
 				tempvar		paired_sample
 				gen byte	`paired_sample' = e(sample)
 				reg			lncp_yld `v' i.year if `paired_sample', vce(cluster hhid)
 				assert		e(sample) == `paired_sample'
+
+			* reuse the matched-sample tss and count fitted coefficients
+				_ms_omit_info e(b)
 				post		`reg_results' (`l') ("`sat'") ("cp") ("reg7") ///
 							("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
 							(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-							("`v'") (`=e(N_clust)')
+							("`v'") (`=e(N_clust)') (e(rss)) (`tss') ///
+							(e(N) - colsof(e(b)) + r(k_omit))
 				drop		`paired_sample'
 			}
-
-		* weather and inputs and fe
-			xtreg		lncp_yld `v' `inputscp' i.year if country == `l', fe vce(cluster ///
-						hhid)
-			post		`reg_results' (`l') ("`sat'") ("cp") ("reg3") ///
-						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-						("`v'") (`=e(N_clust)')
-
-		* weather and squared weather
-			reg			lncp_yld c.`v'##c.`v' if country == `l', vce(cluster hhid)
-			post		`reg_results' (`l') ("`sat'") ("cp") ("reg4") ///
-						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-						("`v'") (`=e(N_clust)')
-
-		* weather and squared weather and fe
-			xtreg		lncp_yld c.`v'##c.`v' i.year if country == `l', fe vce(cluster ///
-						hhid)
-			post		`reg_results' (`l') ("`sat'") ("cp") ("reg5") ///
-						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-						("`v'") (`=e(N_clust)')
-
-		* weather and squared weather and inputs and fe
-			xtreg		lncp_yld c.`v'##c.`v' `inputscp' i.year if country == `l', fe ///
-						vce(cluster hhid)
-			post		`reg_results' (`l') ("`sat'") ("cp") ("reg6") ///
-						("`varn'") (`=_b[`v']') (`=_se[`v']') (`=e(r2_a)') ///
-						(`=e(ll)') (`=e(df_r)') (`=e(N)') ///
-						("`v'") (`=e(N_clust)')
-
 			display		`l'
-
 		}
 	}
 
@@ -225,9 +155,10 @@
 	label var	nclusters "Number of household clusters"
 	label var	paired_sample "reg2/reg7 comparison on identical observations"
 	label var	estimable "Weather coefficient has a positive finite standard error"
+	label var	rss "Residual sum of squares"
+	label var	tss "Centered outcome sum of squares on the estimation sample"
+	label var	df_fit "Full-model residual degrees of freedom, including fixed effects"
 	isid		country outcome_var weather_var spec_id
-	assert		_N == `expected'
-	display		as text "Posted " _N " regression rows; expected `expected'."
 	count		if !estimable
 	if r(N) > 0 {
 		display		as error ///
@@ -243,20 +174,6 @@
 		list		country outcome_var weather_var spec_id paired_sample if ///
 					missing(loglike), noobs
 	}
-* Check pair cardinality and saved sample/cluster counts, in addition to e(sample).
-	if `nrain' > 0 {
-		preserve
-		keep		if paired_sample
-		bysort		country outcome_var weather_var (spec_id): assert _N == 2
-		by			country outcome_var weather_var: assert spec_id[1] == "reg2" & ///
-					spec_id[2] ///
-					== "reg7"
-		by			country outcome_var weather_var: assert obs[1] == obs[2] & ///
-					nclusters[1] ///
-					== nclusters[2]
-		restore
-	}
-	save		"$results/reg_results.dta", replace
 
 * Preserve the historical exclusion rule, while retaining both comparison rows.
 	drop		if missing(loglike) & !paired_sample

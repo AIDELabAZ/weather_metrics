@@ -3,7 +3,7 @@
 * created by: cda
 * edited on: 27 Oct 2026
 * edited by: codex
-* stata v.18.0
+* stata v.19.5
 
 * does
 	* take 8.5 hours to run, most (8 hrs) cleaning weather data
@@ -50,7 +50,7 @@
 		global		code	"C:/Users/ca558/Documents/GitHub/weather_metrics"
 		global		base	"C:/Users/ca558/OneDrive - University of Arizona/weather_and_agriculture"
 	}
-	else if {
+	else {
 		display		as error "Add your username and paths to section 0.1."
 		error		198
 	}
@@ -114,6 +114,7 @@
 	* set graph and Stata preferences
 		set			scheme plotplain, perm
 		set			more off
+		set			maxvar 120000, perm
 	}
 
 

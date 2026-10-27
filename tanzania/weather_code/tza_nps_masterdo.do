@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: April 2020
 * Created by: jdm
-* edited on: 20 May 2024
-* edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -24,9 +24,6 @@
 **********************************************************************
 
 clear
-
-*set max vars
-	set			maxvar 120000  // this amount is only allowed for MP editions
 
 * define paths
 	loc root = "$code/tanzania/weather_code"

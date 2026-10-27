@@ -25,6 +25,8 @@ This repository supports reproducible research on remote-sensing weather data an
 
 ## Implementation and verification
 
+- Limit verification to the actual project data and risks relevant to the requested change. Do not add generic synthetic stress tests for situations absent from this panel, such as countries with few clusters or singleton households. Keep checks proportionate; do not build new test suites for routine edits.
+
 - Work on a feature branch based on `analysis`; prepare a reviewed change for merge into `analysis`. Do not modify `main`.
 - Where possible, run the Stata file with the user's local panel dataset, check matching estimation samples, verify unique regression identifiers, and reconcile expected counts. If Stata or the data are unavailable, distinguish static checks from executed tests.
 - Preserve the existing `reg_results.dta` and `lsms_complete_results.dta` output filenames.

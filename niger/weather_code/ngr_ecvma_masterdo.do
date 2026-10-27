@@ -1,8 +1,8 @@
 * Project: WB Weather
 * Created on: April 2020
 * Created by: jdm
-* Edited on: 7 June 2024
-* Edited by: jdm
+* edited on: 27 Oct 2026
+* edited by: codex
 * Stata v.18
 
 * does
@@ -23,9 +23,6 @@
 **********************************************************************
 
 clear
-
-* set max vars
-	set			maxvar 120000  // this amount is only allowed for MP editions
 
 * define paths
 	loc root = "$code/niger/weather_code"
