@@ -45,18 +45,18 @@
 		global		code	"C:/Users/annal/Documents/git/weather_metrics"
 		global		base	"C:/Users/annal/OneDrive - University of Arizona/weather_and_agriculture"
 	}
+	else if `"`c(username)'"' == "aljos" {
+        global 		code  	"C:/Users/aljos/git/weather_metrics"
+		global 		data	"C:/Users/aljos/OneDrive - University of Arizona/weather_and_agriculture"
+    }	
 	else if `"`c(username)'"' == "ca558" {
 		global		code	"C:/Users/ca558/Documents/GitHub/weather_metrics"
-		global		base	"C:/Users/ca558/University of Arizona/Michler, Jeffrey David - (jdmichler) - weather_and_agriculture"
+		global		base	"C:/Users/ca558/OneDrive - University of Arizona/weather_and_agriculture"
 	}
 	else if {
 		display		as error "Add your username and paths to section 0.1."
 		error		198
 	}
-	else if `"`c(username)'"' == "annal" {
-        global 		code  	"C:/Users/aljosephson/git/weather_metrics"
-		global 		data	"C:/Users/aljosephson/OneDrive - University of Arizona/weather_and_agriculture"
-    }	
 
 * define shared inputs and project outputs under this user's data root
 	global		raw		"$base/raw_lsms_data"
