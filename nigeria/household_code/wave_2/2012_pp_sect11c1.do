@@ -13,31 +13,31 @@
 * assumes
 	* access to all raw data
 	* mdesc.ado
-	
+
 * TO DO:
 	* complete
 
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+
+**********************************************************************
+**# 0 - setup
+**********************************************************************
 
 * define paths
-	loc		root	=	"$data/household_data/nigeria/wave_2/raw"
-	loc		export	=	"$data/household_data/nigeria/wave_2/refined"
-	loc		logout	=	"$data/household_data/nigeria/logs"
+	loc			root	=	"$raw/nigeria/wave_2/raw"
+	loc			export	=	"$data/refined_data/nigeria/wave_2"
+	loc			logout	=	"$data/refined_data/nigeria/logs"
 
-* open log	
+* open log
 	cap log close
 	log 	using 	"`logout'/wave_2_pp_sect11c1", append
 
-	
-* **********************************************************************
-* 1 - labor 
-* **********************************************************************
-		
+
+**********************************************************************
+**# 1 - labor
+**********************************************************************
+
 * import the first relevant data file
-	use 			"`root'/sect11c1_plantingw2", clear 	
+	use			"`root'/sect11c1_plantingw2", clear
 
 	describe
 	sort			hhid plotid
@@ -54,13 +54,13 @@
 * create household member labor (weeks x days per week)
 	gen				hh_1 = (s11c1q1a2 * s11c1q1a3)
 	replace			hh_1 = 0 if hh_1 == .
-	
+
 	gen				hh_2 = (s11c1q1b2 * s11c1q1b3)
 	replace			hh_2 = 0 if hh_2 == .
-	
+
 	gen				hh_3 = (s11c1q1c2 * s11c1q1c3)
 	replace			hh_3 = 0 if hh_3 == .
-	
+
 	gen				hh_4 = (s11c1q1d2 * s11c1q1d3)
 	replace			hh_4 = 0 if hh_4 == .
 	*** this calculation is for up to 4 members of the household that were laborers
@@ -70,20 +70,20 @@
 * hired labor days (# of people days hired for planting)
 	gen				men_days = s11c1q3
 	replace			men_days = 0 if men_days == .
-	
+
 	gen				women_days = s11c1q6
 	replace			women_days = 0 if women_days == .
 	*** we do not include child labor days
 
-	
-* **********************************************************************
-* 2 - impute labor outliers
-* **********************************************************************
-	
+
+**********************************************************************
+**# 2 - impute labor outliers
+**********************************************************************
+
 * summarize household individual labor for land prep to look for outliers
 	sum				hh_1 hh_2 hh_3 hh_4 men_days women_days
 	*** all but one (women_days) has more labor days than possible
-	
+
 * generate local for variables that contain outliers
 	loc				labor hh_1 hh_2 hh_3 hh_4 men_days
 
@@ -100,15 +100,15 @@
 	mi xtset		, clear 	// clear any xtset that may have had in place previously
 
 
-* impute each variable in local		
+* impute each variable in local
 	foreach var of loc labor {
 		mi register			imputed `var' // identify variable to be imputed
 		sort				hhid plotid, stable // sort to ensure reproducability of results
 		mi impute 			pmm `var' i.state, add(1) rseed(245780) ///
 								noisily dots force knn(5) bootstrap
-	}						
-	mi 				unset	
-	
+	}
+	mi			unset
+
 * summarize imputed variables
 	sum				hh_1_1_ hh_2_2_ hh_3_3_ hh_4_4_ men_days_5_
 
@@ -121,11 +121,11 @@
 * check for missing values
 	mdesc			pp_labor
 	*** no missing values
-		
 
-* **********************************************************************
-* 3 - end matter, clean up to save
-* **********************************************************************
+
+**********************************************************************
+**# 3 - end matter, clean up to save
+**********************************************************************
 
 	keep 			hhid zone state lga sector hhid ea plotid ///
 					pp_labor tracked_obs
@@ -135,10 +135,10 @@
 	sort			hhid plotid
 	egen			plot_id = group(hhid plotid)
 	lab var			plot_id "unique plot identifier"
-	
+
 	compress
 	describe
-	summarize 
+	summarize
 
 * save file
 	save 			"`export'/pp_sect11c1.dta", replace

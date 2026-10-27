@@ -12,32 +12,34 @@
 
 * assumes
 	* customsave.ado
-	
+
 * TO DO:
 	* everything
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
-	
-* define paths	
-	global root = "$data/household_data/nigeria/wave_4/raw"
-	global export = "$data/household_data/nigeria/wave_4/refined"
-	global logout = "$data/household_data/nigeria/logs"
+
+
+**********************************************************************
+**# 0 - setup
+**********************************************************************
+
+* define paths
+	global		root = "$raw/nigeria/wave_4/raw"
+	global		export = "$data/refined_data/nigeria/wave_4"
+	global		logout = "$data/refined_data/nigeria/logs"
 
 * close log (in case still open)
 	*log close
-	
-* open log	
+
+* open log
 	cap log close
 	log using "$logout/2018_pp_sect11b1", append
 
-* **********************************************************************
-* 1 - determine irrigation and plot use
-* **********************************************************************
-		
+
+**********************************************************************
+**# 1 - determine irrigation and plot use
+**********************************************************************
+
 * import the first relevant data file
-		use "$root/sect11b1_plantingw4", clear 	
+	use			"$root/sect11b1_plantingw4", clear
 
 describe
 sort hhid plotid
@@ -50,14 +52,15 @@ rename s11b1q39 irr_any
 * check to see if values are missing
 	mdesc			irr_any
 	***2010 missing
-	
-	
+
+
 * convert missing values to "no"
 	replace			irr_any = 2 if irr_any == .
-	
-* **********************************************************************
-* 2 - end matter, clean up to save
-* **********************************************************************
+
+
+**********************************************************************
+**# 2 - end matter, clean up to save
+**********************************************************************
 
 	keep 			hhid zone state lga sector hhid ea plotid ///
 					irr_any
@@ -67,14 +70,14 @@ rename s11b1q39 irr_any
 	sort			hhid plotid
 	egen			plot_id = group(hhid plotid)
 	lab var			plot_id "unique plot identifier"
-	
+
 	compress
 	describe
-	summarize 
+	summarize
 
 
 * save file
-	save 			"$export/pp_sect11b1.dta", replace 
+	save		"$export/pp_sect11b1.dta", replace
 
 * close the log
 	log	close

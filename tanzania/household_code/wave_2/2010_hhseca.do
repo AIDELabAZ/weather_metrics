@@ -16,27 +16,27 @@
 	* completed
 
 
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+**********************************************************************
+**# 0 - setup
+**********************************************************************
 
 * define paths
-	global	root		"$data/household_data/tanzania/wave_2/raw"
-	global export		"$data/household_data/tanzania/wave_2/refined"
-	global logout		"$data/household_data/tanzania/logs"
+	global		root		"$raw/tanzania/wave_2/raw"
+	global		export		"$data/refined_data/tanzania/wave_2"
+	global		logout		"$data/refined_data/tanzania/logs"
 
 * open log
-	cap log 			close 
+	cap log close
 	log					using	"$logout/wv2_HHSECA", append
-	
 
-* ***********************************************************************
-* 1 - TZA 2010 (Wave 2) - Household Section A
+
+**********************************************************************
+**# 1 - tza 2010 (wave 2) - household section a
 * *********************1*************************************************
 
 * load data
 	use 		"$root/HH_SEC_A", clear
-	
+
 * dropping duplicates
 	duplicates 	drop
 	*** 0 obs dropped
@@ -52,7 +52,7 @@
 	lab var	 	mover_R1R2 "Household moved from its original 2008 sample"
 	lab def		yesno 0 "No" 1 "Yes"
 	lab val		mover_R1R2 yesno
-	
+
 * generate location variable
 	rename		hh_a11 location_R1_to_R2
 	lab var		location_R1_to_R2 "Household location category"
@@ -61,15 +61,15 @@
 					3 "Split-off household"
 	lab val		location_R1_to_R2 location
 
-* replace two miscoded observations 
-	replace 	location_R1_to_R2 = 1 if location_R1_to_R2 == . 
-	replace		location_R1_to_R2 = 1 if location_R1_to_R2 == 6 
-	
+* replace two miscoded observations
+	replace		location_R1_to_R2 = 1 if location_R1_to_R2 == .
+	replace		location_R1_to_R2 = 1 if location_R1_to_R2 == 6
+
 	order		y2_hhid region district ward ea y2_rural ///
 					clusterid strataid y2_weight mover_R1R2 location_R1_to_R2
-					
+
 	rename		y2_weight hhweight
-	
+
 * relabel variables
 	lab var		y2_hhid "Unique Household Identification NPS Y2"
 	lab var		region "Region Code"
@@ -80,13 +80,13 @@
 	lab var		clusterid "Unique Cluster Identification"
 	lab var		strataid "Design Strata"
 	lab var		hhweight "Household Weights (Trimmed & Post-Stratified)"
-	
+
 * prepare for export
 	compress
 	describe
 	summarize
 	sort y2_hhid
-	
+
 	save 			"$export/HH_SECA.dta", replace
 
 * close the log

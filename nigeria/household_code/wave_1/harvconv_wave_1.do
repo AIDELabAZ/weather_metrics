@@ -15,39 +15,40 @@
 	* w1agnsconversion.dta conversion file
 
 * TO DO:
-	* complete 
-	
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+	* complete
+
+
+**********************************************************************
+**# 0 - setup
+**********************************************************************
 
 * define paths
-	loc		cnvrt	=	"$data/household_data/nigeria/conversion_files"
-	loc 	export	= 	"$data/household_data/nigeria/conversion_files"
-	loc 	logout	= 	"$data/household_data/nigeria/logs"
+	loc			cnvrt	=	"$raw/nigeria/conversion_files"
+	loc			export	= 	"$data/refined_data/nigeria/conversion_files"
+	loc			logout	= 	"$data/refined_data/nigeria/logs"
 
 * open log
 	cap log close
-	log 	using 	"`logout'/harvconv_master_wave_1", append	
-	
-	
-* **********************************************************************
-* 1 - general import and clean up
-* **********************************************************************
+	log			using 	"`logout'/harvconv_master_wave_1", append
+
+
+**********************************************************************
+**# 1 - general import and clean up
+**********************************************************************
 
 * import the relevant conversion file
 	use 			"`cnvrt'/w1agnsconversion" , clear
-	
+
 * rename for matching with harvest files
 	rename 			nscode harv_unit
 	rename 			agcropid cropcode
-	
-* **********************************************************************
-* 2 - modify conversion factors - add kilograms
-* **********************************************************************
 
-* need to add new observations for a number of crops to faciliate conversion to kilograms  
+
+**********************************************************************
+**# 2 - modify conversion factors - add kilograms
+**********************************************************************
+
+* need to add new observations for a number of crops to faciliate conversion to kilograms
 
 	tab 			cropcode, nolabel
 
@@ -271,22 +272,23 @@
 	replace			cropcode = 3250 in 2285
 	set 			obs 2286
 	replace			cropcode = 3260 in 2286
-	
+
 * create conversion for kilograms, 1 = kilograms
 	replace 		harv_unit = 1 in 2178
 	*** 1 change made
-	replace 		harv_unit = 1 if harv_unit ==. 
+	replace		harv_unit = 1 if harv_unit ==.
 	*** 108 changes made
 	replace 		conversion = 1 if harv_unit ==1
 	*** 109 changes made
-	
-	drop 			if cropcode == . 
 
-* **********************************************************************
-* 3 - modify conversion factors - add grams
-* **********************************************************************
+	drop		if cropcode == .
 
-* need to add new observations for a number of crops to faciliate conversion to grams  
+
+**********************************************************************
+**# 3 - modify conversion factors - add grams
+**********************************************************************
+
+* need to add new observations for a number of crops to faciliate conversion to grams
 
 	set 			obs 2287
 	replace 		cropcode = 1010 in 2287
@@ -507,22 +509,23 @@
 	replace			cropcode = 3250 in 2404
 	set 			obs 2405
 	replace			cropcode = 3260 in 2405
-	
+
 * replace conversion for grams, 2 = grams
 	replace 		harv_unit = 2 in 2287
 	*** 1 change made
-	replace 		harv_unit = 2 if harv_unit ==. 
+	replace		harv_unit = 2 if harv_unit ==.
 	*** 227 changes made
 	replace 		conversion = 100 if harv_unit ==2
-	*** 228 changes made 
-	
-	drop 			if cropcode == . 
+	*** 228 changes made
 
-* **********************************************************************
-* 4 - modify conversion factors - add litres
-* **********************************************************************
+	drop		if cropcode == .
 
-* need to add new observations for a number of crops to faciliate conversion to litres  
+
+**********************************************************************
+**# 4 - modify conversion factors - add litres
+**********************************************************************
+
+* need to add new observations for a number of crops to faciliate conversion to litres
 
 	set 			obs 2406
 	replace 		cropcode = 1010 in 2406
@@ -742,24 +745,25 @@
 	replace			cropcode = 3260 in 2513
 	set 			obs 2514
 	replace			cropcode = 3010 in 2514
-	
-	
+
+
 * replace conversion for liters, 3 = liters
 	replace 		harv_unit = 3 in 2406
 	*** 1 change made
-	replace 		harv_unit = 3 if harv_unit ==. 
+	replace		harv_unit = 3 if harv_unit ==.
 	*** 227 changes made
 	replace 		conversion = 1 if harv_unit ==3
-	*** 228 changes made 
-	
-	drop 			if cropcode == . 
-	
-* **********************************************************************
-* 6 - modify conversion factors - add centilitres 
-* **********************************************************************
+	*** 228 changes made
+
+	drop		if cropcode == .
 
 
-* need to add new observations for a number of crops to faciliate conversion to litres  
+**********************************************************************
+**# 6 - modify conversion factors - add centilitres
+**********************************************************************
+
+
+* need to add new observations for a number of crops to faciliate conversion to litres
 
 	set 			obs 2515
 	replace 		cropcode = 1010 in 2515
@@ -979,27 +983,28 @@
 	replace			cropcode = 3010 in 2622
 	set 			obs 2623
 	replace			cropcode = 3061 in 2623
-	
+
 * replace conversion for centiliters, 4 = centiliters
 	replace 		harv_unit = 4 in 2515
 	*** 1 change made
-	replace 		harv_unit = 4 if harv_unit ==. 
+	replace		harv_unit = 4 if harv_unit ==.
 	*** 227 changes made
 	replace 		conversion = 100 if harv_unit ==4
-	*** 228 changes made 
-	
-	drop 			if cropcode == . 
+	*** 228 changes made
 
-* **********************************************************************
-* 6 - end matter, clean up to save
-* **********************************************************************
+	drop		if cropcode == .
+
+
+**********************************************************************
+**# 6 - end matter, clean up to save
+**********************************************************************
 	isid			cropcode harv_unit
-	
+
 * create unique household-plot identifier
 	sort			cropcode harv_unit
 	egen			crop_unit = group(cropcode harv_unit)
 	lab var			crop_unit "unique crop and unit identifier"
-	
+
 	compress
 	describe
 	summarize

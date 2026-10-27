@@ -13,25 +13,26 @@
 	* customsave.ado
 
 * TO DO:
-	* 
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+	*
 
-* define paths	
-	global root 		= "$data/household_data/nigeria/wave_4/raw"  
-	global export 		= "$data/household_data/nigeria/wave_4/refined"
-	global logout 		= "$data/household_data/nigeria/logs"
-	
-* open log	
-	cap log 		close
+
+**********************************************************************
+**# 0 - setup
+**********************************************************************
+
+* define paths
+	global		root 		= "$raw/nigeria/wave_4/raw"
+	global		export 		= "$data/refined_data/nigeria/wave_4"
+	global		logout 		= "$data/refined_data/nigeria/logs"
+
+* open log
+	cap log close
 	log using 		"$logout/wave_4_geovars", append
 
-	
-* **********************************************************************
-* 1 - GHSY3 (Wave 4) - geovars
-* **********************************************************************
+
+**********************************************************************
+**# 1 - ghsy3 (wave 4) - geovars
+**********************************************************************
 
 * import wave 4 geovars
 	use 			"$root/NGA_HouseholdGeovars_Y4.dta", clear
@@ -40,11 +41,11 @@
 	isid 			hhid
 
 	rename 			ssa_aez09 aez
-	
-	
-* **********************************************************************
-* 2 - end matter, clean up to save
-* **********************************************************************
+
+
+**********************************************************************
+**# 2 - end matter, clean up to save
+**********************************************************************
 
 	keep 			hhid aez
 
@@ -58,4 +59,4 @@
 * close the log
 	log	close
 
-/* END */	
+/* END */

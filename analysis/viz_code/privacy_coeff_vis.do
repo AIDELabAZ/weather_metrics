@@ -3,84 +3,85 @@
 * Created by: jdm
 * Edited by: alj
 * Last edit: 18 January 2024
-* Stata v.17.0 
+* Stata v.17.0
 
 * does
 	* reads in results data set
-	* makes visualziations of results 
+	* makes visualziations of results
 
 * assumes
-	* you have results file 
+	* you have results file
 	* grc1leg2.ado
 
 * TO DO:
 	* complete
-	
-************************************************************************
+
+
+**********************************************************************
 **# 0 - setup
-************************************************************************
+**********************************************************************
 
 * define paths
 	global	root 	= 	"$data/results_data"
 	global	stab 	= 	"$data/results_data/tables"
-	global	xtab 	= 	"$data/output/mismeasure_paper/tables"
-	global	sfig	= 	"$data/results_data/figures"	
-	global 	xfig    =   "$data/output/mismeasure_paper/figures"
+	global		xtab 	= 	"$data/results_data/tables/mismeasure_paper"
+	global		sfig	= 	"$data/results_data/figures"
+	global		xfig    =   "$data/results_data/figures/mismeasure_paper"
 	global	logout 	= 	"$data/results_data/logs"
 	* s indicates Stata figures, works in progress
-	* x indicates final version for paper 
-	
-* open log	
+* x indicates final version for paper
+
+* open log
 	cap log close
 	log 	using 	"$logout/privacy_coeff_vis", append
 
 
-************************************************************************
+**********************************************************************
 **# 1 - generate (non)-significant indicators
-************************************************************************
+**********************************************************************
 
-* load data 
+* load data
 	use 			"$root/lsms_complete_results", clear
 
 *generate different betas based on signficance
 	gen 			b_sig = beta
 	replace 		b_sig = . if pval > .05
 	lab var 		b_sig "p < 0.05"
-	
+
 	gen 			b_ns = beta
 	replace 		b_ns= . if p <= .05
 	lab var 		b_ns "n.s."
-	
+
 * generate significance dummy
 	gen				sig = 1 if b_sig != .
 	replace			sig = 0 if b_ns != .
 	lab	def			yesno 0 "Not Significant" 1 "Significant"
 	lab val			sig yesno
 	lab var			sig "Weather variable is significant"
-	
+
 * generate sign dummy
 	gen 			b_sign = 1 if b_sig > 0 & b_sig != .
 	replace 		b_sign = 0 if b_sig < 0 & b_sig != .
 	lab	def			posneg 0 "Negative" 1 "Positive"
 	lab val			b_sign posneg
 	lab var			b_sign "Sign on weather variable"
-	
-	
-************************************************************************
+
+
+**********************************************************************
 **# 2 - generate specification chart for mean rainfall
-************************************************************************
-			
-* define loop through levels of the data type variable	
+**********************************************************************
+
+* define loop through levels of the data type variable
 	levelsof 	country, local(cty)
 	local 		ctyname: value label country
-	foreach 	l of local cty {
+	foreach l of local cty {
 		local		ctyl: label `ctyname' `l'
 
-	
-************************************************************************
+
+**********************************************************************
 **## 2a - weather only
-************************************************************************
-	
+**********************************************************************
+
 preserve
 	keep			if varname == 1 & country == 1 & regname == 1
 	sort 			beta
@@ -90,20 +91,20 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -137,9 +138,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 2b - weather squared only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 1 & country == `l' & regname == 4
@@ -150,20 +151,20 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -197,9 +198,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 2c - weather and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 1 & country == `l' & regname == 2
@@ -210,20 +211,20 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -254,14 +255,14 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(5 6) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/v01_reg2_cty`l'", replace)
-						
+
 	*	graph export 	"$sfig/v01_reg2_cty`l'.pdf", as(pdf) replace
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 2d - weather squared and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 1 & country == `l' & regname == 5
@@ -272,20 +273,20 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -319,9 +320,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 2e - weather and FEs and inputs
-************************************************************************
+**********************************************************************
 /*
 preserve
 	keep			if varname == 1 & country == `l' & regname == 4
@@ -332,8 +333,8 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
@@ -342,10 +343,10 @@ preserve
 
 	qui sum			ci_up
 	global			bmax = r(max)
-	
+
 	qui sum			ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -376,12 +377,12 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(5 6) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/v01_reg3_cty`l'", replace)
-restore			
+restore
 
 
-************************************************************************
+**********************************************************************
 **## 2f - weather squared and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 1 & country == `l' & regname == 6
@@ -392,8 +393,8 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
@@ -402,10 +403,10 @@ preserve
 
 	qui sum			ci_up
 	global			bmax = r(max)
-	
+
 	qui sum			ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -440,22 +441,22 @@ restore
 */
 	}
 
-	
-************************************************************************
+
+**********************************************************************
 **# 3 - generate specification chart for no rain days
-************************************************************************
-			
-* define loop through levels of the data type variable	
+**********************************************************************
+
+* define loop through levels of the data type variable
 	levelsof 	country, local(cty)
 	local 		ctyname: value label country
-	foreach 	l of local cty {
+	foreach l of local cty {
 		local		ctyl: label `ctyname' `l'
 
 
-************************************************************************
+**********************************************************************
 **## 3a - weather only
-************************************************************************
-	
+**********************************************************************
+
 preserve
 	keep			if varname == 10 & country == `l' & regname == 1
 	sort 			beta
@@ -465,20 +466,20 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -512,9 +513,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 3b - weather squared only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 10 & country == `l' & regname == 4
@@ -525,20 +526,20 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -572,9 +573,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 3c - weather and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 10 & country == `l' & regname == 2
@@ -585,20 +586,20 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -632,9 +633,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 3d - weather squared and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 10 & country == `l' & regname == 5
@@ -645,20 +646,20 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -692,9 +693,11 @@ preserve
 restore
 
 /*
-************************************************************************
+
+
+**********************************************************************
 **## 3e - weather and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 10 & country == `l' & regname == 4
@@ -705,8 +708,8 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
@@ -715,10 +718,10 @@ preserve
 
 	qui sum			ci_up
 	global			bmax = r(max)
-	
+
 	qui sum			ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -747,12 +750,12 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(5 6) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/v10_reg3_cty`l'", replace)
-restore			
+restore
 
 
-************************************************************************
+**********************************************************************
 **## 3f - weather squared and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 10 & country == `l' & regname == 6
@@ -763,8 +766,8 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
@@ -773,10 +776,10 @@ preserve
 
 	qui sum			ci_up
 	global			bmax = r(max)
-	
+
 	qui sum			ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -808,23 +811,23 @@ preserve
 restore
 */
 	}
-	
-	
-************************************************************************
+
+
+**********************************************************************
 **# 4 - generate specification chart for z-score total season
-************************************************************************
-			
-* define loop through levels of the data type variable	
+**********************************************************************
+
+* define loop through levels of the data type variable
 	levelsof 	country, local(cty)
 	local 		ctyname: value label country
-	foreach 	l of local cty {
+	foreach l of local cty {
 		local		ctyl: label `ctyname' `l'
 
 
-************************************************************************
+**********************************************************************
 **## 4a - weather only
-************************************************************************
-	
+**********************************************************************
+
 preserve
 	keep			if varname == 7 & country == `l' & regname == 1
 	sort 			beta
@@ -834,20 +837,20 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -881,9 +884,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 4b - weather squared only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 7 & country == `l' & regname == 4
@@ -894,20 +897,20 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -941,9 +944,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 4c - weather and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 7 & country == `l' & regname == 2
@@ -954,20 +957,20 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -1001,9 +1004,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 4d - weather squared and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 7 & country == `l' & regname == 5
@@ -1014,20 +1017,20 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -1061,9 +1064,11 @@ preserve
 restore
 
 /*
-************************************************************************
+
+
+**********************************************************************
 **## 4e - weather and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 7 & country == `l' & regname == 4
@@ -1074,8 +1079,8 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
@@ -1084,10 +1089,10 @@ preserve
 
 	qui sum			ci_up
 	global			bmax = r(max)
-	
+
 	qui sum			ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -1116,12 +1121,12 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(5 6) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/v07_reg3_cty`l'", replace)
-restore			
+restore
 
 
-************************************************************************
+**********************************************************************
 **## 4f - weather squared and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 7 & country == `l' & regname == 6
@@ -1132,8 +1137,8 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 6 + 2 + 2 + 2
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
@@ -1142,10 +1147,10 @@ preserve
 
 	qui sum			ci_up
 	global			bmax = r(max)
-	
+
 	qui sum			ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	34
@@ -1177,52 +1182,52 @@ preserve
 restore
 */
 	}
-			
-	
-************************************************************************
+
+
+**********************************************************************
 **# 5 - combine rainfall graphs
-************************************************************************
-	
-* define loop through levels of the data type variable	
+**********************************************************************
+
+* define loop through levels of the data type variable
 	levelsof 	country, local(cty)
-	foreach 	l of local cty {
-		
+	foreach l of local cty {
+
 * combine country graphs for linear models
 	grc1leg2 		"$sfig/v01_reg1_cty`l'.gph" "$sfig/v01_reg2_cty`l'.gph" ///
 						"$sfig/v10_reg1_cty`l'.gph" "$sfig/v10_reg2_cty`l'.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
+
 	graph export 	"$xfig\line_cty`l'_rf.pdf", as(pdf) replace
-	
+
 * combine country graphs for quadtratic models
 	grc1leg2 		"$sfig/v01_reg4_cty`l'.gph" "$sfig/v01_reg5_cty`l'.gph" ///
 						"$sfig/v10_reg4_cty`l'.gph" "$sfig/v10_reg5_cty`l'.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
+
 	graph export 	"$xfig\quad_cty`l'_rf.pdf", as(pdf) replace
-	
+
 * combine country graphs for z-score
 	grc1leg2 		"$sfig/v07_reg1_cty`l'.gph" "$sfig/v07_reg2_cty`l'.gph" ///
 						"$sfig/v07_reg4_cty`l'.gph" "$sfig/v07_reg5_cty`l'.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
+
 	graph export 	"$xfig\ztot_cty`l'_rf.pdf", as(pdf) replace
 	}
-	
-	
-************************************************************************
-**# 6 - generate specification chart for mean temperature
-************************************************************************
-	
-* define loop through levels of the data type variable	
-	levelsof 	country, local(cty)
-	foreach 	l of local cty {
 
-	
-************************************************************************
+
+**********************************************************************
+**# 6 - generate specification chart for mean temperature
+**********************************************************************
+
+* define loop through levels of the data type variable
+	levelsof 	country, local(cty)
+	foreach l of local cty {
+
+
+**********************************************************************
 **## 6a - weather only
-************************************************************************
-	
+**********************************************************************
+
 preserve
 	keep			if varname == 15 & country ==`l' & regname == 1
 	sort 			beta
@@ -1232,25 +1237,25 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -1283,9 +1288,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 6b - weather squared only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 15 & country == `l' & regname == 4
@@ -1296,25 +1301,25 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -1347,9 +1352,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 6c - weather and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 15 & country == `l' & regname == 2
@@ -1360,25 +1365,25 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -1411,9 +1416,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 6d - weather squared and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 15 & country == `l' & regname == 5
@@ -1424,25 +1429,25 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -1475,9 +1480,11 @@ preserve
 restore
 
 /*
-************************************************************************
+
+
+**********************************************************************
 **## 6e - weather and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 15 & country == `l' & regname == 4
@@ -1488,13 +1495,13 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
@@ -1503,10 +1510,10 @@ preserve
 
 	qui sum			ci_up
 	global			bmax = r(max)
-	
+
 	qui sum			ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -1536,12 +1543,12 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(5 6) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/v15_reg3_cty`l'", replace)
-restore			
+restore
 
 
-************************************************************************
+**********************************************************************
 **## 6f - weather squared and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 15 & country == `l' & regname == 6
@@ -1552,13 +1559,13 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
@@ -1567,10 +1574,10 @@ preserve
 
 	qui sum			ci_up
 	global			bmax = r(max)
-	
+
 	qui sum			ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -1603,20 +1610,21 @@ preserve
 restore
 */
 	}
-	
-************************************************************************
-**# 7 - generate specification chart for GDD
-************************************************************************
-	
-* define loop through levels of the data type variable	
-	levelsof 	country, local(cty)
-	foreach 	l of local cty {
 
-	
-************************************************************************
+
+**********************************************************************
+**# 7 - generate specification chart for gdd
+**********************************************************************
+
+* define loop through levels of the data type variable
+	levelsof 	country, local(cty)
+	foreach l of local cty {
+
+
+**********************************************************************
 **## 7a - weather only
-************************************************************************
-	
+**********************************************************************
+
 preserve
 	keep			if varname == 19 & country == `l' & regname == 1
 	sort 			beta
@@ -1626,25 +1634,25 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -1677,9 +1685,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 7b - weather squared only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 19 & country == `l' & regname == 4
@@ -1690,25 +1698,25 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -1741,9 +1749,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 7c - weather and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 19 & country == `l' & regname == 2
@@ -1754,25 +1762,25 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -1807,9 +1815,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 7d - weather squared and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 19 & country == `l' & regname == 5
@@ -1820,25 +1828,25 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -1871,9 +1879,11 @@ preserve
 restore
 
 /*
-************************************************************************
+
+
+**********************************************************************
 **## 7e - weather and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 19 & country == `l' & regname == 4
@@ -1884,13 +1894,13 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
@@ -1899,10 +1909,10 @@ preserve
 
 	qui sum			ci_up
 	global			bmax = r(max)
-	
+
 	qui sum			ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -1932,12 +1942,12 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(5 6) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/v19_reg3_cty`l'", replace)
-restore			
+restore
 
 
-************************************************************************
+**********************************************************************
 **## 7f - weather squared and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 19 & country == `l' & regname == 6
@@ -1948,13 +1958,13 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
@@ -1963,10 +1973,10 @@ preserve
 
 	qui sum			ci_up
 	global			bmax = r(max)
-	
+
 	qui sum			ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -2000,20 +2010,20 @@ restore
 */
 	}
 
-	
-************************************************************************
-**# 8 - generate specification chart for z-GDD
-************************************************************************
-	
-* define loop through levels of the data type variable	
-	levelsof 	country, local(cty)
-	foreach 	l of local cty {
 
-	
-************************************************************************
+**********************************************************************
+**# 8 - generate specification chart for z-gdd
+**********************************************************************
+
+* define loop through levels of the data type variable
+	levelsof 	country, local(cty)
+	foreach l of local cty {
+
+
+**********************************************************************
 **## 8a - weather only
-************************************************************************
-	
+**********************************************************************
+
 preserve
 	keep			if varname == 21 & country == `l' & regname == 1
 	sort 			beta
@@ -2023,25 +2033,25 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -2074,9 +2084,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 8b - weather squared only
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 21 & country == `l' & regname == 4
@@ -2087,25 +2097,25 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -2138,9 +2148,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 8c - weather and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 21 & country == `l' & regname == 2
@@ -2151,25 +2161,25 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -2202,9 +2212,9 @@ preserve
 restore
 
 
-************************************************************************
+**********************************************************************
 **## 8d - weather squared and FEs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 21 & country == `l' & regname == 5
@@ -2215,25 +2225,25 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+	* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
 	lab				var k2 "Weather Product"
 	lab 			var k3 "Anon. Method"
 
-	qui sum			ci_up
+	qui sum ci_up
 	global			bmax = r(max)
-	
-	qui sum			ci_lo
+
+	qui sum ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -2266,9 +2276,11 @@ preserve
 restore
 
 /*
-************************************************************************
+
+
+**********************************************************************
 **## 8e - weather and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 21 & country == `l' & regname == 4
@@ -2279,13 +2291,13 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
@@ -2294,10 +2306,10 @@ preserve
 
 	qui sum			ci_up
 	global			bmax = r(max)
-	
+
 	qui sum			ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -2327,12 +2339,12 @@ preserve
 						yline(0, lcolor(maroon) axis(2) lstyle(solid) ) ), ///
 						legend(order(5 6) cols(2) size(small) rowgap(.5) pos(12)) ///
 						saving("$sfig/v21_reg3_cty`l'", replace)
-restore			
+restore
 
 
-************************************************************************
+**********************************************************************
 **## 8f - weather squared and FEs and inputs
-************************************************************************
+**********************************************************************
 
 preserve
 	keep			if varname == 21 & country == `l' & regname == 6
@@ -2343,13 +2355,13 @@ preserve
 	gen 			k1 		= 	depvar
 	gen 			k2 		= 	sat + 2 + 2
 	gen 			k3 		= 	ext + 3 + 2 + 2 + 2
-	
+
 * subtract values of off k2 because of varname numbering
 	replace			k2		=	5 if k2 == 11
 	replace			k2		=	6 if k2 == 12
 	replace			k2		=	7 if k2 == 13
-	
-* label new variables	
+
+* label new variables
 	lab				var obs "Specification # - sorted by effect size"
 
 	lab 			var k1 "Dep. Var."
@@ -2358,10 +2370,10 @@ preserve
 
 	qui sum			ci_up
 	global			bmax = r(max)
-	
+
 	qui sum			ci_lo
 	global			bmin = r(min)
-	
+
 	global			brange	=	$bmax - $bmin
 	global			from_y	=	$bmin - 2.5*$brange
 	global			gheight	=	31
@@ -2394,44 +2406,44 @@ preserve
 restore
 */
 	}
-	
-	
-************************************************************************
+
+
+**********************************************************************
 **# 9 - combine graphs
-************************************************************************
-	
-* define loop through levels of the data type variable	
+**********************************************************************
+
+* define loop through levels of the data type variable
 	levelsof 	country, local(cty)
-	foreach 	l of local cty {
-		
+	foreach l of local cty {
+
 * combine country graphs for linear models
 	grc1leg2 		"$sfig/v15_reg1_cty`l'.gph" "$sfig/v15_reg2_cty`l'.gph" ///
 						"$sfig/v19_reg1_cty`l'.gph" "$sfig/v19_reg2_cty`l'.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
+
 	graph export 	"$xfig\line_cty`l'_tp.pdf", as(pdf) replace
-	
+
 * combine country graphs for quadtratic models
 	grc1leg2 		"$sfig/v15_reg4_cty`l'.gph" "$sfig/v15_reg5_cty`l'.gph" ///
 						"$sfig/v19_reg4_cty`l'.gph" "$sfig/v19_reg5_cty`l'.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
+
 	graph export 	"$xfig\quad_cty`l'_tp.pdf", as(pdf) replace
-	
+
 * combine country graphs for z-score
 	grc1leg2 		"$sfig/v21_reg1_cty`l'.gph" "$sfig/v21_reg2_cty`l'.gph" ///
 						"$sfig/v21_reg4_cty`l'.gph" "$sfig/v21_reg5_cty`l'.gph", ///
 						col(2) iscale(.5) pos(12) commonscheme
-						
+
 	graph export 	"$xfig\zgdd_cty`l'_tp.pdf", as(pdf) replace
 	}
 
-************************************************************************
+
+**********************************************************************
 **# 10 - end matter
-************************************************************************
+**********************************************************************
 
 * close the log
 	log	close
 
-/* END */				
-	
+/* END */

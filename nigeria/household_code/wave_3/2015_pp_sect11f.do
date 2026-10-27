@@ -11,45 +11,45 @@
 
 * assumes
 	* access to all raw data
-	
+
 * TO DO:
 	* complete
-	
-	
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
-* define paths	
-	loc root = "$data/household_data/nigeria/wave_3/raw"
-	loc export = "$data/household_data/nigeria/wave_3/refined"
-	loc logout = "$data/household_data/nigeria/logs"
+
+
+**********************************************************************
+**# 0 - setup
+**********************************************************************
+* define paths
+	loc			root = "$raw/nigeria/wave_3/raw"
+	loc			export = "$data/refined_data/nigeria/wave_3"
+	loc			logout = "$data/refined_data/nigeria/logs"
 
 * close log (in case still open)
 	*log close
-	
-* open log	
+
+* open log
 	cap log close
 	log using "`logout'/pp_sect11f", append
 
-	
-* **********************************************************************
-* 1 - determine plot size
-* **********************************************************************
-		
+
+**********************************************************************
+**# 1 - determine plot size
+**********************************************************************
+
 * import the first relevant data file
-		use "`root'/sect11f_plantingw3", clear 
+	use			"`root'/sect11f_plantingw3", clear
 
 describe
 sort hhid plotid cropid
 isid hhid plotid cropid, missok
 
 
-* **********************************************************************
-* 2 - determine planting year and months 
-* **********************************************************************
+**********************************************************************
+**# 2 - determine planting year and months
+**********************************************************************
 
 *rename month and year
-rename 			s11fq3a month 
+	rename		s11fq3a month
 lab var			month "planting month"
 
 rename 			s11fq3b year
@@ -64,14 +64,16 @@ lab var			year "planting year"
 	tab year
 	*** 97% are in 2015, we will drop those from years before 2014
 	drop if year<=2013
-* **********************************************************************
-* 3 - end matter, clean up to save
-* **********************************************************************
+
+
+**********************************************************************
+**# 3 - end matter, clean up to save
+**********************************************************************
 
 
 compress
 describe
-summarize 
+	summarize
 
 * save file
 	save 			"`export'/pp_sect11f.dta", replace

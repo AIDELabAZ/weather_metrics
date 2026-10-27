@@ -1,8 +1,17 @@
 # Agent guidance for `weather_metrics`
 
+<!-- edited by: codex; edited on: 27 Oct 2026 -->
+
 This repository supports reproducible research on remote-sensing weather data and agricultural outcomes. Most analysis is written in Stata 18.
 
 ## Scientific and coding conventions
+
+- Follow the [lab's house style](https://jdavidm.github.io/learn-stata/materials/02-house-style/) in every file. Use documented, numbered and bookmarked sections, tabs for command/object alignment and nested blocks, readable continuation lines, and lowercase commands. Preserve case-sensitive data names and existing workflow structure. Apply style corrections without redesigning the workflow.
+- Indent entries under `* does`, `* assumes`, and `* TO DO:` by one tab. Section borders must contain only stars, with no embedded spaces. Leave two blank lines before the start of each section.
+- Preserve the username-based path blocks in `projectdo.do`. Users must be able to copy a block and edit their own paths. Do not replace them with automatic OneDrive defaults or environment-variable configuration.
+- Keep control statements and compound commands together with ordinary spaces: `if ...`, `foreach ...`, `capture ssc install ...`. Use tabs for nesting and useful command/object alignment, not between every word of a command. Use short path globals: `base`, `raw`, `wraw`, `code`, and `data`.
+- Keep all weather stages in the shared `$wraw` (`weather_data`) tree: `<country>/wave_<n>/raw/<source>` for CSV inputs, `daily/<source>` for daily Stata files, and `refined/<source>` for wxsum outputs. Projects read these shared outputs; do not create project-specific weather copies or add machine-specific fallback paths.
+- Keep wxsum calls and weather-variable preparation in the existing country-wave weather files. Do not replace them with a shared processing wrapper or place weather processing under `analysis/reg_code`.
 
 - Preserve existing estimation specifications, identifiers, output contracts, and historical replication behavior unless a task explicitly changes them. Distinguish historical specifications from newly proposed exploratory analyses.
 - Use the repository's existing Stata style, country/weather/outcome loops, and long-format `postfile` workflow. Make targeted edits; avoid unrelated refactoring or new dependencies.

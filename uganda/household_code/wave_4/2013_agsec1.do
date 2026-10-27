@@ -10,28 +10,28 @@
 
 * assumes
 	* access to raw data
-	
+
 * TO DO:
 	* done
 
-	
-***********************************************************************
-**# 0 - setup
-***********************************************************************
 
-* define paths	
-	global root 	"$data/household_data/uganda/wave_4/raw"  
-	global export 	"$data/household_data/uganda/wave_4/refined"
-	global logout 	"$data/household_data/uganda/logs"
-	
-* open log	
-	cap log 		close
+**********************************************************************
+**# 0 - setup
+**********************************************************************
+
+* define paths
+	global		root 	"$raw/uganda/wave_4/raw"
+	global		export 	"$data/refined_data/uganda/wave_4"
+	global		logout 	"$data/refined_data/uganda/logs"
+
+* open log
+	cap log close
 	log using 		"$logout/2013_AGSEC1", append
 
-	
-***********************************************************************
-**# 1 - UNPS 2013 (Wave 4) - Section 1 
-***********************************************************************
+
+**********************************************************************
+**# 1 - unps 2013 (wave 4) - section 1
+**********************************************************************
 
 * import wave 4 season 1
 	use				"$root/agric/AGSEC1", clear
@@ -49,23 +49,23 @@
 * drop if missing
 	drop if			district == ""
 	*** dropped 0 observations
-	
-	
-***********************************************************************
+
+
+**********************************************************************
 **# 2 - end matter, clean up to save
-***********************************************************************
+**********************************************************************
 
 	keep 			hh hhid region district subcounty parish ///
-						 wgt13 hhid_pnl rotate ea 
+				wgt13 hhid_pnl rotate ea
 
 	compress
 	describe
 	summarize
 
 * save file
-	save			"$export/2013_agsec1.dta", replace 
+	save		"$export/2013_agsec1.dta", replace
 
 * close the log
 	log	close
 
-/* END */	
+/* END */

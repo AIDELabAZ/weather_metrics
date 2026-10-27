@@ -16,26 +16,27 @@
 	* completed
 
 
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+**********************************************************************
+**# 0 - setup
+**********************************************************************
 
 * define paths
-	global	root		"$data/household_data/tanzania/wave_3/raw"
-	global export		"$data/household_data/tanzania/wave_3/refined"
-	global logout		"$data/household_data/tanzania/logs"
+	global		root		"$raw/tanzania/wave_3/raw"
+	global		export		"$data/refined_data/tanzania/wave_3"
+	global		logout		"$data/refined_data/tanzania/logs"
 
 * open log
-	cap log 			close 
+	cap log close
 	log					using	"$logout/wv3_HHSECA", append
 
-* ***********************************************************************
-* 1 - TZA 2012 (Wave 3) - Household Section A
-* ***********************************************************************
+
+**********************************************************************
+**# 1 - tza 2012 (wave 3) - household section a
+**********************************************************************
 
 * load data
 	use 		"$root/HH_SEC_A", clear
-	
+
 * dropping duplicates
 	duplicates 	drop
 	*** 0 obs dropped
@@ -45,7 +46,7 @@
 	rename		hh_a02_1 district
 	rename		hh_a03_1 ward
 	rename		hh_a04_1 ea
-	
+
 * keep variables of interest
 	keep 		y3_hhid y3_weight clusterid strataid ///
 					region district ward ea ///
@@ -59,16 +60,16 @@
 	lab val		mover_R1R2R3 yesno
 
 * generate location variable
-	rename		hh_a11 location_R2_to_R3	
+	rename		hh_a11 location_R2_to_R3
 	lab var		location_R2_to_R3 "Household location category"
-	
+
 	drop		hh_a10
 
 	order		y3_hhid region district ward ea y3_rural ///
-					clusterid strataid y3_weight mover_R1R2R3 location_R2_to_R3	
+				clusterid strataid y3_weight mover_R1R2R3 location_R2_to_R3
 
 	rename		y3_weight hhweight
-	
+
 * relabel variables
 	lab var		y3_hhid "Unique Household Identification NPS Y3"
 	lab var		region "Region Code"
@@ -79,14 +80,14 @@
 	lab var		clusterid "Unique Cluster Identification"
 	lab var		strataid "Design Strata"
 	lab var		hhweight "Household Weights (Trimmed & Post-Stratified)"
-					
+
 * prepare for export
 	compress
 	describe
 	summarize
 	sort y3_hhid
-	*** missing 3 ward values, 8 ea values 
-	
+	*** missing 3 ward values, 8 ea values
+
 	save 			"$export/HH_SECA.dta", replace
 
 * close the log

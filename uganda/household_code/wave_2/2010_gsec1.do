@@ -15,24 +15,24 @@
 * TO DO:
 	* done
 
-	
-************************************************************************
-**# 0 - setup
-************************************************************************
 
-* define paths	
-	global root 		"$data/household_data/uganda/wave_2/raw"  
-	global export 		"$data/household_data/uganda/wave_2/refined"
-	global logout 		"$data/household_data/uganda/logs"
-	
-* open log	
-	cap log 			close
+**********************************************************************
+**# 0 - setup
+**********************************************************************
+
+* define paths
+	global		root 		"$raw/uganda/wave_2/raw"
+	global		export 		"$data/refined_data/uganda/wave_2"
+	global		logout 		"$data/refined_data/uganda/logs"
+
+* open log
+	cap log close
 	log using 			"$logout/2010_GSEC1", append
 
-	
-************************************************************************
-**# 1 - UNPS 2009 (Wave 2) - General(?) Section 1 
-************************************************************************
+
+**********************************************************************
+**# 1 - unps 2009 (wave 2) - general(?) section 1
+**********************************************************************
 
 * import wave 2 season 1
 	use 			"$root/GSEC1", clear
@@ -53,11 +53,11 @@
 * drop if missing
 	drop if			district == ""
 	*** dropped 25 observations
-	
-	
-************************************************************************
+
+
+**********************************************************************
 **# 2 - end matter, clean up to save
-************************************************************************
+**********************************************************************
 
 	keep 			hhid region district county subcounty parish ///
 						hh_status2010 spitoff09_10 spitoff10_11 wgt10
@@ -72,4 +72,4 @@
 * close the log
 	log	close
 
-/* END */	
+/* END */
