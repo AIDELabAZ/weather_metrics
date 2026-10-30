@@ -1,8 +1,8 @@
 * Project: WB Weather - mismeasure paper
 * Created on: 4 April 2023
 * Created by: jdm
-* Edited by: jdm
-* Last edit: 18 Jun 2024
+* edited by: codex
+* edited on: 28 Oct 2026
 * Stata v.18.0
 
 * does
@@ -98,7 +98,7 @@ preserve
 						msize(small small small) mcolor(gs10 gs10 gs10) ylabel( ///
 						1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
 						4 "*{bf: Model}*" 6 "Quantity" 7 "Value" 8 "*{bf:Dep. Var.}*" ///
-						10 "CHIRPS" 11 "CPC" 12 "MERRA-2" 13 "ARC2" 14 "ERA5" ///
+						10 "ARC2" 11 "CHIRPS" 12 "CPC" 13 "ERA5" 14 "MERRA-2" ///
 						15 "TAMSAT" 16 "*{bf:Weather Product}*" 23 " ", ///
 						angle(0) labsize(vsmall) tstyle(notick)) || ///
 						(scatter k3 obs if b_sig != . & beta > 0, ///
@@ -165,7 +165,7 @@ preserve
 						msize(small small small) mcolor(gs10 gs10 gs10) ylabel( ///
 						1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
 						4 "*{bf: Model}*" 6 "Quantity" 7 "Value" 8 "*{bf:Dep. Var.}*" ///
-						10 "CHIRPS" 11 "CPC" 12 "MERRA-2" 13 "ARC2" 14 "ERA5" ///
+						10 "ARC2" 11 "CHIRPS" 12 "CPC" 13 "ERA5" 14 "MERRA-2" ///
 						15 "TAMSAT" 16 "*{bf:Weather Product}*" 23 " ", ///
 						angle(0) labsize(vsmall) tstyle(notick)) || ///
 						(scatter k3 obs if b_sig != . & beta > 0, ///
@@ -232,7 +232,7 @@ preserve
 						msize(small small small) mcolor(gs10 gs10 gs10) ylabel( ///
 						1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
 						4 "*{bf: Model}*" 6 "Quantity" 7 "Value" 8 "*{bf:Dep. Var.}*" ///
-						10 "CHIRPS" 11 "CPC" 12 "MERRA-2" 13 "ARC2" 14 "ERA5" ///
+						10 "ARC2" 11 "CHIRPS" 12 "CPC" 13 "ERA5" 14 "MERRA-2" ///
 						15 "TAMSAT" 16 "*{bf:Weather Product}*" 23 " ", ///
 						angle(0) labsize(vsmall) tstyle(notick)) || ///
 						(scatter k3 obs if b_sig != . & beta > 0, ///
@@ -299,7 +299,7 @@ preserve
 						msize(small small small) mcolor(gs10 gs10 gs10) ylabel( ///
 						1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
 						4 "*{bf: Model}*" 6 "Quantity" 7 "Value" 8 "*{bf:Dep. Var.}*" ///
-						10 "CHIRPS" 11 "CPC" 12 "MERRA-2" 13 "ARC2" 14 "ERA5" ///
+						10 "ARC2" 11 "CHIRPS" 12 "CPC" 13 "ERA5" 14 "MERRA-2" ///
 						15 "TAMSAT" 16 "*{bf:Weather Product}*" 23 " ", ///
 						angle(0) labsize(vsmall) tstyle(notick)) || ///
 						(scatter k3 obs if b_sig != . & beta > 0, ///
@@ -366,7 +366,7 @@ preserve
 						msize(small small small) mcolor(gs10 gs10 gs10) ylabel( ///
 						1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
 						4 "*{bf: Model}*" 6 "Quantity" 7 "Value" 8 "*{bf:Dep. Var.}*" ///
-						10 "CHIRPS" 11 "CPC" 12 "MERRA-2" 13 "ARC2" 14 "ERA5" ///
+						10 "ARC2" 11 "CHIRPS" 12 "CPC" 13 "ERA5" 14 "MERRA-2" ///
 						15 "TAMSAT" 16 "*{bf:Weather Product}*" 23 " ", ///
 						angle(0) labsize(vsmall) tstyle(notick)) || ///
 						(scatter k3 obs if b_sig != . & beta > 0, ///
@@ -433,7 +433,7 @@ preserve
 						msize(small small small) mcolor(gs10 gs10 gs10) ylabel( ///
 						1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
 						4 "*{bf: Model}*" 6 "Quantity" 7 "Value" 8 "*{bf:Dep. Var.}*" ///
-						10 "CHIRPS" 11 "CPC" 12 "MERRA-2" 13 "ARC2" 14 "ERA5" ///
+						10 "ARC2" 11 "CHIRPS" 12 "CPC" 13 "ERA5" 14 "MERRA-2" ///
 						15 "TAMSAT" 16 "*{bf:Weather Product}*" 23 " ", ///
 						angle(0) labsize(vsmall) tstyle(notick)) || ///
 						(scatter k3 obs if b_sig != . & beta > 0, ///
@@ -924,7 +924,7 @@ preserve
 						msize(small small small) mcolor(gs10 gs10 gs10) ylabel( ///
 						1 "Ethiopia" 2 "Malawi" 4 "Niger" 5 "Nigeria" 6 "Tanzania" ///
 						7 "Uganda " 8 "*{bf: Country}*" 10 "Quantity" 11 "Value" 12 "*{bf:Dep. Var.}*" ///
-						14 "CHIRPS" 15 "CPC" 16 "MERRA-2" 17 "ARC2" 18 "ERA5" ///
+						14 "ARC2" 15 "CHIRPS" 16 "CPC" 17 "ERA5" 18 "MERRA-2" ///
 						19 "TAMSAT" 20 "*{bf:Weather Product}*" 27 " ", ///
 						angle(0) labsize(vsmall) tstyle(notick)) || ///
 						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, ///
@@ -993,7 +993,7 @@ preserve
 						msize(small small small) mcolor(gs10 gs10 gs10) ylabel( ///
 						1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
 						4 "*{bf: Model}*" 6 "Quantity" 7 "Value" 8 "*{bf:Dep. Var.}*" ///
-						10 "CHIRPS" 11 "CPC" 12 "MERRA-2" 13 "ARC2" 14 "ERA5" ///
+						10 "ARC2" 11 "CHIRPS" 12 "CPC" 13 "ERA5" 14 "MERRA-2" ///
 						15 "TAMSAT" 16 "*{bf:Weather Product}*" 23 " ", ///
 						angle(0) labsize(vsmall) tstyle(notick)) || ///
 						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, ///
@@ -1050,7 +1050,7 @@ preserve
 						msize(small small small) mcolor(gs10 gs10 gs10) ylabel( ///
 						1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
 						4 "*{bf: Model}*" 6 "Quantity" 7 "Value" 8 "*{bf:Dep. Var.}*" ///
-						10 "CHIRPS" 11 "CPC" 12 "MERRA-2" 13 "ARC2" 14 "ERA5" ///
+						10 "ARC2" 11 "CHIRPS" 12 "CPC" 13 "ERA5" 14 "MERRA-2" ///
 						15 "TAMSAT" 16 "*{bf:Weather Product}*" 23 " ", ///
 						angle(0) labsize(vsmall) tstyle(notick)) || ///
 						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, ///
@@ -1107,7 +1107,7 @@ preserve
 						msize(small small small) mcolor(gs10 gs10 gs10) ylabel( ///
 						1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
 						4 "*{bf: Model}*" 6 "Quantity" 7 "Value" 8 "*{bf:Dep. Var.}*" ///
-						10 "CHIRPS" 11 "CPC" 12 "MERRA-2" 13 "ARC2" 14 "ERA5" ///
+						10 "ARC2" 11 "CHIRPS" 12 "CPC" 13 "ERA5" 14 "MERRA-2" ///
 						15 "TAMSAT" 16 "*{bf:Weather Product}*" 23 " ", ///
 						angle(0) labsize(vsmall) tstyle(notick)) || ///
 						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, ///
@@ -1165,7 +1165,7 @@ preserve
 						msize(small small small) mcolor(gs10 gs10 gs10) ylabel( ///
 						1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
 						4 "*{bf: Model}*" 6 "Quantity" 7 "Value" 8 "*{bf:Dep. Var.}*" ///
-						10 "CHIRPS" 11 "CPC" 12 "MERRA-2" 13 "ARC2" 14 "ERA5" ///
+						10 "ARC2" 11 "CHIRPS" 12 "CPC" 13 "ERA5" 14 "MERRA-2" ///
 						15 "TAMSAT" 16 "*{bf:Weather Product}*" 23 " ", ///
 						angle(0) labsize(vsmall) tstyle(notick)) || ///
 						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, ///
@@ -1222,7 +1222,7 @@ preserve
 						msize(small small small) mcolor(gs10 gs10 gs10) ylabel( ///
 						1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
 						4 "*{bf: Model}*" 6 "Quantity" 7 "Value" 8 "*{bf:Dep. Var.}*" ///
-						10 "CHIRPS" 11 "CPC" 12 "MERRA-2" 13 "ARC2" 14 "ERA5" ///
+						10 "ARC2" 11 "CHIRPS" 12 "CPC" 13 "ERA5" 14 "MERRA-2" ///
 						15 "TAMSAT" 16 "*{bf:Weather Product}*" 23 " ", ///
 						angle(0) labsize(vsmall) tstyle(notick)) || ///
 						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, ///
@@ -1280,7 +1280,7 @@ preserve
 						msize(small small small) mcolor(gs10 gs10 gs10) ylabel( ///
 						1 "Weather" 2 "Weather + FE" 3 "Weather + FE + Inputs" ///
 						4 "*{bf: Model}*" 6 "Quantity" 7 "Value" 8 "*{bf:Dep. Var.}*" ///
-						10 "CHIRPS" 11 "CPC" 12 "MERRA-2" 13 "ARC2" 14 "ERA5" ///
+						10 "ARC2" 11 "CHIRPS" 12 "CPC" 13 "ERA5" 14 "MERRA-2" ///
 						15 "TAMSAT" 16 "*{bf:Weather Product}*" 23 " ", ///
 						angle(0) labsize(vsmall) tstyle(notick)) || ///
 						(scatter b_ns obs, yaxis(2) mcolor(black%75) ylab(, ///

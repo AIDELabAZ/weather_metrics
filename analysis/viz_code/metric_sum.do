@@ -2,7 +2,7 @@
 * Created on: April 2024
 * Created by: jdm
 * edited by: codex
-* edited on: 27 Oct 2026
+* edited on: 28 Oct 2026
 * Stata v.18.0
 
 * does
@@ -43,8 +43,8 @@
 **# 1 - define rainfall inputs
 **********************************************************************
 
-* use product names from the wxsum output filenames in figure-legend order
-	loc			products chirps cpc merra arc2 era tamsat
+* assign canonical product IDs from the wxsum output filenames
+	loc			products arc2 chirps cpc era merra tamsat
 
 * retain the same fourteen rainfall metrics for the country-year means
 	loc			metrics mean_season_ median_season_ sd_season_ total_season_ ///
@@ -121,8 +121,8 @@
 
 * calculate the same country-year means using all available years
 	collapse	(mean) `metrics', by(year sat)
-	label define sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" ///
-				4 "ARC2" 5 "ERA5" 6 "TAMSAT", replace
+	label define sat 1 "ARC2" 2 "CHIRPS" 3 "CPC" ///
+				4 "ERA5" 5 "MERRA-2" 6 "TAMSAT", replace
 	label values sat sat
 
 * change scale of percentage once, after averaging
@@ -149,9 +149,9 @@
 				(line mean_season_ year if sat == 5, `p5') ///
 				(line mean_season_ year if sat == 6, `p6'), ///
 				`frame' `years' legend(off) ///
-				title("{bf:Ethiopia}", size(4) color("38 43 47")) ///
+				title("{bf:Ethiopia}", size(3) color("38 43 47")) ///
 				ytitle("Mean daily rainfall (mm)", size(3) color("38 43 47")) ///
-				ylabel(0(1)7, `grid' `ticks' angle(horizontal)) ///
+				ylabel(0(1)7, `pale' `ticks' angle(horizontal)) ///
 				saving("$sfig/eth_v01", replace)
 
 	graph export	"$xfig/eth_v01.pdf", replace
@@ -392,9 +392,9 @@
 				(line percent_raindays_ year if sat == 5, `p5') ///
 				(line percent_raindays_ year if sat == 6, `p6'), ///
 				`frame' `years' legend(off) ///
-				title("{bf:Ethiopia}", size(4) color("38 43 47")) ///
+				title("{bf:Ethiopia}", size(3) color("38 43 47")) ///
 				ytitle("Share of rainy days (%)", size(3) color("38 43 47")) ///
-				ylabel(0(20)100, `grid' `ticks' angle(horizontal)) ///
+				ylabel(0(20)100, `pale' `ticks' angle(horizontal)) ///
 				saving("$sfig/eth_v12", replace)
 
 	graph export	"$xfig/eth_v12.pdf", replace
@@ -509,8 +509,8 @@
 
 * calculate the same country-year means using all available years
 	collapse	(mean) `metrics', by(year sat)
-	label define sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" ///
-				4 "ARC2" 5 "ERA5" 6 "TAMSAT", replace
+	label define sat 1 "ARC2" 2 "CHIRPS" 3 "CPC" ///
+				4 "ERA5" 5 "MERRA-2" 6 "TAMSAT", replace
 	label values sat sat
 
 * change scale of percentage once, after averaging
@@ -537,9 +537,9 @@
 				(line mean_season_ year if sat == 5, `p5') ///
 				(line mean_season_ year if sat == 6, `p6'), ///
 				`frame' `years' legend(off) ///
-				title("{bf:Malawi}", size(4) color("38 43 47")) ///
+				title("{bf:Malawi}", size(3) color("38 43 47")) ///
 				ytitle("Mean daily rainfall (mm)", size(3) color("38 43 47")) ///
-				ylabel(0(1)8, `grid' `ticks' angle(horizontal)) ///
+				ylabel(0(1)8, `pale' `ticks' angle(horizontal)) ///
 				saving("$sfig/mwi_v01", replace)
 
 	graph export	"$xfig/mwi_v01.pdf", replace
@@ -780,9 +780,9 @@
 				(line percent_raindays_ year if sat == 5, `p5') ///
 				(line percent_raindays_ year if sat == 6, `p6'), ///
 				`frame' `years' legend(off) ///
-				title("{bf:Malawi}", size(4) color("38 43 47")) ///
+				title("{bf:Malawi}", size(3) color("38 43 47")) ///
 				ytitle("Share of rainy days (%)", size(3) color("38 43 47")) ///
-				ylabel(0(20)100, `grid' `ticks' angle(horizontal)) ///
+				ylabel(0(20)100, `pale' `ticks' angle(horizontal)) ///
 				saving("$sfig/mwi_v12", replace)
 
 	graph export	"$xfig/mwi_v12.pdf", replace
@@ -893,8 +893,8 @@
 
 * calculate the same country-year means using all available years
 	collapse	(mean) `metrics', by(year sat)
-	label define sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" ///
-				4 "ARC2" 5 "ERA5" 6 "TAMSAT", replace
+	label define sat 1 "ARC2" 2 "CHIRPS" 3 "CPC" ///
+				4 "ERA5" 5 "MERRA-2" 6 "TAMSAT", replace
 	label values sat sat
 
 * change scale of percentage once, after averaging
@@ -921,9 +921,9 @@
 				(line mean_season_ year if sat == 5, `p5') ///
 				(line mean_season_ year if sat == 6, `p6'), ///
 				`frame' `years' legend(off) ///
-				title("{bf:Niger}", size(4) color("38 43 47")) ///
+				title("{bf:Niger}", size(3) color("38 43 47")) ///
 				ytitle("Mean daily rainfall (mm)", size(3) color("38 43 47")) ///
-				ylabel(0(1)3, `grid' `ticks' angle(horizontal)) ///
+				ylabel(0(1)3, `pale' `ticks' angle(horizontal)) ///
 				saving("$sfig/ngr_v01", replace)
 
 	graph export	"$xfig/ngr_v01.pdf", replace
@@ -1164,9 +1164,9 @@
 				(line percent_raindays_ year if sat == 5, `p5') ///
 				(line percent_raindays_ year if sat == 6, `p6'), ///
 				`frame' `years' legend(off) ///
-				title("{bf:Niger}", size(4) color("38 43 47")) ///
+				title("{bf:Niger}", size(3) color("38 43 47")) ///
 				ytitle("Share of rainy days (%)", size(3) color("38 43 47")) ///
-				ylabel(0(20)100, `grid' `ticks' angle(horizontal)) ///
+				ylabel(0(20)100, `pale' `ticks' angle(horizontal)) ///
 				saving("$sfig/ngr_v12", replace)
 
 	graph export	"$xfig/ngr_v12.pdf", replace
@@ -1275,8 +1275,8 @@
 
 * calculate the same country-year means using all available years
 	collapse	(mean) `metrics', by(year sat)
-	label define sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" ///
-				4 "ARC2" 5 "ERA5" 6 "TAMSAT", replace
+	label define sat 1 "ARC2" 2 "CHIRPS" 3 "CPC" ///
+				4 "ERA5" 5 "MERRA-2" 6 "TAMSAT", replace
 	label values sat sat
 
 * change scale of percentage once, after averaging
@@ -1303,9 +1303,9 @@
 				(line mean_season_ year if sat == 5, `p5') ///
 				(line mean_season_ year if sat == 6, `p6'), ///
 				`frame' `years' legend(off) ///
-				title("{bf:Nigeria}", size(4) color("38 43 47")) ///
+				title("{bf:Nigeria}", size(3) color("38 43 47")) ///
 				ytitle("Mean daily rainfall (mm)", size(3) color("38 43 47")) ///
-				ylabel(0(1)12, `grid' `ticks' angle(horizontal)) ///
+				ylabel(0(1)12, `pale' `ticks' angle(horizontal)) ///
 				saving("$sfig/nga_v01", replace)
 
 	graph export	"$xfig/nga_v01.pdf", replace
@@ -1546,9 +1546,9 @@
 				(line percent_raindays_ year if sat == 5, `p5') ///
 				(line percent_raindays_ year if sat == 6, `p6'), ///
 				`frame' `years' legend(off) ///
-				title("{bf:Nigeria}", size(4) color("38 43 47")) ///
+				title("{bf:Nigeria}", size(3) color("38 43 47")) ///
 				ytitle("Share of rainy days (%)", size(3) color("38 43 47")) ///
-				ylabel(0(20)100, `grid' `ticks' angle(horizontal)) ///
+				ylabel(0(20)100, `pale' `ticks' angle(horizontal)) ///
 				saving("$sfig/nga_v12", replace)
 
 	graph export	"$xfig/nga_v12.pdf", replace
@@ -1663,8 +1663,8 @@
 
 * calculate the same country-year means using all available years
 	collapse	(mean) `metrics', by(year sat)
-	label define sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" ///
-				4 "ARC2" 5 "ERA5" 6 "TAMSAT", replace
+	label define sat 1 "ARC2" 2 "CHIRPS" 3 "CPC" ///
+				4 "ERA5" 5 "MERRA-2" 6 "TAMSAT", replace
 	label values sat sat
 
 * change scale of percentage once, after averaging
@@ -1691,9 +1691,9 @@
 				(line mean_season_ year if sat == 5, `p5') ///
 				(line mean_season_ year if sat == 6, `p6'), ///
 				`frame' `years' legend(off) ///
-				title("{bf:Tanzania}", size(4) color("38 43 47")) ///
+				title("{bf:Tanzania}", size(3) color("38 43 47")) ///
 				ytitle("Mean daily rainfall (mm)", size(3) color("38 43 47")) ///
-				ylabel(0(1)8, `grid' `ticks' angle(horizontal)) ///
+				ylabel(0(1)8, `pale' `ticks' angle(horizontal)) ///
 				saving("$sfig/tza_v01", replace)
 
 	graph export	"$xfig/tza_v01.pdf", replace
@@ -1934,9 +1934,9 @@
 				(line percent_raindays_ year if sat == 5, `p5') ///
 				(line percent_raindays_ year if sat == 6, `p6'), ///
 				`frame' `years' legend(off) ///
-				title("{bf:Tanzania}", size(4) color("38 43 47")) ///
+				title("{bf:Tanzania}", size(3) color("38 43 47")) ///
 				ytitle("Share of rainy days (%)", size(3) color("38 43 47")) ///
-				ylabel(0(20)100, `grid' `ticks' angle(horizontal)) ///
+				ylabel(0(20)100, `pale' `ticks' angle(horizontal)) ///
 				saving("$sfig/tza_v12", replace)
 
 	graph export	"$xfig/tza_v12.pdf", replace
@@ -2047,8 +2047,8 @@
 
 * calculate the same country-year means using all available years
 	collapse	(mean) `metrics', by(year sat)
-	label define sat 1 "CHIRPS" 2 "CPC" 3 "MERRA-2" ///
-				4 "ARC2" 5 "ERA5" 6 "TAMSAT", replace
+	label define sat 1 "ARC2" 2 "CHIRPS" 3 "CPC" ///
+				4 "ERA5" 5 "MERRA-2" 6 "TAMSAT", replace
 	label values sat sat
 
 * change scale of percentage once, after averaging
@@ -2075,9 +2075,9 @@
 				(line mean_season_ year if sat == 5, `p5') ///
 				(line mean_season_ year if sat == 6, `p6'), ///
 				`frame' `years' legend(off) ///
-				title("{bf:Uganda}", size(4) color("38 43 47")) ///
+				title("{bf:Uganda}", size(3) color("38 43 47")) ///
 				ytitle("Mean daily rainfall (mm)", size(3) color("38 43 47")) ///
-				ylabel(0(1)7, `grid' `ticks' angle(horizontal)) ///
+				ylabel(0(1)7, `pale' `ticks' angle(horizontal)) ///
 				saving("$sfig/uga_v01", replace)
 
 	graph export	"$xfig/uga_v01.pdf", replace
@@ -2318,9 +2318,9 @@
 				(line percent_raindays_ year if sat == 5, `p5') ///
 				(line percent_raindays_ year if sat == 6, `p6'), ///
 				`frame' `years' legend(off) ///
-				title("{bf:Uganda}", size(4) color("38 43 47")) ///
+				title("{bf:Uganda}", size(3) color("38 43 47")) ///
 				ytitle("Share of rainy days (%)", size(3) color("38 43 47")) ///
-				ylabel(0(20)100, `grid' `ticks' angle(horizontal)) ///
+				ylabel(0(20)100, `pale' `ticks' angle(horizontal)) ///
 				saving("$sfig/uga_v12", replace)
 
 	graph export	"$xfig/uga_v12.pdf", replace
@@ -2398,8 +2398,8 @@
 				(line mean_season_ year if sat == 6, `p6'), ///
 				`frame' `years' `key' ///
 				ytitle("Mean daily rainfall (mm)", size(3) color("38 43 47")) ///
-				ylabel(, `grid' `ticks' angle(horizontal)) ///
-				subtitle(, size(3.8) color("38 43 47") nobox fcolor(white)) ///
+				ylabel(, `pale' `ticks' angle(horizontal)) ///
+				subtitle(, size(2.8) color("38 43 47") nobox fcolor(white)) ///
 				by(country, cols(3) yrescale iyaxes iylabel iscale(1) ///
 				legend(pos(6)) note("") imargin(small) ///
 				graphregion(color(white) margin(small))) ///
@@ -2684,8 +2684,8 @@
 				(line percent_raindays_ year if sat == 6, `p6'), ///
 				`frame' `years' `key' ///
 				ytitle("Share of rainy days (%)", size(3) color("38 43 47")) ///
-				ylabel(0(20)100, `grid' `ticks' angle(horizontal)) ///
-				subtitle(, size(3.8) color("38 43 47") nobox fcolor(white)) ///
+				ylabel(0(20)100, `pale' `ticks' angle(horizontal)) ///
+				subtitle(, size(2.8) color("38 43 47") nobox fcolor(white)) ///
 				by(country, cols(3) iscale(1) ///
 				legend(pos(6)) note("") imargin(small) ///
 				graphregion(color(white) margin(small))) ///

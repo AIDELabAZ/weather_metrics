@@ -2,7 +2,7 @@
 * Created on: 27 Oct 2026
 * Created by: codex
 * edited by: codex
-* edited on: 27 Oct 2026
+* edited on: 28 Oct 2026
 * Stata v.18.0
 
 * does
@@ -20,7 +20,7 @@
 **********************************************************************
 
 * use product names because figure and regression identifiers differ
-	loc			arc2 "82 116 170"
+	loc			arc2 "40 86 154"
 	loc			chirps "29 132 147"
 	loc			cpc "111 143 82"
 	loc			era5 "194 123 65"
