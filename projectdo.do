@@ -1,7 +1,7 @@
 * project: wb weather - metric
 * created on: jan 2024
 * created by: cda
-* edited on: 27 Oct 2026
+* edited on: 30 Oct 2026
 * edited by: codex
 * stata v.19.5
 
@@ -170,6 +170,6 @@
 
 *	do			"$code/analysis/viz_code/metric_sum.do"
 *	do			"$code/analysis/viz_code/metric_pval.do"
-*	do			"$code/analysis/viz_code/metric_coeff_vis.do"
+*	do			"$code/analysis/viz_code/metric_coeff.do"
 
 /* END */

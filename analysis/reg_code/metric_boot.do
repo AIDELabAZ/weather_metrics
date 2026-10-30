@@ -2,7 +2,7 @@
 * Created on: 27 Oct 2026
 * Created by: codex
 * edited by: codex
-* edited on: 27 Oct 2026
+* edited on: 30 Oct 2026
 * Stata v.18.0
 
 * does
@@ -30,9 +30,11 @@
 
 * run without arguments for all pairs and 1,000 replications per pair
 * optional arguments: mode, replications, countries, outcomes, weather variables
-*	do metric_boot.do pilot 30 "1" "lncp_yld" "v01_rf1"
-*	do metric_boot.do pilot 99 "1" "lncp_yld lntf_yld" "v01_rf*"
-*	do metric_boot.do full 1000
+*	do "$code/analysis/reg_code/metric_boot.do" ///
+*		pilot 30 "1" "lncp_yld" "v01_rf1"
+*	do "$code/analysis/reg_code/metric_boot.do" ///
+*		pilot 99 "1" "lncp_yld lntf_yld" "v01_rf*"
+*	do "$code/analysis/reg_code/metric_boot.do" full 1000
 	args mode reps countries outcomes weather
 	if "`mode'" == "" loc mode full
 	if !inlist("`mode'", "pilot", "full") error 198
