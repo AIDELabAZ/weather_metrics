@@ -126,14 +126,14 @@ end
 
 
 **********************************************************************
-**# 3 - the predeclared twenty-cell pilot
+**# 3 - the predeclared metric-product subset across available countries
 **********************************************************************
 
 	tempname	post
 	postfile	`post' byte(country outcome design) str8 weather_var int rep ///
 				double(delta original scale) long(n households blocks) using ///
 				"`draws'", replace
-	foreach c in 1 2 5 6 7 {
+	foreach c in 1 2 4 5 6 7 {
 		forvalues o = 1/2 {
 			use			"`panel'", clear
 			loc			y = cond(`o' == 1, "lntf_yld", "lncp_yld")

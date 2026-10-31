@@ -34,27 +34,43 @@ in the crosswalk and coverage audit.
 |---|---:|---:|
 | Ethiopia | 10,674 | 10,664 |
 | Malawi | 8,897 | 8,895 |
-| Niger | 3,913 | 0 |
+| Niger | 3,913 | 3,913 |
 | Nigeria | 9,145 | 9,145 |
-| Tanzania | 9,916 | 5,913 |
-| Uganda | 11,692 | 5,787 |
+| Tanzania | 9,916 | 7,691 |
+| Uganda | 11,692 | 9,845 |
 
-Niger's inspected geovariables file contains no latitude/longitude fields.
-Its coordinate files are pending. The available Tanzania geography covers
-2008, 2010, and 2012 rainfall years; Uganda covers 2009, 2010, and 2011.
-Later-wave coordinates for both countries are pending. The user is locating
-these files. No location is carried forward from an earlier wave.
+Niger uses the released modified EA positions in `NER_EA_Offsets.dta`.
+The user confirmed that `grappe` identifies the same EA in 2011 and 2014,
+so both waves join to that file by their actual wave's grappe. This explicit
+linkage does not infer household immobility or permanent EA links elsewhere.
+
+Tanzania's 2014 new panel joins its cluster IDs to `npsy4.ea.offset.dta`:
+all 1,778 analysis observations match. The 349 extended-panel observations
+use a different cluster coding and do not match that file; a compatible
+released centroid file or cluster crosswalk is still needed for that panel.
+The 2019/20 and 2020/21 community modules contain `cm_gps__Latitude` and
+`cm_gps__Longitude`, but every value in both fields is `**CONFIDENTIAL**`:
+99 and 488 community records, respectively. These sources are recorded in
+the inventory as unavailable, not converted to coordinates or imputed.
+
+Uganda now also covers all 2,190 observations in 2013/14 and all 1,868 in
+2015/16. The downloaded files use lowercase `hhid`; the 2013/14 values match
+`hh` in `unps4_merged`, which provides the bridge to the panel's `HHID`.
+No 2019/20 coordinates have been located. The linked
+[2018/19 geofile](https://microdata.worldbank.org/catalog/3795/data-dictionary/F109?file_name=unps_geovars_2018_19)
+belongs to wave 7, which the current panel excludes; it is not substituted
+for wave 8's observed location. No other location is carried forward.
 
 Original IDs are recovered from the existing household/append intermediates:
 Ethiopia's `household_id2`, Malawi's long/short-panel wave identifiers,
-Nigeria's original `hhid`, Tanzania's wave-specific IDs, and Uganda's
+Nigeria's original `hhid`, Tanzania's wave-specific IDs/cluster codes, and Uganda's
 reconstructed panel links. Malawi's baseline family ID alone is not a unique
 tracked-unit key. Joins preserve each country's existing panel identifiers.
 
 Global coordinate ranges and broad country envelopes flag implausible
 positions. The envelopes are checks rather than exact national boundaries.
 Suppressed or missing coordinates remain missing. Released EA codes are
-retained where available. When no EA code is released, identical modified
+retained where available. When no EA code is released, identical released
 coordinate pairs define location groups; these are explicitly identified
 in the inventory. Grouping identical positions leaves the covariance kernel
 unchanged. The analysis does not infer permanent EA identities across waves.
@@ -114,7 +130,7 @@ reference value need not indicate negative meteorological dependence.
 
 Three new PDF/PNG figures are created in `figures/metric_paper/`:
 
-- `space_score`: six-country score dependence, with pending geography labeled.
+- `space_score`: six-country score dependence on the available geography.
 - `space_share`: paired household/100-km shares above |t|=1.96.
 - `space_share481`: the corresponding appendix comparison at |t|=4.81.
 
@@ -138,28 +154,30 @@ year, released location, outcome/specification, and `q_<weather_var>` scores.
 This avoids repeating the same identifiers in millions of long-format rows.
 
 Executed with StataNow 19.5 using built-in Stata/Mata commands and no new
-production packages. All 240 available-country pilot fits matched direct
-Stata coefficients, household-clustered SEs, and observation counts to
-relative tolerance 1e-8. Independent chord-distance neighbor searches
-reproduced every cached pair: 136,355 Ethiopia; 841,623 Malawi; 182,319
-Nigeria; 99,408 Tanzania; 295,878 Uganda. The pending Niger list is empty.
+production packages. The initial 240 pilot fits matched direct Stata
+coefficients, household-clustered SEs, and observation counts to relative
+tolerance 1e-8. Independent chord-distance searches reproduced the initial
+five-country cached neighbor lists. All 12 updated-sample fits for CHIRPS
+total rainfall, both outcomes and both FE models in Niger, Tanzania, and
+Uganda also matched direct Stata estimates to relative tolerance 1e-8.
 A separate, hand-checkable example independently reproduced the covariance
 calculation, including same-location households, a mover, serial household
 terms, and the adjacent-interval subtraction, to tolerance 1e-10. Those
 verification fits/examples are not part of the production scripts.
 
-The full run saved 2,016 specification rows: 840 estimated reg2 fits and
-840 estimated reg7 fits, with 336 Niger rows explicitly marked as missing
-coordinates. All estimated fits have positive spatial variances at every
-prespecified bandwidth and in the adjacent-interval sensitivity. Each
-available country's primary paired comparison contains 168 specifications.
+The updated full run saved 2,016 specification rows: 1,008 estimated reg2
+fits and 1,008 estimated reg7 fits. All estimated fits have positive spatial
+variances at every prespecified bandwidth and in the adjacent-interval
+sensitivity. Each country's primary paired comparison contains 168
+specifications. The crosswalk covers 50,153 of the original 54,237 panel
+observations; the estimation samples also exclude missing outcomes.
 
 ## Triggered bootstrap pilot
 
-The 100-km adjustment reduces threshold-crossing shares in all five available
-countries, triggering the plan's subset assessment. `metric_block.do` pilots
-CHIRPS total rainfall and rainy days, both outcomes, and the five currently
-available countries: 20 declared cells. Both resampling designs use the
+The 100-km adjustment reduces threshold-crossing shares in all six countries,
+triggering the plan's subset assessment. `metric_block.do` pilots
+CHIRPS total rainfall and rainy days, both outcomes, and all six countries:
+24 declared cells after Niger's coordinates were located. Both designs use the
 identical georeferenced sample and preserve each household's observed panel
 history. The existing 1,008-by-1,000 household-bootstrap files remain untouched.
 
@@ -174,13 +192,13 @@ thousands of redundant full regression commands. An actual-sample weighted
 comparison verified the statistic against Stata frequency-weighted fits.
 
 The statistic is reg2 minus reg7, standardized by the original georeferenced
-sample's weather/outcome SD ratio. `block_boot_draws.dta` retains all 7,960
-attempts. `block_boot_pilot.csv` records the 40 distributions, successful and
+sample's weather/outcome SD ratio. `block_boot_draws.dta` retains all 9,552
+attempts. `block_boot_pilot.csv` records the 48 distributions, successful and
 failed draws, and percentile intervals. Intervals require at least 95%
 successful replications. `block_boot_comparison.csv` compares interval widths
 only when both designs are complete.
 
-The 16 comparisons outside Malawi completed all 199 draws. Malawi has only
+The 20 comparisons outside Malawi completed all 199 draws. Malawi has only
 two connected geographic blocks; its four geographic distributions have
 151 or 156 successful draws and do not meet the required success rate.
 Their intervals and significance indicators remain unavailable. This is a
@@ -189,3 +207,9 @@ replacement for the paper's production bootstrap or a claim of unrestricted
 spatial-temporal robustness. Coordinate coverage, block design, and the
 adjacent-interval sensitivity must be assessed before interpreting the full
 bootstrap's significance rates as spatially robust.
+
+With the expanded household histories, Uganda has eight connected geographic
+blocks for farm value and seven for maize; Niger has 43 and 38, respectively.
+The updated run contains 44 complete distributions and four incomplete
+Malawi geographic distributions. Large connected blocks and the remaining
+coordinate restrictions remain part of the pilot's interpretation.

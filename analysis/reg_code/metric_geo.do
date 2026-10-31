@@ -14,7 +14,7 @@
 	* released geovariables mappings in metric_geo.csv
 
 * TO DO:
-	* add the coordinate files still being located by the user
+	* add usable Tanzania late-wave and Uganda wave-8 coordinates if released
 
 
 **********************************************************************
@@ -28,7 +28,7 @@
 	capture mkdir "`out'/neighbors"
 	cap log close
 	log using	"`out'/logs/metric_geo.log", text replace
-	tempfile	map keys eth mwi nga bridge found one coverage lpmap spmap
+	tempfile	map keys eth mwi ngr nga tza bridge found one coverage lpmap spmap
 
 
 **********************************************************************
@@ -80,6 +80,24 @@
 				keep(master match) keepusing(mwi_y2 mwi_y3 mwi_y4) nogen
 	save		"`mwi'"
 
+* niger retains the same grappe across waves; the user confirmed the EA linkage
+	forvalues w = 1/2 {
+		loc			extra = cond(`w' == 2, "extension", "")
+		use			hid year clusterid `extra' using ///
+					"$data/merged_data/niger/wave_`w'/ecvmay`w'_merged", clear
+		if `w' == 2 drop if inlist(extension, "1", "2")
+		rename		clusterid ngr_grappe
+		keep		hid year ngr_grappe
+		if `w' > 1 append using "`bridge'"
+		save		"`bridge'", replace
+	}
+	isid		hid year
+	use			"$data/results_data/additional_evidence/exhibit2/panel_keys", clear
+	keep if		country == 4
+	merge		1:1 hid year using "`bridge'", ///
+				keep(master match) keepusing(ngr_grappe) nogen
+	save		"`ngr'"
+
 * nigeria's raw household identifier differs from the harmonized panel ID
 	use			nga_id hhid year using ///
 				"$data/regression_data/nigeria/nga_complete", clear
@@ -92,16 +110,48 @@
 				keep(master match) keepusing(nga_hhid) nogen
 	save		"`nga'"
 
-* other original identifiers already survive in the recovered keys
+* recover the 2014 cluster identifiers separately for each tanzania panel
+	loc			files npsy4 npsy4xp
+	loc			clusters clusterid clusterid2014
+	forvalues w = 4/5 {
+		loc			j = `w' - 3
+		loc			file : word `j' of `files'
+		loc			cluster : word `j' of `clusters'
+		use			y4_hhid `cluster' using ///
+					"$data/merged_data/tanzania/wave_`w'/`file'_merged", clear
+		rename		`cluster' tza_cluster
+		keep		y4_hhid tza_cluster
+		isid		y4_hhid
+		save		"`one'", replace
+		use			"$data/results_data/additional_evidence/exhibit2/panel_keys", clear
+		keep if		country == 6 & wave == `w'
+		merge		m:1 y4_hhid using "`one'", keep(master match) nogen
+		if `w' > 4 append using "`bridge'"
+		save		"`bridge'", replace
+	}
 	use			"$data/results_data/additional_evidence/exhibit2/panel_keys", clear
-	keep if		inlist(country, 4, 6, 7)
-	append		using "`eth'" "`mwi'" "`nga'"
+	keep if		country == 6 & !inlist(wave, 4, 5)
+	append		using "`bridge'"
+	isid		country hhid year
+	save		"`tza'"
+
+* uganda's 2013 geofile uses hh, while the panel key retains HHID
+	use			HHID hh using ///
+				"$data/merged_data/uganda/wave_4/unps4_merged", clear
+	rename		(HHID hh) (hh_4_7 uga_hh4)
+	isid		hh_4_7
+	save		"`bridge'", replace
+	use			"$data/results_data/additional_evidence/exhibit2/panel_keys", clear
+	keep if		country == 7
+	merge		m:1 hh_4_7 using "`bridge'", ///
+				keep(master match) keepusing(uga_hh4) nogen
+	append		using "`eth'" "`mwi'" "`ngr'" "`nga'" "`tza'"
 	isid		country hhid year
 	save		"`keys'"
 
 
 **********************************************************************
-**# 2 - read the released coordinate sources and join on household keys
+**# 2 - read the released coordinate sources and join the recovered keys
 **********************************************************************
 
 * the map records real country-wave differences, not machine-specific paths
@@ -204,7 +254,7 @@
 	bysort ea_wave_id: assert latitude == latitude[1] & ///
 				longitude == longitude[1] if geo_available
 
-* do not carry a location forward to another survey wave
+* retain observed wave locations; Niger's shared grappe source is explicit in the map
 	bysort country hhid (year): gen byte location_changed = ///
 				(latitude != latitude[_n-1] | longitude != longitude[_n-1]) ///
 				if _n > 1 & geo_available & geo_available[_n-1]
@@ -212,7 +262,7 @@
 	save		"`out'/geovariables_crosswalk", replace
 	merge		1:1 country hhid year using "$data/regression_data/lsms_panel", ///
 				assert(match) nogen
-	char _dta[geography] "Released modified EA/coordinate groups; no confidential GPS or imputed locations"
+	char _dta[geography] "Released modified coordinates; Niger uses stable grappe and the 2011 EA source in both waves"
 	save		"`out'/lsms_panel_geo", replace
 
 
