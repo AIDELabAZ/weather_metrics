@@ -1,5 +1,5 @@
 /* Project: WB Weather - metric
-   Created by: codex; edited by: codex; edited on: 31 Oct 2026
+   Created by: codex; edited by: codex; edited on: 2 Nov 2026
    does: batch fixed-effects residualization and household-clustered scores
    assumes: one observation per household and survey year
 */
@@ -46,9 +46,10 @@ mata:
 		w = metric_demean((a, d), h)
 		wa = w[, 1..cols(a)]
 		wd = w[, (cols(a)+1)..cols(w)]
-		/* disconnected survey cohorts leave some year indicators redundant */
-		k = rank(wd) + 2
-		return(wa - wd * qrsolve(wd, wa))
+		/* use the same QR rank for residualization and the degrees of freedom */
+		wa = wa - wd * qrsolve(wd, wa, k)
+		k = k + 2
+		return(wa)
 	}
 
 

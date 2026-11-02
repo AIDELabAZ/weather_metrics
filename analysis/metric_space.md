@@ -36,7 +36,7 @@ in the crosswalk and coverage audit.
 | Malawi | 8,897 | 8,895 |
 | Niger | 3,913 | 3,913 |
 | Nigeria | 9,145 | 9,145 |
-| Tanzania | 9,916 | 8,970 |
+| Tanzania | 9,916 | 9,138 |
 | Uganda | 11,692 | 9,845 |
 
 Niger uses the released modified EA positions in `NER_EA_Offsets.dta`.
@@ -55,10 +55,19 @@ observations in the extended panel; the other 348 remain unlocated.
 The 2019/20 and 2020/21 community modules contain `cm_gps__Latitude` and
 `cm_gps__Longitude`, but every value in both fields is `**CONFIDENTIAL**`:
 99 and 488 community records, respectively. Masked GPS values are not
-converted to coordinates or imputed. The 2019/20 SDD locations remain
-unresolved; their sampling-unit IDs do not directly match the 2014 new-panel
-EA roster. Matching an original sampling unit alone would not establish a
-tracked household's current location.
+converted to coordinates or imputed.
+
+The 2019/20 SDD panel has a separate bridge. `sdd_panel_key` links its
+household IDs to earlier survey IDs; `hhfinal_npsy5sdd` supplies the current
+region, district, ward, and EA. SDD district codes include the region prefix,
+so that prefix is removed when comparing with the earlier waves' separate
+region/district fields. Coordinates are reused only if all four current
+administrative components agree with the linked earlier household record.
+The most recent usable source is selected first: 2012, then 2010, then 2008.
+This recovers 168 of the 312 SDD analysis observations: 120 from 2012 and 48
+from 2008; the 2010 source adds no further observations in the current panel.
+The other 144 do not have a verified same-EA coordinate link. Household-ID
+continuity alone does not justify carrying a previous location forward.
 
 The 2020/21 household file does retain the 2014 new-panel `clusterid` codes.
 Those codes also persist for movers, so an unrestricted join would assign
@@ -123,7 +132,9 @@ The estimator never constructs a dense all-location distance matrix.
 
 The same household-cluster small-sample factor, G/(G-1) times (N-1)/(N-k),
 multiplies the household and spatial components. The effective parameter
-count k matches the identifiable FE specification. Raw spatial variances
+count k uses the rank returned by the same QR projection that removes year
+effects. This avoids a separate SVD rank counting a redundant year effect
+on the expanded SDD sample. Raw spatial variances
 and covariance components are retained. Nonpositive variances are flagged;
 no arbitrary positive floor or silent replacement is applied.
 
@@ -180,6 +191,8 @@ total rainfall, both outcomes and both FE models in Niger, Tanzania, and
 Uganda also matched direct Stata estimates to relative tolerance 1e-8.
 After the EA-based update, four additional Tanzania fits (CHIRPS total
 rainfall, both outcomes and FE specifications) passed the same comparison.
+The four fits on the expanded SDD sample also pass after the QR-rank
+correction, with the same relative tolerance of 1e-8.
 A separate, hand-checkable example independently reproduced the covariance
 calculation, including same-location households, a mover, serial household
 terms, and the adjacent-interval subtraction, to tolerance 1e-10. Those
@@ -189,7 +202,7 @@ The updated full run saved 2,016 specification rows: 1,008 estimated reg2
 fits and 1,008 estimated reg7 fits. All estimated fits have positive spatial
 variances at every prespecified bandwidth and in the adjacent-interval
 sensitivity. Each country's primary paired comparison contains 168
-specifications. The crosswalk covers 51,432 of the original 54,237 panel
+specifications. The crosswalk covers 51,600 of the original 54,237 panel
 observations; the estimation samples also exclude missing outcomes.
 
 ## Triggered bootstrap pilot
@@ -230,7 +243,7 @@ bootstrap's significance rates as spatially robust.
 
 With the expanded household histories, Uganda has eight connected geographic
 blocks for farm value and seven for maize; Niger has 43 and 38, respectively.
-Tanzania has 73 blocks for farm value and 72 for maize after the EA update.
+Tanzania has 71 blocks in each outcome sample after adding the SDD matches.
 The updated run contains 44 complete distributions and four incomplete
 Malawi geographic distributions. Large connected blocks and the remaining
 coordinate restrictions remain part of the pilot's interpretation.

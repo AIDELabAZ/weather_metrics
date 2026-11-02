@@ -29,7 +29,7 @@
 	cap log close
 	log using	"`out'/logs/metric_geo.log", text replace
 	tempfile	map keys eth mwi ngr nga tza bridge found one coverage ///
-				lpmap spmap ea_map
+				lpmap spmap ea_map sdd
 
 
 **********************************************************************
@@ -152,8 +152,55 @@
 		if `w' > 4 append using "`bridge'"
 		save		"`bridge'", replace
 	}
+
+* link SDD households to earlier released coordinates only in the same current EA
+	use			"$data/refined_data/tanzania/wave_6/sdd_panel_key", clear
+	keep if		sdd_hhid != ""
+	keep		sdd_hhid y1_hhid y2_hhid y3_hhid
+	rename		(y1_hhid y2_hhid y3_hhid) (sdd_y1 sdd_y2 sdd_y3)
+	isid		sdd_hhid
+	save		"`one'", replace
+	use			sdd_hhid region district ward ea using ///
+				"$data/refined_data/tanzania/wave_6/hhfinal_npsy5sdd", clear
+	rename		(region district ward ea) (sdd_region sdd_district sdd_ward sdd_ea)
+* SDD uses a full district code; earlier waves store region and district separately
+	replace		sdd_district = sdd_district - 10 * sdd_region
+	merge		1:1 sdd_hhid using "`one'", keep(master match) nogen
+	gen byte	located = 0
+	save		"`sdd'"
+	loc			files HH.Geovariables_Y1 HH.Geovariables_Y2 HouseholdGeovars_Y3
+	forvalues w = 3(-1)1 {
+		loc			id = cond(`w' == 1, "hhid", "y`w'_hhid")
+		loc			lat = cond(`w' == 3, "lat_dd_mod", "lat_modified")
+		loc			lon = cond(`w' == 3, "lon_dd_mod", "lon_modified")
+		loc			file : word `w' of `files'
+		use			`id' region district ward ea using ///
+					"$data/refined_data/tanzania/wave_`w'/HH_SECA", clear
+		merge		1:1 `id' using "$raw/tanzania/wave_`w'/raw/`file'.dta", ///
+					keep(master match) keepusing(`lat' `lon') nogen
+		gen byte	point_available = !missing(`lat', `lon')
+		rename		`id' sdd_y`w'
+		rename		(region district ward ea) (old_region old_district old_ward old_ea)
+		keep		sdd_y`w' old_* point_available
+		save		"`one'", replace
+		use			"`sdd'", clear
+		merge		m:1 sdd_y`w' using "`one'", keep(master match) nogen
+		replace		sdd_y`w' = "" if located | point_available != 1 | ///
+					missing(sdd_region, sdd_district, sdd_ward, sdd_ea) | ///
+					sdd_region != old_region | sdd_district != old_district | ///
+					sdd_ward != old_ward | sdd_ea != old_ea
+		replace		located = 1 if sdd_y`w' != ""
+		drop		old_* point_available
+		save		"`sdd'", replace
+	}
 	use			"$data/results_data/additional_evidence/exhibit2/panel_keys", clear
-	keep if		country == 6 & !inlist(wave, 4, 5, 7)
+	keep if		country == 6 & wave == 6
+	merge		1:1 sdd_hhid using "`sdd'", ///
+				keep(master match) keepusing(sdd_y1 sdd_y2 sdd_y3) nogen
+	append		using "`bridge'"
+	save		"`bridge'", replace
+	use			"$data/results_data/additional_evidence/exhibit2/panel_keys", clear
+	keep if		country == 6 & !inlist(wave, 4, 5, 6, 7)
 	append		using "`bridge'"
 	isid		country hhid year
 	save		"`tza'"
@@ -324,11 +371,16 @@
 	gen str80	coordinate_variable_names = lat_var + " " + lon_var
 	gen str80	ea_id_variable = cond(ea_var == "", "Released Coordinate Group", ea_var)
 	gen str80	household_join_key = raw_key + " -> " + panel_key
-	bysort country wave (map_id): gen str2045 files = raw_geofile
-	by country wave: replace files = files[_n-1] + "; " + raw_geofile if _n > 1
+	sort		country wave map_id
+	foreach v in raw_geofile coordinate_variable_names ea_id_variable ///
+				household_join_key remarks {
+		by country wave: gen str2045 joined = `v'
+		by country wave: replace joined = joined[_n-1] + "; " + `v' if _n > 1
+		drop		`v'
+		rename		joined `v'
+	}
 	by country wave: keep if _n == _N
-	drop		raw_geofile map_id lat_var lon_var ea_var raw_key panel_key
-	rename		files raw_geofile
+	drop		map_id lat_var lon_var ea_var raw_key panel_key
 	merge		1:1 country wave using "`coverage'", assert(match) nogen
 	order		country wave year raw_geofile coordinate_variable_names ///
 				ea_id_variable household_join_key coordinates_available ///
