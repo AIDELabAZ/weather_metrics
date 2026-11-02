@@ -7,7 +7,7 @@
 
 * does
 	* creates selection-frontier figures and companion descriptive tables
-	* plots separate outcomes, alternative selection, and year-only FE
+	* plots separate outcomes with household/year FE and year FE
 
 * assumes
 	* completed metric_front.do results and the project globals
@@ -95,14 +95,13 @@
 	use			"`front'", clear
 	loc			ymin = -.1
 	loc			ymax = .4
-	foreach view in main t year {
+	foreach view in main year {
 		loc			spec = cond("`view'" == "year", 7, 2)
-		loc			rule = cond("`view'" == "t", 2, 1)
 		loc			prefix = cond("`view'" == "main", "front", "front_`view'")
 		forvalues o = 1/2 {
 			loc			outcome = cond(`o' == 1, "value", "maize")
 			preserve
-			keep if		spec == `spec' & outcome == `o' & rule == `rule'
+			keep if		spec == `spec' & outcome == `o' & rule == 1
 			* clip the displayed band; saved percentile values remain unchanged
 			replace		lo_valid = max(lo_valid, `ymin') if !missing(lo_valid)
 			twoway		(rarea lo_train hi_train k, sort color("`arc2'%18")) ///
@@ -155,35 +154,6 @@
 	label values country country
 	save		"`root'/choice_frequency", replace
 	export delimited using "`root'/choice_frequency.csv", replace
-	loc			labels
-	forvalues m = 1/14 {
-		loc			metric : display %02.0f `m'
-		loc			labels `labels' `m' "V`metric'"
-	}
-	forvalues o = 1/2 {
-		loc			plots
-		forvalues b = 0/10 {
-			loc			red = round(242 - 20.2 * `b')
-			loc			green = round(244 - 15.8 * `b')
-			loc			blue = round(246 - 9.2 * `b')
-			loc			plots `plots' (scatter metric product if outcome == `o' & ///
-						shade == `b', msymbol(square) msize(3.7) ///
-						mcolor("`red' `green' `blue'") mlcolor(none))
-		}
-		twoway		`plots', `frame' ///
-					xlabel(1 "ARC2" 2 "CHIRPS" 3 "CPC" 4 "ERA5" ///
-					5 "MERRA-2" 6 "TAMSAT", angle(45) nogrid `ticks') ///
-					ylabel(`labels', nogrid `ticks') yscale(reverse) ///
-					xtitle("") ytitle("Rainfall Metric", size(3)) ///
-					legend(order(1 "0%" 3 "20%" 5 "40%" 7 "60%" 9 "80%" 11 "100%") ///
-					rows(1) size(2.8) region(lstyle(none))) ///
-					subtitle(, size(2.8) nobox fcolor(white)) ///
-					by(country, cols(3) iscale(1) legend(pos(6)) note("") ///
-					graphregion(color(white)) imargin(small)) xsize(9) ysize(5.5)
-		loc			outcome = cond(`o' == 1, "value", "maize")
-		graph export "`xfig'/front_choice_`outcome'.pdf", replace
-		graph export "`xfig'/front_choice_`outcome'.png", width(3200) replace
-	}
 	log close
 
 /* END */

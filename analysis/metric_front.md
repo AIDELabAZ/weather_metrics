@@ -1,6 +1,6 @@
 # Rainfall selection frontier
 
-<!-- edited by: codex; edited on: 31 Oct 2026 -->
+<!-- edited by: codex; edited on: 2 Nov 2026 -->
 
 Run after `projectdo.do` has established `$code`, `$raw`, and `$data`:
 
@@ -102,9 +102,9 @@ attempted, valid, and invalid denominators are included. Choice frequencies
 at K=84 count all 20 orderings per fold, preserving equal fold weights when
 equivalent candidates tie.
 
-Eight new PDF/PNG figures are saved in `figures/metric_paper/`: separate
-value/maize frontiers (`front_value`, `front_maize`), clustered-t selection
-(`front_t_*`), year-only FE (`front_year_*`), and choice maps (`front_choice_*`).
+Four PDF/PNG figures are saved in `figures/metric_paper/`: separate
+value/maize frontiers (`front_value`, `front_maize`) and year-only FE
+frontiers (`front_year_value`, `front_year_maize`).
 K is displayed on a logarithmic axis, labeled at every declared set size.
 Existing figures and the household bootstrap are not overwritten.
 
