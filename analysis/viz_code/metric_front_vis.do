@@ -2,7 +2,7 @@
 * Created on: 31 Oct 2026
 * Created by: codex
 * edited by: codex
-* edited on: 31 Oct 2026
+* edited on: 2 Nov 2026
 * Stata v.18
 
 * does
@@ -93,12 +93,8 @@
 
 * both outcomes and all countries use the same vertical scale
 	use			"`front'", clear
-	egen		low = rowmin(lo_train lo_valid)
-	egen		high = rowmax(hi_train hi_valid)
-	quietly summarize low, meanonly
-	loc			ymin = floor(min(0, r(min)) / .1) * .1
-	quietly summarize high, meanonly
-	loc			ymax = ceil(r(max) / .1) * .1
+	loc			ymin = -.1
+	loc			ymax = .4
 	foreach view in main t year {
 		loc			spec = cond("`view'" == "year", 7, 2)
 		loc			rule = cond("`view'" == "t", 2, 1)
@@ -107,6 +103,8 @@
 			loc			outcome = cond(`o' == 1, "value", "maize")
 			preserve
 			keep if		spec == `spec' & outcome == `o' & rule == `rule'
+			* clip the displayed band; saved percentile values remain unchanged
+			replace		lo_valid = max(lo_valid, `ymin') if !missing(lo_valid)
 			twoway		(rarea lo_train hi_train k, sort color("`arc2'%18")) ///
 						(rarea lo_valid hi_valid k, sort color("`era5'%18")) ///
 						(line train k, sort lcolor("`arc2'") lwidth(medium)) ///
