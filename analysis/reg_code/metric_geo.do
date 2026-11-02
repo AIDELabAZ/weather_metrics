@@ -2,7 +2,7 @@
 * Created on: 31 Oct 2026
 * Created by: codex
 * edited by: codex
-* edited on: 31 Oct 2026
+* edited on: 2 Nov 2026
 * Stata v.18
 
 * does
@@ -28,7 +28,8 @@
 	capture mkdir "`out'/neighbors"
 	cap log close
 	log using	"`out'/logs/metric_geo.log", text replace
-	tempfile	map keys eth mwi ngr nga tza bridge found one coverage lpmap spmap
+	tempfile	map keys eth mwi ngr nga tza bridge found one coverage ///
+				lpmap spmap ea_map
 
 
 **********************************************************************
@@ -110,27 +111,49 @@
 				keep(master match) keepusing(nga_hhid) nogen
 	save		"`nga'"
 
-* recover the 2014 cluster identifiers separately for each tanzania panel
-	loc			files npsy4 npsy4xp
-	loc			clusters clusterid clusterid2014
-	forvalues w = 4/5 {
-		loc			j = `w' - 3
-		loc			file : word `j' of `files'
-		loc			cluster : word `j' of `clusters'
-		use			y4_hhid `cluster' using ///
-					"$data/merged_data/tanzania/wave_`w'/`file'_merged", clear
-		rename		`cluster' tza_cluster
-		keep		y4_hhid tza_cluster
-		isid		y4_hhid
+* bridge the extended panel by its complete administrative EA key
+	use			clusterid hh_a01_1 hh_a02_1 hh_a03_1 hh_a03_3a hh_a04_1 ///
+				using "$raw/tanzania/wave_4/raw/hh_sec_a", clear
+	rename		(hh_a01_1 hh_a02_1 hh_a03_1 hh_a03_3a hh_a04_1) ///
+				(region district ward village ea)
+	drop if		missing(region, district, ward, village, ea)
+	bysort region district ward village ea: assert clusterid == clusterid[1]
+	bysort region district ward village ea: keep if _n == 1
+	rename		clusterid tza_cluster
+	save		"`ea_map'"
+	foreach w in 4 5 7 {
+		loc			id = cond(`w' == 7, "y5_hhid", "y4_hhid")
+		if `w' == 4 {
+			use			y4_hhid clusterid using ///
+						"$raw/tanzania/wave_4/raw/hh_sec_a", clear
+			rename		clusterid tza_cluster
+		}
+		if `w' == 5 {
+			use			y4_hhid hh_a01_1 hh_a02_1 hh_a03_1 hh_a03_3a hh_a04_1 ///
+						using "$raw/tanzania/wave_5/raw/hh_sec_a", clear
+			rename		(hh_a01_1 hh_a02_1 hh_a03_1 hh_a03_3a hh_a04_1) ///
+						(region district ward village ea)
+			merge		m:1 region district ward village ea using "`ea_map'", ///
+						keep(master match) keepusing(tza_cluster) nogen
+		}
+		if `w' == 7 {
+			* sampling EA codes persist for movers; use confirmed original locations
+			use			y5_hhid clusterid hh_tracking_status using ///
+						"$raw/tanzania/wave_7/raw/hh_sec_a", clear
+			rename		clusterid tza_cluster
+			replace		tza_cluster = . if hh_tracking_status != 1
+		}
+		keep		`id' tza_cluster
+		isid		`id'
 		save		"`one'", replace
 		use			"$data/results_data/additional_evidence/exhibit2/panel_keys", clear
 		keep if		country == 6 & wave == `w'
-		merge		m:1 y4_hhid using "`one'", keep(master match) nogen
+		merge		m:1 `id' using "`one'", keep(master match) nogen
 		if `w' > 4 append using "`bridge'"
 		save		"`bridge'", replace
 	}
 	use			"$data/results_data/additional_evidence/exhibit2/panel_keys", clear
-	keep if		country == 6 & !inlist(wave, 4, 5)
+	keep if		country == 6 & !inlist(wave, 4, 5, 7)
 	append		using "`bridge'"
 	isid		country hhid year
 	save		"`tza'"
@@ -254,7 +277,7 @@
 	bysort ea_wave_id: assert latitude == latitude[1] & ///
 				longitude == longitude[1] if geo_available
 
-* retain observed wave locations; Niger's shared grappe source is explicit in the map
+* retain observed EA locations; shared-source EA linkages are recorded in the map
 	bysort country hhid (year): gen byte location_changed = ///
 				(latitude != latitude[_n-1] | longitude != longitude[_n-1]) ///
 				if _n > 1 & geo_available & geo_available[_n-1]
@@ -262,7 +285,8 @@
 	save		"`out'/geovariables_crosswalk", replace
 	merge		1:1 country hhid year using "$data/regression_data/lsms_panel", ///
 				assert(match) nogen
-	char _dta[geography] "Released modified coordinates; Niger uses stable grappe and the 2011 EA source in both waves"
+	char _dta[geography] ///
+				"Released EA centroids; source and linkage in metric_geo.csv"
 	save		"`out'/lsms_panel_geo", replace
 
 

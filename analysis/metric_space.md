@@ -1,6 +1,6 @@
 # Spatial dependence and first-stage precision
 
-<!-- edited by: codex; edited on: 31 Oct 2026 -->
+<!-- edited by: codex; edited on: 2 Nov 2026 -->
 
 Run after the project globals and `metric_keys.do` have been established:
 
@@ -36,7 +36,7 @@ in the crosswalk and coverage audit.
 | Malawi | 8,897 | 8,895 |
 | Niger | 3,913 | 3,913 |
 | Nigeria | 9,145 | 9,145 |
-| Tanzania | 9,916 | 7,691 |
+| Tanzania | 9,916 | 8,970 |
 | Uganda | 11,692 | 9,845 |
 
 Niger uses the released modified EA positions in `NER_EA_Offsets.dta`.
@@ -45,13 +45,30 @@ so both waves join to that file by their actual wave's grappe. This explicit
 linkage does not infer household immobility or permanent EA links elsewhere.
 
 Tanzania's 2014 new panel joins its cluster IDs to `npsy4.ea.offset.dta`:
-all 1,778 analysis observations match. The 349 extended-panel observations
-use a different cluster coding and do not match that file; a compatible
-released centroid file or cluster crosswalk is still needed for that panel.
+all 1,778 analysis observations match. The extended panel uses a different
+cluster coding, so its raw household file is linked to the new-panel EA
+roster by the complete region, district, ward, village, and EA codes. This
+roster uses all 3,352 raw new-panel households, not just the agricultural
+analysis subset. Each complete key must identify one released centroid EA;
+missing components are not matched. This recovers one of the 349 analysis
+observations in the extended panel; the other 348 remain unlocated.
 The 2019/20 and 2020/21 community modules contain `cm_gps__Latitude` and
 `cm_gps__Longitude`, but every value in both fields is `**CONFIDENTIAL**`:
-99 and 488 community records, respectively. These sources are recorded in
-the inventory as unavailable, not converted to coordinates or imputed.
+99 and 488 community records, respectively. Masked GPS values are not
+converted to coordinates or imputed. The 2019/20 SDD locations remain
+unresolved; their sampling-unit IDs do not directly match the 2014 new-panel
+EA roster. Matching an original sampling unit alone would not establish a
+tracked household's current location.
+
+The 2020/21 household file does retain the 2014 new-panel `clusterid` codes.
+Those codes also persist for movers, so an unrestricted join would assign
+some households the wrong location. The coordinate crosswalk therefore uses
+the released 2014 centroid only when `hh_tracking_status == 1`, explicitly
+labeled "HOUSEHOLD FOUND - ORIGINAL LOCATION". All 1,278 eligible analysis
+observations have the same EA ID as their linked 2014 household record.
+Other tracking statuses, including new locations and missing statuses,
+remain unlocated. The 2014 coordinate vintage is recorded in the inventory;
+it is not represented as newly released 2020/21 GPS.
 
 Uganda now also covers all 2,190 observations in 2013/14 and all 1,868 in
 2015/16. The downloaded files use lowercase `hhid`; the 2013/14 values match
@@ -59,7 +76,8 @@ Uganda now also covers all 2,190 observations in 2013/14 and all 1,868 in
 No 2019/20 coordinates have been located. The linked
 [2018/19 geofile](https://microdata.worldbank.org/catalog/3795/data-dictionary/F109?file_name=unps_geovars_2018_19)
 belongs to wave 7, which the current panel excludes; it is not substituted
-for wave 8's observed location. No other location is carried forward.
+for wave 8's observed location. Locations are reused only through the
+documented stable-EA/current-location linkages above.
 
 Original IDs are recovered from the existing household/append intermediates:
 Ethiopia's `household_id2`, Malawi's long/short-panel wave identifiers,
@@ -73,7 +91,7 @@ Suppressed or missing coordinates remain missing. Released EA codes are
 retained where available. When no EA code is released, identical released
 coordinate pairs define location groups; these are explicitly identified
 in the inventory. Grouping identical positions leaves the covariance kernel
-unchanged. The analysis does not infer permanent EA identities across waves.
+unchanged. Cross-wave reuse is restricted to the documented EA linkages.
 
 `geo_inventory.csv` reports every active input folder, source variables,
 matched keys, valid-coordinate coverage, and distinct EA/location groups.
@@ -160,6 +178,8 @@ tolerance 1e-8. Independent chord-distance searches reproduced the initial
 five-country cached neighbor lists. All 12 updated-sample fits for CHIRPS
 total rainfall, both outcomes and both FE models in Niger, Tanzania, and
 Uganda also matched direct Stata estimates to relative tolerance 1e-8.
+After the EA-based update, four additional Tanzania fits (CHIRPS total
+rainfall, both outcomes and FE specifications) passed the same comparison.
 A separate, hand-checkable example independently reproduced the covariance
 calculation, including same-location households, a mover, serial household
 terms, and the adjacent-interval subtraction, to tolerance 1e-10. Those
@@ -169,7 +189,7 @@ The updated full run saved 2,016 specification rows: 1,008 estimated reg2
 fits and 1,008 estimated reg7 fits. All estimated fits have positive spatial
 variances at every prespecified bandwidth and in the adjacent-interval
 sensitivity. Each country's primary paired comparison contains 168
-specifications. The crosswalk covers 50,153 of the original 54,237 panel
+specifications. The crosswalk covers 51,432 of the original 54,237 panel
 observations; the estimation samples also exclude missing outcomes.
 
 ## Triggered bootstrap pilot
@@ -210,6 +230,7 @@ bootstrap's significance rates as spatially robust.
 
 With the expanded household histories, Uganda has eight connected geographic
 blocks for farm value and seven for maize; Niger has 43 and 38, respectively.
+Tanzania has 73 blocks for farm value and 72 for maize after the EA update.
 The updated run contains 44 complete distributions and four incomplete
 Malawi geographic distributions. Large connected blocks and the remaining
 coordinate restrictions remain part of the pilot's interpretation.
