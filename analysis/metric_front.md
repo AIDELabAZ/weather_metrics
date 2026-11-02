@@ -2,7 +2,46 @@
 
 <!-- edited by: codex; edited on: 2 Nov 2026 -->
 
-Run after `projectdo.do` has established `$code`, `$raw`, and `$data`:
+## Appendix-only update, 2 Nov 2026
+
+The current appendix uses saved estimates; it does not require another frontier
+run. After the project globals are set, run:
+
+```stata
+do "$code/analysis/viz_code/metric_app.do"
+```
+
+Then run `python analysis/viz_code/metric_app.py "<project data directory>"`,
+using the directory represented by `$data`. Supply `--pdftoppm "<executable>"`
+if Poppler is not on PATH. Python requires pypdf and reportlab. This produces
+the vector `front_panel` and `space_panel` PDFs and 3,200-pixel PNG previews.
+The four standalone frontier files below remain unchanged auxiliary outputs.
+
+`front_panel` uses a six-country-row/four-column matrix: value reg7, value reg2,
+maize reg7, maize reg2. Every cell retains all nine K points, log K and the
+same -0.1 to 0.4 y range. Only median curves are plotted; the standalone plots
+retain descriptive 10th-90th percentile bands.
+
+`front_increment_comparison.csv` pairs G(84)-G(1) within the same allocation,
+fold, ordering and selection rule, then pairs the reg2-minus-reg7 increment.
+Orderings are summarized within a fold/allocation before summarizing the 100
+fold/allocation values. This is descriptive dispersion, not independent
+sampling replications. All primary cells have 100 valid summaries; Niger has
+a few undefined raw comparisons that remain missing. The new auxiliary
+`front_increment` plot is not automatically included as a third appendix figure.
+
+The completed appendix review reproduces all 216 frontier points, checks all
+20 allocations for household/geographic-group leakage, and replays 720 saved
+candidate choices exactly. The optional verification is
+`do "$code/analysis/reg_code/metric_app_check.do"`. See
+`additional_exhibits_QA.md` for executed checks, denominators and sample
+restrictions, and `metric_app.tex` for the appendix-only manuscript blocks.
+
+## Original estimation workflow
+
+The commands below rebuild the original estimates, rather than the saved-result
+appendix update above. Run after `projectdo.do` has established `$code`, `$raw`,
+and `$data`:
 
 ```stata
 do "$code/analysis/reg_code/metric_keys.do"

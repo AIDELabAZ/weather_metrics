@@ -1,0 +1,128 @@
+% Project: WB Weather - metric
+% Created on: 2 Nov 2026
+% Created by: codex
+% edited by: codex
+% edited on: 2 Nov 2026
+% does
+	% provides two appendix figures and two supporting appendix tables
+% assumes
+	% graphicx and lscape/pdflscape; PDFs copied into the manuscript's Figures folder
+	% the manuscript has already established appendix numbering
+% TO DO:
+	% done
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1 - appendix selection-frontier figure
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{landscape}
+	\begin{figure}[!htbp]
+		\begin{minipage}{\linewidth}
+			\caption{First-Stage Instrument Selection In and Out of Sample}
+			\label{app:front_panel}
+			{\centering
+				\includegraphics[width=.97\linewidth,keepaspectratio]{Figures/front_panel.pdf}\par}
+			\smallskip
+			\footnotesize \textit{Note}: Blue shows absolute training partial correlation;
+			copper shows held-out correlation oriented by the training sign. Candidates
+			comprise 14 rainfall metrics across six products. Nested sets use
+			$K=1,2,3,5,10,20,40,60,84$. Lines take medians over 20 candidate orderings
+			within each held-out fold, then over 20 allocations of five folds.
+			Splits keep households and connected EA-wave groups together; they are
+			geographically grouped, not distance-buffered. Year and household FE are
+			removed separately within each partition. These descriptive medians are
+			not confidence intervals or causal estimates of selection bias.
+		\end{minipage}
+	\end{figure}
+\end{landscape}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 2 - appendix spatial-dependence figure
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{landscape}
+	\begin{figure}[!htbp]
+		\begin{minipage}{\linewidth}
+			\caption{Spatial Dependence and First-Stage Instrument Strength}
+			\label{app:space_panel}
+			{\centering
+				\includegraphics[width=.97\linewidth,keepaspectratio]{Figures/space_panel.pdf}\par}
+			\smallskip
+			\footnotesize \textit{Note}: Panel A shows mean standardized cross-products
+			of first-stage scores, not Pearson correlations. Location-year score sums
+			are divided by the square root of household count and standardized within
+			specification and year; curves take the median of 12 product-outcome
+			specification means per metric. Panel B uses year and household FE, with
+			the same coefficient and observations for each covariance comparison:
+			168 matched specifications per country. The spatial estimator combines
+			unrestricted own-household serial covariance with contemporaneous
+			cross-household covariance under a 100-km Bartlett kernel. Percentages
+			are descriptive threshold-crossing shares, not tests of their differences.
+			Geographic coverage restricts the sample, especially in Tanzania and
+			Uganda; missing or confidential coordinates are not imputed.
+		\end{minipage}
+	\end{figure}
+\end{landscape}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 3 - supporting appendix tables
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{table}[!htbp]
+	\centering
+	\caption{First-Stage Shares Above $|t|=4.81$}
+	\label{app:space_481}
+	\begin{tabular}{lrr}
+		\hline
+		Country & Household Clustered (\%) & Spatial 100 Km (\%) \\
+		\hline
+		Ethiopia & 3.6 & 0.0 \\
+		Malawi & 12.5 & 0.0 \\
+		Niger & 4.2 & 0.0 \\
+		Nigeria & 0.6 & 0.0 \\
+		Tanzania & 0.0 & 0.0 \\
+		Uganda & 25.6 & 0.0 \\
+		\hline
+	\end{tabular}
+	\par\smallskip
+	\begin{minipage}{.95\linewidth}
+		\footnotesize \textit{Note}: Each country has 168 matched specifications:
+		two outcomes, 14 rainfall metrics, and six products. All use year and
+		household FE on the same georeferenced sample within each covariance
+		comparison. Values are percentages; threshold comparisons are strict.
+		Source: \texttt{spatial\_bandwidth\_audit.csv}.
+	\end{minipage}
+\end{table}
+
+\begin{table}[!htbp]
+	\centering
+	\caption{First-Stage Shares Above $|t|=1.96$ By Covariance Component}
+	\label{app:space_components}
+	\begin{tabular}{lrrr}
+		\hline
+		Country & Household (\%) & Household + Within-EA (\%) & Spatial 100 Km (\%) \\
+		\hline
+		Ethiopia & 49.4 & 19.0 & 15.5 \\
+		Malawi & 50.0 & 41.7 & 33.9 \\
+		Niger & 38.7 & 21.4 & 16.7 \\
+		Nigeria & 31.0 & 17.9 & 12.5 \\
+		Tanzania & 25.0 & 20.2 & 18.5 \\
+		Uganda & 60.1 & 54.8 & 42.3 \\
+		\hline
+	\end{tabular}
+	\par\smallskip
+	\begin{minipage}{.95\linewidth}
+		\footnotesize \textit{Note}: Each row uses the same 168 year-and-household-FE
+		specifications and estimation samples across all three columns. The middle
+		column adds contemporaneous cross-household covariance within an EA;
+		the final column also adds covariance across distinct EAs under a 100-km
+		Bartlett kernel. Signed covariance additions are retained. All total
+		variances are positive in these data. These are descriptive shares,
+		not a test of differences. Source: \texttt{spatial\_components\_summary.csv}.
+	\end{minipage}
+\end{table}
+
+% front_increment.pdf is an auxiliary diagnostic, not an automatic third figure.

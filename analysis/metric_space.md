@@ -2,6 +2,49 @@
 
 <!-- edited by: codex; edited on: 2 Nov 2026 -->
 
+## Appendix-only update, 2 Nov 2026
+
+The current appendix uses existing saved estimates. With the project globals
+set, run `do "$code/analysis/viz_code/metric_app.do"`, followed by
+`python analysis/viz_code/metric_app.py "<project data directory>"`, using
+the directory represented by `$data`. Supply `--pdftoppm "<executable>"` if
+needed; the Python assembly requires pypdf and reportlab. Do not run the
+historical estimation or bootstrap commands below for this appendix update.
+
+The vector `space_panel` PDF and 3,200-pixel PNG combine a two-column/three-row
+score grid (about 60% width) with the reg2 paired 1.96 dumbbell plot (about 40%).
+All 60 score-bin means and six country shares reproduce saved results. Every
+country has the same 168 specifications in each covariance comparison. The
+auxiliary `space_share481` is retained; its values appear in the appendix table
+rather than a third panel. The optional component plot is omitted.
+
+Under `additional_evidence/exhibit3/`, the new outputs are:
+
+- `spatial_variance_components.csv`: 2,016 fits with HH, HH+within-EA, and
+  full 100-km variances, SEs, t-statistics, ratios and threshold flags.
+- `spatial_components_summary.csv`: 216 country/outcome/model/threshold/step
+  rows, retaining signed additions and common matched denominators.
+- `spatial_bandwidth_audit.csv`: 288 rows for 50/100/200-km and 100-km
+  adjacent-interval sensitivity, both models, both outcomes and pooled shares.
+- `spatial_sample_audit.csv` and `spatial_sample_summary.csv`: original versus
+  georeferenced household estimates, distinguishing coverage from covariance.
+
+Four within-EA and 92 between-EA additions are negative and retained; all total
+variances are positive. The direction of the threshold-share reduction is
+unchanged across the audited variants, although its magnitude depends on the
+bandwidth and lag choice. Geography still excludes 778 Tanzania and 1,847
+Uganda panel observations. The SDD audit confirms the 168 same-current-EA
+links (120 from 2012 and 48 from 2008).
+
+The optional `metric_app_check.do` verification matched 24 direct Stata fits
+and independently reproduced the hand-checkable covariance example. See
+`additional_exhibits_QA.md` for actual numeric results and limitations, and
+`metric_app.tex` for the two appendix figures and supporting tables. No
+coefficient-change or bootstrap analysis forms part of this appendix update.
+
+## Original estimation workflow
+
+The commands below document the earlier full estimation and pilot workflow.
 Run after the project globals and `metric_keys.do` have been established:
 
 ```stata
