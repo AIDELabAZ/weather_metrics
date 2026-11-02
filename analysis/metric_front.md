@@ -4,7 +4,18 @@
 
 ## Appendix-only update, 2 Nov 2026
 
-The current appendix uses saved estimates; it does not require another frontier
+The redesigned appendix figures now use `metric_app_fit.do`, followed by
+`metric_app_fit.py` with the same data-root argument described below. They
+create `front_panel_fit`, `front_increment_forest`, and `space_panel_revised`.
+The frontier is now a 12-cell country/outcome matrix with both FE models and
+empirical dispersion ribbons; the paired increment plot includes descriptive
+10th-90th percentile whiskers. See `appendix_figures_redesign_QA.md` and the
+updated `metric_app.tex` for exact ranges, counts and the current handoff.
+The earlier workflow below remains an auxiliary reproducibility path.
+
+### Earlier appendix design
+
+The earlier appendix design uses saved estimates; it does not require another frontier
 run. After the project globals are set, run:
 
 ```stata

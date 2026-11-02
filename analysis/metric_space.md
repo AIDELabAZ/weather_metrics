@@ -4,7 +4,18 @@
 
 ## Appendix-only update, 2 Nov 2026
 
-The current appendix uses existing saved estimates. With the project globals
+The redesigned appendix now uses `metric_app_fit.do` and `metric_app_fit.py`.
+`space_panel_revised` stacks a two-row/three-column score grid above two
+outcome-specific share strips, retaining 84 matched specifications in each
+country/outcome. Scores use categorical distance bins and country-specific
+vertical scales. The share axis expands to 90% to include Uganda farm value.
+See `appendix_figures_redesign_QA.md` for the executed numeric and print-size
+review, and `metric_app.tex` for the current three-figure handoff. The earlier
+appendix workflow below remains an auxiliary reproducibility path.
+
+### Earlier appendix design
+
+The earlier appendix design uses existing saved estimates. With the project globals
 set, run `do "$code/analysis/viz_code/metric_app.do"`, followed by
 `python analysis/viz_code/metric_app.py "<project data directory>"`, using
 the directory represented by `$data`. Supply `--pdftoppm "<executable>"` if
