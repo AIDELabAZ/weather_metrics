@@ -1,6 +1,23 @@
 # Rainfall selection frontier
 
-<!-- edited by: codex; edited on: 31 Oct 2026 -->
+<!-- edited by: codex; edited on: 3 Nov 2026 -->
+
+## Current appendix figures
+
+After `projectdo.do` establishes `$code` and `$data`, run:
+
+```stata
+do "$code/analysis/viz_code/metric_app_vis.do"
+```
+
+This single native Stata script reads the completed exhibit2/exhibit3 saved
+results and creates only `front.pdf/png`, `gain.pdf/png`, and `space.pdf/png`
+under `$data/results_data/figures/metric_paper`. It opens one log at
+`$data/results_data/logs/metric_app_vis.log`. No external assembly or estimation
+is required. See `metric_app_QA.md` and `metric_app.tex` for validation and the
+appendix-only manuscript handoff.
+
+## Original estimation workflow
 
 Run after `projectdo.do` has established `$code`, `$raw`, and `$data`:
 
@@ -8,7 +25,6 @@ Run after `projectdo.do` has established `$code`, `$raw`, and `$data`:
 do "$code/analysis/reg_code/metric_keys.do"
 do "$code/analysis/reg_code/metric_front.do" 5 20
 do "$code/analysis/reg_code/metric_front.do"
-do "$code/analysis/viz_code/metric_front_vis.do"
 ```
 
 The five-allocation pilot has separate `_pilot` outputs. The full run uses

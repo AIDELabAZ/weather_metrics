@@ -1,0 +1,185 @@
+% Project: WB Weather - metric
+% Created on: 2 Nov 2026
+% Created by: codex
+% edited by: codex
+% edited on: 3 Nov 2026
+% does
+	% provides three redesigned appendix figures and supporting appendix tables
+% assumes
+	% graphicx and lscape/pdflscape; PDFs copied into the manuscript's Figures folder
+	% the manuscript has already established appendix numbering
+% TO DO:
+	% done
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1 - appendix selection-frontier figure
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{landscape}
+	\begin{figure}[!htbp]
+		\begin{minipage}{\linewidth}
+			\caption{First-Stage Instrument Selection In and Out of Sample}
+			\label{app:front_panel}
+			{\centering
+				\includegraphics[width=.97\linewidth,height=5.35in,keepaspectratio]{Figures/front.pdf}\par}
+			\smallskip
+			\footnotesize \textit{Note}: Quantity denotes maize yield; Value denotes
+			farm production value. Blue denotes year FE; orange denotes year and
+			household FE. Solid lines show absolute training partial correlation;
+			dashed lines show held-out correlation oriented by the training sign.
+			The 84 candidates comprise 14 metrics across six rainfall products;
+			$K=1,2,3,5,10,20,40,60,84$. Curves first summarize 20 candidate orderings
+			within each fold, then take medians across 20 allocations of five folds.
+			Ribbons are descriptive 10th--90th percentiles across geographically
+			grouped folds, not confidence intervals. Households and connected EA-wave
+			groups remain together; validation is not distance-buffered.
+		\end{minipage}
+	\end{figure}
+\end{landscape}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 2 - training and held-out gains from search
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{landscape}
+	\begin{figure}[!htbp]
+		\begin{minipage}{\linewidth}
+			\caption{Training and Held-Out Gains From Instrument Search}
+			\label{app:gain}
+			{\centering
+				\includegraphics[width=.97\linewidth,height=5.35in,keepaspectratio]{Figures/gain.pdf}\par}
+			\smallskip
+			\footnotesize \textit{Note}: Quantity is maize yield; Value is farm
+			production value. Gains are the absolute changes in the first-stage
+			partial-correlation coefficient from K=1 (the first randomly ordered
+			candidate) to K=84 (all candidates), not percentages or t-statistics.
+			Training fit is absolute partial correlation; held-out fit retains its
+			sign oriented by the selected instrument's training sign. Filled/open
+			circles show training/held-out gains; arrows run from filled to open.
+			Blue denotes year FE; orange denotes year and household FE. Gains are
+			paired within the same allocation, fold and ordering before medians over
+			20 orderings per fold and 100 fold/allocation units. Taller/shorter
+			whiskers show the respective training/held-out IQRs, with each marker on
+			its own interval's centerline. These are descriptive percentiles, not
+			confidence intervals. Repeated folds reuse observations. Connectors bend
+			slightly for nearly coincident gains to keep the direction visible.
+		\end{minipage}
+	\end{figure}
+\end{landscape}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 3 - appendix spatial-dependence figure
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{landscape}
+	\begin{figure}[!htbp]
+		\begin{minipage}{\linewidth}
+			\caption{Spatial Dependence and First-Stage Instrument Strength}
+			\label{app:space_panel}
+			{\centering
+				\includegraphics[width=.97\linewidth,height=5.35in,keepaspectratio]{Figures/space.pdf}\par}
+			\smallskip
+			\footnotesize \textit{Note}: Panel A plots the mean product of standardized
+			first-stage scores for pairs of EAs in each distance bin, summarized
+			across six products and two outcomes per rainfall metric. Upward/downward
+			triangles denote seasonal rainfall/rainy days. Distance bins are
+			categorical; country vertical scales differ. Panel B shows Quantity then
+			Value, using year and household FE and 84 matched specifications per
+			country/outcome. Diamonds denote household-clustered SEs; squares denote
+			100 km Bartlett spatial SEs. Arrows point from household to spatial
+			estimates, with heads on the connecting segments. Coefficients,
+			observations and own-household serial covariance are held fixed. Shares
+			are descriptive. Geography restrictions remain in Tanzania and Uganda.
+		\end{minipage}
+	\end{figure}
+\end{landscape}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 4 - supporting appendix tables
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{table}[!htbp]
+	\centering
+	\caption{First-Stage Shares Above $|t|=4.81$}
+	\label{app:space_481}
+	\begin{tabular}{lrr}
+		\hline
+		Country & Household Clustered (\%) & Spatial 100 km (\%) \\
+		\hline
+		Ethiopia & 3.6 & 0.0 \\
+		Malawi & 12.5 & 0.0 \\
+		Niger & 4.2 & 0.0 \\
+		Nigeria & 0.6 & 0.0 \\
+		Tanzania & 0.0 & 0.0 \\
+		Uganda & 25.6 & 0.0 \\
+		\hline
+	\end{tabular}
+	\par\smallskip
+	\begin{minipage}{.95\linewidth}
+		\footnotesize \textit{Note}: Each country has 168 matched specifications:
+		two outcomes, 14 rainfall metrics, and six products. All use year and
+		household FE on the same georeferenced sample within each covariance
+		comparison. Values are percentages; threshold comparisons are strict.
+		Source: \texttt{spatial\_bandwidth\_audit.csv}.
+	\end{minipage}
+\end{table}
+
+\begin{table}[!htbp]
+	\centering
+	\caption{First-Stage Shares Above $|t|=1.96$ By Covariance Component}
+	\label{app:space_components}
+	\begin{tabular}{lrrr}
+		\hline
+		Country & Household (\%) & Household + Within-EA (\%) & Spatial 100 km (\%) \\
+		\hline
+		Ethiopia & 49.4 & 19.0 & 15.5 \\
+		Malawi & 50.0 & 41.7 & 33.9 \\
+		Niger & 38.7 & 21.4 & 16.7 \\
+		Nigeria & 31.0 & 17.9 & 12.5 \\
+		Tanzania & 25.0 & 20.2 & 18.5 \\
+		Uganda & 60.1 & 54.8 & 42.3 \\
+		\hline
+	\end{tabular}
+	\par\smallskip
+	\begin{minipage}{.95\linewidth}
+		\footnotesize \textit{Note}: Each row uses the same 168 year-and-household-FE
+		specifications and estimation samples across all three columns. The middle
+		column adds contemporaneous cross-household covariance within an EA;
+		the final column also adds covariance across distinct EAs under a 100-km
+		Bartlett kernel. Signed covariance additions are retained. All total
+		variances are positive in these data. These are descriptive shares,
+		not a test of differences. Source: \texttt{spatial\_components\_summary.csv}.
+	\end{minipage}
+\end{table}
+
+\begin{table}[!htbp]
+	\centering
+	\caption{First-Stage Shares Above $|t|=1.96$ Across Spatial Sensitivities}
+	\label{app:space_bandwidth}
+	\begin{tabular}{lrrrr}
+		\hline
+		Country & 50 km & 100 km & 200 km & 100 km + Adjacent Interval \\
+		\hline
+		Ethiopia & 18.5 & 15.5 & 16.1 & 12.5 \\
+		Malawi & 39.3 & 33.9 & 33.9 & 28.0 \\
+		Niger & 19.6 & 16.7 & 16.7 & 14.9 \\
+		Nigeria & 14.3 & 12.5 & 12.5 & 12.5 \\
+		Tanzania & 19.0 & 18.5 & 13.1 & 17.3 \\
+		Uganda & 51.8 & 42.3 & 34.5 & 38.1 \\
+		\hline
+	\end{tabular}
+	\par\smallskip
+	\begin{minipage}{.95\linewidth}
+		\footnotesize \textit{Note}: Percentages use 168 matched year-and-household-FE
+		specifications per country, pooling both outcomes with their matched
+		denominators. Adjacent survey intervals receive temporal Bartlett weight
+		0.5; own-household serial covariance is already retained. Bandwidth changes
+		the magnitude of the adjustment, without reversing its direction relative
+		to household clustering in these data. Source:
+		\texttt{spatial\_bandwidth\_audit.csv}.
+	\end{minipage}
+\end{table}
