@@ -4,14 +4,14 @@
 
 ## Appendix-only update, 3 Nov 2026
 
-The current update runs `metric_app_fit.do keepfront`, followed by
-`metric_app_fit.py "<project data directory>" --keep-front`. This preserves the
-approved `front_panel_fit` PDF and PNG, updates the spatial arrows, and creates
-`front_payoff_arrows` plus the review alternative `front_payoff_scatter`.
-The paired-arrow payoff figure replaces the old forest plot. Both candidates
-use the same gains from K=1 to K=84; bars are descriptive IQRs across split
-summaries. See `metric_payoff.md` and `metric_app.tex` for the
-current commands, counts, checks and appendix handoff.
+The current update runs `metric_app_fit.do`, followed by
+`metric_app_fit.py "<project data directory>"`. It creates the direct
+`front_payoff_levels` optimism exhibit and refreshes spacing in `front_panel_fit`
+and `space_panel_revised`. Optimism is training gain minus held-out gain from
+K=1 to K=84, calculated before aggregation. Points are medians across split
+summaries; whiskers are descriptive IQRs. Earlier payoff candidates are no longer
+generated. See `metric_payoff.md` and `metric_app.tex` for the current commands,
+counts, checks and appendix handoff.
 The earlier workflow below remains an auxiliary reproducibility path.
 
 ### Earlier appendix design

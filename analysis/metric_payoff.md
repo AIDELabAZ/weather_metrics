@@ -1,119 +1,122 @@
-# Appendix payoff figures: 3 Nov 2026 update
+# Appendix selection optimism and spacing update
 
 <!-- edited by: codex; edited on: 3 Nov 2026 -->
 
-The paired search-gain arrows replace the incremental-gap forest plot. The
-training-versus-held-out scatter is retained as the alternative for review.
-The approved frontier remains unchanged. Spatial Panel B gains small neutral
-arrowheads from household-clustered circles to spatial squares; its existing
-gray circles, red squares, axes and panel arrangement are preserved.
+The current payoff exhibit is `front_payoff_levels`: a direct paired-dot plot
+of selection optimism. The earlier arrow/scatter candidates are no longer
+generated or included in the handoff. Frontier and spatial content is preserved,
+with more room around axis labels, panel headings and legends.
 
 ## Reproduction
 
-With the existing project globals established:
+After the existing project globals have been established:
 
 ```stata
-do "$code/analysis/viz_code/metric_app_fit.do" keepfront
+do "$code/analysis/viz_code/metric_app_fit.do"
 ```
 
 Then run:
 
 ```text
-python analysis/viz_code/metric_app_fit.py "<project data directory>" --keep-front
+python analysis/viz_code/metric_app_fit.py "<project data directory>"
 ```
 
-The argument is the directory represented by `$data`. Add
-`--pdftoppm "<Poppler executable>"` if it is not on PATH. Both keep-front
-options preserve the approved frontier files. No new dependency is needed.
-The scripts edited are `metric_app_fit.do`, `metric_app_fit.py`, and the
-appendix-only handoff `metric_app.tex`; the frontier/spatial READMEs link here.
+The argument is the directory represented by `$data`. Supply
+`--pdftoppm "<Poppler executable>"` if it is not on PATH. No new dependency is
+required. Both scripts now refresh all three current figures in one run.
+The Stata log is `additional_evidence/appendix/metric_app_fit.log` under
+`$data/results_data`. The appendix-only handoff is `analysis/metric_app.tex`.
 
-The Stata log is
-`$data/results_data/additional_evidence/appendix/metric_app_fit.log`.
-The plotting run completed successfully on 3 November 2026. No estimation,
-bootstrap, or unrelated visualization script was run.
+## Definition, baseline and descriptive spread
 
-## Data and summaries
+The saved `exhibit2/candidates.dta` contains exactly 84 unique metric/product
+pairs: 14 rainfall metrics crossed with six products. The primary frontier
+rule selects on absolute training partial correlation. K=1 is the first
+candidate in the same random candidate ordering, not the best of 84 or an
+average over an independently drawn baseline. K=84 considers the complete set.
 
-Payoffs use saved `exhibit2/selected_instruments.dta`, primary selection rule 1.
-The fit measure is unchanged: absolute training partial correlation, and
-held-out partial correlation oriented by the selected instrument's training
-sign. For each country/outcome/FE/allocation/fold/ordering, each gain is
-`fit(84)-fit(1)`. Training and held-out gains use the same jointly valid pair
-of candidate-set endpoints; undefined held-out fits are not set to zero.
+For each country, outcome, FE specification, allocation, held-out fold and
+candidate ordering, the code computes:
 
-First take medians over 20 candidate orderings within a fold, then medians
-and **IQRs (25th-75th percentiles)** across 100 allocation/fold summaries.
-These are descriptive spread intervals, not confidence intervals; repeated
-folds reuse observations. This is not the earlier difference between FE gap
-increments, nor a coefficient or IV estimate.
+```text
+R_train(K) = abs(r_train(K))
+R_heldout(K) = sign(r_train(K)) * r_valid(K)
+optimism = [R_train(84)-R_train(1)] - [R_heldout(84)-R_heldout(1)]
+```
 
-`appendix/front_payoff_values.csv` contains all 24 country/outcome/FE rows:
-both median gains, their four IQR endpoints, valid/attempted pairs, valid
-splits and plot limits. Both candidate figures read this same CSV. All cells
-have 100 valid split summaries and 2,000 attempted ordering pairs. Valid pairs
-are 2,000 except Niger:
+This uses `exhibit2/selected_instruments.dta`, primary rule 1, without changing
+the outcome transforms or selection routine. Optimism is calculated before
+aggregation. It is not the difference of separately computed median gains,
+and it is not the earlier reg2-minus-reg7 contrast of gap increments.
+
+First take the median over 20 orderings within an allocation/fold, then the
+median and **IQR (25th-75th percentiles)** across 100 allocation/fold summaries.
+Undefined paired gains remain missing. Repeated folds reuse observations;
+IQRs are descriptive spread, not confidence intervals or tests of FE differences.
+
+The tidy `appendix/front_payoff_levels.dta` and `.csv` contain all 24
+country/outcome/specification rows: `optimism_center`, `optimism_p25`,
+`optimism_p75`, paired/attempted counts, valid split counts and axis limits.
+Country IDs are 1 Ethiopia, 2 Malawi, 4 Niger, 5 Nigeria, 6 Tanzania, 7 Uganda;
+outcomes are 1 farm production value and 2 maize yield. Reg7 is year FE;
+reg2 is year plus household FE. All cells have 100 valid split summaries and
+2,000 attempted ordering pairs. Valid pairs are 2,000 except Niger:
 
 | Outcome | Year FE | Year + Household FE |
 |---|---:|---:|
 | Farm Production Value | 1,996 | 1,993 |
-| Maize Quantity | 1,995 | 1,992 |
+| Maize Yield | 1,995 | 1,992 |
 
-The paired-arrow range is -0.08 to 0.23, containing every IQR endpoint
-(-0.0551482 to 0.2039247) with 8% padding and outward rounding. Blue denotes
-year FE; orange denotes year plus household FE. Filled/open circles identify
-training/held-out gains. Solid/dashed bars identify their respective IQRs.
-Arrowheads point from training to held-out; near-equal endpoints naturally
-overlap rather than being moved apart. All 24 training medians exceed the
-corresponding held-out medians; two household-FE held-out medians are negative.
-This is descriptive evidence, not a test of differences.
+## Figure decisions
 
-The scatter uses square plot regions and identical -0.02 to 0.20 x/y ranges,
-so its reference is exactly y=x and physically 45 degrees. Country abbreviations
-are placed with short leaders while avoiding other labels and markers.
-Whiskers are omitted from the scatter to keep the 12 points per panel readable.
-Panel A is farm production value and Panel B is maize quantity in both candidates.
-Outcome variables and transformations are unchanged.
+The optimism plot uses two stacked outcome panels. Both FE centers share the
+same country row and a thin gray horizontal connector. Blue filled circles
+represent year FE; orange filled squares represent year plus household FE.
+Thin IQR bars are offset slightly above/below the row to keep overlapping
+intervals readable; their x values are unchanged and short stems link each
+bar to its point. A zero reference and two-entry bottom legend complete the plot.
 
-Spatial components still use `exhibit3/score_summary.dta` and the matched
-reg2 rows in `spatial_first_stage.dta`. The 60 score values and 12 outcome
-shares retain their existing CSVs, with 84 matched specifications per
-country/outcome. Physical-size arrowheads are added in the PDF assembly,
-outside the endpoint markers. No data, marker, scale or spacing is changed.
+Observed centers range from -0.0098054 to 0.0746358. IQR endpoints range from
+-0.0447697 to 0.1311368. The common axis is **-0.06 to 0.15**, with 8% empirical
+span padding and outward rounding. Three year-FE centers are negative, and
+19 of 24 IQRs contain zero. The requested figure is retained; these broad
+spreads limit strong interpretation. No significance colors or inferential
+claims are added.
 
-## Executed checks and decision
+The frontier retains all 12 cells, both FE models, the nine exact K values,
+log K, four lines and all four descriptive ribbons per cell. Its -0.12 to
+0.38 y range is unchanged. The left margin increases from 44 to 66 points;
+plot-row gaps increase from 25 to 31 points. Tick/title and title/legend gaps
+increase separately, with additional room above the top strip labels.
 
-- Recomputed all 48 payoff medians and 96 IQR endpoints directly from the
-  saved selected-instrument records, with errors below 1e-9; pair counts match.
-- Verified six countries, two outcomes, reg7/year FE and reg2/year-plus-household
-  FE, paired K=1/K=84 endpoints, and all valid-split denominators before export.
-- Confirmed the approved frontier PDF and PNG are byte-identical by SHA-256.
-  Its bands, colors, legend and axes are preserved.
-- Confirmed both spatial value CSVs are byte-identical. Panel A renders
-  pixel-identically at 100 dpi; arrowheads point from HH circles to spatial
-  squares in Panel B, with the existing 0-90% axis and markers.
-- Checked the new arrow directions against the actual training/held-out values;
-  both candidates use the same 24 summary rows and exact FE palette.
-- Exported single-page vector PDFs with no raster image objects and 3,200-pixel
-  PNG previews; reviewed the figures at their actual landscape inclusion sizes.
+The spatial figure retains its two top-level panels, categorical distance
+bins, country-specific score scales, both outcomes, 84 matched specifications
+per country/outcome, gray circles/red squares, and directional arrows.
+The score-grid left margin increases from 46 to 64 points; plot-row gaps
+increase from 16 to 30 points. Both local legends have more room below their
+axis titles, and the bottom legend has a larger outer margin. The share axis
+remains 0-90%, containing the observed maximum 82.143% with modest padding.
 
-The letter-paper, one-inch-margin LaTeX proof compiled successfully without
-overfull boxes. The selected payoff graphic prints at about 8.73 x 4.93 inches;
-the spatial graphic retains its 7.24 x 5.35-inch inclusion size. Captions and
-notes remain outside the images. Both payoff candidates use panel letters
-only, with the outcome definitions supplied in the handoff note.
+## Executed review
 
-Final files under `$data/results_data/figures/metric_paper/`:
+- Independently recomputed all 24 optimism medians and 48 IQR endpoints from
+  saved raw selected-instrument rows; differences are below 1e-9. Valid paired
+  counts and all 100 split summaries match the exported tidy table.
+- Verified the 84-candidate grid, K=1/K=84 pairing, six countries, two outcomes,
+  FE identifiers and palette, and that every displayed IQR is inside its axis.
+- Frontier median/ribbon CSV and both spatial plotting-value CSVs are
+  byte-identical before and after the layout revision. No plotted quantity
+  or descriptive ribbon was removed or recomputed differently.
+- Exported three single-page vector PDFs with no raster image objects,
+  plus 3,200-pixel PNG previews. Reviewed the figures at actual inclusion size.
+- Compiled the appendix-only LaTeX handoff on letter paper with one-inch
+  margins and reviewed its captions, labels, notes and spacing.
 
-| Figure | Native PDF Canvas | PNG Preview | Use |
-|---|---|---|---|
-| `front_panel_fit` | 11.5 x 8.0 in | Unchanged | Approved Frontier |
-| `front_payoff_arrows` | 11.5 x 6.5 in | 3,200 x 1,809 px | Selected Replacement |
-| `front_payoff_scatter` | 11.5 x 6.3 in | 3,200 x 1,754 px | Review Alternative |
-| `space_panel_revised` | 11.5 x 8.5 in | 3,200 x 2,366 px | Directional Comparison |
+| Figure | Native PDF Canvas | Use |
+|---|---|---|
+| `front_panel_fit` | 11.5 x 8.0 in | Frontier With More Spacing |
+| `front_payoff_levels` | 8.5 x 6.0 in | Direct Selection Optimism |
+| `space_panel_revised` | 11.5 x 8.5 in | Spatial Comparison With More Spacing |
 
-The arrow figure tells the training-to-held-out story clearly while retaining
-the IQRs. It is therefore selected in `metric_app.tex`. The old forest is no
-longer generated or included. Main-text figures and the protected bootstrap
-heat map and workflow remain untouched. Earlier detailed audits remain in
-`additional_exhibits_QA.md` and `appendix_figures_redesign_QA.md` as dated records.
+Outputs remain under `$data/results_data/figures/metric_paper/`. No estimator,
+bootstrap, main-text figure, or protected heat-map workflow was run or changed.

@@ -5,7 +5,7 @@
 # edited on: 3 Nov 2026
 # Python 3
 # does
-	# assembles appendix frontiers, payoff candidates and spatial comparisons
+	# assembles appendix frontiers, selection optimism and spatial comparisons
 # assumes
 	# metric_app_fit.do has run; pypdf, reportlab and Poppler are installed
 # TO DO:
@@ -29,8 +29,6 @@ from reportlab.pdfgen import canvas
 parser = argparse.ArgumentParser(description="Assemble the redesigned appendix figures.")
 parser.add_argument("data", type=Path, help="Project data root used by Stata's $data.")
 parser.add_argument("--pdftoppm", default="pdftoppm")
-parser.add_argument("--keep-front", action="store_true",
-	help="Preserve the approved frontier PDF and PNG without exporting them.")
 args = parser.parse_args()
 out = args.data / "results_data/additional_evidence/appendix"
 figures = args.data / "results_data/figures/metric_paper"
@@ -131,13 +129,10 @@ def legend(c, y, entries, width, size=12):
 		c.setFillColorRGB(*color)
 		c.setLineWidth(.9)
 		c.setDash([5, 3] if dashed else [])
-		if symbol not in ("square", "point", "openpoint"):
+		if symbol not in ("square", "point"):
 			c.line(x, y + 3, x + 22, y + 3)
 		if symbol in ("circle", "point"):
 			c.circle(x + 11, y + 3, 2.3, fill=1, stroke=0)
-		elif symbol == "openpoint":
-			c.setFillColorRGB(1, 1, 1)
-			c.circle(x + 11, y + 3, 2.3, fill=1, stroke=1)
 		elif symbol == "diamond":
 			p = c.beginPath()
 			p.moveTo(x + 11, y + 6)
@@ -171,122 +166,59 @@ def finish(writer, overlay, c, name):
 # 1 - country-outcome frontiers; color identifies FE, pattern identifies sample
 ##############################################################################
 
-if not args.keep_front:
-	front = values("front_fit_values.csv")
-	ymin, ymax = front[0]["y_min"], front[0]["y_max"]
-	width, height = 828, 576
-	writer, page, overlay, c = sheet(width, height)
-	left, gutter, cell_height = 44, 11, 148
-	cell_width = (width - left - 8 - 3 * gutter) / 4
-	for i, (country, name) in enumerate(countries):
-		for outcome, outcome_name in ((1, "Value"), (2, "Maize")):
-			row, column = i // 2, 2 * (i % 2) + outcome - 1
-			x, y = left + column * (cell_width + gutter), 402 - row * 173
-			place(page, f"front_{country}_{outcome}.pdf", x, y, cell_width, cell_height)
-			text(c, x + cell_width / 2, y + cell_height + 8, f"{name} · {outcome_name}", 12.3, True)
-			if column == 0:
-				vertical(c, x, y, cell_height, ymin, ymax,
-					[(v, f"{v:.2f}") for v in (-.1, 0, .1, .2, .3)], 11)
-			if row == 2:
-				horizontal(c, x, y, cell_width, 1, 84,
-					[(k, str(k)) for k in (1, 3, 10, 40, 84)], log=True, size=11)
-	rotated(c, 10, 303, "Selected First-Stage Partial Correlation", 12.5)
-	text(c, width / 2, 28, "Number Of Candidate Instruments, K", 12.5)
-	legend(c, 8, [("Year FE: Training", blue, False, None),
-		("Year FE: Held-Out", blue, True, None),
-		("Year + Household FE: Training", copper, False, None),
-		("Year + Household FE: Held-Out", copper, True, None)], width, 12)
-	finish(writer, overlay, c, "front_panel_fit")
-
-
-##############################################################################
-# 2 - paired search-gain arrows and the alternative scatter
-##############################################################################
-
-gains = values("front_payoff_values.csv")
-assert len(gains) == 24
-assert {v["country"] for v in gains} == {c for c, _ in countries}
-assert {v["outcome"] for v in gains} == {1, 2}
-assert {v["spec"] for v in gains} == {2, 7}
-xmin, xmax = gains[0]["x_min"], gains[0]["x_max"]
-width, height = 828, 468
+front = values("front_fit_values.csv")
+ymin, ymax = front[0]["y_min"], front[0]["y_max"]
+width, height = 828, 576
 writer, page, overlay, c = sheet(width, height)
-left, gap, cell_width, cell_height, bottom = 84, 92, 319, 365, 60
-for outcome, title in ((1, "(A)"), (2, "(B)")):
-	x = left + (outcome - 1) * (cell_width + gap)
-	place(page, f"payoff_arrows_{outcome}.pdf", x, bottom, cell_width, cell_height)
-	for v in gains:
-		if v["outcome"] != outcome:
-			continue
-		row = next(i for i, (country, _) in enumerate(countries) if country == v["country"])
-		position = row + 1 + (-.18 if v["spec"] == 7 else .18)
-		y = bottom + cell_height * (1 - (position - .5) / 6)
-		start = x + cell_width * (v["train"] - xmin) / (xmax - xmin)
-		end = x + cell_width * (v["holdout"] - xmin) / (xmax - xmin)
-		arrow_head(c, start, end, y, blue if v["spec"] == 7 else copper)
-	text(c, x + cell_width / 2, bottom + cell_height + 14, title, 13.5, True)
+left, gutter, cell_height = 66, 15, 137
+cell_width = (width - left - 12 - 3 * gutter) / 4
+for i, (country, name) in enumerate(countries):
+	for outcome, outcome_name in ((1, "Value"), (2, "Maize")):
+		row, column = i // 2, 2 * (i % 2) + outcome - 1
+		x, y = left + column * (cell_width + gutter), 412 - row * 168
+		place(page, f"front_{country}_{outcome}.pdf", x, y, cell_width, cell_height)
+		text(c, x + cell_width / 2, y + cell_height + 8, f"{name} · {outcome_name}", 12.3, True)
+		if column == 0:
+			vertical(c, x, y, cell_height, ymin, ymax,
+				[(v, f"{v:.2f}") for v in (-.1, 0, .1, .2, .3)], 11)
+		if row == 2:
+			horizontal(c, x, y, cell_width, 1, 84,
+				[(k, str(k)) for k in (1, 3, 10, 40, 84)], log=True, size=11)
+rotated(c, 16, 316, "Selected First-Stage Partial Correlation", 12.5)
+text(c, width / 2, 39, "Number Of Candidate Instruments, K", 12.5)
+legend(c, 10, [("Year FE: Training", blue, False, None),
+	("Year FE: Held-Out", blue, True, None),
+	("Year + Household FE: Training", copper, False, None),
+	("Year + Household FE: Held-Out", copper, True, None)], width, 12)
+finish(writer, overlay, c, "front_panel_fit")
+
+
+##############################################################################
+# 2 - selection optimism: paired medians with descriptive IQRs
+##############################################################################
+
+levels = values("front_payoff_levels.csv")
+assert len(levels) == 24
+assert {v["country"] for v in levels} == {country for country, _ in countries}
+assert {v["outcome"] for v in levels} == {1, 2}
+assert {v["spec"] for v in levels} == {2, 7}
+xmin, xmax = levels[0]["x_min"], levels[0]["x_max"]
+width, height = 612, 432
+writer, page, overlay, c = sheet(width, height)
+left, cell_width, cell_height = 84, 514, 140
+for outcome, title, y in ((1, "(A)", 242), (2, "(B)", 66)):
+	place(page, f"payoff_levels_{outcome}.pdf", left, y, cell_width, cell_height)
+	text(c, left + cell_width / 2, y + cell_height + 15, title, 11.5, True)
 	for i, (_, country) in enumerate(countries):
-		text(c, x - 9, bottom + cell_height * (1 - (i + .5) / 6) - 4,
-			country, 13, align="right")
-	ticks = [(i / 100, f"{i / 100:.2f}") for i in range(-5, 21, 5)]
-	horizontal(c, x, bottom, cell_width, xmin, xmax, ticks, size=12)
-text(c, width / 2, 31, "Search Gain In First-Stage Partial Correlation", 13)
-legend(c, 10, [("Year FE", blue, False, None),
-	("Year + Household FE", copper, False, None),
-	("Training", ink, False, "point"), ("Held-Out", ink, False, "openpoint")], width, 12)
-finish(writer, overlay, c, "front_payoff_arrows")
-
-
-def country_labels(c, points, bounds):
-	# Place short labels near the actual points, avoiding labels and marker boxes.
-	boxes = [(x - 4, y - 4, x + 4, y + 4) for x, y, *_ in points]
-	for x, y, label, color in points:
-		label_width = c.stringWidth(label, "Helvetica", 11.5)
-		options = []
-		for dx in (8, -label_width - 8, 22, -label_width - 22, 36, -label_width - 36):
-			for dy in (7, -14, 21, -28, 35, -42):
-				a, b = x + dx, y + dy
-				rect = (a - 2, b - 3, a + label_width + 2, b + 11)
-				if rect[0] < bounds[0] or rect[1] < bounds[1] or rect[2] > bounds[2] or rect[3] > bounds[3]:
-					continue
-				if any(rect[0] < r[2] and rect[2] > r[0] and
-					rect[1] < r[3] and rect[3] > r[1] for r in boxes):
-					continue
-				options.append((dx * dx + dy * dy, a, b, rect))
-		if not options:
-			raise ValueError(f"Country label needs more room: {label}")
-		_, a, b, rect = min(options)
-		boxes.append(rect)
-		c.setStrokeColorRGB(*color)
-		c.setLineWidth(.45)
-		c.line(x, y, min(max(x, a), a + label_width), b + 3)
-		c.setFillColorRGB(*color)
-		c.setFont("Helvetica", 11.5)
-		c.drawString(a, b, label)
-
-
-width, height = 828, 453.6
-writer, page, overlay, c = sheet(width, height)
-left, gap, cell_width, bottom = 54, 36, 365, 56
-smin, smax = gains[0]["s_min"], gains[0]["s_max"]
-abbreviations = {1: "ETH", 2: "MWI", 4: "NER", 5: "NGA", 6: "TZA", 7: "UGA"}
-ticks = [(i / 100, f"{i / 100:.2f}") for i in range(0, 21, 5)]
-for outcome, title in ((1, "(A)"), (2, "(B)")):
-	x = left + (outcome - 1) * (cell_width + gap)
-	place(page, f"payoff_scatter_{outcome}.pdf", x, bottom, cell_width, cell_width)
-	text(c, x + cell_width / 2, bottom + cell_width + 12, title, 13.5, True)
-	horizontal(c, x, bottom, cell_width, smin, smax, ticks, size=12)
-	vertical(c, x, bottom, cell_width, smin, smax, ticks, size=12)
-	points = [(x + (v["train"] - smin) / (smax - smin) * cell_width,
-		bottom + (v["holdout"] - smin) / (smax - smin) * cell_width,
-		abbreviations[int(v["country"])], blue if v["spec"] == 7 else copper)
-		for v in gains if v["outcome"] == outcome]
-	country_labels(c, points, (x + 3, bottom + 3, x + cell_width - 3, bottom + cell_width - 3))
-rotated(c, 12, bottom + cell_width / 2, "Held-Out Search Gain", 13)
-text(c, width / 2, 27, "Training Search Gain", 13)
-legend(c, 7, [("Year FE", blue, False, "point"),
-	("Year + Household FE", copper, False, "point")], width, 12)
-finish(writer, overlay, c, "front_payoff_scatter")
+		text(c, left - 9, y + cell_height * (1 - (i + .5) / 6) - 3.5,
+			country, 10.5, align="right")
+	if outcome == 2:
+		ticks = [(i / 100, f"{i / 100:.2f}") for i in range(-5, 16, 5)]
+		horizontal(c, left, y, cell_width, xmin, xmax, ticks, size=10.5)
+text(c, width / 2, 31, "Selection Optimism In First-Stage Fit", 11.5)
+legend(c, 10, [("Year FE", blue, False, "point"),
+	("Year + Household FE", copper, False, "square")], width, 11)
+finish(writer, overlay, c, "front_payoff_levels")
 
 
 ##############################################################################
@@ -297,15 +229,15 @@ scores = values("space_fit_values.csv")
 shares = values("space_outcome_values.csv")
 width, height = 828, 612
 writer, page, overlay, c = sheet(width, height)
-text(c, 16, 600, "(A) First-Stage Score Dependence By Distance", 13, True, "left")
-left, gutter, cell_height = 46, 26, 111.6
-cell_width = (width - left - 6 - 2 * gutter) / 3
+text(c, 32, 600, "(A) First-Stage Score Dependence By Distance", 13, True, "left")
+left, gutter, cell_height = 64, 34, 82
+cell_width = (width - left - 10 - 2 * gutter) / 3
 for i, (country, name) in enumerate(countries):
-	x, y = left + (i % 3) * (cell_width + gutter), 465.4 - (i // 3) * 127.6
+	x, y = left + (i % 3) * (cell_width + gutter), 484 - (i // 3) * 112
 	entry = next(v for v in scores if v["country"] == country)
 	low, high, step = entry["y_min"], entry["y_max"], entry["y_step"]
 	place(page, f"score_{country}.pdf", x, y, cell_width, cell_height)
-	text(c, x + cell_width / 2, y + cell_height + 8, name, 12.8, True)
+	text(c, x + cell_width / 2, y + cell_height + 12, name, 12.8, True)
 	digits = 3 if step < .01 else 2
 	first, last = math.ceil(low / step - 1e-8), math.floor(high / step + 1e-8)
 	ticks = [(n * step, f"{n * step:.{digits}f}") for n in range(first, last + 1)]
@@ -313,14 +245,14 @@ for i, (country, name) in enumerate(countries):
 	if i >= 3:
 		horizontal(c, x, y, cell_width, .5, 5.5,
 			list(enumerate(("0-25", "25-50", "50-100", "100-200", "200-300"), 1)), size=11.5)
-rotated(c, 10, 457, "Mean Standardized First-Stage Score Cross-Product", 12.8)
-text(c, width / 2, 307.5, "EA Distance Bin (Km)", 12.8)
-legend(c, 289.5, [("Seasonal Rainfall", teal, False, "circle"),
+rotated(c, 14, 454, "Mean Standardized First-Stage Score Cross-Product", 12.8)
+text(c, width / 2, 336, "EA Distance Bin (Km)", 12.8)
+legend(c, 312, [("Seasonal Rainfall", teal, False, "circle"),
 	("Rainy Days", plum, True, "diamond")], width, 12.5)
-text(c, 16, 270, "(B) Outcome-Specific First-Stage Significance", 13, True, "left")
-left, cell_width, cell_height = 99, 715, 86.4
+text(c, 32, 290, "(B) Outcome-Specific First-Stage Significance", 13, True, "left")
+left, cell_width, cell_height = 110, 704, 80
 xmax = shares[0]["x_max"]
-for outcome, title, y in ((1, "Farm Production Value", 157), (2, "Maize Yield", 45)):
+for outcome, title, y in ((1, "Farm Production Value", 176), (2, "Maize Yield", 67)):
 	place(page, f"share_{outcome}.pdf", left, y, cell_width, cell_height)
 	for i, (country, _) in enumerate(countries):
 		entry = next(v for v in shares if v["country"] == country and v["outcome"] == outcome)
@@ -328,14 +260,14 @@ for outcome, title, y in ((1, "Farm Production Value", 157), (2, "Maize Yield", 
 		start = left + cell_width * entry["share_hh"] / xmax
 		end = left + cell_width * entry["share_sp"] / xmax
 		arrow_head(c, start, end, row_y, (170 / 255,) * 3)
-	text(c, left + cell_width / 2, y + cell_height + 7, title, 12.8, True)
+	text(c, left + cell_width / 2, y + cell_height + 13, title, 12.8, True)
 	for i, (_, country) in enumerate(countries):
 		text(c, left - 8, y + cell_height * (1 - (i + .5) / 6) - 4,
 			country, 12.8, align="right")
 	if outcome == 2:
 		horizontal(c, left, y, cell_width, 0, xmax,
 			[(v, str(v)) for v in range(0, int(xmax) + 1, 10)], size=11.5)
-text(c, width / 2, 18, "Share Of First-Stage Specifications With |t| > 1.96 (%)", 12.8)
-legend(c, 3, [("Household-Clustered SE", gray, False, "point"),
+text(c, width / 2, 34, "Share Of First-Stage Specifications With |t| > 1.96 (%)", 12.8)
+legend(c, 10, [("Household-Clustered SE", gray, False, "point"),
 	("Spatial SE (100 Km)", red, False, "square")], width, 12.5)
 finish(writer, overlay, c, "space_panel_revised")

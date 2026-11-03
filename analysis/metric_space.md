@@ -4,10 +4,10 @@
 
 ## Appendix-only update, 3 Nov 2026
 
-The current update uses `metric_app_fit.do keepfront` and `metric_app_fit.py`
-with `--keep-front`, preserving the approved frontier files. Spatial arrows
-point from household-clustered circles to the spatial squares. The endpoints,
-data, scales and panel layout are unchanged.
+The current update uses `metric_app_fit.do` and `metric_app_fit.py` to refresh
+all three appendix exhibits. Spatial arrows still point from household-clustered
+circles to spatial squares. Extra margins separate tick labels, titles and local
+legends. The data, scales, country order and panel content are unchanged.
 See `metric_payoff.md` for the current commands and executed review.
 
 The redesigned appendix uses `metric_app_fit.do` and `metric_app_fit.py`.

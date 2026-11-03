@@ -39,34 +39,30 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 2 - paired search payoffs
+% 2 - selection optimism
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{landscape}
 	\begin{figure}[!htbp]
 		\begin{minipage}{\linewidth}
-			\caption{Search Gains In Training and Held-Out Data}
-			\label{app:front_payoff}
+			\caption{Selection Optimism In First-Stage Fit}
+			\label{app:front_optimism}
 			{\centering
-				\includegraphics[width=.97\linewidth,keepaspectratio]{Figures/front_payoff_arrows.pdf}\par}
+				\includegraphics[width=.97\linewidth,height=5.35in,keepaspectratio]{Figures/front_payoff_levels.pdf}\par}
 			\smallskip
 			\footnotesize \textit{Note}: Panel A shows farm production value;
-			Panel B shows maize quantity. Points summarize gains from considering
-			84 rather than one candidate instrument, using absolute training
-			partial correlation and training-sign-oriented held-out correlation.
-			Blue denotes year FE; orange denotes year and household FE. Filled
-			circles show training gains and open circles show held-out gains;
-			arrows run from training to held-out. Gains are paired within each
-			allocation, fold and candidate ordering, then summarized across 20
-			orderings within each fold and 100 fold/allocation units. Bars show
-			interquartile ranges, solid for training and dashed for held-out,
-			not confidence intervals. Repeated folds reuse
-			observations; all 100 split summaries are valid in each cell.
+			Panel B shows maize yield. Selection optimism is the training gain
+			minus the held-out gain from searching 84 rather than one candidate.
+			Fit is absolute training partial correlation and training-sign-oriented
+			held-out correlation. Optimism is calculated within each ordering before
+			medians over 20 orderings within folds and 100 fold/allocation units.
+			Blue circles denote year FE; orange squares denote year and household FE.
+			Whiskers show descriptive IQRs, slightly offset vertically for legibility,
+			not confidence intervals. Repeated folds reuse observations.
 		\end{minipage}
 	\end{figure}
 \end{landscape}
 
-% front_payoff_scatter.pdf is the review alternative, not an additional exhibit.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -79,20 +75,16 @@
 			\caption{Spatial Dependence and First-Stage Instrument Strength}
 			\label{app:space_panel}
 			{\centering
-				\includegraphics[width=.97\linewidth,height=5.35in,keepaspectratio]{Figures/space_panel_revised.pdf}\par}
+				\includegraphics[width=.97\linewidth,height=5.5in,keepaspectratio]{Figures/space_panel_revised.pdf}\par}
 			\smallskip
-			\footnotesize \textit{Note}: Panel A shows mean standardized first-stage
-			score cross-products, summarized across six products and two outcomes
-			for each rainfall metric. Distance bins are equally spaced categories;
-			vertical scales differ across countries. Panel B separates outcomes,
-			using year and household FE and 84 matched specifications per
-			country/outcome. Each covariance comparison retains the same coefficient
-			and observations. Arrows run from household-clustered circles to spatial
-			squares. The 100-km Bartlett adjustment adds contemporaneous
-			cross-household spatial covariance to unrestricted own-household serial
-			covariance. Threshold shares are descriptive, not tests of differences.
-			Geographic restrictions remain substantial in Tanzania and Uganda;
-			missing or confidential coordinates are not imputed.
+			\footnotesize \textit{Note}: Panel A shows standardized first-stage score
+			cross-products, summarized across six products and two outcomes per
+			rainfall metric. Distance bins are categorical; country vertical scales
+			differ. Panel B uses year and household FE, with 84 matched specifications
+			per country/outcome. Arrows run from household-clustered circles to
+			100-km Bartlett spatial squares, retaining the same coefficient,
+			observations and own-household serial covariance. Shares are descriptive.
+			Geographic restrictions remain substantial in Tanzania and Uganda.
 		\end{minipage}
 	\end{figure}
 \end{landscape}
