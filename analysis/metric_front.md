@@ -1,16 +1,17 @@
 # Rainfall selection frontier
 
-<!-- edited by: codex; edited on: 2 Nov 2026 -->
+<!-- edited by: codex; edited on: 3 Nov 2026 -->
 
-## Appendix-only update, 2 Nov 2026
+## Appendix-only update, 3 Nov 2026
 
-The redesigned appendix figures now use `metric_app_fit.do`, followed by
-`metric_app_fit.py` with the same data-root argument described below. They
-create `front_panel_fit`, `front_increment_forest`, and `space_panel_revised`.
-The frontier is now a 12-cell country/outcome matrix with both FE models and
-empirical dispersion ribbons; the paired increment plot includes descriptive
-10th-90th percentile whiskers. See `appendix_figures_redesign_QA.md` and the
-updated `metric_app.tex` for exact ranges, counts and the current handoff.
+The current update runs `metric_app_fit.do keepfront`, followed by
+`metric_app_fit.py "<project data directory>" --keep-front`. This preserves the
+approved `front_panel_fit` PDF and PNG, updates the spatial arrows, and creates
+`front_payoff_arrows` plus the review alternative `front_payoff_scatter`.
+The paired-arrow payoff figure replaces the old forest plot. Both candidates
+use the same gains from K=1 to K=84; bars are descriptive IQRs across split
+summaries. See `metric_payoff.md` and `metric_app.tex` for the
+current commands, counts, checks and appendix handoff.
 The earlier workflow below remains an auxiliary reproducibility path.
 
 ### Earlier appendix design

@@ -2,11 +2,11 @@
 * Created on: 2 Nov 2026
 * Created by: codex
 * edited by: codex
-* edited on: 2 Nov 2026
+* edited on: 3 Nov 2026
 * Stata v.18
 
 * does
-	* redraws three appendix figures from saved selection and spatial estimates
+	* prepares appendix frontiers, search payoffs and spatial comparisons
 	* saves plotted values, empirical bands and matched denominators
 
 * assumes
@@ -20,6 +20,7 @@
 **# 0 - setup
 **********************************************************************
 
+	args		keepfront
 	loc			front "$data/results_data/additional_evidence/exhibit2"
 	loc			space "$data/results_data/additional_evidence/exhibit3"
 	loc			out "$data/results_data/additional_evidence/appendix"
@@ -29,7 +30,6 @@
 	include		"$code/analysis/viz_code/metric_palette.do"
 	loc			teal "24 105 112"
 	loc			plum "124 83 117"
-	loc			ink "38 43 47"
 	loc			frame scheme(stcolor) graphregion(color(white) margin(zero)) ///
 				plotregion(color(white) lstyle(none) margin(zero)) ///
 				xlabel(none) ylabel(none) xtitle("") ytitle("") legend(off)
@@ -42,99 +42,157 @@
 **# 1 - twelve country-outcome frontiers with empirical dispersion
 **********************************************************************
 
-	use			"`front'/selection_frontier", clear
-	keep if		rule == 1
-	egen byte	country_row = group(country)
-	gen byte	row = floor((country_row - 1) / 2) + 1
-	gen byte	column = 2 * mod(country_row - 1, 2) + outcome
-	egen double	low = rowmin(lo_train lo_valid train valid_corr)
-	egen double	high = rowmax(hi_train hi_valid train valid_corr)
-	quietly summarize low, meanonly
-	loc			ymin = min(-.05, floor((r(min) - .01) * 100) / 100)
-	quietly summarize high, meanonly
-	loc			ymax = max(.35, ceil((r(max) + .01) * 100) / 100)
-	gen double	y_min = `ymin'
-	gen double	y_max = `ymax'
-	assert		_N == 216
-	export delimited country outcome spec row column k train valid_corr ///
-				lo_train hi_train lo_valid hi_valid attempts valid invalid ///
-				y_min y_max using "`out'/front_fit_values.csv", nolabel replace
-	display		"Frontier range including all ribbons: `ymin' to `ymax'."
-	foreach c in 1 2 4 5 6 7 {
-		forvalues o = 1/2 {
-			preserve
-			keep if		country == `c' & outcome == `o'
-			twoway		(rarea lo_train hi_train k if spec == 7, sort ///
-						color("`arc2'%5") lwidth(none)) ///
-						(rarea lo_train hi_train k if spec == 2, sort ///
-						color("`era5'%5") lwidth(none)) ///
-						(rarea lo_valid hi_valid k if spec == 7, sort ///
-						color("`arc2'%11") lwidth(none)) ///
-						(rarea lo_valid hi_valid k if spec == 2, sort ///
-						color("`era5'%11") lwidth(none)) ///
-						(line train k if spec == 7, sort ///
-						lcolor("`arc2'") lwidth(.9pt)) ///
-						(line valid_corr k if spec == 7, sort ///
-						lcolor("`arc2'") lpattern(dash) lwidth(.9pt)) ///
-						(line train k if spec == 2, sort ///
-						lcolor("`era5'") lwidth(.9pt)) ///
-						(line valid_corr k if spec == 2, sort ///
-						lcolor("`era5'") lpattern(dash) lwidth(.9pt)), ///
-						`frame' xscale(log range(1 84) off noextend) ///
-						yscale(range(`ymin' `ymax') off noextend) ///
-						yline(-.1 .1 .2 .3, `pale') yline(0, `zero') ///
-						xsize(2.6) ysize(2.055)
-			graph export "`out'/fit/front_`c'_`o'.pdf", replace
-			restore
+	if "`keepfront'" != "keepfront" {
+		use			"`front'/selection_frontier", clear
+		keep if		rule == 1
+		egen byte	country_row = group(country)
+		gen byte	row = floor((country_row - 1) / 2) + 1
+		gen byte	column = 2 * mod(country_row - 1, 2) + outcome
+		egen double	low = rowmin(lo_train lo_valid train valid_corr)
+		egen double	high = rowmax(hi_train hi_valid train valid_corr)
+		quietly summarize low, meanonly
+		loc			ymin = min(-.05, floor((r(min) - .01) * 100) / 100)
+		quietly summarize high, meanonly
+		loc			ymax = max(.35, ceil((r(max) + .01) * 100) / 100)
+		gen double	y_min = `ymin'
+		gen double	y_max = `ymax'
+		assert		_N == 216
+		export delimited country outcome spec row column k train valid_corr ///
+					lo_train hi_train lo_valid hi_valid attempts valid invalid ///
+					y_min y_max using "`out'/front_fit_values.csv", nolabel replace
+		display		"Frontier range including all ribbons: `ymin' to `ymax'."
+		foreach c in 1 2 4 5 6 7 {
+			forvalues o = 1/2 {
+				preserve
+				keep if		country == `c' & outcome == `o'
+				twoway		(rarea lo_train hi_train k if spec == 7, sort ///
+							color("`arc2'%5") lwidth(none)) ///
+							(rarea lo_train hi_train k if spec == 2, sort ///
+							color("`era5'%5") lwidth(none)) ///
+							(rarea lo_valid hi_valid k if spec == 7, sort ///
+							color("`arc2'%11") lwidth(none)) ///
+							(rarea lo_valid hi_valid k if spec == 2, sort ///
+							color("`era5'%11") lwidth(none)) ///
+							(line train k if spec == 7, sort ///
+							lcolor("`arc2'") lwidth(.9pt)) ///
+							(line valid_corr k if spec == 7, sort ///
+							lcolor("`arc2'") lpattern(dash) lwidth(.9pt)) ///
+							(line train k if spec == 2, sort ///
+							lcolor("`era5'") lwidth(.9pt)) ///
+							(line valid_corr k if spec == 2, sort ///
+							lcolor("`era5'") lpattern(dash) lwidth(.9pt)), ///
+							`frame' xscale(log range(1 84) off noextend) ///
+							yscale(range(`ymin' `ymax') off noextend) ///
+							yline(-.1 .1 .2 .3, `pale') yline(0, `zero') ///
+							xsize(2.6) ysize(2.055)
+				graph export "`out'/fit/front_`c'_`o'.pdf", replace
+				restore
+			}
 		}
 	}
 
 
 **********************************************************************
-**# 2 - paired difference of incremental search gaps
+**# 2 - paired training and held-out search gains
 **********************************************************************
 
-* form the FE contrast before aggregating the shared candidate orderings
+* use the approved fit statistic at both search sizes within the same ordering
 	use			"`front'/selected_instruments", clear
 	keep if		rule == 1 & inlist(k, 1, 84)
-	gen double	raw_gap = abs(r_train) - sign(r_train) * r_valid
-	assert		abs(raw_gap - gap) < 1e-12 if !missing(raw_gap, gap)
-	keep		country outcome spec rep fold ordering k candidate raw_gap
-	reshape wide candidate raw_gap, ///
+	isid		country outcome spec rep fold ordering k
+	gen double	fit_train = abs(r_train)
+	gen double	fit_holdout = sign(r_train) * r_valid
+	keep		country outcome spec rep fold ordering k fit_train fit_holdout
+	reshape wide fit_train fit_holdout, ///
 				i(country outcome spec rep fold ordering) j(k)
-	gen double	increment = raw_gap84 - raw_gap1
-	keep		country outcome spec rep fold ordering candidate1 increment
-	reshape wide candidate1 increment, i(country outcome rep fold ordering) j(spec)
-	assert		candidate12 == candidate17 if !missing(increment2, increment7)
-	gen double	difference = increment2 - increment7
-	gen byte	matched = !missing(difference)
+	gen double	train = fit_train84 - fit_train1
+	gen double	holdout = fit_holdout84 - fit_holdout1
+	gen byte	matched = !missing(train, holdout)
+	replace		train = . if !matched
+	replace		holdout = . if !matched
 	gen byte	attempted = 1
-	collapse	(median) difference (sum) n_pairs = matched n_attempted = attempted, ///
-				by(country outcome rep fold)
-	collapse	(p50) difference (p10) p10 = difference (p90) p90 = difference ///
-				(sum) n_pairs n_attempted (count) n_folds = difference, ///
-				by(country outcome)
-	quietly summarize p10, meanonly
-	loc			xmin = min(-.04, floor((r(min) - .01) / .02) * .02)
-	quietly summarize p90, meanonly
-	loc			xmax = max(.11, ceil((r(max) + .01) / .02) * .02)
+
+* summarize the 20 orderings within folds before describing the 100 split units
+	collapse	(median) train holdout (sum) n_pairs = matched ///
+				n_attempted = attempted, by(country outcome spec rep fold)
+	collapse	(p50) train holdout (p25) train_p25 = train holdout_p25 = holdout ///
+				(p75) train_p75 = train holdout_p75 = holdout ///
+				(sum) n_pairs n_attempted (count) n_splits = train, ///
+				by(country outcome spec)
+	isid		country outcome spec
+	assert		_N == 24 & inlist(spec, 2, 7) & inlist(outcome, 1, 2)
+	label define spec 7 "Year FE" 2 "Year + Household FE", replace
+	label values spec spec
+	egen byte	country_row = group(country)
+	egen double	low = rowmin(train_p25 holdout_p25)
+	egen double	high = rowmax(train_p75 holdout_p75)
+	quietly summarize low, meanonly
+	loc			lo = min(0, r(min))
+	quietly summarize high, meanonly
+	loc			hi = max(0, r(max))
+	loc			pad = .08 * (`hi' - `lo')
+	loc			xmin = floor((`lo' - `pad') * 100) / 100
+	loc			xmax = ceil((`hi' + `pad') * 100) / 100
 	gen double	x_min = `xmin'
 	gen double	x_max = `xmax'
-	egen byte	country_row = group(country)
-	export delimited country outcome difference p10 p90 n_pairs n_attempted ///
-				n_folds x_min x_max using "`out'/front_forest_values.csv", nolabel replace
-	list		country outcome difference p10 p90 n_pairs n_folds, noobs
-	display		"Paired forest range: `xmin' to `xmax'."
+	egen double	median_low = rowmin(train holdout)
+	egen double	median_high = rowmax(train holdout)
+	quietly summarize median_low, meanonly
+	loc			lo = min(0, r(min))
+	quietly summarize median_high, meanonly
+	loc			hi = max(0, r(max))
+	loc			pad = .08 * (`hi' - `lo')
+	loc			smin = floor((`lo' - `pad') * 100) / 100
+	loc			smax = ceil((`hi' + `pad') * 100) / 100
+	gen double	s_min = `smin'
+	gen double	s_max = `smax'
+	assert		low > x_min & high < x_max
+	export delimited country outcome spec train holdout train_p25 train_p75 ///
+				holdout_p25 holdout_p75 n_pairs n_attempted n_splits ///
+				x_min x_max s_min s_max using ///
+				"`out'/front_payoff_values.csv", nolabel replace
+	list		country outcome spec train holdout n_pairs n_splits, noobs
+	gen double	position = country_row + cond(spec == 7, -.18, .18)
+	loc			first = ceil(`xmin' / .05) * .05
 	forvalues o = 1/2 {
-		twoway		(rspike p10 p90 country_row if outcome == `o', horizontal ///
-					lcolor("`ink'") lwidth(.7pt)) ///
-					(scatter country_row difference if outcome == `o', ///
-					msymbol(O) msize(4pt) mcolor("`ink'")), ///
+		twoway		(rspike train_p25 train_p75 position if outcome == `o' & spec == 7, ///
+					horizontal lcolor("`arc2'%40") lwidth(1.5pt)) ///
+					(rspike holdout_p25 holdout_p75 position if outcome == `o' & spec == 7, ///
+					horizontal lcolor("`arc2'%40") lpattern(dash) lwidth(1.5pt)) ///
+					(rspike train_p25 train_p75 position if outcome == `o' & spec == 2, ///
+					horizontal lcolor("`era5'%40") lwidth(1.5pt)) ///
+					(rspike holdout_p25 holdout_p75 position if outcome == `o' & spec == 2, ///
+					horizontal lcolor("`era5'%40") lpattern(dash) lwidth(1.5pt)) ///
+					(rspike train holdout position if outcome == `o' & spec == 7, ///
+					horizontal lcolor("`arc2'%80") lwidth(.7pt)) ///
+					(rspike train holdout position if outcome == `o' & spec == 2, ///
+					horizontal lcolor("`era5'%80") lwidth(.7pt)) ///
+					(scatter position train if outcome == `o' & spec == 7, ///
+					msymbol(O) msize(5pt) mcolor("`arc2'")) ///
+					(scatter position train if outcome == `o' & spec == 2, ///
+					msymbol(O) msize(5pt) mcolor("`era5'")) ///
+					(scatter position holdout if outcome == `o' & spec == 7, ///
+					msymbol(O) msize(5pt) mfcolor(white) mlcolor("`arc2'") mlwidth(.8pt)) ///
+					(scatter position holdout if outcome == `o' & spec == 2, ///
+					msymbol(O) msize(5pt) mfcolor(white) mlcolor("`era5'") mlwidth(.8pt)), ///
 					`frame' xscale(range(`xmin' `xmax') off noextend) ///
 					yscale(reverse range(.5 6.5) off noextend) ///
-					xline(-.2(.05).2, `pale') xline(0, `zero') ///
-					xsize(5.9) ysize(1.6)
-		graph export "`out'/fit/forest_`o'.pdf", replace
+					xline(`first'(.05)`xmax', `pale') xline(0, `zero') ///
+					xsize(4.43) ysize(5.07)
+		graph export "`out'/fit/payoff_arrows_`o'.pdf", replace
+
+* the scatter uses the same summary rows; its reference line is exactly y = x
+		twoway		(function y = x, range(`smin' `smax') ///
+					lcolor("140 140 140") lpattern(dash) lwidth(.7pt)) ///
+					(scatter holdout train if outcome == `o' & spec == 7, ///
+					msymbol(O) msize(5pt) mcolor("`arc2'")) ///
+					(scatter holdout train if outcome == `o' & spec == 2, ///
+					msymbol(O) msize(5pt) mcolor("`era5'")), ///
+					`frame' xscale(range(`smin' `smax') off noextend) ///
+					yscale(range(`smin' `smax') off noextend) ///
+					xline(0(.05)`smax', `pale') yline(0(.05)`smax', `pale') ///
+					xsize(5.07) ysize(5.07)
+		graph export "`out'/fit/payoff_scatter_`o'.pdf", replace
 	}
 
 

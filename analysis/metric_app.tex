@@ -2,7 +2,7 @@
 % Created on: 2 Nov 2026
 % Created by: codex
 % edited by: codex
-% edited on: 2 Nov 2026
+% edited on: 3 Nov 2026
 % does
 	% provides three redesigned appendix figures and supporting appendix tables
 % assumes
@@ -39,31 +39,34 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 2 - paired incremental search gaps
+% 2 - paired search payoffs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{figure}[!htbp]
-	\begin{minipage}{\linewidth}
-		\caption{Household Fixed Effects and the Incremental Search Gap}
-		\label{app:front_increment}
-		{\centering
-			\includegraphics[width=.97\linewidth,keepaspectratio]{Figures/front_increment_forest.pdf}\par}
-		\smallskip
-		\footnotesize \textit{Note}: Define
-		$G_s(K)=|r_{\mathrm{train},s}(K)|-\mathrm{sign}(r_{\mathrm{train},s}(K))
-		r_{\mathrm{heldout},s}(K)$ and $\Delta G_s=G_s(84)-G_s(1)$.
-		The plotted statistic is $D=\Delta G_{\mathrm{year+HH\ FE}}-
-		\Delta G_{\mathrm{year\ FE}}$, paired within the same allocation, held-out
-		fold and candidate ordering before aggregation. Positive values mean
-		household FE increases the search-induced training--validation gap;
-		negative values mean it reduces that gap. Points are medians and whiskers
-		are descriptive 10th--90th percentiles across 100 geographic fold/allocation
-		summaries, after within-fold medians over 20 orderings. All 100 summaries
-		are valid; Niger retains 1,993 value and 1,992 maize raw pairs, versus
-		2,000 elsewhere. These are neither confidence intervals nor coefficient
-		or IV estimates. Repeated folds reuse observations.
-	\end{minipage}
-\end{figure}
+\begin{landscape}
+	\begin{figure}[!htbp]
+		\begin{minipage}{\linewidth}
+			\caption{Search Gains In Training and Held-Out Data}
+			\label{app:front_payoff}
+			{\centering
+				\includegraphics[width=.97\linewidth,keepaspectratio]{Figures/front_payoff_arrows.pdf}\par}
+			\smallskip
+			\footnotesize \textit{Note}: Panel A shows farm production value;
+			Panel B shows maize quantity. Points summarize gains from considering
+			84 rather than one candidate instrument, using absolute training
+			partial correlation and training-sign-oriented held-out correlation.
+			Blue denotes year FE; orange denotes year and household FE. Filled
+			circles show training gains and open circles show held-out gains;
+			arrows run from training to held-out. Gains are paired within each
+			allocation, fold and candidate ordering, then summarized across 20
+			orderings within each fold and 100 fold/allocation units. Bars show
+			interquartile ranges, solid for training and dashed for held-out,
+			not confidence intervals. Repeated folds reuse
+			observations; all 100 split summaries are valid in each cell.
+		\end{minipage}
+	\end{figure}
+\end{landscape}
+
+% front_payoff_scatter.pdf is the review alternative, not an additional exhibit.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -84,7 +87,8 @@
 			vertical scales differ across countries. Panel B separates outcomes,
 			using year and household FE and 84 matched specifications per
 			country/outcome. Each covariance comparison retains the same coefficient
-			and observations. The 100-km Bartlett adjustment adds contemporaneous
+			and observations. Arrows run from household-clustered circles to spatial
+			squares. The 100-km Bartlett adjustment adds contemporaneous
 			cross-household spatial covariance to unrestricted own-household serial
 			covariance. Threshold shares are descriptive, not tests of differences.
 			Geographic restrictions remain substantial in Tanzania and Uganda;

@@ -1,10 +1,16 @@
 # Spatial dependence and first-stage precision
 
-<!-- edited by: codex; edited on: 2 Nov 2026 -->
+<!-- edited by: codex; edited on: 3 Nov 2026 -->
 
-## Appendix-only update, 2 Nov 2026
+## Appendix-only update, 3 Nov 2026
 
-The redesigned appendix now uses `metric_app_fit.do` and `metric_app_fit.py`.
+The current update uses `metric_app_fit.do keepfront` and `metric_app_fit.py`
+with `--keep-front`, preserving the approved frontier files. Spatial arrows
+point from household-clustered circles to the spatial squares. The endpoints,
+data, scales and panel layout are unchanged.
+See `metric_payoff.md` for the current commands and executed review.
+
+The redesigned appendix uses `metric_app_fit.do` and `metric_app_fit.py`.
 `space_panel_revised` stacks a two-row/three-column score grid above two
 outcome-specific share strips, retaining 84 matched specifications in each
 country/outcome. Scores use categorical distance bins and country-specific
