@@ -1,8 +1,8 @@
 * Project: WB Weather - metric
 * Created on: 30 Oct 2026
 * Created by: codex
-* edited by: codex
-* edited on: 30 Oct 2026
+* edited by: jdm
+* edited on: 5 Nov 2026
 * Stata v.19.5
 
 * does
@@ -740,8 +740,8 @@ restore
 					`frame' xscale(range(0 15)) yscale(range(0 1)) ///
 					xlabel(0(5)15, nogrid `ticks') ///
 					ylabel(0(.2)1, format(%3.1f) `grid' `ticks' angle(horizontal)) ///
-					xline(1.96, lcolor("160 166 172") ///
-					lpattern(dot) lwidth(thin)) ///
+					xline(1.96, lcolor("112 119 125") ///
+					lpattern(shortdash) lwidth(medium)) ///
 					xline(`benchmark', lcolor("112 119 125") ///
 					lpattern(dash) lwidth(thin)) ///
 					xtitle("Absolute Cluster-Robust T-Statistic", ///
@@ -817,8 +817,8 @@ restore
 					`frame' xscale(range(0 15)) yscale(range(0 1)) ///
 					xlabel(0(5)15, nogrid `ticks') ///
 					ylabel(0(.2)1, format(%3.1f) `grid' `ticks' angle(horizontal)) ///
-					xline(1.96, lcolor("160 166 172") ///
-					lpattern(dot) lwidth(thin)) ///
+					xline(1.96, lcolor("112 119 125") ///
+					lpattern(shortdash) lwidth(medium)) ///
 					xline(`benchmark', lcolor("112 119 125") ///
 					lpattern(dash) lwidth(thin)) ///
 					xtitle("Absolute Cluster-Robust T-Statistic", ///
