@@ -1,0 +1,279 @@
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+Resuming: 3741 paper(s) already done in /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gemma/baseline/full_baseline_gemma_output.csv
+
+Processing 10.26481_spe.20071011jpu.pdf...
+Extracted relevant sections length: 58198 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: What can commonalities among time series teach us?
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: 10.26481/spe.20071011jpu
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.26481_spe.20071011jpu.pdf: {'File Name': '10.26481_spe.20071011jpu.pdf', 'Title': 'What can commonalities among time series teach us?', 'DOI': '10.26481/spe.20071011jpu', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.26686_wgtn.16992625.pdf...
+Extracted relevant sections length: 292232 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: The Role of Exports in African Economic Development: A Comparative Study of Mauritius and Tunisia
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): n/a
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 0
+Answer for Endogenous Variable(s): n/a
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=0 != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.26686_wgtn.16992625.pdf: {'File Name': '10.26686_wgtn.16992625.pdf', 'Title': 'The Role of Exports in African Economic Development: A Comparative Study of Mauritius and Tunisia', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': '0', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.32479_ijeep.17866.pdf...
+Extracted relevant sections length: 91382 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Assessing the Role of the Oil Market in Rising Food Prices: Strategic Implications for Food Security in Gulf Cooperation Council Countries
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: 10.32479/ijeep.17866
+Querying: Empirical Analysis (max_completion_tokens=256)
+Error querying model (Empirical Analysis): Error code: 429 - [{'error': {'code': 429, 'message': 'The request queue is full.', 'status': 'RESOURCE_EXHAUSTED'}}]. Retrying in 2s...
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): ppi; corn export price index; soybean export prices; wheat flour price; milk price; meat price
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Error querying model (Endogeneity Bundle): Error code: 429 - [{'error': {'code': 429, 'message': 'The request queue is full.', 'status': 'RESOURCE_EXHAUSTED'}}]. Retrying in 2s...
+Answer for Endogeneity Problem: 1
+Answer for Endogenous Variable(s): explanatory variables
+Querying: IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Used: 1
+Answer for Instrumental Variable(s): lagged values of the dependent variable
+Querying: Rainfall IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Rainfall: 0
+Answer for Rainfall Instrument: n/a
+Final extracted info for 10.32479_ijeep.17866.pdf: {'File Name': '10.32479_ijeep.17866.pdf', 'Title': 'Assessing the Role of the Oil Market in Rising Food Prices: Strategic Implications for Food Security in Gulf Cooperation Council Countries', 'DOI': '10.32479/ijeep.17866', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'ppi; corn export price index; soybean export prices; wheat flour price; milk price; meat price', 'Endogeneity Problem': '1', 'Endogenous Variable(s)': 'explanatory variables', 'Instrumental Variable Used': '1', 'Instrumental Variable(s)': 'lagged values of the dependent variable', 'Instrumental Variable Rainfall': '0', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.32479_ijeep.9439.pdf...
+Extracted relevant sections length: 51107 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: A Forecasting Model on Carrying Capacity for Government’s Controlling Measure under Environmental Law in Thailand: Adapting Non-recursive Autoregression Based on the Var-X Model
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: 10.32479/ijeep.9439
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): CO2 emissions
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 1
+Answer for Endogenous Variable(s): economic (ECONO); social (SOCIAL); environmental (ENVIRON)
+Querying: IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Used: 0
+Answer for Instrumental Variable(s): n/a
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=0 != 1)
+Final extracted info for 10.32479_ijeep.9439.pdf: {'File Name': '10.32479_ijeep.9439.pdf', 'Title': 'A Forecasting Model on Carrying Capacity for Government’s Controlling Measure under Environmental Law in Thailand: Adapting Non-recursive Autoregression Based on the Var-X Model', 'DOI': '10.32479/ijeep.9439', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'CO2 emissions', 'Endogeneity Problem': '1', 'Endogenous Variable(s)': 'economic (ECONO); social (SOCIAL); environmental (ENVIRON)', 'Instrumental Variable Used': '0', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.32479_ijefi.11299.pdf...
+Extracted relevant sections length: 61636 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Spillover Effect of Official Development Assistance on Sectoral Economic Growth in West African Economic and Monetary Union Countries
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: 10.32479/ijefi.11299
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): sectorial value added; sectoral values added; sectoral value added of the primary sector; value added of the secondary sector; value added of the tertiary sector; Log (VA of the primary sector); Log (VA of the secondary sector); Log (VA of the tertiary sector)
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 1
+Answer for Endogenous Variable(s): sectoral values added; capital; credits to the economy; development aid
+Querying: IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Used: 1
+Answer for Instrumental Variable(s): lagged values of development aid; previous values of sectoral value added; ˆlog(ODA)it
+Querying: Rainfall IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Rainfall: 0
+Answer for Rainfall Instrument: n/a
+Final extracted info for 10.32479_ijefi.11299.pdf: {'File Name': '10.32479_ijefi.11299.pdf', 'Title': 'Spillover Effect of Official Development Assistance on Sectoral Economic Growth in West African Economic and Monetary Union Countries', 'DOI': '10.32479/ijefi.11299', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'sectorial value added; sectoral values added; sectoral value added of the primary sector; value added of the secondary sector; value added of the tertiary sector; Log (VA of the primary sector); Log (VA of the secondary sector); Log (VA of the tertiary sector)', 'Endogeneity Problem': '1', 'Endogenous Variable(s)': 'sectoral values added; capital; credits to the economy; development aid', 'Instrumental Variable Used': '1', 'Instrumental Variable(s)': 'lagged values of development aid; previous values of sectoral value added; ˆlog(ODA)it', 'Instrumental Variable Rainfall': '0', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.32629_memf.v3i4.1027.pdf...
+Extracted relevant sections length: 16912 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Impact of COVID-19 on Nebraska Agricultural Economics
+Querying: DOI (max_completion_tokens=128)
+Error querying model (DOI): Error code: 429 - [{'error': {'code': 429, 'message': 'The request queue is full.', 'status': 'RESOURCE_EXHAUSTED'}}]. Retrying in 2s...
+Answer for DOI: 10.32629/memf.v3i4.1027
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.32629_memf.v3i4.1027.pdf: {'File Name': '10.32629_memf.v3i4.1027.pdf', 'Title': 'Impact of COVID-19 on Nebraska Agricultural Economics', 'DOI': '10.32629/memf.v3i4.1027', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.3386_w13876.pdf...
+Extracted relevant sections length: 60002 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: International Evidence on Sticky Consumption Growth
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): $\Delta \log C_t$
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 1
+Answer for Endogenous Variable(s): $\Delta \log C_{t-1}$; $\Delta \log Y_t$
+Querying: IV Bundle (max_completion_tokens=512)
+Error querying model (IV Bundle): Error code: 429 - [{'error': {'code': 429, 'message': 'The request queue is full.', 'status': 'RESOURCE_EXHAUSTED'}}]. Retrying in 2s...
+Error querying model (IV Bundle): Error code: 503 - [{'error': {'code': 503, 'message': 'Connection to backend aborted, possibly due to server shutdown.', 'status': 'UNAVAILABLE'}}]. Retrying in 4s...
+Error querying model (IV Bundle): Error code: 429 - [{'error': {'code': 429, 'message': 'The request queue is full.', 'status': 'RESOURCE_EXHAUSTED'}}]. Retrying in 8s...
+Answer for Instrumental Variable Used: 1
+Answer for Instrumental Variable(s): unemployment rate; a long-term interest rate; an index of price volatility; consumer sentiment; income growth; the interest-rate spread
+Querying: Rainfall IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Rainfall: 0
+Answer for Rainfall Instrument: n/a
+Final extracted info for 10.3386_w13876.pdf: {'File Name': '10.3386_w13876.pdf', 'Title': 'International Evidence on Sticky Consumption Growth', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': '$\\Delta \\log C_t$', 'Endogeneity Problem': '1', 'Endogenous Variable(s)': '$\\Delta \\log C_{t-1}$; $\\Delta \\log Y_t$', 'Instrumental Variable Used': '1', 'Instrumental Variable(s)': 'unemployment rate; a long-term interest rate; an index of price volatility; consumer sentiment; income growth; the interest-rate spread', 'Instrumental Variable Rainfall': '0', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.3386_w14347.pdf...
+Extracted relevant sections length: 95786 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Landed Interests and Financial Underdevelopment in the United States
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): number of banks per capita; banks per square kilometer
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Error querying model (Endogeneity Bundle): Error code: 429 - [{'error': {'code': 429, 'message': 'The request queue is full.', 'status': 'RESOURCE_EXHAUSTED'}}]. Retrying in 2s...
+Answer for Endogeneity Problem: 1
+Answer for Endogenous Variable(s): land concentration; land inequality; land concentration index
+Querying: IV Bundle (max_completion_tokens=512)
+Error querying model (IV Bundle): Error code: 429 - [{'error': {'code': 429, 'message': 'The request queue is full.', 'status': 'RESOURCE_EXHAUSTED'}}]. Retrying in 2s...
+Answer for Instrumental Variable Used: 1
+Answer for Instrumental Variable(s): mean rainfall in the county computed over the last century
+Querying: Rainfall IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Rainfall: 1
+Answer for Rainfall Instrument: mean rainfall in the county computed over the last century
+Final extracted info for 10.3386_w14347.pdf: {'File Name': '10.3386_w14347.pdf', 'Title': 'Landed Interests and Financial Underdevelopment in the United States', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'number of banks per capita; banks per square kilometer', 'Endogeneity Problem': '1', 'Endogenous Variable(s)': 'land concentration; land inequality; land concentration index', 'Instrumental Variable Used': '1', 'Instrumental Variable(s)': 'mean rainfall in the county computed over the last century', 'Instrumental Variable Rainfall': '1', 'Rainfall Instrument': 'mean rainfall in the county computed over the last century'}
+
+Processing 10.3386_w14521.pdf...
+Extracted relevant sections length: 123893 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Financial Crash, Commodity Prices and Global Imbalances
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.3386_w14521.pdf: {'File Name': '10.3386_w14521.pdf', 'Title': 'Financial Crash, Commodity Prices and Global Imbalances', 'DOI': 'n/a', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.3386_w14751.pdf...
+Extracted relevant sections length: 53207 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: TOWARDS A SYSTEM OF OPEN CITIES IN CHINA: HOME PRICES, FDI FLOWS AND AIR QUALITY IN 35 MAJOR CITIES
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Error querying model (Dependent Variable(s)): Error code: 429 - [{'error': {'code': 429, 'message': 'The request queue is full.', 'status': 'RESOURCE_EXHAUSTED'}}]. Retrying in 2s...
+Answer for Dependent Variable(s): Home Pricejt; HPjt; Air Pollution(PM, SO2)jt
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 1
+Answer for Endogenous Variable(s): FDI; cumulative FDI per capita; CFDIPCjt
+Querying: IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Used: 1
+Answer for Instrumental Variable(s): EAST; DIS_PORT; AIRPORT; Geographyjt (EAST, DIS_PORT, AIRPORT)
+Querying: Rainfall IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Rainfall: 0
+Answer for Rainfall Instrument: n/a
+Final extracted info for 10.3386_w14751.pdf: {'File Name': '10.3386_w14751.pdf', 'Title': 'TOWARDS A SYSTEM OF OPEN CITIES IN CHINA: HOME PRICES, FDI FLOWS AND AIR QUALITY IN 35 MAJOR CITIES', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'Home Pricejt; HPjt; Air Pollution(PM, SO2)jt', 'Endogeneity Problem': '1', 'Endogenous Variable(s)': 'FDI; cumulative FDI per capita; CFDIPCjt', 'Instrumental Variable Used': '1', 'Instrumental Variable(s)': 'EAST; DIS_PORT; AIRPORT; Geographyjt (EAST, DIS_PORT, AIRPORT)', 'Instrumental Variable Rainfall': '0', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.3386_w2688.pdf...
+Extracted relevant sections length: 72197 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: THE SEASONAL CYCLE AND THE BUSINESS CYCLE
+Querying: DOI (max_completion_tokens=128)
+Error querying model (DOI): Error code: 429 - [{'error': {'code': 429, 'message': 'The request queue is full.', 'status': 'RESOURCE_EXHAUSTED'}}]. Retrying in 2s...
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): log growth rates; deviations from trend
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 0
+Answer for Endogenous Variable(s): n/a
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=0 != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.3386_w2688.pdf: {'File Name': '10.3386_w2688.pdf', 'Title': 'THE SEASONAL CYCLE AND THE BUSINESS CYCLE', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'log growth rates; deviations from trend', 'Endogeneity Problem': '0', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.3386_w27237.pdf...
+Extracted relevant sections length: 116546 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: THE PERSUASIVE EFFECT OF FOX NEWS: NON-COMPLIANCE WITH SOCIAL DISTANCING DURING THE COVID-19 PANDEMIC
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): SDzt; compliance with social distancing; change in staying-at-home behavior relative to a base pre-COVID period; propensity to stay at home
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 1
+Answer for Endogenous Variable(s): Fox News viewership; viewership of the three leading cable news channels: FOX News, CNN and MSNBC
+Querying: IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Used: 1
+Answer for Instrumental Variable(s): channel position; news channel position; relative position across cable markets; ordinal position
+Querying: Rainfall IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Rainfall: 0
+Answer for Rainfall Instrument: n/a
+Final extracted info for 10.3386_w27237.pdf: {'File Name': '10.3386_w27237.pdf', 'Title': 'THE PERSUASIVE EFFECT OF FOX NEWS: NON-COMPLIANCE WITH SOCIAL DISTANCING DURING THE COVID-19 PANDEMIC', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'SDzt; compliance with social distancing; change in staying-at-home behavior relative to a base pre-COVID period; propensity to stay at home', 'Endogeneity Problem': '1', 'Endogenous Variable(s)': 'Fox News viewership; viewership of the three leading cable news channels: FOX News, CNN and MSNBC', 'Instrumental Variable Used': '1', 'Instrumental Variable(s)': 'channel position; news channel position; relative position across cable markets; ordinal position', 'Instrumental Variable Rainfall': '0', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.3386_w27321.pdf...
+Extracted relevant sections length: 139600 characters
+Querying: Title (max_completion_tokens=256)
+Error querying model (Title): Error code: 429 - [{'error': {'code': 429, 'message': 'The request queue is full.', 'status': 'RESOURCE_EXHAUSTED'}}]. Retrying in 2s...
+Answer for Title: THE EMPLOYMENT IMPACT OF GREEN FISCAL PUSH: EVIDENCE FROM THE AMERICAN RECOVERY ACT
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): n/a
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 1
+Answer for Endogenous Variable(s): green ARRA
+Querying: IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Used: 1
+Answer for Instrumental Variable(s): pre-sample share of different types of green spending in each commuting zone combined with the green ARRA shift
+Querying: Rainfall IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Rainfall: 0
+Answer for Rainfall Instrument: n/a
+Final extracted info for 10.3386_w27321.pdf: {'File Name': '10.3386_w27321.pdf', 'Title': 'THE EMPLOYMENT IMPACT OF GREEN FISCAL PUSH: EVIDENCE FROM THE AMERICAN RECOVERY ACT', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': '1', 'Endogenous Variable(s)': 'green ARRA', 'Instrumental Variable Used': '1', 'Instrumental Variable(s)': 'pre-sample share of different types of green spending in each commuting zone combined with the green ARRA shift', 'Instrumental Variable Rainfall': '0', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.3386_w27436.pdf...
+Extracted relevant sections length: 84955 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: ‘MECHANIZATION TAKES COMMAND’: INANIMATE POWER AND LABOR PRODUCTIVITY IN LATE NINETEENTH CENTURY AMERICAN MANUFACTURING
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): difference between machine and hand labor in the log of the time spent in the production block
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 1
+Answer for Endogenous Variable(s): difference between machine and hand labor in the mechanization dummy
+Querying: IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Used: 1
+Answer for Instrumental Variable(s): gerunds that appear in text descriptions of the hand labor operations in the relevant block
+Querying: Rainfall IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Rainfall: 0
+Answer for Rainfall Instrument: n/a
+Final extracted info for 10.3386_w27436.pdf: {'File Name': '10.3386_w27436.pdf', 'Title': '‘MECHANIZATION TAKES COMMAND’: INANIMATE POWER AND LABOR PRODUCTIVITY IN LATE NINETEENTH CENTURY AMERICAN MANUFACTURING', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'difference between machine and hand labor in the log of the time spent in the production block', 'Endogeneity Problem': '1', 'Endogenous Variable(s)': 'difference between machine and hand labor in the mechanization dummy', 'Instrumental Variable Used': '1', 'Instrumental Variable(s)': 'gerunds that appear in text descriptions of the hand labor operations in the relevant block', 'Instrumental Variable Rainfall': '0', 'Rainfall Instrument': 'n/a'}
+Data saved to /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gemma/baseline/full_baseline_gemma_output.csv
+Script finished: 2026-10-29 10:28:29

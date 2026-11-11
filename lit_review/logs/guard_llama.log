@@ -1,0 +1,18 @@
+pgrep: Unknown user ` baseline_llama.py'
+2026-10-28 15:34:36 RUN EXITED EARLY at 8 papers
+2026-10-28 15:34:36 Final extracted info for 10.1002_9780470880616.ch4.pdf: {'File Name': '10.1002_9780470880616.ch4.pdf', 'Title': 'Forecasting in Financial and Sports Gambling Markets: Adaptive Drift Modeling', 'DOI': 'n/a', 'Empirical Analysis': '0', 'Dependent Varia
+2026-10-28 15:34:36 
+2026-10-28 15:34:36 Processing 10.1002_9781118231838.ch4.pdf...
+2026-10-28 15:34:36 Extracted relevant sections length: 66522 characters
+2026-10-28 15:34:36 Querying: Title (max_completion_tokens=256)
+2026-10-28 15:35:05 --- guard restarted (fixed process match)
+2026-10-28 16:03:07 OK: 447/3755 papers, 0 failed
+2026-10-28 16:32:11 OK: 961/3755 papers, 0 failed
+2026-10-28 17:01:15 OK: 1363/3755 papers, 0 failed
+2026-10-28 17:30:20 OK: 1754/3755 papers, 0 failed
+2026-10-28 17:59:27 OK: 2143/3755 papers, 0 failed
+2026-10-28 18:03:28 QUALITY: none of the last 20 papers marked empirical (at 2211) - possible garbage answers
+2026-10-28 18:28:34 OK: 2546/3755 papers, 0 failed
+2026-10-28 18:57:42 OK: 2969/3755 papers, 0 failed
+2026-10-28 19:26:50 OK: 3364/3755 papers, 0 failed
+2026-10-28 19:51:58 RUN FINISHED: 3755 papers, 0 failed

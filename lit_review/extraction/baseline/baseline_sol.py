@@ -19,8 +19,8 @@ GPT-6.1 Sol is a reasoning model and its API differs from gpt-4.1's
   - No dated snapshot is published, so the undated alias is used — record
     the run date when reporting results.
 
-Configured below to run against the held-out pdf_test_20 set (ground truth
-in removed_20.csv).
+Configured below to run against the full papers/ corpus. For the held-out
+test set (ground truth in removed_20.csv), point pdf_folder at pdf_test_20.
 """
 
 import fitz  # PyMuPDF
@@ -92,15 +92,14 @@ STOP_SEQUENCES_BY_KEY = {
 # No TEMPERATURE knob: gpt-6.1-sol only accepts the default (1).
 
 # Characters of (keyword-filtered) article text sent to the model; None sends
-# the full text. Full text is the default since the Oct 2026 context test
-# (analysis/compare_context_test.py): dropping the original 40_000 cap cut
-# missed IVs/endogeneity without lowering similarity scores. The text is
-# resent with every question in the conversation (~7 per paper), so a cap
-# multiplies down input cost; 40_000 (~10k tokens) reproduces the original
-# runs. The keyword filter in extract_relevant_sections rarely removes
-# anything, since PyMuPDF output has few blank lines and each "paragraph" is
-# a whole page.
-MAX_INPUT_CHARS = None
+# the full text. Capped at 40_000 (~10k tokens, the original setting) for the
+# Oct 2026 full-corpus runs: the text is resent with every question (~5 per
+# paper), so full text costs ~3x more, and the context test
+# (analysis/compare_context_test.py) found only modest gains from it (fewer
+# missed IVs/endogeneity, mostly for Sol; slightly lower similarity scores).
+# The keyword filter in extract_relevant_sections rarely removes anything,
+# since PyMuPDF output has few blank lines and each "paragraph" is a whole page.
+MAX_INPUT_CHARS = 40_000
 
 
 # -------------------------------------------------------------------
@@ -676,20 +675,43 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
     # checkpoint and once at the end.
     import csv as _csv
     local_tmp = os.path.join(tempfile.gettempdir(), f"baseline_sol_{os.getpid()}.csv")
-    csv_file = open(local_tmp, "w", newline="", encoding="utf-8")
-    writer = _csv.DictWriter(csv_file, fieldnames=FIELDNAMES, extrasaction="ignore")
-    writer.writeheader()
     # Sidecar: every model answer before parsing/cleaning, one JSON line per
     # paper, so cleaning can be changed (or the legacy cleaner re-applied)
     # without re-running the API calls.
     raw_jsonl = os.path.splitext(output_csv)[0] + "_raw_answers.jsonl"
     local_raw = os.path.join(tempfile.gettempdir(), f"baseline_sol_{os.getpid()}_raw.jsonl")
+
+    # Resume: if output_csv already exists (an interrupted run's checkpoint),
+    # carry over its rows that finished without an Extraction Error, plus
+    # their raw answers, and skip those papers. Failed rows are dropped so
+    # those papers are re-run.
+    done = set()
+    kept_rows, kept_raw = [], []
+    if os.path.exists(output_csv):
+        with open(output_csv, newline="", encoding="utf-8") as f:
+            for row in _csv.DictReader(f):
+                if not row.get("Extraction Error"):
+                    done.add(row["File Name"])
+                    kept_rows.append(row)
+        if os.path.exists(raw_jsonl):
+            with open(raw_jsonl, encoding="utf-8") as f:
+                for line in f:
+                    rec = json.loads(line)
+                    if rec["File Name"] in done and not rec.get("error"):
+                        kept_raw.append(line)
+        print(f"Resuming: {len(done)} paper(s) already done in {output_csv}")
+
+    csv_file = open(local_tmp, "w", newline="", encoding="utf-8")
+    writer = _csv.DictWriter(csv_file, fieldnames=FIELDNAMES, extrasaction="ignore")
+    writer.writeheader()
+    writer.writerows(kept_rows)
     raw_file = open(local_raw, "w", encoding="utf-8")
+    raw_file.writelines(kept_raw)
     n_processed = 0
 
     failed = []  # (filename, error) for papers a model call failed on
-    for filename in os.listdir(pdf_folder):
-        if not filename.endswith(".pdf"):
+    for filename in sorted(os.listdir(pdf_folder)):
+        if not filename.endswith(".pdf") or filename in done:
             continue
 
         pdf_path = os.path.join(pdf_folder, filename)
@@ -931,14 +953,15 @@ def process_pdfs_conditional_queries(pdf_folder, output_csv):
 # -------------------------------------------------------------------
 # Paths and execution
 # -------------------------------------------------------------------
-# Held-out test set → /output/gpt/baseline_sol/test_baseline_sol_output.csv. For a full-corpus run, point
-# pdf_folder at /weather_iv_lit/papers and name the output full_baseline_sol_output.csv.
+# Full corpus → /output/gpt/baseline_sol/full_baseline_sol_output.csv. For the held-out test set, point
+# pdf_folder at /training/finetune_data/pdf_test_20 and name the output test_baseline_sol_output.csv.
+# Re-running with the same output_csv resumes an interrupted run.
 
 if __name__ == "__main__":
-    pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/finetune_data/pdf_test_20"
+    pdf_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/papers"
     output_folder = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline_sol"
     os.makedirs(output_folder, exist_ok=True)
-    output_csv = os.path.join(output_folder, "test_baseline_sol_output.csv")
+    output_csv = os.path.join(output_folder, "full_baseline_sol_output.csv")
 
     process_pdfs_conditional_queries(pdf_folder, output_csv)
     print(f"Script finished: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

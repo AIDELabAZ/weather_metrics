@@ -1,0 +1,27 @@
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+
+Processing 0.1162_REST_a_00265.pdf...
+Extracted relevant sections length: 88144 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: POLICY VOLATILITY, INSTITUTIONS, AND ECONOMIC GROWTH
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): average growth rate of output per capita (1970–2007); Growth Rate of Output per Capita, 1970–2007; Policy Volatility, 1970–2007; real government consumption spending
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 1
+Answer for Endogenous Variable(s): Policy volatility; output; real GDP
+Querying: IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Used: 1
+Answer for Instrumental Variable(s): constraints in 1969; presidential; majoritarian; elections; time trend; logarithm of oil prices; lag of the GDP deflator; output in the rest of the world (current and lagged); current and lagged oil prices
+Querying: Rainfall IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Rainfall: 0
+Answer for Rainfall Instrument: n/a
+Final extracted info for 0.1162_REST_a_00265.pdf: {'File Name': '0.1162_REST_a_00265.pdf', 'Title': 'POLICY VOLATILITY, INSTITUTIONS, AND ECONOMIC GROWTH', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'average growth rate of output per capita (1970–2007); Growth Rate of Output per Capita, 1970–2007; Policy Volatility, 1970–2007; real government consumption spending', 'Endogeneity Problem': '1', 'Endogenous Variable(s)': 'Policy volatility; output; real GDP', 'Instrumental Variable Used': '1', 'Instrumental Variable(s)': 'constraints in 1969; presidential; majoritarian; elections; time trend; logarithm of oil prices; lag of the GDP deflator; output in the rest of the world (current and lagged); current and lagged oil prices', 'Instrumental Variable Rainfall': '0', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_(sici)1099-1328_missinginfo.pdf...
+Extracted relevant sections length: 71091 characters
+Querying: Title (max_completion_tokens=256)

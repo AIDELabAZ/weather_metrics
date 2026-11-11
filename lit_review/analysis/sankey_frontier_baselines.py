@@ -26,6 +26,10 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sankey_iv_clustering as sic
 
+# e.g. SANKEY_BACKBONE=qwen3-8b to use results scored on HPC (analysis/hpc/).
+if "SANKEY_BACKBONE" in os.environ:
+    sic.fixed_label_classifier.BACKBONE = os.environ["SANKEY_BACKBONE"]
+
 ROOT = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit"
 FIGURES_DIR = os.path.join(ROOT, "writing", "figures")
 
@@ -41,8 +45,12 @@ BASELINES = {
 
 def set_paths(key, subdir):
     out_dir = os.path.join(ROOT, "output", subdir)
+    # Outputs get a _<backbone> suffix when SANKEY_BACKBONE is set, so 0.6b /
+    # 4b / 8b Sankeys sit side by side; the input CSV name never changes.
     stem = f"test_baseline_{key}"
-    sic.MERGED_CSV = os.path.join(out_dir, f"{stem}_output.csv")
+    if "SANKEY_BACKBONE" in os.environ:
+        stem += "_" + os.environ["SANKEY_BACKBONE"]
+    sic.MERGED_CSV = os.path.join(out_dir, f"test_baseline_{key}_output.csv")
     sic.OUTPUT_HTML_ENDOG = os.path.join(out_dir, f"sankey_{stem}_rainfall_endog.html")
     sic.OUTPUT_PNG_ENDOG = os.path.join(FIGURES_DIR, f"sankey_{stem}_rainfall_endog.png")
     sic.OUTPUT_PNG_WIDE_ENDOG = os.path.join(FIGURES_DIR, f"sankey_{stem}_rainfall_endog_wide.png")

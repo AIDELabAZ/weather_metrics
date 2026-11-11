@@ -1269,7 +1269,8 @@ def main():
     print(f"Sankey → {OUTPUT_HTML_ENDOG}")
     fig_endog.write_image(OUTPUT_PNG_ENDOG, scale=2)
     print(f"Sankey → {OUTPUT_PNG_ENDOG}")
-    fig_endog.write_image(OUTPUT_EPS_ENDOG, scale=2)
+    # Kaleido v1 dropped EPS export, so render SVG and convert with cairosvg.
+    cairosvg.svg2eps(bytestring=fig_endog.to_image(format="svg"), write_to=OUTPUT_EPS_ENDOG)
     print(f"Sankey → {OUTPUT_EPS_ENDOG}")
 
     # Re-render the same figure at landscape dimensions for the wide PNG —

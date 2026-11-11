@@ -3,13 +3,21 @@ Fixed-label classifier for the Sankey categories: assigns each cleaned entry
 to one label of the fixed taxonomy in sankey_taxonomy.py, so every extraction
 model's Sankey uses the same categories.
 
-Two stages:
-  1. Embedding retrieval — embed the entry (as an instructed query) and every
-     "<label>: <definition>" string; keep the RERANK_TOP_K most similar labels.
-  2. Reranking — score each (entry, candidate label) pair with a reranker and
-     take the highest. The Other label (sankey_taxonomy.OTHER_DEFINITIONS) is
-     always one of the candidates, so "fits nothing" is decided by the same
-     comparison rather than by a score threshold.
+Stages (METHOD = "two-stage-v1"):
+  1. Validity — the reranker answers "is this entry a meaningful variable of
+     this side?" against a positive definition (sankey_taxonomy.
+     VALID_DEFINITIONS). P(yes) < VALID_THRESHOLD -> Other. This is a yes/no
+     probability, so 0.5 is its natural cut-off, not a tuned score threshold.
+  2. Category — embed the entry and every "<label>: <definition>" string, keep
+     the RERANK_TOP_K most similar real labels (None = all of them), score each
+     (entry, label) pair with the reranker and take the argmax.
+
+Before Nov 2026 the Other label (OTHER_DEFINITIONS, phrased negatively: "not a
+meaningful ...") was just one more reranker candidate, judged with a strict
+"is this THE single best category" instruction. That sent 60-77% of
+endogenous entries to Other even with the 8B models, including clearly
+classifiable ones ("change in consumption", "carbon monoxide"), so validity
+and category choice are now separate questions.
 
 Backbones are swappable (BACKBONES below) so the categorization itself can be
 checked for robustness — the default is Qwen3; "bge" is a non-Qwen
@@ -30,7 +38,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-from sankey_taxonomy import OTHER_DEFINITIONS, SIDE_DESCRIPTIONS, TAXONOMIES
+from sankey_taxonomy import OTHER_DEFINITIONS, SIDE_DESCRIPTIONS, TAXONOMIES, VALID_DEFINITIONS
 
 # ─── Backbones ────────────────────────────────────────────────────────────
 # rerank_kind:
@@ -71,14 +79,34 @@ BACKBONES: dict[str, dict] = {
 }
 
 BACKBONE = "qwen3-4b"
-RERANK_TOP_K = 5        # candidate labels per entry passed to the reranker
+METHOD = "two-stage-v1"  # part of the cache key; bump when the scoring logic changes
+# Candidate labels per entry passed to the reranker; None = every real label.
+# All 23 are cheap to score, and the embedding top-1 looked biased (many
+# unrelated entries -> "Household Income & Consumption"), so don't let
+# retrieval prune the right label.
+RERANK_TOP_K: int | None = None
+VALID_THRESHOLD = 0.5    # P(yes) for the stage-1 "is this a real variable?" question
 RERANK_BATCH_SIZE = 16
 
-CACHE_PATH = os.path.join(os.path.dirname(__file__), ".sankey_fixed_label_cache.json")
+# Overridable so the HPC job (analysis/hpc/) can write a separate cache that
+# is merged back into the local one afterwards.
+CACHE_PATH = os.environ.get(
+    "SANKEY_CLASSIFIER_CACHE",
+    os.path.join(os.path.dirname(__file__), ".sankey_fixed_label_cache.json"),
+)
 
 DEVICE = "mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu")
-# fp16 on MPS/CUDA (M1 has no native bf16); fp32 on CPU.
-DTYPE = torch.float32 if DEVICE == "cpu" else torch.float16
+# fp16 on MPS (M1 has no native bf16); bf16 on CUDA GPUs that support it
+# (A100 — no fp16 overflow risk), else fp16; fp32 on CPU. Precision is not
+# part of the cache key: it only changes scores in the last few digits.
+if DEVICE == "cpu":
+    DTYPE = torch.float32
+# Native bf16 needs compute capability >= 8 (A100); is_bf16_supported() can
+# report True on a V100 via slow emulation, so check the hardware directly.
+elif DEVICE == "cuda" and torch.cuda.get_device_capability()[0] >= 8:
+    DTYPE = torch.bfloat16
+else:
+    DTYPE = torch.float16
 
 
 def _label_docs(side_name: str, other_label: str) -> tuple[list[str], list[str]]:
@@ -95,13 +123,20 @@ def _embed_instruction(side_name: str) -> str:
 
 
 def _rerank_instruction(side_name: str) -> str:
-    # Stricter than the retrieval instruction: a "does this doc meet the
-    # requirements" framing let the reranker say yes to most candidates
-    # (scores saturated near 1.0), so ask whether it is THE right category.
-    return (f"The Query is the name of {SIDE_DESCRIPTIONS[side_name]} extracted from an "
-            f"economics paper. Answer yes only if the Document is the single most accurate "
-            f"category for what the Query measures, and no if another category would fit better "
-            f"or if the Query is not a meaningful variable name")
+    # Plain relevance: the argmax over candidates does the comparison, so the
+    # instruction needn't ask for "the single best" (which depressed every
+    # real label's score and let Other win — see module docstring).
+    return (f"Given the name of {SIDE_DESCRIPTIONS[side_name]} extracted from an economics "
+            f"paper, judge whether the Document is a category that describes what the Query measures")
+
+
+def _validity_instruction(side_name: str) -> str:
+    return (f"The Query was extracted from an economics paper as the name of "
+            f"{SIDE_DESCRIPTIONS[side_name]}. Judge whether the Query names a variable of the kind "
+            f"the Document describes. Answer no only if it names no such variable: it is just a "
+            f"lag or time-window specification on its own, a unit, a location name, an "
+            f"uninterpretable code or abbreviation, a different kind of variable, or a sentence "
+            f"fragment")
 
 
 def _free_device_memory() -> None:
@@ -129,6 +164,8 @@ def _embed_similarities(spec: dict, entries: list[str], docs: list[str], instruc
     d = model.encode(docs, normalize_embeddings=True)
     del model
     _free_device_memory()
+    if np.isnan(q).any() or np.isnan(d).any():
+        raise RuntimeError("Embedder produced NaN — likely fp16 overflow; set DTYPE = torch.float32.")
     return q @ d.T
 
 
@@ -141,7 +178,8 @@ _QWEN3_RERANK_PREFIX = (
 _QWEN3_RERANK_SUFFIX = "<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
 
 
-def _qwen3_rerank(model_name: str, pairs: list[tuple[str, str]], instruction: str) -> np.ndarray:
+def _qwen3_rerank(model_name: str, jobs: list[tuple[list[tuple[str, str]], str]]) -> list[np.ndarray]:
+    """Scores each (pairs, instruction) job with one model load."""
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     tok = AutoTokenizer.from_pretrained(model_name, padding_side="left")
@@ -149,36 +187,43 @@ def _qwen3_rerank(model_name: str, pairs: list[tuple[str, str]], instruction: st
     yes_id = tok.convert_tokens_to_ids("yes")
     no_id = tok.convert_tokens_to_ids("no")
 
-    scores = []
+    results = []
     with torch.no_grad():
-        for i in range(0, len(pairs), RERANK_BATCH_SIZE):
-            batch = pairs[i:i + RERANK_BATCH_SIZE]
-            texts = [
-                f"{_QWEN3_RERANK_PREFIX}<Instruct>: {instruction}\n<Query>: {q}\n<Document>: {d}"
-                f"{_QWEN3_RERANK_SUFFIX}"
-                for q, d in batch
-            ]
-            enc = tok(texts, padding=True, return_tensors="pt").to(DEVICE)
-            logits = model(**enc).logits[:, -1, :]
-            yes_no = torch.stack([logits[:, no_id], logits[:, yes_id]], dim=1).float()
-            scores.append(torch.softmax(yes_no, dim=1)[:, 1].cpu().numpy())
+        for pairs, instruction in jobs:
+            scores = []
+            for i in range(0, len(pairs), RERANK_BATCH_SIZE):
+                batch = pairs[i:i + RERANK_BATCH_SIZE]
+                texts = [
+                    f"{_QWEN3_RERANK_PREFIX}<Instruct>: {instruction}\n<Query>: {q}\n<Document>: {d}"
+                    f"{_QWEN3_RERANK_SUFFIX}"
+                    for q, d in batch
+                ]
+                enc = tok(texts, padding=True, return_tensors="pt").to(DEVICE)
+                logits = model(**enc).logits[:, -1, :]
+                yes_no = torch.stack([logits[:, no_id], logits[:, yes_id]], dim=1).float()
+                scores.append(torch.softmax(yes_no, dim=1)[:, 1].cpu().numpy())
+            out = np.concatenate(scores) if scores else np.array([])
+            if np.isnan(out).any():
+                raise RuntimeError("Reranker produced NaN scores — likely fp16 overflow; "
+                                   "set DTYPE = torch.float32.")
+            results.append(out)
     del model
     _free_device_memory()
-
-    out = np.concatenate(scores) if scores else np.array([])
-    if np.isnan(out).any():
-        raise RuntimeError("Reranker produced NaN scores — likely fp16 overflow; set DTYPE = torch.float32.")
-    return out
+    return results
 
 
-def _cross_encoder_rerank(model_name: str, pairs: list[tuple[str, str]]) -> np.ndarray:
+def _cross_encoder_rerank(model_name: str, jobs: list[tuple[list[tuple[str, str]], str]]) -> list[np.ndarray]:
+    """Same interface as _qwen3_rerank; cross-encoders take no instruction."""
     from sentence_transformers import CrossEncoder
 
     model = CrossEncoder(model_name, device=DEVICE, model_kwargs={"dtype": DTYPE})
-    out = model.predict(pairs, batch_size=RERANK_BATCH_SIZE, show_progress_bar=True)
+    # bge-reranker has one output logit, which sentence-transformers passes
+    # through a sigmoid, so the validity score is a probability like Qwen3's.
+    results = [np.asarray(model.predict(pairs, batch_size=RERANK_BATCH_SIZE, show_progress_bar=True),
+                          dtype=float) for pairs, _ in jobs]
     del model
     _free_device_memory()
-    return np.asarray(out, dtype=float)
+    return results
 
 
 # ─── Cache ────────────────────────────────────────────────────────────────
@@ -199,9 +244,35 @@ def _save_cache(cache: dict) -> None:
 
 def _cache_namespace(backbone: str, side_name: str, docs: list[str]) -> str:
     spec = BACKBONES[backbone]
-    key = json.dumps([backbone, spec, side_name, docs, RERANK_TOP_K,
+    key = json.dumps([METHOD, backbone, spec, side_name, docs, RERANK_TOP_K, VALID_THRESHOLD,
+                      VALID_DEFINITIONS[side_name], _validity_instruction(side_name),
                       _embed_instruction(side_name), _rerank_instruction(side_name)], sort_keys=True)
     return hashlib.sha256(key.encode("utf-8")).hexdigest()
+
+
+# ─── Manual review ────────────────────────────────────────────────────────
+# Hand-checked decisions for entries the models can't judge without the
+# paper: uninterpretable variable codes and econometric terms (-> Other), and
+# clear category mistakes (category_override). Applied after the cache, so
+# editing the CSV never requires re-scoring. The validity scores of the 8B
+# models don't separate junk codes ("pr", "r20", "h3") from real variables,
+# which is why this step exists. Columns: side, entry, model_label,
+# model_best_category, decision (keep/other), category_override, reason.
+MANUAL_REVIEW_PATH = os.path.join(os.path.dirname(__file__), "classifier_manual_review.csv")
+APPLY_MANUAL_REVIEW = True
+
+
+def _load_manual_review(side_name: str) -> dict[str, dict]:
+    if not (APPLY_MANUAL_REVIEW and os.path.exists(MANUAL_REVIEW_PATH)):
+        return {}
+    df = pd.read_csv(MANUAL_REVIEW_PATH, dtype=str, keep_default_na=False)
+    df = df[df["side"] == side_name]
+    bad_dec = set(df["decision"].str.strip().str.lower()) - {"keep", "other"}
+    bad_cat = set(df["category_override"].str.strip()) - set(TAXONOMIES[side_name]) - {""}
+    if bad_dec or bad_cat:
+        raise ValueError(f"{MANUAL_REVIEW_PATH}: unknown decision(s) {bad_dec or ''} "
+                         f"/ category_override(s) {bad_cat or ''} for {side_name}")
+    return {r["entry"]: r for r in df.to_dict("records")}
 
 
 # ─── Public entry point ───────────────────────────────────────────────────
@@ -213,13 +284,14 @@ def classify(
 ) -> tuple[dict[str, str], pd.DataFrame]:
     """
     Returns ({entry: label}, audit) where audit has one row per entry with the
-    chosen label, its reranker score, the runner-up, and the embedding top-1 —
-    low scores / small margins are the entries worth eyeballing.
+    final label, the stage-1 validity probability, the best real category and
+    its score (kept even when the entry went to Other), the runner-up, and the
+    embedding top-1 — low validity / small margins are worth eyeballing.
     """
     backbone = backbone or BACKBONE
     spec = BACKBONES[backbone]
     labels, docs = _label_docs(side_name, other_label)
-    other_idx = len(labels) - 1
+    n_real = len(labels) - 1          # Other is last and is not a category candidate
 
     cache = _load_cache()
     ns = _cache_namespace(backbone, side_name, docs)
@@ -229,34 +301,47 @@ def classify(
     if todo:
         print(f"  [{backbone}] scoring {len(todo)} new entries "
               f"({len(entries) - len(todo)} cached) on {DEVICE}...")
-        sims = _embed_similarities(spec, todo, docs[:other_idx], _embed_instruction(side_name))
-        k = min(RERANK_TOP_K, other_idx)
+        sims = _embed_similarities(spec, todo, docs[:n_real], _embed_instruction(side_name))
+        k = n_real if RERANK_TOP_K is None else min(RERANK_TOP_K, n_real)
         top_idx = np.argsort(-sims, axis=1)[:, :k]
-        top_idx = np.hstack([top_idx, np.full((len(todo), 1), other_idx)])
-        k += 1
 
-        pairs = [(e, docs[j]) for e, row in zip(todo, top_idx) for j in row]
-        if spec["rerank_kind"] == "qwen3":
-            flat = _qwen3_rerank(spec["rerank_model"], pairs, _rerank_instruction(side_name))
-        else:
-            flat = _cross_encoder_rerank(spec["rerank_model"], pairs)
+        valid_pairs = [(e, VALID_DEFINITIONS[side_name]) for e in todo]
+        cat_pairs = [(e, docs[j]) for e, row in zip(todo, top_idx) for j in row]
+        jobs = [(valid_pairs, _validity_instruction(side_name)),
+                (cat_pairs, _rerank_instruction(side_name))]
+        rerank = _qwen3_rerank if spec["rerank_kind"] == "qwen3" else _cross_encoder_rerank
+        valid, flat = rerank(spec["rerank_model"], jobs)
         rr = flat.reshape(len(todo), k)
 
-        for e, cand, s, sim_row in zip(todo, top_idx, rr, sims):
+        for e, v, cand, s, sim_row in zip(todo, valid, top_idx, rr, sims):
             order = np.argsort(-s)
+            best = labels[cand[order[0]]]
+            is_valid = bool(v >= VALID_THRESHOLD)
             side_cache[e] = {
-                "top1": labels[cand[order[0]]],
-                "top1_score": float(s[order[0]]),
-                "top2": labels[cand[order[1]]],
-                "top2_score": float(s[order[1]]),
+                "top1": best if is_valid else other_label,
+                "valid_score": float(v),
+                "best_category": best,
+                "best_score": float(s[order[0]]),
+                "top2": labels[cand[order[1]]] if k > 1 else None,
+                "top2_score": float(s[order[1]]) if k > 1 else None,
                 "embed_top1": labels[int(np.argmax(sim_row))],
                 "embed_top1_sim": float(np.max(sim_row)),
             }
         _save_cache(cache)
 
+    review = _load_manual_review(side_name)
     mapping, rows = {}, []
     for e in entries:
         r = side_cache[e]
-        mapping[e] = r["top1"]
-        rows.append({"side": side_name, "backbone": backbone, "entry": e, "label": r["top1"], **r})
+        label, manual = r["top1"], ""
+        if e in review:
+            m = review[e]
+            if m["decision"].strip().lower() == "other":
+                label, manual = other_label, "other"
+            else:
+                label = m["category_override"].strip() or r["best_category"]
+                manual = "override" if m["category_override"].strip() else "keep"
+        mapping[e] = label
+        rows.append({"side": side_name, "backbone": backbone, "entry": e, "label": label,
+                     "manual_review": manual, "model_label": r["top1"], **r})
     return mapping, pd.DataFrame(rows)

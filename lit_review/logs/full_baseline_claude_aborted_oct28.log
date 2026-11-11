@@ -1,0 +1,297 @@
+
+Processing 0.1162_REST_a_00265.pdf...
+Extracted relevant sections length: 88144 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: POLICY VOLATILITY, INSTITUTIONS, AND ECONOMIC GROWTH
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): Growth Rate of Output per Capita, 1970–2007
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 1
+Answer for Endogenous Variable(s): Policy volatility
+Querying: IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Used: 1
+Answer for Instrumental Variable(s): constraints in 1969; presidential; majoritarian; elections
+Querying: Rainfall IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Rainfall: 0
+Answer for Rainfall Instrument: n/a
+Final extracted info for 0.1162_REST_a_00265.pdf: {'File Name': '0.1162_REST_a_00265.pdf', 'Title': 'POLICY VOLATILITY, INSTITUTIONS, AND ECONOMIC GROWTH', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'Growth Rate of Output per Capita, 1970–2007', 'Endogeneity Problem': '1', 'Endogenous Variable(s)': 'Policy volatility', 'Instrumental Variable Used': '1', 'Instrumental Variable(s)': 'constraints in 1969; presidential; majoritarian; elections', 'Instrumental Variable Rainfall': '0', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_(sici)1099-1328_missinginfo.pdf...
+Extracted relevant sections length: 71091 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: The Political Economy of Financial Reform in Africa
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_(sici)1099-1328_missinginfo.pdf: {'File Name': '10.1002_(sici)1099-1328_missinginfo.pdf', 'Title': 'The Political Economy of Financial Reform in Africa', 'DOI': 'n/a', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_1520-6297_missinginfo.pdf...
+Extracted relevant sections length: 13039 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Soybean Crushing Margins and Risk
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): crushing margin ($/ton of soybeans)
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 1
+Answer for Endogenous Variable(s): quantity of soybeans crushed annually
+Querying: IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Used: 1
+Answer for Instrumental Variable(s): lagged prices and quantities of cottonseed meal; price of corn
+Querying: Rainfall IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Rainfall: 0
+Answer for Rainfall Instrument: n/a
+Final extracted info for 10.1002_1520-6297_missinginfo.pdf: {'File Name': '10.1002_1520-6297_missinginfo.pdf', 'Title': 'Soybean Crushing Margins and Risk', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'crushing margin ($/ton of soybeans)', 'Endogeneity Problem': '1', 'Endogenous Variable(s)': 'quantity of soybeans crushed annually', 'Instrumental Variable Used': '1', 'Instrumental Variable(s)': 'lagged prices and quantities of cottonseed meal; price of corn', 'Instrumental Variable Rainfall': '0', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_2014wr016357.pdf...
+Extracted relevant sections length: 81957 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Simulation of yearly rainfall time series at microscale resolution with actual properties: Intermittency, scale invariance, and rainfall distribution
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: 10.1002/2014wr016357
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_2014wr016357.pdf: {'File Name': '10.1002_2014wr016357.pdf', 'Title': 'Simulation of yearly rainfall time series at microscale resolution with actual properties: Intermittency, scale invariance, and rainfall distribution', 'DOI': '10.1002/2014wr016357', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_2015wr017254.pdf...
+Extracted relevant sections length: 56689 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Self-affinity and surface-area-dependent fluctuations of lake-level time series
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: 10.1002/2015wr017254
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): spectral exponent; range
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 0
+Answer for Endogenous Variable(s): n/a
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=0 != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_2015wr017254.pdf: {'File Name': '10.1002_2015wr017254.pdf', 'Title': 'Self-affinity and surface-area-dependent fluctuations of lake-level time series', 'DOI': '10.1002/2015wr017254', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'spectral exponent; range', 'Endogeneity Problem': '0', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_2016wr020154.pdf...
+Extracted relevant sections length: 73002 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Informing water harvesting technology contract design using choice experiments
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: 10.1002/2016wr020154
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): farmers' choices for alternative contract designs
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 0
+Answer for Endogenous Variable(s): n/a
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=0 != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_2016wr020154.pdf: {'File Name': '10.1002_2016wr020154.pdf', 'Title': 'Informing water harvesting technology contract design using choice experiments', 'DOI': '10.1002/2016wr020154', 'Empirical Analysis': '1', 'Dependent Variable(s)': "farmers' choices for alternative contract designs", 'Endogeneity Problem': '0', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9780470756461.ch12.pdf...
+Extracted relevant sections length: 109734 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: The Economic Geography of Trade, Production, and Income: A Survey of Empirics
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_9780470756461.ch12.pdf: {'File Name': '10.1002_9780470756461.ch12.pdf', 'Title': 'The Economic Geography of Trade, Production, and Income: A Survey of Empirics', 'DOI': 'n/a', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9780470880616.ch4.pdf...
+Extracted relevant sections length: 26712 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Adaptive Modeling Concepts in Dynamic Markets
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_9780470880616.ch4.pdf: {'File Name': '10.1002_9780470880616.ch4.pdf', 'Title': 'Adaptive Modeling Concepts in Dynamic Markets', 'DOI': 'n/a', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9781118231838.ch4.pdf...
+Extracted relevant sections length: 66522 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Ecological economics of biodiversity use for pest management
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_9781118231838.ch4.pdf: {'File Name': '10.1002_9781118231838.ch4.pdf', 'Title': 'Ecological economics of biodiversity use for pest management', 'DOI': 'n/a', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9781118258415.ch1.pdf...
+Extracted relevant sections length: 58993 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Behavioral Finance: An Overview
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_9781118258415.ch1.pdf: {'File Name': '10.1002_9781118258415.ch1.pdf', 'Title': 'Behavioral Finance: An Overview', 'DOI': 'n/a', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9781118300442.ch5.pdf...
+Extracted relevant sections length: 73166 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: BEHAVIOURAL COMPLEXITY
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_9781118300442.ch5.pdf: {'File Name': '10.1002_9781118300442.ch5.pdf', 'Title': 'BEHAVIOURAL COMPLEXITY', 'DOI': 'n/a', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9781118386392.ch5.pdf...
+Extracted relevant sections length: 37392 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Credit Risk
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_9781118386392.ch5.pdf: {'File Name': '10.1002_9781118386392.ch5.pdf', 'Title': 'Credit Risk', 'DOI': 'n/a', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9781118445112.stat03800.pdf...
+Extracted relevant sections length: 60805 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Global Warming, Statistics for
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_9781118445112.stat03800.pdf: {'File Name': '10.1002_9781118445112.stat03800.pdf', 'Title': 'Global Warming, Statistics for', 'DOI': 'n/a', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9781118632321.ch7.pdf...
+Extracted relevant sections length: 52092 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Extreme Value Theory for Randomly Perturbed Dynamical Systems
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_9781118632321.ch7.pdf: {'File Name': '10.1002_9781118632321.ch7.pdf', 'Title': 'Extreme Value Theory for Randomly Perturbed Dynamical Systems', 'DOI': 'n/a', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9781118786352.wbieg0688.pdf...
+Extracted relevant sections length: 43937 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Neoliberalism
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: 10.1002/9781118786352.wbieg0688
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_9781118786352.wbieg0688.pdf: {'File Name': '10.1002_9781118786352.wbieg0688.pdf', 'Title': 'Neoliberalism', 'DOI': '10.1002/9781118786352.wbieg0688', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9781118786352.wbieg1024.pdf...
+Extracted relevant sections length: 29803 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Class
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: 10.1002/9781118786352.wbieg1024
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_9781118786352.wbieg1024.pdf: {'File Name': '10.1002_9781118786352.wbieg1024.pdf', 'Title': 'Class', 'DOI': '10.1002/9781118786352.wbieg1024', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9781118845028.ch41.pdf...
+Extracted relevant sections length: 31009 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Climate change adaptation in the rental sector
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_9781118845028.ch41.pdf: {'File Name': '10.1002_9781118845028.ch41.pdf', 'Title': 'Climate change adaptation in the rental sector', 'DOI': 'n/a', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9781119300977.ch17.pdf...
+Extracted relevant sections length: 57178 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Econometric Methods
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 0
+Skipping 'Dependent Variable(s)' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'Endogeneity Bundle' due to unmet dependency (Empirical Analysis=0 != 1)
+Skipping 'IV Bundle' due to unmet dependency (Endogeneity Problem=n/a != 1)
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=n/a != 1)
+Final extracted info for 10.1002_9781119300977.ch17.pdf: {'File Name': '10.1002_9781119300977.ch17.pdf', 'Title': 'Econometric Methods', 'DOI': 'n/a', 'Empirical Analysis': '0', 'Dependent Variable(s)': 'n/a', 'Endogeneity Problem': 'n/a', 'Endogenous Variable(s)': 'n/a', 'Instrumental Variable Used': 'n/a', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9781119328223.ch3.pdf...
+Extracted relevant sections length: 89555 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Structural Equation Modelling and the Causal Effect of Permanent Income on Life Satisfaction: The Case of Air Pollution Valuation in Switzerland
+Querying: DOI (max_completion_tokens=128)
+Answer for DOI: n/a
+Querying: Empirical Analysis (max_completion_tokens=256)
+Answer for Empirical Analysis: 1
+Querying: Dependent Variable(s) (max_completion_tokens=512)
+Answer for Dependent Variable(s): Life satisfaction
+Querying: Endogeneity Bundle (max_completion_tokens=512)
+Answer for Endogeneity Problem: 1
+Answer for Endogenous Variable(s): Permanent Income; Health Status
+Querying: IV Bundle (max_completion_tokens=512)
+Answer for Instrumental Variable Used: 0
+Answer for Instrumental Variable(s): n/a
+Skipping 'Rainfall IV Bundle' due to unmet dependency (Instrumental Variable Used=0 != 1)
+Final extracted info for 10.1002_9781119328223.ch3.pdf: {'File Name': '10.1002_9781119328223.ch3.pdf', 'Title': 'Structural Equation Modelling and the Causal Effect of Permanent Income on Life Satisfaction: The Case of Air Pollution Valuation in Switzerland', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'Life satisfaction', 'Endogeneity Problem': '1', 'Endogenous Variable(s)': 'Permanent Income; Health Status', 'Instrumental Variable Used': '0', 'Instrumental Variable(s)': 'n/a', 'Instrumental Variable Rainfall': 'n/a', 'Rainfall Instrument': 'n/a'}
+
+Processing 10.1002_9781444315813.ch26.pdf...
+Extracted relevant sections length: 80123 characters
+Querying: Title (max_completion_tokens=256)
+Answer for Title: Methodologies for Economic Evaluation of Wetlands and Wetland Functioning
+Querying: DOI (max_completion_tokens=128)

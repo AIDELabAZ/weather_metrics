@@ -1,0 +1,8 @@
+pgrep: Unknown user ` baseline_gemini.py'
+2026-10-28 15:34:36 RUN EXITED EARLY at 0 papers
+2026-10-28 15:34:36 Querying: DOI (max_completion_tokens=128)
+2026-10-28 15:34:36 Answer for DOI: n/a
+2026-10-28 15:34:36 Querying: Empirical Analysis (max_completion_tokens=256)
+2026-10-28 15:34:36 Answer for Empirical Analysis: 1
+2026-10-28 15:34:36 Querying: Dependent Variable(s) (max_completion_tokens=512)
+2026-10-28 15:35:05 --- guard restarted (fixed process match)

@@ -1,0 +1,35 @@
+pgrep: Unknown user ` baseline_claude.py'
+2026-10-28 15:34:36 RUN EXITED EARLY at 3 papers
+2026-10-28 15:34:36 Final extracted info for 10.1002_1520-6297_missinginfo.pdf: {'File Name': '10.1002_1520-6297_missinginfo.pdf', 'Title': 'Soybean Crushing Margins and Risk', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'crushing margin ($/ton of 
+2026-10-28 15:34:36 
+2026-10-28 15:34:36 Processing 10.1002_2014wr016357.pdf...
+2026-10-28 15:34:36 Extracted relevant sections length: 81957 characters
+2026-10-28 15:34:36 Querying: Title (max_completion_tokens=256)
+2026-10-28 15:35:05 --- guard restarted (fixed process match)
+2026-10-29 22:22:04 --- new full run (key …rwAA)
+2026-10-29 22:50:06 OK: 154/3755 papers, 0 failed
+2026-10-29 23:19:09 OK: 304/3755 papers, 0 failed
+2026-10-29 23:48:12 OK: 519/3755 papers, 0 failed
+2026-10-30 00:17:15 OK: 728/3755 papers, 0 failed
+2026-10-30 00:39:18 QUALITY: none of the last 20 papers marked empirical (at 891) - possible garbage answers
+2026-10-30 00:46:19 OK: 930/3755 papers, 0 failed
+2026-10-30 01:15:23 OK: 1104/3755 papers, 0 failed
+2026-10-30 01:44:28 OK: 1241/3755 papers, 0 failed
+2026-10-30 02:13:33 OK: 1394/3755 papers, 0 failed
+2026-10-30 02:42:38 OK: 1539/3755 papers, 0 failed
+2026-10-30 03:11:43 OK: 1679/3755 papers, 0 failed
+2026-10-30 03:40:49 OK: 1829/3755 papers, 0 failed
+2026-10-30 04:09:55 OK: 1986/3755 papers, 0 failed
+2026-10-30 04:39:01 OK: 2140/3755 papers, 0 failed
+2026-10-30 04:49:04 QUALITY: none of the last 20 papers marked empirical (at 2210) - possible garbage answers
+2026-10-30 05:08:08 OK: 2314/3755 papers, 0 failed
+2026-10-30 05:37:15 OK: 2450/3755 papers, 0 failed
+2026-10-30 06:06:23 OK: 2582/3755 papers, 0 failed
+2026-10-30 06:35:31 OK: 2739/3755 papers, 0 failed
+2026-10-30 07:04:38 OK: 2907/3755 papers, 0 failed
+2026-10-30 07:33:47 OK: 3032/3755 papers, 0 failed
+2026-10-30 08:02:55 OK: 3170/3755 papers, 0 failed
+2026-10-30 08:32:04 OK: 3326/3755 papers, 0 failed
+2026-10-30 09:01:13 OK: 3507/3755 papers, 0 failed
+2026-10-30 09:30:23 OK: 3671/3755 papers, 0 failed
+2026-10-30 09:46:28 RUN FINISHED: 3755 papers, 0 failed

@@ -1,0 +1,46 @@
+pgrep: Unknown user ` baseline_gemma.py'
+2026-10-28 15:34:36 RUN EXITED EARLY at 1 papers
+2026-10-28 15:34:36 Final extracted info for 0.1162_REST_a_00265.pdf: {'File Name': '0.1162_REST_a_00265.pdf', 'Title': 'POLICY VOLATILITY, INSTITUTIONS, AND ECONOMIC GROWTH', 'DOI': 'n/a', 'Empirical Analysis': '1', 'Dependent Variable(s)': 'Δyi; average growth rate of
+2026-10-28 15:34:36 
+2026-10-28 15:34:36 Processing 10.1002_(sici)1099-1328_missinginfo.pdf...
+2026-10-28 15:34:36 Extracted relevant sections length: 71091 characters
+2026-10-28 15:34:36 Querying: Title (max_completion_tokens=256)
+2026-10-28 15:35:05 --- guard restarted (fixed process match)
+2026-10-28 16:03:07 OK: 84/3755 papers, 0 failed
+2026-10-28 16:32:10 OK: 149/3755 papers, 0 failed
+2026-10-28 17:01:13 OK: 235/3755 papers, 0 failed
+2026-10-28 17:30:16 OK: 346/3755 papers, 0 failed
+2026-10-28 17:59:20 OK: 446/3755 papers, 0 failed
+2026-10-28 18:28:23 OK: 546/3755 papers, 0 failed
+2026-10-28 18:57:27 OK: 740/3755 papers, 0 failed
+2026-10-28 19:26:31 OK: 878/3755 papers, 0 failed
+2026-10-28 19:55:35 OK: 1005/3755 papers, 0 failed
+2026-10-28 20:24:40 OK: 1152/3755 papers, 0 failed
+2026-10-28 20:53:44 OK: 1331/3755 papers, 0 failed
+2026-10-28 21:22:50 OK: 1584/3755 papers, 0 failed
+2026-10-28 21:51:55 OK: 1825/3755 papers, 0 failed
+2026-10-28 22:21:01 OK: 2090/3755 papers, 0 failed
+2026-10-28 22:50:09 OK: 2355/3755 papers, 0 failed
+2026-10-28 23:19:16 OK: 2557/3755 papers, 0 failed
+2026-10-28 23:46:23 FAILED:   [FAILED] 10.26481_spe.20071011jpu.pdf: DOI: failed after 8 attempts: Error code: 503 - [{'error': {'code': 503, 'message': 'Model server is not available. Please retry. endpoint_id: 4577504950698901504, deployed_model_id: 4224020758461939712', 'sta
+2026-10-28 23:48:24 OK: 2760/3755 papers, 1 failed
+2026-10-28 23:53:25 FAILED:   [FAILED] 10.26686_wgtn.16992625.pdf: Empirical Analysis: failed after 8 attempts: Error code: 503 - [{'error': {'code': 503, 'message': 'Model server is not available. Please retry. endpoint_id: 4577504950698901504, deployed_model_id: 4224020758461
+2026-10-29 00:13:31 FAILED:   [FAILED] 10.32479_ijeep.17866.pdf: Endogeneity Bundle: failed after 8 attempts: Error code: 503 - [{'error': {'code': 503, 'message': 'Model server is not available. Please retry. endpoint_id: 4577504950698901504, deployed_model_id: 422402075846193
+2026-10-29 00:16:32 FAILED:   [FAILED] 10.32479_ijeep.9439.pdf: Title: failed after 8 attempts: Error code: 429 - [{'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-42
+2026-10-29 00:17:33 OK: 2877/3755 papers, 4 failed
+2026-10-29 00:20:33 FAILED:   [FAILED] 10.32479_ijefi.11299.pdf: IV Bundle: failed after 8 attempts: Error code: 503 - [{'error': {'code': 503, 'message': 'Model server is not available. Please retry. endpoint_id: 4577504950698901504, deployed_model_id: 4224020758461939712', 's
+2026-10-29 00:23:34 FAILED:   [FAILED] 10.32629_memf.v3i4.1027.pdf: Title: failed after 8 attempts: Error code: 429 - [{'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-cod
+2026-10-29 00:36:38 FAILED:   [FAILED] 10.3386_w13876.pdf: Dependent Variable(s): failed after 8 attempts: Error code: 503 - [{'error': {'code': 503, 'message': 'Model server is not available. Please retry. endpoint_id: 4577504950698901504, deployed_model_id: 422402075846193971
+2026-10-29 00:44:40 FAILED:   [FAILED] 10.3386_w14347.pdf: Dependent Variable(s): failed after 8 attempts: Error code: 429 - [{'error': {'code': 429, 'message': 'The request queue is full.', 'status': 'RESOURCE_EXHAUSTED'}}]
+2026-10-29 00:46:41 OK: 2940/3755 papers, 8 failed
+2026-10-29 00:51:42 FAILED:   [FAILED] 10.3386_w14521.pdf: Title: failed after 8 attempts: Error code: 503 - [{'error': {'code': 503, 'message': 'Model server is not available. Please retry. endpoint_id: 4577504950698901504, deployed_model_id: 4224020758461939712', 'status': 'U
+2026-10-29 00:58:44 FAILED:   [FAILED] 10.3386_w14751.pdf: IV Bundle: failed after 8 attempts: Error code: 503 - [{'error': {'code': 503, 'message': 'Model server is not available. Please retry. endpoint_id: 4577504950698901504, deployed_model_id: 4224020758461939712', 'status'
+2026-10-29 01:13:49 FAILED:   [FAILED] 10.3386_w2688.pdf: Endogeneity Bundle: failed after 8 attempts: Error code: 503 - [{'error': {'code': 503, 'message': 'Model server is not available. Please retry. endpoint_id: 4577504950698901504, deployed_model_id: 4224020758461939712', 
+2026-10-29 01:15:50 OK: 3032/3755 papers, 11 failed
+2026-10-29 01:22:52 FAILED:   [FAILED] 10.3386_w27237.pdf: Dependent Variable(s): failed after 8 attempts: Error code: 429 - [{'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/er
+2026-10-29 01:28:53 FAILED:   [FAILED] 10.3386_w27321.pdf: Endogeneity Bundle: failed after 8 attempts: Error code: 503 - [{'error': {'code': 503, 'message': 'Model server is not available. Please retry. endpoint_id: 4577504950698901504, deployed_model_id: 4224020758461939712',
+2026-10-29 01:31:54 FAILED:   [FAILED] 10.3386_w27436.pdf: Title: failed after 8 attempts: Error code: 429 - [{'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for
+2026-10-29 01:44:59 OK: 3135/3755 papers, 14 failed
+2026-10-29 02:14:08 OK: 3406/3755 papers, 14 failed
+2026-10-29 02:43:17 OK: 3679/3755 papers, 14 failed
+2026-10-29 03:06:25 RUN FINISHED: 3755 papers, 14 failed

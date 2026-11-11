@@ -1,0 +1,64 @@
+Sat Nov  7 19:45:41 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.196.07             Driver Version: 580.196.07     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100 80GB PCIe          On  |   00000000:29:00.0 Off |                   On |
+| N/A   50C    P0            149W /  300W |    3880MiB /  81920MiB |     N/A      Default |
+|                                         |                        |              Enabled |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| MIG devices:                                                                            |
++------------------+----------------------------------+-----------+-----------------------+
+| GPU  GI  CI  MIG |              Shared Memory-Usage |        Vol|        Shared         |
+|      ID  ID  Dev |                Shared BAR1-Usage | SM     Unc| CE ENC  DEC  OFA  JPG |
+|                  |                                  |        ECC|                       |
+|==================+==================================+===========+=======================|
+|  0    2   0   0  |             107MiB / 40192MiB    | 42      0 |  3   0    2    0    0 |
+|                  |               0MiB / 24543MiB    |           |                       |
++------------------+----------------------------------+-----------+-----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+torch 2.15.0+cu132 cuda available: True
+device=cuda dtype=torch.bfloat16 cache=/groups/jdmichler/jdmichler/weather_iv/lit_review/analysis/hpc/hpc_cache_2stage.json
+
+[qwen3-4b] Rainfall Metrics: 455 entries
+  [qwen3-4b] scoring 455 new entries (0 cached) on cuda...
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 43.63it/s]
+Batches:   0%|          | 0/15 [00:00<?, ?it/s]/groups/jdmichler/jdmichler/weather_iv/venv/lib/python3.11/site-packages/triton/knobs.py:504: UserWarning: TRITON_DEFAULT_FP_FUSION is unset: defaulting to FP fusion ENABLED for backward compatibility in Triton 3.9. The default will change to DISABLED in Triton 3.10; set TRITON_DEFAULT_FP_FUSION=1 to keep fusion enabled or =0 to adopt the new default early and silence this warning.
+  warn_once(FP_FUSION_DEFAULT_WARNING)
+Batches:   7%|▋         | 1/15 [00:02<00:35,  2.56s/it]Batches:  13%|█▎        | 2/15 [00:02<00:15,  1.16s/it]Batches:  20%|██        | 3/15 [00:02<00:08,  1.41it/s]Batches:  27%|██▋       | 4/15 [00:03<00:05,  2.00it/s]Batches:  33%|███▎      | 5/15 [00:03<00:03,  2.61it/s]Batches:  40%|████      | 6/15 [00:03<00:02,  3.20it/s]Batches:  47%|████▋     | 7/15 [00:03<00:02,  3.78it/s]Batches:  53%|█████▎    | 8/15 [00:03<00:01,  4.30it/s]Batches:  60%|██████    | 9/15 [00:03<00:01,  4.82it/s]Batches:  67%|██████▋   | 10/15 [00:04<00:00,  5.25it/s]Batches:  73%|███████▎  | 11/15 [00:04<00:00,  5.61it/s]Batches:  80%|████████  | 12/15 [00:04<00:00,  5.89it/s]Batches:  87%|████████▋ | 13/15 [00:04<00:00,  6.11it/s]Batches:  93%|█████████▎| 14/15 [00:04<00:00,  6.37it/s]Batches: 100%|██████████| 15/15 [00:04<00:00,  3.18it/s]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 41.54it/s]
+  -> Other: 4/455 (1%)
+
+[qwen3-4b] Endogenous Variables: 808 entries
+  [qwen3-4b] scoring 808 new entries (0 cached) on cuda...
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 44.57it/s]
+Batches:   0%|          | 0/26 [00:00<?, ?it/s]Batches:   4%|▍         | 1/26 [00:00<00:04,  5.07it/s]Batches:   8%|▊         | 2/26 [00:00<00:04,  4.87it/s]Batches:  12%|█▏        | 3/26 [00:00<00:04,  5.29it/s]Batches:  15%|█▌        | 4/26 [00:00<00:04,  5.38it/s]Batches:  19%|█▉        | 5/26 [00:00<00:03,  5.57it/s]Batches:  23%|██▎       | 6/26 [00:01<00:03,  5.68it/s]Batches:  27%|██▋       | 7/26 [00:01<00:03,  5.65it/s]Batches:  31%|███       | 8/26 [00:01<00:03,  5.73it/s]Batches:  35%|███▍      | 9/26 [00:01<00:02,  5.80it/s]Batches:  38%|███▊      | 10/26 [00:01<00:02,  5.77it/s]Batches:  42%|████▏     | 11/26 [00:01<00:02,  5.82it/s]Batches:  46%|████▌     | 12/26 [00:02<00:02,  5.91it/s]Batches:  50%|█████     | 13/26 [00:02<00:02,  5.97it/s]Batches:  54%|█████▍    | 14/26 [00:02<00:01,  6.12it/s]Batches:  58%|█████▊    | 15/26 [00:02<00:01,  6.22it/s]Batches:  62%|██████▏   | 16/26 [00:02<00:01,  6.19it/s]Batches:  65%|██████▌   | 17/26 [00:02<00:01,  6.31it/s]Batches:  69%|██████▉   | 18/26 [00:03<00:01,  6.37it/s]Batches:  73%|███████▎  | 19/26 [00:03<00:01,  6.25it/s]Batches:  77%|███████▋  | 20/26 [00:03<00:00,  6.32it/s]Batches:  81%|████████  | 21/26 [00:03<00:00,  6.39it/s]Batches:  85%|████████▍ | 22/26 [00:03<00:00,  6.31it/s]Batches:  88%|████████▊ | 23/26 [00:03<00:00,  6.25it/s]Batches:  92%|█████████▏| 24/26 [00:04<00:00,  6.34it/s]Batches:  96%|█████████▌| 25/26 [00:04<00:00,  6.42it/s]Batches: 100%|██████████| 26/26 [00:04<00:00,  6.17it/s]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 42.93it/s]
+  -> Other: 61/808 (8%)
+
+[qwen3-8b] Rainfall Metrics: 455 entries
+  [qwen3-8b] scoring 455 new entries (0 cached) on cuda...
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00, 82.09it/s]
+Batches:   0%|          | 0/15 [00:00<?, ?it/s]Batches:   7%|▋         | 1/15 [00:00<00:05,  2.62it/s]Batches:  13%|█▎        | 2/15 [00:00<00:04,  3.07it/s]Batches:  20%|██        | 3/15 [00:00<00:03,  3.24it/s]Batches:  27%|██▋       | 4/15 [00:01<00:03,  3.32it/s]Batches:  33%|███▎      | 5/15 [00:01<00:02,  3.37it/s]Batches:  40%|████      | 6/15 [00:01<00:02,  3.40it/s]Batches:  47%|████▋     | 7/15 [00:02<00:02,  3.51it/s]Batches:  53%|█████▎    | 8/15 [00:02<00:01,  3.59it/s]Batches:  60%|██████    | 9/15 [00:02<00:01,  3.75it/s]Batches:  67%|██████▋   | 10/15 [00:02<00:01,  3.87it/s]Batches:  73%|███████▎  | 11/15 [00:03<00:01,  3.97it/s]Batches:  80%|████████  | 12/15 [00:03<00:00,  4.04it/s]Batches:  87%|████████▋ | 13/15 [00:03<00:00,  4.09it/s]Batches:  93%|█████████▎| 14/15 [00:03<00:00,  4.20it/s]Batches: 100%|██████████| 15/15 [00:03<00:00,  3.91it/s]
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:00<00:00, 96.18it/s]
+  -> Other: 7/455 (2%)
+
+[qwen3-8b] Endogenous Variables: 808 entries
+  [qwen3-8b] scoring 808 new entries (0 cached) on cuda...
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00, 82.30it/s]
+Batches:   0%|          | 0/26 [00:00<?, ?it/s]Batches:   4%|▍         | 1/26 [00:00<00:07,  3.28it/s]Batches:   8%|▊         | 2/26 [00:00<00:07,  3.36it/s]Batches:  12%|█▏        | 3/26 [00:00<00:06,  3.51it/s]Batches:  15%|█▌        | 4/26 [00:01<00:06,  3.47it/s]Batches:  19%|█▉        | 5/26 [00:01<00:05,  3.56it/s]Batches:  23%|██▎       | 6/26 [00:01<00:05,  3.61it/s]Batches:  27%|██▋       | 7/26 [00:01<00:05,  3.55it/s]Batches:  31%|███       | 8/26 [00:02<00:04,  3.60it/s]Batches:  35%|███▍      | 9/26 [00:02<00:04,  3.64it/s]Batches:  38%|███▊      | 10/26 [00:02<00:04,  3.59it/s]Batches:  42%|████▏     | 11/26 [00:03<00:04,  3.64it/s]Batches:  46%|████▌     | 12/26 [00:03<00:03,  3.69it/s]Batches:  50%|█████     | 13/26 [00:03<00:03,  3.74it/s]Batches:  54%|█████▍    | 14/26 [00:03<00:03,  3.85it/s]Batches:  58%|█████▊    | 15/26 [00:04<00:02,  3.94it/s]Batches:  62%|██████▏   | 16/26 [00:04<00:02,  3.91it/s]Batches:  65%|██████▌   | 17/26 [00:04<00:02,  3.99it/s]Batches:  69%|██████▉   | 18/26 [00:04<00:01,  4.04it/s]Batches:  73%|███████▎  | 19/26 [00:05<00:01,  3.94it/s]Batches:  77%|███████▋  | 20/26 [00:05<00:01,  4.01it/s]Batches:  81%|████████  | 21/26 [00:05<00:01,  4.06it/s]Batches:  85%|████████▍ | 22/26 [00:05<00:01,  3.98it/s]Batches:  88%|████████▊ | 23/26 [00:06<00:00,  3.94it/s]Batches:  92%|█████████▏| 24/26 [00:06<00:00,  4.00it/s]Batches:  96%|█████████▌| 25/26 [00:06<00:00,  4.07it/s]Batches: 100%|██████████| 26/26 [00:06<00:00,  3.92it/s]
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:00<00:00, 98.99it/s]
+  -> Other: 17/808 (2%)
+Results -> /groups/jdmichler/jdmichler/weather_iv/lit_review/analysis/hpc/hpc_cache_2stage.json

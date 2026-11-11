@@ -1,0 +1,235 @@
+
+===== gpt =====
+Loading data...
+  (note: 2 duplicate paper_key row(s) — same paper flagged rainfall on more than one row; counts below are deduplicated)
+Rainfall IV papers (deduped): 123
+
+[Rainfall Metrics]
+  Entries after cleaning: 143 (from 121 non-null rows, 31 raw fragments rejected by cleaning)
+  Classifying 98 unique entries into the fixed taxonomy...
+  [qwen3-8b] scoring 37 new entries (61 cached) on mps...
+Fetching 4 files:   0%|          | 0/4 [00:00<?, ?it/s]Fetching 4 files:  25%|██▌       | 1/4 [01:35<04:45, 95.16s/it]Fetching 4 files: 100%|██████████| 4/4 [01:35<00:00, 23.79s/it]
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  2.16it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.38it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.75s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.80s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.72s/it]
+Batches:   0%|          | 0/2 [00:00<?, ?it/s]Batches:  50%|█████     | 1/2 [00:02<00:02,  2.89s/it]Batches: 100%|██████████| 2/2 [00:03<00:00,  1.49s/it]Batches: 100%|██████████| 2/2 [00:03<00:00,  1.70s/it]
+Fetching 5 files:   0%|          | 0/5 [00:00<?, ?it/s]Fetching 5 files:  20%|██        | 1/5 [01:46<07:07, 106.79s/it]Fetching 5 files:  40%|████      | 2/5 [01:51<02:19, 46.45s/it] Fetching 5 files: 100%|██████████| 5/5 [01:51<00:00, 22.20s/it]
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:00<00:01,  3.62it/s]Loading checkpoint shards:  40%|████      | 2/5 [00:00<00:00,  3.36it/s]Loading checkpoint shards:  60%|██████    | 3/5 [00:00<00:00,  3.20it/s]Loading checkpoint shards:  80%|████████  | 4/5 [00:04<00:01,  1.49s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:05<00:00,  1.40s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:05<00:00,  1.09s/it]
+  12 categories used (+ Other (Rainfall Metrics): 0 entries)
+  Unique entries classified into a real category: 98 / 98
+  +18 papers with no surviving entry added as fallback nodes
+    Rainfall Level  (38 entries)
+    Log & Nonlinear Transformations  (28 entries)
+    Shocks & Anomalies  (21 entries)
+    Seasonal & Monthly Rainfall  (14 entries)
+    Other (Rainfall Metrics)  (14 entries)
+    Variability & Volatility  (12 entries)
+    Lagged Rainfall  (10 entries)
+    Daily & Event-Specific Rainfall  (4 entries)
+    Drought & Wetness Indices  (4 entries)
+    Not Specified (Rainfall Metrics)  (4 entries)
+    Spatially Specific Rainfall  (3 entries)
+    Changes & Growth  (3 entries)
+    Snow & Other Hydrometeorology  (3 entries)
+    Extremes, Thresholds & Rainy Days  (3 entries)
+
+[Endogenous Variables]
+  Entries after cleaning: 169 (from 124 non-null rows, 14 raw fragments rejected by cleaning)
+  Classifying 150 unique entries into the fixed taxonomy...
+  [qwen3-8b] scoring 35 new entries (115 cached) on mps...
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.18s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.18s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:08<00:03,  3.11s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  2.04s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  2.24s/it]
+Batches:   0%|          | 0/2 [00:00<?, ?it/s]Batches:  50%|█████     | 1/2 [00:01<00:01,  1.41s/it]Batches: 100%|██████████| 2/2 [00:01<00:00,  1.37it/s]Batches: 100%|██████████| 2/2 [00:01<00:00,  1.20it/s]
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:01<00:07,  1.77s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:03<00:05,  1.77s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:06<00:04,  2.09s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:08<00:02,  2.34s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:10<00:00,  2.22s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:10<00:00,  2.15s/it]
+  23 categories used (+ Other (Endogenous Variables): 5 entries)
+  Unique entries classified into a real category: 145 / 150
+  +5 papers with no surviving entry added as fallback nodes
+    Economic Growth & Macro Performance  (25 entries)
+    Agriculture  (18 entries)
+    Household Income & Consumption  (14 entries)
+    Environment & Pollution  (12 entries)
+    Natural Disasters & Weather Damages  (11 entries)
+    Finance, Credit & Savings  (10 entries)
+    Prices & Inflation  (10 entries)
+    Other (Endogenous Variables)  (9 entries)
+    Education & Human Capital  (9 entries)
+    Trade & Exchange Rates  (8 entries)
+    Poverty & Inequality  (7 entries)
+    Firms, Industry & Structural Change  (6 entries)
+    Conflict, Crime & Unrest  (5 entries)
+    Demographics & Family  (5 entries)
+    Energy & Natural Resources  (4 entries)
+    Remittances, Aid & Transfers  (4 entries)
+    Infrastructure & Public Goods  (4 entries)
+    Migration & Urbanization  (2 entries)
+    Elections & Political Participation  (2 entries)
+    Public Finance & Governance  (2 entries)
+    Labor & Employment  (2 entries)
+    Health & Nutrition  (2 entries)
+    Technology, Information & Media  (1 entries)
+    Social Capital & Networks  (1 entries)
+    Not Specified (Endogenous Variables)  (1 entries)
+
+Rejected raw fragments (review for real data dropped by cleaning) → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/rejected_entries_full_baseline_gpt_qwen3-8b.csv (45 rows)
+Fixed-label classifier audit → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/classifier_audit_full_baseline_gpt_qwen3-8b.csv (248 rows)
+Endogenous variable cluster summary → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/cluster_full_baseline_gpt_qwen3-8b_summary_endog.csv
+Review it, add label overrides above, and rerun.
+
+Building Sankey: Rainfall → Endogenous Variables...
+  Sankey totals — left instances: 134 across 12 categories; right instances: 138 across 23 categories
+Sankey → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/sankey_full_baseline_gpt_qwen3-8b_rainfall_endog.html
+Sankey → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_full_baseline_gpt_qwen3-8b_rainfall_endog.png
+Sankey → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_full_baseline_gpt_qwen3-8b_rainfall_endog.eps
+Sankey (wide) → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_full_baseline_gpt_qwen3-8b_rainfall_endog_wide.png
+
+===== sft_gpt =====
+Loading data...
+  (note: 2 duplicate paper_key row(s) — same paper flagged rainfall on more than one row; counts below are deduplicated)
+Rainfall IV papers (deduped): 150
+
+[Rainfall Metrics]
+  Entries after cleaning: 175 (from 150 non-null rows, 32 raw fragments rejected by cleaning)
+  Classifying 98 unique entries into the fixed taxonomy...
+  [qwen3-8b] scoring 51 new entries (47 cached) on mps...
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.07s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.10s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:08<00:03,  3.10s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  2.01s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  2.20s/it]
+Batches:   0%|          | 0/2 [00:00<?, ?it/s]Batches:  50%|█████     | 1/2 [00:01<00:01,  1.20s/it]Batches: 100%|██████████| 2/2 [00:01<00:00,  1.19it/s]Batches: 100%|██████████| 2/2 [00:01<00:00,  1.12it/s]
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:01<00:07,  1.77s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:03<00:05,  1.76s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:05<00:04,  2.05s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:09<00:02,  2.56s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:10<00:00,  2.10s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:10<00:00,  2.11s/it]
+  12 categories used (+ Other (Rainfall Metrics): 2 entries)
+  Unique entries classified into a real category: 96 / 98
+  +13 papers with no surviving entry added as fallback nodes
+    Rainfall Level  (67 entries)
+    Log & Nonlinear Transformations  (28 entries)
+    Variability & Volatility  (20 entries)
+    Shocks & Anomalies  (20 entries)
+    Other (Rainfall Metrics)  (13 entries)
+    Seasonal & Monthly Rainfall  (8 entries)
+    Snow & Other Hydrometeorology  (7 entries)
+    Extremes, Thresholds & Rainy Days  (7 entries)
+    Lagged Rainfall  (5 entries)
+    Daily & Event-Specific Rainfall  (4 entries)
+    Drought & Wetness Indices  (4 entries)
+    Changes & Growth  (2 entries)
+    Not Specified (Rainfall Metrics)  (2 entries)
+    Spatially Specific Rainfall  (1 entries)
+
+[Endogenous Variables]
+  Entries after cleaning: 195 (from 152 non-null rows, 2 raw fragments rejected by cleaning)
+  Classifying 155 unique entries into the fixed taxonomy...
+  [qwen3-8b] scoring 77 new entries (78 cached) on mps...
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.17s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.18s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:08<00:03,  3.01s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  1.96s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  2.17s/it]
+Batches:   0%|          | 0/3 [00:00<?, ?it/s]Batches:  33%|███▎      | 1/3 [00:01<00:02,  1.40s/it]Batches:  67%|██████▋   | 2/3 [00:02<00:01,  1.20s/it]Batches: 100%|██████████| 3/3 [00:02<00:00,  1.18it/s]Batches: 100%|██████████| 3/3 [00:02<00:00,  1.04it/s]
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:01<00:06,  1.74s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:03<00:05,  1.75s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:05<00:04,  2.02s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:08<00:02,  2.20s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:10<00:00,  2.19s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:10<00:00,  2.10s/it]
+  23 categories used (+ Other (Endogenous Variables): 1 entries)
+  Unique entries classified into a real category: 154 / 155
+  +1 papers with no surviving entry added as fallback nodes
+    Economic Growth & Macro Performance  (22 entries)
+    Environment & Pollution  (16 entries)
+    Natural Disasters & Weather Damages  (16 entries)
+    Trade & Exchange Rates  (16 entries)
+    Household Income & Consumption  (14 entries)
+    Firms, Industry & Structural Change  (14 entries)
+    Prices & Inflation  (14 entries)
+    Labor & Employment  (10 entries)
+    Poverty & Inequality  (9 entries)
+    Agriculture  (9 entries)
+    Finance, Credit & Savings  (8 entries)
+    Public Finance & Governance  (6 entries)
+    Conflict, Crime & Unrest  (6 entries)
+    Infrastructure & Public Goods  (6 entries)
+    Demographics & Family  (5 entries)
+    Education & Human Capital  (5 entries)
+    Elections & Political Participation  (4 entries)
+    Social Capital & Networks  (4 entries)
+    Energy & Natural Resources  (3 entries)
+    Remittances, Aid & Transfers  (3 entries)
+    Technology, Information & Media  (2 entries)
+    Other (Endogenous Variables)  (2 entries)
+    Health & Nutrition  (1 entries)
+    Migration & Urbanization  (1 entries)
+
+Rejected raw fragments (review for real data dropped by cleaning) → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/rejected_entries_full_sft_gpt_qwen3-8b.csv (34 rows)
+Fixed-label classifier audit → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/classifier_audit_full_sft_gpt_qwen3-8b.csv (253 rows)
+Endogenous variable cluster summary → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/cluster_full_sft_gpt_qwen3-8b_summary_endog.csv
+Review it, add label overrides above, and rerun.
+
+Building Sankey: Rainfall → Endogenous Variables...
+  Sankey totals — left instances: 168 across 12 categories; right instances: 173 across 23 categories
+Sankey → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/sankey_full_sft_gpt_qwen3-8b_rainfall_endog.html
+Sankey → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_full_sft_gpt_qwen3-8b_rainfall_endog.png
+Sankey → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_full_sft_gpt_qwen3-8b_rainfall_endog.eps
+Sankey (wide) → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_full_sft_gpt_qwen3-8b_rainfall_endog_wide.png
+
+===== rag_gpt =====
+Loading data...
+  (note: 2 duplicate paper_key row(s) — same paper flagged rainfall on more than one row; counts below are deduplicated)
+Rainfall IV papers (deduped): 129
+
+[Rainfall Metrics]
+  Entries after cleaning: 158 (from 126 non-null rows, 22 raw fragments rejected by cleaning)
+  Classifying 102 unique entries into the fixed taxonomy...
+  [qwen3-8b] scoring 27 new entries (75 cached) on mps...
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.21s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.23s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:08<00:03,  3.27s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:09<00:00,  2.13s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:09<00:00,  2.34s/it]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:01<00:00,  1.66s/it]Batches: 100%|██████████| 1/1 [00:01<00:00,  1.66s/it]
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:01<00:07,  1.77s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:03<00:05,  1.77s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:05<00:04,  2.07s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:08<00:02,  2.28s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:10<00:00,  2.15s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:10<00:00,  2.10s/it]
+  12 categories used (+ Other (Rainfall Metrics): 0 entries)
+  Unique entries classified into a real category: 102 / 102
+  +14 papers with no surviving entry added as fallback nodes
+    Rainfall Level  (45 entries)
+    Log & Nonlinear Transformations  (35 entries)
+    Shocks & Anomalies  (18 entries)
+    Variability & Volatility  (16 entries)
+    Lagged Rainfall  (13 entries)
+    Other (Rainfall Metrics)  (9 entries)
+    Seasonal & Monthly Rainfall  (8 entries)
+    Extremes, Thresholds & Rainy Days  (5 entries)
+    Not Specified (Rainfall Metrics)  (5 entries)
+    Daily & Event-Specific Rainfall  (4 entries)
+    Snow & Other Hydrometeorology  (4 entries)
+    Drought & Wetness Indices  (4 entries)
+    Spatially Specific Rainfall  (3 entries)
+    Changes & Growth  (3 entries)
+
+[Endogenous Variables]
+  Entries after cleaning: 200 (from 128 non-null rows, 9 raw fragments rejected by cleaning)
+  Classifying 175 unique entries into the fixed taxonomy...
+  [qwen3-8b] scoring 36 new entries (139 cached) on mps...
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.23s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.21s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:08<00:03,  3.05s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  1.97s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  2.20s/it]
+Batches:   0%|          | 0/2 [00:00<?, ?it/s]Batches:  50%|█████     | 1/2 [00:01<00:01,  1.58s/it]Batches: 100%|██████████| 2/2 [00:01<00:00,  1.13it/s]Batches: 100%|██████████| 2/2 [00:01<00:00,  1.01it/s]
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:01<00:07,  1.76s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:03<00:05,  1.78s/it]Loading checkpoint shards:  60%|██████    | 3/5 [00:06<00:04,  2.09s/it]Loading checkpoint shards:  80%|████████  | 4/5 [00:08<00:02,  2.35s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:10<00:00,  2.24s/it]Loading checkpoint shards: 100%|██████████| 5/5 [00:10<00:00,  2.16s/it]
+  23 categories used (+ Other (Endogenous Variables): 7 entries)
+  Unique entries classified into a real category: 168 / 175
+  +6 papers with no surviving entry added as fallback nodes
+    Economic Growth & Macro Performance  (33 entries)
+    Prices & Inflation  (16 entries)
+    Agriculture  (16 entries)
+    Trade & Exchange Rates  (13 entries)
+    Natural Disasters & Weather Damages  (12 entries)
+    Environment & Pollution  (12 entries)
+    Household Income & Consumption  (11 entries)
+    Education & Human Capital  (10 entries)
+    Other (Endogenous Variables)  (10 entries)
+    Firms, Industry & Structural Change  (10 entries)
+    Infrastructure & Public Goods  (8 entries)
+    Finance, Credit & Savings  (7 entries)
+    Poverty & Inequality  (7 entries)
+    Demographics & Family  (6 entries)
+    Energy & Natural Resources  (5 entries)
+    Conflict, Crime & Unrest  (5 entries)
+    Elections & Political Participation  (4 entries)
+    Technology, Information & Media  (4 entries)
+    Labor & Employment  (4 entries)
+    Public Finance & Governance  (3 entries)
+    Not Specified (Endogenous Variables)  (3 entries)
+    Remittances, Aid & Transfers  (2 entries)
+    Social Capital & Networks  (2 entries)
+    Migration & Urbanization  (2 entries)
+    Health & Nutrition  (1 entries)
+
+Rejected raw fragments (review for real data dropped by cleaning) → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/rejected_entries_full_rag_gpt_qwen3-8b.csv (31 rows)
+Fixed-label classifier audit → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/classifier_audit_full_rag_gpt_qwen3-8b.csv (277 rows)
+Endogenous variable cluster summary → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/cluster_full_rag_gpt_qwen3-8b_summary_endog.csv
+Review it, add label overrides above, and rerun.
+
+Building Sankey: Rainfall → Endogenous Variables...
+  Sankey totals — left instances: 147 across 12 categories; right instances: 166 across 22 categories
+Sankey → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/sankey_full_rag_gpt_qwen3-8b_rainfall_endog.html
+Sankey → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_full_rag_gpt_qwen3-8b_rainfall_endog.png
+Sankey → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_full_rag_gpt_qwen3-8b_rainfall_endog.eps
+Sankey (wide) → /Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_full_rag_gpt_qwen3-8b_rainfall_endog_wide.png

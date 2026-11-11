@@ -144,6 +144,28 @@ OTHER_DEFINITIONS: dict[str, str] = {
         "a location name, a variable code, or a sentence fragment",
 }
 
+# Positive statement of what a valid entry is, for the classifier's first
+# stage ("is this a real variable?"). Phrased positively because rerankers
+# score a negatively-defined document ("not a ...") unreliably — the old
+# design compared OTHER_DEFINITIONS against the real labels directly and sent
+# clearly classifiable entries (e.g. "change in consumption") to Other.
+VALID_DEFINITIONS: dict[str, str] = {
+    "Rainfall Metrics":
+        # Mirrors every RAIN_TAXONOMY category — an earlier, narrower wording
+        # made the validity check reject logs, volatility and interactions.
+        "any measure built from rainfall, precipitation or related hydrometeorological "
+        "data: rainfall levels or totals; seasonal, monthly, daily or event-day rainfall; "
+        "shocks, deviations or anomalies; variability, volatility or standard deviations; "
+        "changes or growth; logs, squares or other transformations; lagged or past rainfall; "
+        "drought, flood or wetness indices such as SPI or SPEI; extremes, thresholds or "
+        "rainy-day counts; monsoon timing or onset; rainfall at a specific place; rainfall "
+        "interacted with another variable; snow or similar measures",
+    "Endogenous Variables":
+        "a meaningful, interpretable economic, social, political, health or environmental "
+        "variable — a quantity or outcome that can be measured, such as income, "
+        "consumption, wages, prices, conflict, pollution or population",
+}
+
 # What each side's entries ARE, for the embedding/reranker instructions.
 SIDE_DESCRIPTIONS: dict[str, str] = {
     "Rainfall Metrics":     "a rainfall-based instrumental variable",
