@@ -1,8 +1,8 @@
 * Project: WB Weather - metric
 * Created on: 2 Nov 2026
 * Created by: codex
-* edited by: codex
-* edited on: 2 Nov 2026
+* Last updated: 12 Nov 2026
+* Last updated by: codex
 * Stata v.18
 
 * does
@@ -26,12 +26,8 @@
 	cap log close
 	log using	"`out'/metric_app_check.log", text replace
 	tempfile	medians panel source chosen
-	capture mata: mata drop metric_sums() metric_demean() metric_resid() metric_stats()
-	capture mata: mata drop metric_root() metric_blocks() metric_folds()
-	capture mata: mata drop metric_choices() metric_add() metric_front()
 	capture mata: mata drop metric_distance() metric_neighbors() metric_save_neighbors() metric_spatial()
-	do			"$code/analysis/reg_code/metric_fe.mata"
-	do			"$code/analysis/reg_code/metric_front.mata"
+	do			"$code/analysis/reg_code/metric_front.do" routines
 	do			"$code/analysis/reg_code/metric_space.mata"
 
 

@@ -173,9 +173,9 @@ Large Tanzania/Uganda sample restrictions must accompany any interpretation.
 
 Each outcome and rainfall variable are residualized on the specified FE.
 For each separate single-instrument fit, the score is residualized rainfall
-times the full regression residual. This reuses `metric_fe.mata`; year-FE
-rank accounts for disconnected household cohorts. All variance estimators
-for a fit use the same observations and the same coefficient.
+times the full regression residual. This reuses the fixed-effects routines in
+`metric_front.do`; year-FE rank accounts for disconnected household cohorts.
+All variance estimators for a fit use the same observations and the same coefficient.
 
 The household component is the sum of squared household score sums, retaining
 unrestricted own-household serial covariance. Contemporaneous spatial terms
