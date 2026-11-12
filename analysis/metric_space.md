@@ -62,7 +62,8 @@ coefficient-change or bootstrap analysis forms part of this appendix update.
 ## Original estimation workflow
 
 The commands below document the earlier full estimation and pilot workflow.
-Run after the project globals and `metric_keys.do` have been established:
+Run after setting the project globals and creating `panel_keys.dta` with
+`do "$code/analysis/reg_code/metric_front.do" keys`:
 
 ```stata
 do "$code/analysis/reg_code/metric_geo.do"

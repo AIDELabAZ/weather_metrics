@@ -49,18 +49,28 @@ candidate choices exactly. The optional verification is
 `additional_exhibits_QA.md` for executed checks, denominators and sample
 restrictions, and `metric_app.tex` for the appendix-only manuscript blocks.
 
-## Original estimation workflow
+## Estimation and figure workflow
 
-The commands below rebuild the original estimates, rather than the saved-result
-appendix update above. Run after `projectdo.do` has established `$code`, `$raw`,
-and `$data`:
+The consolidated `metric_front.do` rebuilds the geographic keys, estimates
+candidate scores, runs instrument search, and generates the original frontier
+figures and descriptive tables. Run after `projectdo.do` has established
+`$code`, `$raw`, and `$data`:
 
 ```stata
-do "$code/analysis/reg_code/metric_keys.do"
-do "$code/analysis/reg_code/metric_front.do" 5 20
 do "$code/analysis/reg_code/metric_front.do"
-do "$code/analysis/viz_code/metric_front_vis.do"
 ```
+
+The optional `keys` argument rebuilds only `panel_keys.dta`, for spatial
+analyses that require the same household/geography crosswalk:
+
+```stata
+do "$code/analysis/reg_code/metric_front.do" keys
+```
+
+For a separate five-allocation pilot, run
+`do "$code/analysis/reg_code/metric_front.do" 5 20`. The pilot writes
+`_pilot` outputs without replacing the full-run figures. The fixed-effects and
+instrument-choice algorithms remain in the existing Mata support files.
 
 The five-allocation pilot has separate `_pilot` outputs. The full run uses
 20 allocations of five folds and 20 random candidate orderings. Allocation
@@ -78,7 +88,7 @@ append scripts verify the current mapping: `rf1` ARC2, `rf2` CHIRPS, `rf3`
 CPC, `rf4` ERA5, `rf5` MERRA-2, and `rf6` TAMSAT. `candidates.csv` records
 all 84 original weather names and metric/product identifiers.
 
-`metric_keys.do` reconstructs the original country-household identifiers
+The geographic-key stage of `metric_front.do` reconstructs the original country-household identifiers
 before applying the same string grouping used by `panel_build.do`.
 Household/year joins recover the EA identifiers dropped by the country
 append scripts. Tanzania uses its wave-specific cluster IDs rather than

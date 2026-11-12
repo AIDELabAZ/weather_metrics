@@ -10,7 +10,7 @@
 	* creates a separate georeferenced panel and coverage audit
 
 * assumes
-	* project globals and the panel_keys output from metric_keys.do
+	* project globals and the panel_keys output from metric_front.do keys
 	* released geovariables mappings in metric_geo.csv
 
 * TO DO:

@@ -36,6 +36,14 @@ The code in this repository is primarily for replicating the cleaning of the hou
 
 ### Running the pipeline
 
+The rainfall relevance and instrument-search workflow is consolidated in
+`analysis/reg_code/metric_front.do`. Running it without arguments reconstructs
+geographic keys, estimates candidate scores and selected-instrument frontiers,
+and exports the figures. Use `do "$code/analysis/reg_code/metric_front.do" keys`
+to regenerate the geographic keys alone, or append `5 20` to run the
+five-allocation pilot without regenerating the full figures. The existing
+Mata utilities remain separate.
+
 `projectdo.do` keeps the original numbered sections and run blocks. Run it in
 Stata 18 or newer, and edit/select the relevant blocks
 as before. The original block-comment choices are preserved: weather processing,
