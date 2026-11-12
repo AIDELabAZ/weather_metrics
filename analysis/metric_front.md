@@ -1,6 +1,6 @@
 # Rainfall selection frontier
 
-<!-- edited by: codex; edited on: 3 Nov 2026 -->
+<!-- edited by: codex; edited on: 12 Nov 2026 -->
 
 ## Appendix-only update, 3 Nov 2026
 
@@ -48,6 +48,16 @@ candidate choices exactly. The optional verification is
 `do "$code/analysis/reg_code/metric_app_check.do"`. See
 `additional_exhibits_QA.md` for executed checks, denominators and sample
 restrictions, and `metric_app.tex` for the appendix-only manuscript blocks.
+
+## Consolidated estimation entry point
+
+`metric_front.do` contains the fixed-effects, geographic-fold and selection
+routines previously loaded from `metric_fe.mata` and `metric_front.mata`. Its
+existing pilot and full-run commands, seeds, samples and output names are
+unchanged. Shared spatial, bootstrap and appendix-check callers use
+`do "$code/analysis/reg_code/metric_front.do" routines` to define the functions
+without reading data, changing frames, opening logs or running estimation.
+`metric_space.mata` remains the separate spatial-covariance dependency.
 
 ## Original estimation workflow
 

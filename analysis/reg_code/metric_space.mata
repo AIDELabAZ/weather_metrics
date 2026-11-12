@@ -1,7 +1,7 @@
 /* Project: WB Weather - metric
    Created by: codex; edited by: codex; edited on: 31 Oct 2026
    does: sparse spatial neighbors, score diagnostics, and spatial covariance
-   assumes: metric_fe.mata; released coordinates in decimal degrees
+   assumes: metric_front.do routines; released coordinates in decimal degrees
 */
 
 

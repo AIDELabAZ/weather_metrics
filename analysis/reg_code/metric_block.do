@@ -1,8 +1,8 @@
 * Project: WB Weather - metric
 * Created on: 31 Oct 2026
 * Created by: codex
-* edited by: codex
-* edited on: 31 Oct 2026
+* Last updated: 12 Nov 2026
+* Last updated by: codex
 * Stata v.18
 
 * does
@@ -26,9 +26,8 @@
 	cap log close
 	log using	"`out'/logs/metric_block.log", text replace
 	tempfile	panel groups draws
-	capture mata: mata drop metric_sums() metric_demean() metric_resid() metric_stats()
 	capture mata: mata drop metric_weighted_beta() metric_block_draws()
-	do			"$code/analysis/reg_code/metric_fe.mata"
+	do			"$code/analysis/reg_code/metric_front.do" routines
 
 
 **********************************************************************

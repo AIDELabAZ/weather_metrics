@@ -1,8 +1,8 @@
 * Project: WB Weather - metric
 * Created on: 31 Oct 2026
 * Created by: codex
-* edited by: codex
-* edited on: 31 Oct 2026
+* Last updated: 12 Nov 2026
+* Last updated by: codex
 * Stata v.18
 
 * does
@@ -31,9 +31,8 @@
 	timer clear 1
 	timer on 1
 	tempfile	country dictionary
-	capture mata: mata drop metric_sums() metric_demean() metric_resid() metric_stats()
 	capture mata: mata drop metric_distance() metric_neighbors() metric_save_neighbors() metric_spatial()
-	do			"$code/analysis/reg_code/metric_fe.mata"
+	do			"$code/analysis/reg_code/metric_front.do" routines
 	do			"$code/analysis/reg_code/metric_space.mata"
 
 
