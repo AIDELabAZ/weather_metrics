@@ -3,7 +3,7 @@
 # for the qwen3-8b embedder/reranker, which are loaded one at a time.
 #
 # Submit from the lit_review/analysis/hpc directory on Puma:
-#   sbatch --account=<PI_GROUP> classify.slurm                 # qwen3-0.6b (gap-fill) + 4b + 8b
+#   sbatch --account=<PI_GROUP> classify.slurm                 # qwen3-0.6b + 4b + 8b
 #   sbatch --account=<PI_GROUP> classify.slurm qwen3-8b bge    # pick backbones explicitly
 #
 # ~1.3k entries -> expect well under 30 min; time limit is generous.

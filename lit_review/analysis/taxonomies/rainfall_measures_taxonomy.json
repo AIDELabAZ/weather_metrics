@@ -1,0 +1,249 @@
+{
+  "title": "Taxonomy of Rainfall Measures",
+  "note": "Categories group specific rainfall variables according to the substantive feature of precipitation they measure rather than solely by units, aggregation period, or functional form. Variables measured over different temporal windows, such as monthly, seasonal, growing-season, or annual rainfall, remain in the same category when they capture the same substantive rainfall concept. Mathematical transformations are assigned separate categories when they change the substantive interpretation of the measure, as with deviations from normal, standardized anomalies, percentile measures, and one- or two-sided extreme events. Lagged rainfall measures are classified according to their underlying construction rather than assigned to a separate category. Cumulative or recurrent exposure remains distinct because it summarizes a history of rainfall shocks across multiple prior periods rather than a particular lagged realization. Named rainfall indices are distinguished from conventional standardized anomalies. Other is reserved for clearly identified and sufficiently specified measures that do not fit any predefined rainfall category, including identifiable non-rainfall measures. Unclassifiable is reserved for entries whose meaning or construction cannot be determined sufficiently from the extracted text and any supplied definition or context to assign a substantive rainfall category or establish that the measure falls outside the taxonomy. This includes unexplained codes, generic labels, incomplete fragments, uninterpretable or corrupted text, and rainfall measures with unspecified construction. A low classifier score alone does not determine either residual category.",
+  "categories": [
+    {
+      "category": "Total rainfall",
+      "description": "Raw accumulated precipitation over a specified period, rather than an average across observations or a historical reference period",
+      "examples": [
+        "Total annual rainfall",
+        "total rainy-season precipitation",
+        "total growing-season precipitation",
+        "monthly precipitation total",
+        "accumulated rainfall"
+      ]
+    },
+    {
+      "category": "Mean rainfall",
+      "description": "Average precipitation across observations within a specified period, rather than accumulated precipitation or a long-run climatological mean",
+      "examples": [
+        "Mean daily rainfall during the growing season",
+        "average monthly rainfall within a year",
+        "mean weekly precipitation",
+        "average rainfall during the current season"
+      ]
+    },
+    {
+      "category": "Rainfall change or growth",
+      "description": "Change in rainfall between periods rather than the contemporaneous rainfall level or departure from a climatological norm",
+      "examples": [
+        "Rainfall growth",
+        "annual rainfall change",
+        "year-on-year change in seasonal rainfall",
+        "proportional change from the previous year"
+      ]
+    },
+    {
+      "category": "Rainfall deviation from normal",
+      "description": "Signed difference between realized rainfall and a historical or reference amount, expressed in rainfall units rather than percentages or standardized units",
+      "examples": [
+        "Rainfall minus long-run mean",
+        "annual deviation from average",
+        "deviation from historical mean",
+        "deviation from normal rainfall",
+        "rainfall deviation from a fitted trend"
+      ]
+    },
+    {
+      "category": "Relative rainfall deviation",
+      "description": "Departure from normal expressed relative to the reference rainfall level rather than in rainfall units",
+      "examples": [
+        "Percentage deviation from historical rainfall",
+        "rainfall-to-normal ratio",
+        "log rainfall minus log historical rainfall",
+        "fractional deviation from average"
+      ]
+    },
+    {
+      "category": "Standardized rainfall anomaly",
+      "description": "Continuous signed departure from normal expressed in units of the historical standard deviation, excluding separately defined named rainfall indices",
+      "examples": [
+        "Seasonal rainfall z-score",
+        "standardized annual rainfall deviation",
+        "standardized monsoon rainfall",
+        "standardized precipitation anomaly"
+      ]
+    },
+    {
+      "category": "Absolute rainfall anomaly",
+      "description": "Magnitude of departure from normal where the direction of the anomaly is intentionally removed, using absolute values or squared deviations",
+      "examples": [
+        "Absolute standardized anomaly",
+        "|z|",
+        "squared standardized deviation",
+        "absolute rainfall deviation",
+        "squared rainfall deviation from normal"
+      ]
+    },
+    {
+      "category": "Rainfall distribution or percentile position",
+      "description": "Position of realized rainfall within its historical distribution, without necessarily identifying an extreme event",
+      "examples": [
+        "Rainfall percentile",
+        "fitted gamma-distribution percentile",
+        "rainfall quartile",
+        "percentile-discretized precipitation",
+        "rainfall-distribution bins"
+      ]
+    },
+    {
+      "category": "Two-sided rainfall extremes",
+      "description": "Measures that jointly identify or categorize unusually wet and unusually dry realizations, rather than retaining only one tail of the rainfall distribution",
+      "examples": [
+        "Above or below one standard deviation",
+        "below the 20th or above the 80th percentile",
+        "high/normal/low rainfall classification",
+        "negative/normal/positive rainfall shock classification"
+      ]
+    },
+    {
+      "category": "Drought or low-rainfall shock",
+      "description": "Measures retaining only the lower tail of the rainfall distribution or rainfall deficits, including indicators and measures of deficit severity",
+      "examples": [
+        "Drought indicator",
+        "rainfall below the 15th percentile",
+        "negative rainfall shock indicator",
+        "rainfall shortfall",
+        "one-sided drought-intensity measure"
+      ]
+    },
+    {
+      "category": "Excess-rainfall or flood shock",
+      "description": "Measures retaining only the upper tail of the rainfall distribution or rainfall surpluses, including indicators and measures of excess-rainfall severity",
+      "examples": [
+        "Positive rainfall shock indicator",
+        "excessive rainfall",
+        "high-rainfall shock",
+        "rainfall surplus",
+        "flood rainfall shock"
+      ]
+    },
+    {
+      "category": "Rainfall frequency",
+      "description": "Number or frequency of days, months, or other observations experiencing rainfall, dryness, or a specified rainfall state, without measuring consecutive duration",
+      "examples": [
+        "Number of rainy days",
+        "number of wet days",
+        "number of dry days",
+        "number of drought months in a year",
+        "share of days with precipitation"
+      ]
+    },
+    {
+      "category": "Wet/dry spell duration",
+      "description": "Persistence or consecutive duration of wet or dry conditions, rather than the total frequency of such conditions",
+      "examples": [
+        "Longest dry spell",
+        "consecutive dry days",
+        "drought duration",
+        "consecutive drought months",
+        "longest spell of rainfall days"
+      ]
+    },
+    {
+      "category": "Rainfall timing or onset",
+      "description": "Timing of the beginning, end, or arrival of rainfall or the rainy season, rather than the amount or frequency of precipitation",
+      "examples": [
+        "Monsoon onset",
+        "rainy-season onset",
+        "delay in onset",
+        "start or end date of the rainy season",
+        "timing of first rainfall"
+      ]
+    },
+    {
+      "category": "Rainfall intensity or short-duration extremes",
+      "description": "Amount or maximum intensity of precipitation during a short event or interval, rather than an indicator of whether an extreme event occurred",
+      "examples": [
+        "Maximum 24-hour rainfall",
+        "maximum consecutive five-day precipitation",
+        "extreme daily precipitation amount",
+        "maximum hourly rainfall",
+        "peak rainfall intensity"
+      ]
+    },
+    {
+      "category": "Rainfall concentration or within-season distribution",
+      "description": "Temporal concentration or uneven distribution of rainfall within a season or year, measured through the relative allocation of rainfall across intervals rather than its total amount",
+      "examples": [
+        "Wettest-month rainfall relative to average rainfall",
+        "ratio of maximum monthly rainfall to average rainfall",
+        "share of seasonal rainfall occurring in the wettest month",
+        "temporal concentration index"
+      ]
+    },
+    {
+      "category": "Rainfall variability or volatility",
+      "description": "Statistical dispersion of rainfall across repeated observations or periods, rather than the temporal concentration of rainfall within a particular season",
+      "examples": [
+        "Standard deviation of rainfall",
+        "rainfall variance",
+        "coefficient of variation",
+        "standard deviation of monthly rainfall",
+        "rolling rainfall CV"
+      ]
+    },
+    {
+      "category": "Rainfall index",
+      "description": "Named or composite precipitation-derived indices that transform or combine rainfall information using a specified index construction, including indices incorporating other hydroclimatic variables",
+      "examples": [
+        "Standardized Precipitation Index (SPI)",
+        "Standardized Precipitation-Evapotranspiration Index (SPEI)",
+        "Palmer Drought Severity Index (PDSI)",
+        "Weighted Anomaly of Standardized Precipitation (WASP)"
+      ]
+    },
+    {
+      "category": "Cumulative or recurrent rainfall-shock exposure",
+      "description": "Measures summarizing repeated rainfall shocks or accumulated exposure over multiple prior periods rather than a single rainfall realization from a particular period",
+      "examples": [
+        "Number of droughts in the previous five or ten years",
+        "fraction of prior years classified as dry",
+        "cumulative drought count",
+        "recurrent rainfall shocks"
+      ]
+    },
+    {
+      "category": "Long-run rainfall climate",
+      "description": "Historical or climatological rainfall conditions used directly as the measure of interest rather than solely as a reference for contemporaneous weather",
+      "examples": [
+        "Long-run mean precipitation",
+        "historical median rainfall",
+        "precipitation normal used as an instrument",
+        "long-run average rainfall"
+      ]
+    },
+    {
+      "category": "Rainfall trend or long-run change",
+      "description": "Persistent changes in rainfall conditions, including estimated trends and long-run shifts, rather than contemporaneous anomalies or year-to-year fluctuations",
+      "examples": [
+        "Long-run precipitation trend",
+        "change in precipitation trend",
+        "secular change in rainfall",
+        "historical rainfall trend coefficient",
+        "multi-decade change in mean rainfall"
+      ]
+    },
+    {
+      "category": "Other",
+      "description": "Clearly identified and sufficiently specified measures that do not fit any preceding rainfall category, including identifiable non-rainfall measures. Excludes entries whose meaning or construction is too incomplete or ambiguous to assess category fit.",
+      "examples": [
+        "Covariance between monthly rainfall and monthly temperature",
+        "Wind speed",
+        "Air temperature"
+      ]
+    },
+    {
+      "category": "Unclassifiable",
+      "description": "Extracted strings that do not identify an interpretable measure, or that lack enough information about its construction to distinguish among the preceding rainfall categories. Includes gibberish, uninterpretable or corrupted text, unexplained codes or abbreviations, generic labels, and incomplete fragments when no supplied definition or context resolves their meaning.",
+      "examples": [
+        "âˆ†lnmp",
+        "x1",
+        "vul",
+        "Driving factor",
+        "Rainfall shock with unspecified construction",
+        "Rainfall with no indication of whether it is a total, mean, anomaly, or another measure"
+      ]
+    }
+  ]
+}

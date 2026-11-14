@@ -16,11 +16,11 @@ DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib python3 analysis/hpc/export_classif
 ```
 
 ## 1. Mac: copy the code to Puma
-Only three files and this folder are needed:
+Only these files and folders are needed:
 ```bash
 cd ~/Documents/GitHub/weather_metrics/lit_review
 ssh <netid>@filexfer.hpc.arizona.edu "mkdir -p /groups/<PI_GROUP>/<netid>/weather_iv/lit_review/analysis"
-rsync -av analysis/fixed_label_classifier.py analysis/sankey_taxonomy.py \
+rsync -av analysis/fixed_label_classifier.py analysis/sankey_taxonomy.py analysis/taxonomies \
       <netid>@filexfer.hpc.arizona.edu:/groups/<PI_GROUP>/<netid>/weather_iv/lit_review/analysis/
 rsync -av --exclude '*.out' --exclude hpc_cache.json analysis/hpc \
       <netid>@filexfer.hpc.arizona.edu:/groups/<PI_GROUP>/<netid>/weather_iv/lit_review/analysis/
@@ -43,11 +43,10 @@ sbatch --account=<PI_GROUP> classify.slurm            # qwen3-0.6b (gap-fill) + 
 squeue -u <netid>                                      # check status
 tail -f classify_<jobid>.out
 ```
-The log prints the share of entries labelled Other for each side. The 0.6B model sent
-60–75% of endogenous entries to Other.
-The 0.6B pass only fills in entries that aren't in your local 0.6B cache yet (mostly
-test-set entries), so all three sizes are compared on the same entries. Your existing
-0.6B labels aren't changed. For the bge robustness check, add its model IDs to
+The log prints the share of entries labelled Other and Unclassifiable for each side.
+Since the Nov 2026 taxonomy switch (taxonomies/*.json, METHOD "residuals-v1") every
+backbone, 0.6B included, is scored from scratch: the cache key changed, so nothing
+from earlier runs is reused. For the bge robustness check, add its model IDs to
 `setup_env.sh` and run `classify.slurm qwen3-0.6b qwen3-4b qwen3-8b bge`.
 
 ## 4. Mac: fetch, merge and rebuild the Sankeys

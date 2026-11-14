@@ -212,7 +212,9 @@ _NORMALIZATIONS = [
     (re.compile(r"\bmon(?:thly)?\b"),   "monthly"),
     (re.compile(r"\bwk|week(?:ly)?\b"), "weekly"),
     # common abbrevs
-    (re.compile(r"\bgdp\b"),            "gdp per capita"),
+    # Skip when "per capita" already follows (the old bug: "gdp per capita" ->
+    # "gdp per capita per capita").
+    (re.compile(r"\bgdp\b(?!\s*per\s*capita)"), "gdp per capita"),
     (re.compile(r"\bcpi\b"),            "consumer price index"),
     (re.compile(r"\bres\b"),            "renewable energy sources"),
 ]
@@ -701,14 +703,19 @@ def build_summary(*sides) -> pd.DataFrame:
 # ─── Labels to exclude from the Sankey entirely (opt-in) ───────────────────
 # A label in here is dropped from build_sankey()'s left/right maps *before*
 # grouping by paper — so a paper whose ONLY entries on that side are noise
-# ("Other (...)") or missing text ("Not Specified (...)") ends up with an
+# ("Other (...)", "Unclassifiable (...)") or missing text ("Not Specified (...)") ends up with an
 # empty entry list and is skipped entirely by the
 # `if not l_inst or not r_inst: continue` check in build_sankey() — it
 # contributes to neither side's counts, not just a hidden/renamed node. A
 # paper with a MIX of real and noise/missing entries keeps its real ones;
 # only the excluded label's rows are dropped.
-RAIN_EXCLUDE:  set[str] = {"Other (Rainfall Metrics)", "Not Specified (Rainfall Metrics)"}
-ENDOG_EXCLUDE: set[str] = {"Other (Endogenous Variables)", "Not Specified (Endogenous Variables)"}
+# With the Nov 2026 taxonomy, Other is a legitimate, legible variable that
+# fits no category, so it is shown as its own node. Unclassifiable (gibberish,
+# codes, fragments) is excluded; its share of all entries is reported instead
+# (report_residual_shares). With CATEGORIZER = "llm", Other is still the junk
+# bucket — add it back here if you switch.
+RAIN_EXCLUDE:  set[str] = {"Unclassifiable (Rainfall Metrics)", "Not Specified (Rainfall Metrics)"}
+ENDOG_EXCLUDE: set[str] = {"Unclassifiable (Endogenous Variables)", "Not Specified (Endogenous Variables)"}
 
 # ─── Node counting (both sides) ───────────────────────────────────────────
 # True  → every node's printed number is the EXACT count of individual
@@ -1058,6 +1065,8 @@ def process_side(
           f"{len(rejected)} raw fragments rejected by cleaning)")
 
     other_label        = f"Other ({side_name})"
+    # Fixed taxonomy only; the LLM categorizer has a single Other bucket.
+    unclassifiable_label = f"Unclassifiable ({side_name})" if CATEGORIZER == "fixed" else other_label
     not_specified_label = f"Not Specified ({side_name})"
     unique_entries = sorted(exp["entry"].unique()) if len(exp) else []
 
@@ -1065,7 +1074,7 @@ def process_side(
     if CATEGORIZER == "fixed":
         print(f"  Classifying {len(unique_entries)} unique entries into the fixed taxonomy...")
         entry_to_category, audit = (
-            fixed_label_classifier.classify(unique_entries, side_name, other_label)
+            fixed_label_classifier.classify(unique_entries, side_name)
             if unique_entries else ({}, pd.DataFrame())
         )
     else:
@@ -1073,14 +1082,15 @@ def process_side(
         entry_to_category = classify_into_categories(unique_entries, side_name, other_label) if unique_entries else {}
 
     category_counts = Counter(entry_to_category.values())
-    n_raw = len(category_counts) - (1 if other_label in category_counts else 0)
+    residuals = {other_label, unclassifiable_label}
+    n_raw = len(set(category_counts) - residuals)
     print(f"  {n_raw} categories used "
-          f"(+ {other_label}: {category_counts.get(other_label, 0)} entries)")
+          + ", ".join(f"(+ {r}: {category_counts.get(r, 0)} entries)" for r in sorted(residuals)))
 
     # Blank cells never reach here at all (they never survive expand_column/
     # clean_entry, and only show up later as fallback rows), so this is
-    # exactly "unique entries excluding both blank and incoherent (Other)."
-    n_unique_real = len(unique_entries) - category_counts.get(other_label, 0)
+    # exactly "unique entries excluding blank, Other and Unclassifiable."
+    n_unique_real = len(unique_entries) - sum(category_counts.get(r, 0) for r in residuals)
     print(f"  Unique entries classified into a real category: {n_unique_real} / {len(unique_entries)}")
 
     if CATEGORIZER == "fixed":
@@ -1114,7 +1124,7 @@ def process_side(
             continue
         raw_vals = rain_df_raw.loc[[paper_idx], col]
         has_raw = any(str(v).strip().lower() not in ("", "n/a", "na") for v in raw_vals.dropna())
-        label = other_label if has_raw else not_specified_label
+        label = unclassifiable_label if has_raw else not_specified_label
         fallback_rows.append({"paper_idx": paper_idx, "entry": label.lower(), label_col: label, id_col: label})
     if fallback_rows:
         print(f"  +{len(fallback_rows)} papers with no surviving entry added as fallback nodes")
@@ -1206,6 +1216,34 @@ def load_rainfall_papers(merged_csv_path: str) -> pd.DataFrame:
     return rain.set_index("paper_key")
 
 
+def report_residual_shares(sides: list[tuple[str, pd.DataFrame, str]]) -> pd.DataFrame:
+    """Share of each side's entries labelled Other / Unclassifiable, for
+    reporting alongside the Sankey (which drops Unclassifiable). Two bases:
+    entry instances (one per paper x entry, incl. fallback rows for papers
+    whose text all failed cleaning) and unique cleaned entries. "Not
+    Specified" rows (blank text) are left out of the denominator."""
+    rows = []
+    for side_name, exp, label_col in sides:
+        d = exp[~exp[label_col].str.startswith("Not Specified (")]
+        uniq = d.drop_duplicates("entry")
+        for residual in ("Other", "Unclassifiable"):
+            label = f"{residual} ({side_name})"
+            n_inst, n_uniq = int((d[label_col] == label).sum()), int((uniq[label_col] == label).sum())
+            rows.append({"side": side_name, "label": label,
+                         "n_instances": n_inst, "total_instances": len(d),
+                         "pct_instances": round(100 * n_inst / max(len(d), 1), 1),
+                         "n_unique": n_uniq, "total_unique": len(uniq),
+                         "pct_unique": round(100 * n_uniq / max(len(uniq), 1), 1),
+                         "in_sankey": label not in (RAIN_EXCLUDE | ENDOG_EXCLUDE)})
+    df = pd.DataFrame(rows)
+    print("\nResidual categories (share of entries):")
+    for r in df.itertuples():
+        print(f"  {r.label}: {r.pct_instances}% of entry instances ({r.n_instances}/{r.total_instances}), "
+              f"{r.pct_unique}% of unique entries ({r.n_unique}/{r.total_unique})"
+              f"{'' if r.in_sankey else '  [excluded from Sankey]'}")
+    return df
+
+
 def main():
     print("Loading data...")
     rain_df_raw = load_rainfall_papers(MERGED_CSV)
@@ -1245,6 +1283,14 @@ def main():
         audit_all = pd.concat([rain_audit, endog_audit], ignore_index=True)
         audit_all.to_csv(CLASSIFIER_AUDIT_CSV, index=False)
         print(f"Fixed-label classifier audit → {CLASSIFIER_AUDIT_CSV} ({len(audit_all)} rows)")
+        # Written next to the audit CSV, so each driver run gets its own file.
+        shares_csv = os.path.join(os.path.dirname(CLASSIFIER_AUDIT_CSV),
+                                  os.path.basename(CLASSIFIER_AUDIT_CSV).replace("classifier_audit",
+                                                                                 "residual_shares"))
+        report_residual_shares([("Rainfall Metrics", rain_exp, "rain_cluster_label"),
+                                ("Endogenous Variables", endog_exp, "endog_cluster_label")]
+                               ).to_csv(shares_csv, index=False)
+        print(f"Other / Unclassifiable shares → {shares_csv}")
 
     summary_endog = build_summary(
         ("endog", endog_exp, "endog_cluster_id", "endog_cluster_label"),

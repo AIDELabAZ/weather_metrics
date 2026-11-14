@@ -1,0 +1,216 @@
+{
+  "title": "Taxonomy of Economic Concepts",
+  "note": "Categories map specific endogenous-variable names to a fixed set of economic concepts. Classification is based on the economic object represented by the variable rather than the paper's broader topic, sector, population, functional form, or empirical transformation. For example, farm income is classified as income, agricultural employment as labor markets and employment, agricultural exports as trade and international integration, and government health expenditure as public finance and government activity. The JEL codes provide conceptual anchors based on the American Economic Association's Journal of Economic Literature classification system; they are not themselves the classification output. Other is reserved for clearly identified economic variables whose substantive concept does not fit any predefined category. Unclassifiable is reserved for entries that do not provide enough information to identify a specific economic variable from the extracted text and any supplied definition or context. First assess whether the variable can be interpreted; then assess category fit. Unexplained codes, generic labels, incomplete fragments, and uninterpretable or corrupted text are Unclassifiable when their meaning cannot be resolved from the available information. A low classifier score alone does not determine either residual category.",
+  "categories": [
+    {
+      "category": "Income & income shocks",
+      "description": "Individual, household, farm, or other income levels, changes, seasonality, and shocks. Excludes wages and aggregate GDP.",
+      "jel_codes": [
+        "D31",
+        "O15"
+      ]
+    },
+    {
+      "category": "Consumption, expenditure & demand",
+      "description": "Individual or household consumption, expenditure, purchases, or demand for goods and services.",
+      "jel_codes": [
+        "D12",
+        "E21"
+      ]
+    },
+    {
+      "category": "Poverty, inequality & welfare",
+      "description": "Poverty, deprivation, wealth, inequality, distributional outcomes, and general measures of material or subjective welfare.",
+      "jel_codes": [
+        "D31",
+        "D63",
+        "I31",
+        "I32"
+      ]
+    },
+    {
+      "category": "Agricultural production, inputs & land",
+      "description": "Agricultural production and productivity, crop outcomes, agricultural inputs, farming practices, land use and tenure, irrigation, and agricultural technology.",
+      "jel_codes": [
+        "Q11",
+        "Q12",
+        "Q15",
+        "Q16"
+      ]
+    },
+    {
+      "category": "Health, nutrition & food security",
+      "description": "Physical or mental health, disease, mortality, anthropometrics, nutrition, food security, health behavior, and utilization or quality of healthcare.",
+      "jel_codes": [
+        "I10-I15",
+        "Q18"
+      ]
+    },
+    {
+      "category": "Education & human capital",
+      "description": "Schooling, educational attainment, skills, cognitive development, training, and other measures of human-capital accumulation.",
+      "jel_codes": [
+        "I21-I26",
+        "J24"
+      ]
+    },
+    {
+      "category": "Labor markets & employment",
+      "description": "Employment, unemployment, labor-force participation, labor supply, wages, occupations, working conditions, and work arrangements.",
+      "jel_codes": [
+        "J21-J33",
+        "J64"
+      ]
+    },
+    {
+      "category": "Population, fertility & family",
+      "description": "Population size and composition, fertility, marriage, family formation, household structure, and demographic change other than migration.",
+      "jel_codes": [
+        "J11-J14"
+      ]
+    },
+    {
+      "category": "Migration & displacement",
+      "description": "Migration, geographic mobility, displacement, resettlement, migrant stocks, and movement between locations.",
+      "jel_codes": [
+        "F22",
+        "J61",
+        "O15",
+        "R23"
+      ]
+    },
+    {
+      "category": "Social capital, networks, norms & attitudes",
+      "description": "Social connections, peer effects, social capital, trust, cultural or social norms, attitudes, empowerment, and socially transmitted behavior.",
+      "jel_codes": [
+        "D85",
+        "Z10-Z13"
+      ]
+    },
+    {
+      "category": "Political participation & elections",
+      "description": "Voting, turnout, electoral behavior and outcomes, political representation, candidacy, and election-related political participation.",
+      "jel_codes": [
+        "D72"
+      ]
+    },
+    {
+      "category": "Institutions, governance & public policy",
+      "description": "Institutional quality, state capacity, corruption, regulation, property rights, legal institutions, governance, policy regimes, and policy uncertainty. Excludes government expenditure, taxation, and transfers.",
+      "jel_codes": [
+        "D02",
+        "D73",
+        "H11",
+        "H83",
+        "P16"
+      ]
+    },
+    {
+      "category": "Conflict, crime & social unrest",
+      "description": "Armed conflict, political violence, criminal activity, riots, protests, dissent, repression, organized crime, and related social unrest.",
+      "jel_codes": [
+        "D74",
+        "F51",
+        "K14",
+        "K42"
+      ]
+    },
+    {
+      "category": "Macroeconomic growth, output & volatility",
+      "description": "Economy-wide output, GDP, economic growth, output gaps, aggregate productivity, and macroeconomic shocks or volatility.",
+      "jel_codes": [
+        "E23",
+        "E32",
+        "O40",
+        "O47"
+      ]
+    },
+    {
+      "category": "Prices & inflation",
+      "description": "Prices of goods, commodities, outputs, or inputs, as well as aggregate price indices and inflation.",
+      "jel_codes": [
+        "D40",
+        "E31"
+      ]
+    },
+    {
+      "category": "Trade & international integration",
+      "description": "Imports, exports, trade openness, exposure to international markets, trade policy, and cross-border productive capital flows.",
+      "jel_codes": [
+        "F10-F21"
+      ]
+    },
+    {
+      "category": "Finance, credit & monetary conditions",
+      "description": "Credit, borrowing, banking, savings, insurance, financial access, asset markets, interest rates, exchange rates, money, and monetary conditions.",
+      "jel_codes": [
+        "E41-E52",
+        "G10-G29",
+        "O16"
+      ]
+    },
+    {
+      "category": "Firms, investment & productivity",
+      "description": "Nonagricultural firm outcomes, productive investment, capital accumulation, profitability, productivity, business formation, and firm growth or survival.",
+      "jel_codes": [
+        "D21-D25",
+        "G31-G34",
+        "L20-L26"
+      ]
+    },
+    {
+      "category": "Innovation, technology & information",
+      "description": "Innovation, research and development, technological adoption outside agriculture, knowledge, digital technologies, information access, and media.",
+      "jel_codes": [
+        "D83",
+        "L82",
+        "L86",
+        "O30-O33"
+      ]
+    },
+    {
+      "category": "Environment, climate & natural resources",
+      "description": "Environmental quality and pollution, emissions, conservation, ecosystems, climate or weather variables when themselves endogenous, natural disasters, energy, and the stock, extraction, or rents of natural resources.",
+      "jel_codes": [
+        "Q31-Q43",
+        "Q50-Q57"
+      ]
+    },
+    {
+      "category": "Infrastructure, transport & urban/spatial development",
+      "description": "Physical infrastructure, transportation, accessibility, housing, urbanization, spatial concentration, and location-based or regional development.",
+      "jel_codes": [
+        "O18",
+        "R11-R42"
+      ]
+    },
+    {
+      "category": "Public finance & government activity",
+      "description": "Taxation, government expenditure, public debt and deficits, procurement, subsidies, intergovernmental finance, public investment, and other fiscal activity.",
+      "jel_codes": [
+        "H20-H72"
+      ]
+    },
+    {
+      "category": "Transfers, remittances & aid",
+      "description": "Private transfers, remittances, cash or in-kind transfers, pensions, foreign assistance, development aid, and other external transfers when the transfer itself is the endogenous economic object.",
+      "jel_codes": [
+        "F24",
+        "F35",
+        "H53",
+        "H55",
+        "I38"
+      ]
+    },
+    {
+      "category": "Other",
+      "description": "Clearly identified economic variables whose substantive concept does not fit any preceding category. The meaning of the variable must be sufficiently specified to assess category fit. Excludes entries whose meaning is missing, ambiguous, corrupted, or uninterpretable.",
+      "jel_codes": []
+    },
+    {
+      "category": "Unclassifiable",
+      "description": "Extracted strings that do not provide enough information to identify a specific economic variable, including gibberish, uninterpretable or corrupted text, unexplained variable codes or abbreviations, generic labels, and incomplete fragments. Examples include âˆ†lnmp, x1, vul, and Driving factor when no supplied definition or context resolves their meaning.",
+      "jel_codes": []
+    }
+  ]
+}
