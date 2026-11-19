@@ -1,8 +1,8 @@
 * Project: WB Weather - metric
 * Created on: 30 Oct 2026
 * Created by: codex
-* edited by: jdm
-* edited on: 5 Nov 2026
+* edited by: codex
+* edited on: 19 Nov 2026
 * Stata v.19.5
 
 * does
@@ -20,18 +20,23 @@
 **# 0 - setup
 **********************************************************************
 
+* no argument runs the full file; all_pair exports only the pooled chart
+* paired returns the specification inventory in memory for metric_comp_vis.do
+	args		figure
+	if !inlist("`figure'", "", "all_pair", "paired") error 198
+
 * define paths
 	global		root	"$data/results_data"
 	global		xfig	"$data/results_data/figures/metric_paper"
 	global		logout	"$data/results_data/logs"
 
-* open one log for the complete visualization file
-	cap log close
-	log using	"$logout/metric_coeff.log", text replace
-
 * load the shared product colors
 	include		"$code/analysis/viz_code/metric_palette.do"
 
+if "`figure'" == "" {
+* open one log for the complete visualization file
+	cap log close
+	log using	"$logout/metric_coeff.log", text replace
 
 **********************************************************************
 **# 1 - bootstrap figures
@@ -387,6 +392,7 @@ restore
 				name(boot_heat, replace)
 	graph export "$xfig/boot_heat.pdf", name(boot_heat) replace
 	graph export "$xfig/boot_heat.png", name(boot_heat) width(3300) replace
+}
 
 
 **********************************************************************
@@ -406,12 +412,10 @@ restore
 	isid		country outcome_var weather_var spec_id
 	assert		year_fe == 1 & household_fe == (spec_id == "reg2")
 	keep		country outcome_var weather_var spec_id beta ci_lo ci_up ///
-				pval estimable
+				pval estimable stdrd_err
 	gen byte	present = 1
-	rename		(beta ci_lo ci_up pval estimable present) ///
-				(beta_ ci_lo_ ci_up_ pval_ estimable_ present_)
-	reshape wide beta_ ci_lo_ ci_up_ pval_ estimable_ present_, ///
-				i(country outcome_var weather_var) j(spec_id) string
+	rename		(beta ci_lo ci_up pval estimable stdrd_err present) ///
+				(beta_ ci_lo_ ci_up_ pval_ estimable_ stdrd_err_ present_)
 	tempfile	paired
 	save		"`paired'"
 
@@ -426,7 +430,12 @@ restore
 	bysort country outcome_var: gen str7 weather_var = ///
 				"v" + string(ceil(_n / 6), "%02.0f") + ///
 				"_rf" + string(mod(_n - 1, 6) + 1)
-	merge		1:1 country outcome_var weather_var using "`paired'", nogen
+	expand		2
+	bysort country outcome_var weather_var: gen str4 spec_id = cond(_n == 1, "reg7", "reg2")
+	merge		1:1 country outcome_var weather_var spec_id using "`paired'", assert(master match) nogen
+	reshape wide beta_ ci_lo_ ci_up_ pval_ estimable_ stdrd_err_ present_, ///
+				i(country outcome_var weather_var) j(spec_id) string
+	assert		_N == 1008
 	gen str40	omission = ""
 	replace		omission = "reg7 missing" if present_reg7 != 1
 	replace		omission = "reg2 missing" if present_reg2 != 1
@@ -449,12 +458,17 @@ restore
 	gen int		omitted = 168 - pairs
 	egen byte	first = tag(country)
 	list		country pairs omitted if first, noobs
+	gen byte	product = real(substr(weather_var, 7, 1))
+	gen byte	metric = real(substr(weather_var, 2, 2))
+	if "`figure'" == "paired" exit
 	keep if		omission == ""
+	if _N == 0 {
+		display		as error "No valid coefficient pairs to plot."
+		error		2000
+	}
 
 * rank once by signed reg7; every plotted layer uses this same index
 	bysort country (beta_reg7 outcome_var weather_var): gen int rank = _n
-	gen byte	product = real(substr(weather_var, 7, 1))
-	gen byte	metric = real(substr(weather_var, 2, 2))
 	gen double	outcome_row = cond(outcome_var == "lncp_yld", 39, 37.5)
 	gen double	product_row = 34.5 - 1.5 * product
 	gen double	metric_row = 22.5 - 1.5 * metric
@@ -482,11 +496,59 @@ restore
 	loc			stubs eth mwi ngr nga tza uga
 	loc			colors arc2 chirps cpc era5 merra2 tamsat
 	loc			i = 0
-	foreach c of local countries {
+	loc			canvas xsize(9) ysize(5.5)
+	loc			ciwidth .576pt
+	loc			point 3pt
+	loc			strip 1.5pt
+	loc			stroke .864pt
+	loc			ymin 0
+	loc			ymax 62
+	loc			base7 52
+	loc			band 7.5
+	loc			tickstep 24
+	loc			width 3300
+	loc			symbols 12 "N.S." 13 "Positive, p < 0.05" 14 "Negative, p < 0.05"
+	if "`figure'" == "all_pair" loc countries
+	foreach c in `countries' all {
 		use			"`paired'", clear
-		keep if		country == `c'
-		loc			i = `i' + 1
-		loc			stub : word `i' of `stubs'
+		loc			country_strip
+		loc			legend_keys
+		if "`c'" != "all" {
+			keep if		country == `c'
+			loc			i = `i' + 1
+			loc			stub : word `i' of `stubs'
+			if _N == 0 continue
+		}
+		else {
+			sort		beta_reg7 country outcome_var weather_var
+			replace		rank = _n
+			display		"All countries: " _N " valid pairs; " 1008 - _N " omitted."
+			loc			stub all
+			loc			canvas xsize(14) ysize(8.5)
+			loc			ciwidth .22pt
+			loc			point 1.6pt
+			loc			strip 1.1pt
+			loc			stroke .38pt
+			loc			ymin -12
+			loc			ymax 81
+			loc			base7 62
+			loc			band 16
+			loc			tickstep 168
+			loc			width 4800
+		* Keep the legend symbols legible independently of the dense plotted points.
+			loc			legend_keys (scatteri . ., yaxis(2) msymbol(Th) mcolor(black%75) msize(4pt)) ///
+						(scatteri . ., yaxis(2) msymbol(+) mcolor(edkblue%75) msize(4pt)) ///
+						(scatteri . ., yaxis(2) msymbol(+) mcolor(maroon%75) msize(4pt))
+			loc			symbols 22 "N.S." 23 "Positive, significant at 5%" 24 "Negative, significant at 5%"
+		* Use the constructed metric names from metric_sum_vis.do on the new chart.
+			loc			rows : subinstr local rows "Variance Of Daily Rainfall" "SD Of Daily Rainfall"
+			loc			rows : subinstr local rows "Longest Dry Spell" "Longest Mid-Window Dry Spell"
+			loc			rows `rows' -1.5 "{bf:Country}" -3 "Ethiopia" ///
+						-4.5 "Malawi" -6 "Niger" -7.5 "Nigeria" -9 "Tanzania" -10.5 "Uganda"
+			gen double	country_row = -1.5 * (country + 1 - (country >= 4))
+			loc			country_strip (scatter country_row rank, mcolor("93 104 114") ///
+						msymbol(O) msize(`strip') mlwidth(`stroke'))
+		}
 		loc			n = _N
 		loc			xmax = `n' + 1
 		quietly count if beta_reg7 < 0
@@ -504,13 +566,13 @@ restore
 					cond(`fraction' <= 2, 2, cond(`fraction' <= 5, 5, 10)))
 		loc			lo = floor((`lo' - .03 * `span') / `step') * `step'
 		loc			hi = ceil((`hi' + .03 * `span') / `step') * `step'
-		loc			gain = 7.5 / (`hi' - `lo')
+		loc			gain = `band' / (`hi' - `lo')
 		loc			nticks = round((`hi' - `lo') / `step')
 		loc			ticks
 		forvalues j = 0/`nticks' {
 			loc			value = `lo' + `j' * `step'
 			loc			label = strtrim(string(`value', "%6.3g"))
-			loc			y7 = 52 + `gain' * (`value' - `lo')
+			loc			y7 = `base7' + `gain' * (`value' - `lo')
 			loc			y2 = 42.5 + `gain' * (`value' - `lo')
 			loc			ticks `ticks' `y7' "`label'" `y2' "`label'"
 		}
@@ -518,24 +580,24 @@ restore
 	* position two bands on one canvas; axis labels retain the original units
 		loc			plots
 		foreach m in reg7 reg2 {
-			loc			bottom = cond("`m'" == "reg7", 52, 42.5)
+			loc			bottom = cond("`m'" == "reg7", `base7', 42.5)
 			gen double	y_`m' = `bottom' + `gain' * (beta_`m' - `lo')
 			gen double	lo_`m' = `bottom' + `gain' * (ci_lo_`m' - `lo')
 			gen double	hi_`m' = `bottom' + `gain' * (ci_up_`m' - `lo')
 			loc			zero_`m' = `bottom' - `gain' * `lo'
 			loc			plots `plots' ///
 				(rbar lo_`m' hi_`m' rank if pval_`m' > .05, yaxis(2) ///
-				barwidth(.2) color(black%50) lwidth(.576pt)) ///
+				barwidth(.2) color(black%50) lwidth(`ciwidth')) ///
 				(rbar lo_`m' hi_`m' rank if pval_`m' <= .05 & beta_`m' >= 0, ///
-				yaxis(2) barwidth(.2) color(edkblue%50) lwidth(.576pt)) ///
+				yaxis(2) barwidth(.2) color(edkblue%50) lwidth(`ciwidth')) ///
 				(rbar lo_`m' hi_`m' rank if pval_`m' <= .05 & beta_`m' < 0, ///
-				yaxis(2) barwidth(.2) color(maroon%50) lwidth(.576pt)) ///
+				yaxis(2) barwidth(.2) color(maroon%50) lwidth(`ciwidth')) ///
 				(scatter y_`m' rank if pval_`m' > .05, yaxis(2) ///
-				mcolor(black%75) msymbol(Th) msize(3pt) mlwidth(.864pt)) ///
+				mcolor(black%75) msymbol(Th) msize(`point') mlwidth(`stroke')) ///
 				(scatter y_`m' rank if pval_`m' <= .05 & beta_`m' >= 0, ///
-				yaxis(2) mcolor(edkblue%75) msymbol(+) msize(3pt) mlwidth(.864pt)) ///
+				yaxis(2) mcolor(edkblue%75) msymbol(+) msize(`point') mlwidth(`stroke')) ///
 				(scatter y_`m' rank if pval_`m' <= .05 & beta_`m' < 0, ///
-				yaxis(2) mcolor(maroon%75) msymbol(+) msize(3pt) mlwidth(.864pt))
+				yaxis(2) mcolor(maroon%75) msymbol(+) msize(`point') mlwidth(`stroke'))
 		}
 
 	* draw the shared indicator strip from those same ranks
@@ -544,22 +606,22 @@ restore
 			loc			color : word `p' of `colors'
 			loc			strips `strips' ///
 				(scatter product_row rank if product == `p', ///
-				mcolor("``color''") msize(1.5pt) mlwidth(.864pt))
+				mcolor("``color''") msize(`strip') mlwidth(`stroke'))
 		}
 		twoway		`strips' ///
 					(scatter outcome_row metric_row rank, ///
 					mcolor("93 104 114" "93 104 114") msymbol(O O) ///
-					msize(1.5pt 1.5pt) mlwidth(.864pt .864pt)) `plots', ///
-					scheme(stcolor) xsize(9) ysize(5.5) ///
+					msize(`strip' `strip') mlwidth(`stroke' `stroke')) `plots' `country_strip' `legend_keys', ///
+					scheme(stcolor) `canvas' ///
 					graphregion(color(white) margin(l=8pt r=8pt t=4pt b=4pt)) ///
 					plotregion(color(white) lstyle(none) margin(zero)) ///
 					xscale(range(0 `xmax') noextend lcolor("112 119 125")) ///
-					xlabel(1 24(24)`n', labsize(8.5pt) labcolor("38 43 47") ///
+					xlabel(1 `tickstep'(`tickstep')`n', labsize(8.5pt) labcolor("38 43 47") ///
 					glcolor("242 244 246") glpattern(solid) glwidth(vthin)) ///
 					xtitle("Specification Rank (Ordered By Year FE Coefficient)", ///
 					size(8.5pt) color("38 43 47")) ///
-					yscale(range(0 62) noline axis(1)) ///
-					yscale(range(0 62) noline axis(2)) ///
+					yscale(range(`ymin' `ymax') noline axis(1)) ///
+					yscale(range(`ymin' `ymax') noline axis(2)) ///
 					ylabel(`rows', axis(1) labsize(8pt) angle(0) ///
 					labcolor("38 43 47") noticks nogrid) ///
 					ylabel(`ticks', axis(2) labsize(8.5pt) angle(0) ///
@@ -569,16 +631,17 @@ restore
 					yline(`zero_reg7' `zero_reg2', axis(2) ///
 					lcolor("112 119 125") lwidth(.864pt) lpattern(solid)) ///
 					xline(`cut', lcolor(red) lwidth(.864pt) lpattern(solid)) ///
-					text(60.5 2 "{bf:Year FE}" 51 2 "{bf:Year + Household FE}", ///
+					text(`=`base7'+`band'+1' 2 "{bf:Year FE}" ///
+					`=42.5+`band'+1' 2 "{bf:Year + Household FE}", ///
 					yaxis(2) placement(e) justification(left) size(9pt) ///
 					color("38 43 47")) ///
-					legend(order(12 "N.S." 13 "Positive, p < 0.05" ///
-					14 "Negative, p < 0.05") cols(3) size(8.5pt) ///
+					legend(order(`symbols') cols(3) size(8.5pt) ///
 					rowgap(.5) pos(12) bmargin(zero) ///
 					region(lstyle(none) margin(zero)))
 		graph export "$xfig/`stub'_pair.pdf", replace
-		graph export "$xfig/`stub'_pair.png", width(3300) replace
+		graph export "$xfig/`stub'_pair.png", width(`width') replace
 	}
+	if "`figure'" == "all_pair" exit
 
 
 **********************************************************************
