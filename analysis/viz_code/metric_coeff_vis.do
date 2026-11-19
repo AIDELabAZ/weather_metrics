@@ -500,6 +500,8 @@ restore
 	loc			ciwidth .576pt
 	loc			point 3pt
 	loc			strip 1.5pt
+	loc			rowsize 8pt
+	loc			label_x 2
 	loc			stroke .864pt
 	loc			ymin 0
 	loc			ymax 62
@@ -527,12 +529,14 @@ restore
 			loc			canvas xsize(14) ysize(8.5)
 			loc			ciwidth .22pt
 			loc			point 1.6pt
-			loc			strip 1.1pt
+			loc			strip 1.35pt
+			loc			rowsize 8.5pt
+			loc			label_x 32
 			loc			stroke .38pt
 			loc			ymin -12
-			loc			ymax 81
-			loc			base7 62
-			loc			band 16
+			loc			ymax 66.5
+			loc			base7 55.2
+			loc			band 10.5
 			loc			tickstep 168
 			loc			width 4800
 		* Keep the legend symbols legible independently of the dense plotted points.
@@ -554,36 +558,54 @@ restore
 		quietly count if beta_reg7 < 0
 		loc			cut = r(N) + .5
 
-	* use one coefficient range for both panels, including all CIs and zero
-		quietly summarize ci_min, meanonly
-		loc			lo = min(0, r(min))
-		quietly summarize ci_max, meanonly
-		loc			hi = max(0, r(max))
-		loc			span = `hi' - `lo'
-		loc			unit = 10^floor(log10(`span' / 4))
-		loc			fraction = `span' / (4 * `unit')
-		loc			step = `unit' * cond(`fraction' <= 1, 1, ///
-					cond(`fraction' <= 2, 2, cond(`fraction' <= 5, 5, 10)))
-		loc			lo = floor((`lo' - .03 * `span') / `step') * `step'
-		loc			hi = ceil((`hi' + .03 * `span') / `step') * `step'
-		loc			gain = `band' / (`hi' - `lo')
-		loc			nticks = round((`hi' - `lo') / `step')
-		loc			ticks
-		forvalues j = 0/`nticks' {
-			loc			value = `lo' + `j' * `step'
-			loc			label = strtrim(string(`value', "%6.3g"))
-			loc			y7 = `base7' + `gain' * (`value' - `lo')
-			loc			y2 = 42.5 + `gain' * (`value' - `lo')
-			loc			ticks `ticks' `y7' "`label'" `y2' "`label'"
+	* keep the full common CI range for each country's two panels
+		if "`c'" != "all" {
+			quietly summarize ci_min, meanonly
+			loc			lo = min(0, r(min))
+			quietly summarize ci_max, meanonly
+			loc			hi = max(0, r(max))
+			loc			span = `hi' - `lo'
+			loc			unit = 10^floor(log10(`span' / 4))
+			loc			fraction = `span' / (4 * `unit')
+			loc			step = `unit' * cond(`fraction' <= 1, 1, ///
+						cond(`fraction' <= 2, 2, cond(`fraction' <= 5, 5, 10)))
+			loc			lo = floor((`lo' - .03 * `span') / `step') * `step'
+			loc			hi = ceil((`hi' + .03 * `span') / `step') * `step'
+			loc			nticks = round((`hi' - `lo') / `step')
 		}
 
 	* position two bands on one canvas; axis labels retain the original units
 		loc			plots
+		loc			ticks
 		foreach m in reg7 reg2 {
 			loc			bottom = cond("`m'" == "reg7", `base7', 42.5)
+			if "`c'" == "all" {
+				loc			lo -5
+				loc			hi = cond("`m'" == "reg7", 6, 5)
+				loc			step 5
+				loc			nticks 2
+			}
+			loc			gain = `band' / (`hi' - `lo')
+			forvalues j = 0/`nticks' {
+				loc			value = `lo' + `j' * `step'
+				loc			label = strtrim(string(`value', "%6.3g"))
+				if "`c'" == "all" & `value' == 5 loc label "+5"
+				loc			y = `bottom' + `gain' * (`value' - `lo')
+				loc			ticks `ticks' `y' "`label'"
+			}
 			gen double	y_`m' = `bottom' + `gain' * (beta_`m' - `lo')
 			gen double	lo_`m' = `bottom' + `gain' * (ci_lo_`m' - `lo')
 			gen double	hi_`m' = `bottom' + `gain' * (ci_up_`m' - `lo')
+			loc			label_`m' = `bottom' + `band' + 1
+			if "`c'" == "all" {
+			* Intersect each CI with the visible range in graph coordinates only.
+				replace		lo_`m' = max(lo_`m', `bottom') if ci_up_`m' >= `lo'
+				replace		hi_`m' = min(hi_`m', `bottom' + `band') if ci_lo_`m' <= `hi'
+				replace		lo_`m' = . if ci_up_`m' < `lo' | ci_lo_`m' > `hi'
+				replace		hi_`m' = . if missing(lo_`m')
+				replace		y_`m' = . if !inrange(beta_`m', `lo', `hi')
+				loc			label_`m' = `bottom' + `gain' * (4 - `lo')
+			}
 			loc			zero_`m' = `bottom' - `gain' * `lo'
 			loc			plots `plots' ///
 				(rbar lo_`m' hi_`m' rank if pval_`m' > .05, yaxis(2) ///
@@ -622,7 +644,7 @@ restore
 					size(8.5pt) color("38 43 47")) ///
 					yscale(range(`ymin' `ymax') noline axis(1)) ///
 					yscale(range(`ymin' `ymax') noline axis(2)) ///
-					ylabel(`rows', axis(1) labsize(8pt) angle(0) ///
+					ylabel(`rows', axis(1) labsize(`rowsize') angle(0) ///
 					labcolor("38 43 47") noticks nogrid) ///
 					ylabel(`ticks', axis(2) labsize(8.5pt) angle(0) ///
 					labcolor("38 43 47") noticks ///
@@ -631,8 +653,8 @@ restore
 					yline(`zero_reg7' `zero_reg2', axis(2) ///
 					lcolor("112 119 125") lwidth(.864pt) lpattern(solid)) ///
 					xline(`cut', lcolor(red) lwidth(.864pt) lpattern(solid)) ///
-					text(`=`base7'+`band'+1' 2 "{bf:Year FE}" ///
-					`=42.5+`band'+1' 2 "{bf:Year + Household FE}", ///
+					text(`label_reg7' `label_x' "{bf:Year FE}" ///
+					`label_reg2' `label_x' "{bf:Year + Household FE}", ///
 					yaxis(2) placement(e) justification(left) size(9pt) ///
 					color("38 43 47")) ///
 					legend(order(`symbols') cols(3) size(8.5pt) ///

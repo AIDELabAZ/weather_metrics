@@ -50,7 +50,7 @@
 				loc			name : word `p' of `products'
 				loc			labels `labels' `p' "`name'"
 			}
-			loc			key legend(order(1 "0%" 6 "25%" 11 "50%" 16 "75%" 21 "100%") ///
+			loc			key legend(order(1 "25% or less" 11 "35%" 21 "45%" 31 "55%" 36 "60% or more") ///
 						rows(1) pos(6) size(8pt) symxsize(3) symysize(1.8) region(lstyle(none)))
 		}
 		else {
@@ -88,24 +88,24 @@
 		gen double	lo = row - .49
 		gen double	hi = row + .49
 
-	* Common 0-100% scale in five-point steps; the printed cell is rounded to 1%.
-		gen byte	shade = round(share / 5)
+	* Both matrices saturate at 25% and 60%. The printed share uses the full range.
+		gen byte	shade = min(60, max(25, round(share))) if comparisons
 		loc			tiles
-		forvalues j = 0/20 {
+		forvalues j = 25/60 {
 			loc			rgb
 			forvalues ch = 1/3 {
 				loc			from : word `ch' of 243 245 247
 				loc			to : word `ch' of `arc2'
-				loc			rgb `rgb' `=round(`from' + `j'/20 * (`to' - `from'))'
+				loc			rgb `rgb' `=round(`from' + (`j'-25)/35 * (`to' - `from'))'
 			}
 			loc			tiles `tiles' (rbar lo hi col if shade == `j', ///
-						barwidth(.98) color("`rgb'") lcolor(none))
+						barwidth(.98) fcolor("`rgb'%100") fintensity(100) lcolor(none))
 		}
 		loc			cells msymbol(none) mlabel(cell) mlabpos(0) mlabsize(8pt)
 		loc			axis labsize(8pt) labcolor("38 43 47") noticks nogrid
-		twoway		`tiles' (scatter row col if shade < 13 | missing(shade), ///
-					`cells' mlabcolor("38 43 47")) (scatter row col if ///
-					inrange(shade, 13, 20), `cells' mlabcolor(white)), `panel' ///
+		twoway		`tiles' (scatter row col if shade < 53 | missing(shade), ///
+					`cells' mlabcolor(black)) (scatter row col if ///
+					inrange(shade, 53, 60), `cells' mlabcolor(white)), `panel' ///
 					xscale(range(.5 `=`k'+.5') noline) ///
 					yscale(reverse range(.5 `=`k'+.5') noline) ///
 					xlabel(`labels', `axis') ylabel(`labels', angle(0) `axis') ///
