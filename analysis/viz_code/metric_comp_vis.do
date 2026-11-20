@@ -261,7 +261,6 @@
 	graph combine comp_product comp_arrows comp_metric comp_key, cols(2) ///
 				xsize(11.5) ysize(8.5) iscale(1) imargin(small) ///
 				scheme(stcolor) graphregion(color(white) margin(small)) ///
-				note("In (B), arrows start on the equality line. Dashed guides mark t = -1.96 and +1.96. Significance decisions use the saved p-values.", size(8.5pt)) ///
 				name(metric_comp, replace)
 	graph export "$xfig/metric_comp.pdf", replace
 	graph export "$xfig/metric_comp.png", width(4400) replace
