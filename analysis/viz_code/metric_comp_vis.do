@@ -121,7 +121,7 @@
 					xlabel(`labels', `axis') ylabel(`labels', angle(0) `axis') ///
 					xtitle("") ytitle("") title("{bf:`title'}", `heading') ///
 					subtitle("(`note_n')", `parenthesis' margin(l=`title_width')) ///
-					`key' name(comp_`instrument', replace)
+					`key' fysize(31) name(comp_`instrument', replace)
 	}
 
 
@@ -212,7 +212,7 @@
 				lcolor("142 149 155") lwidth(.45pt)) ///
 				(scatter label_y label_x, msymbol(none) mlabel(metric) mlabpos(3) ///
 				mlabgap(.3) mlabsize(8pt) mlabcolor("38 43 47")), `frame' ///
-				aspectratio(1, placement(west)) plotregion(margin(zero)) ///
+				aspectratio(1) plotregion(margin(zero)) ///
 				xlabel(`lo'(`step')`hi', nogrid labsize(8pt)) ///
 				ylabel(`lo'(`step')`hi', nogrid angle(0) labsize(8pt)) ///
 				xline(-1.96 1.96, `dashes') yline(-1.96 1.96, `dashes') ///
@@ -258,8 +258,8 @@
 				yline(.5, lcolor("177 184 190") lwidth(.6pt) lpattern(solid)) ///
 				title("{bf:Metric key and signed t-statistics}", `heading') name(comp_key, replace)
 
-	graph combine comp_product comp_arrows comp_metric comp_key, cols(2) ///
-				xsize(11.5) ysize(8.5) iscale(1) imargin(small) ///
+	graph combine comp_product comp_metric comp_arrows comp_key, cols(2) ///
+				xsize(11.5) ysize(9.8) iscale(1) imargin(small) ///
 				scheme(stcolor) graphregion(color(white) margin(small)) ///
 				name(metric_comp, replace)
 	graph export "$xfig/metric_comp.pdf", replace
