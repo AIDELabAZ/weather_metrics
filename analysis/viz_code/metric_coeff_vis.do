@@ -2,7 +2,7 @@
 * Created on: 30 Oct 2026
 * Created by: codex
 * edited by: codex
-* edited on: 19 Nov 2026
+* edited on: 20 Nov 2026
 * Stata v.19.5
 
 * does
@@ -469,9 +469,9 @@ restore
 
 * rank once by signed reg7; every plotted layer uses this same index
 	bysort country (beta_reg7 outcome_var weather_var): gen int rank = _n
-	gen double	outcome_row = cond(outcome_var == "lncp_yld", 39, 37.5)
-	gen double	product_row = 34.5 - 1.5 * product
-	gen double	metric_row = 22.5 - 1.5 * metric
+	gen double	product_row = 40.5 - 1.5 * product
+	gen double	metric_row = 28.5 - 1.5 * metric
+	gen double	outcome_row = cond(outcome_var == "lncp_yld", 3, 1.5)
 	egen double	ci_min = rowmin(ci_lo_reg7 ci_lo_reg2)
 	egen double	ci_max = rowmax(ci_up_reg7 ci_up_reg2)
 	save		"`paired'", replace
@@ -482,16 +482,16 @@ restore
 **********************************************************************
 
 * retain the existing metric names and alphabetical product order
-	loc			rows 40.5 "{bf:Dependent Variable}" 39 "Quantity" 37.5 "Value" ///
-				34.5 "{bf:Remote Sensing Product}" 33 "ARC2" 31.5 "CHIRPS" ///
-				30 "CPC" 28.5 "ERA5" 27 "MERRA-2" 25.5 "TAMSAT" ///
-				22.5 "{bf:Rainfall Metric}" 21 "Mean Daily Rainfall" ///
-				19.5 "Median Daily Rainfall" 18 "Variance Of Daily Rainfall" ///
-				16.5 "Skew Of Daily Rainfall" 15 "Total Rainfall" ///
-				13.5 "Deviation In Total Rainfall" 12 "Z-Score Of Total Rainfall" ///
-				10.5 "Rainy Days" 9 "Deviation In Rainy Days" 7.5 "No Rain Days" ///
-				6 "Deviation In No Rain Days" 4.5 "Percent Rainy Days" ///
-				3 "Deviation In Percent Rainy Days" 1.5 "Longest Dry Spell"
+	loc			rows 40.5 "{bf:Remote Sensing Product}" 39 "ARC2" 37.5 "CHIRPS" ///
+				36 "CPC" 34.5 "ERA5" 33 "MERRA-2" 31.5 "TAMSAT" ///
+				28.5 "{bf:Rainfall Metric}" 27 "Mean Daily Rainfall" ///
+				25.5 "Median Daily Rainfall" 24 "Variance Of Daily Rainfall" ///
+				22.5 "Skew Of Daily Rainfall" 21 "Total Rainfall" ///
+				19.5 "Deviation In Total Rainfall" 18 "Z-Score Of Total Rainfall" ///
+				16.5 "Rainy Days" 15 "Deviation In Rainy Days" 13.5 "No Rain Days" ///
+				12 "Deviation In No Rain Days" 10.5 "Percent Rainy Days" ///
+				9 "Deviation In Percent Rainy Days" 7.5 "Longest Dry Spell" ///
+				4.5 "{bf:Dependent Variable}" 3 "Quantity" 1.5 "Value"
 	loc			countries 1 2 4 5 6 7
 	loc			stubs eth mwi ngr nga tza uga
 	loc			colors arc2 chirps cpc era5 merra2 tamsat

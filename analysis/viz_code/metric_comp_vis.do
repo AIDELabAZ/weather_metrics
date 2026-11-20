@@ -1,6 +1,7 @@
 * Project: WB Weather - metric
 * Created on: 19 Nov 2026
 * Created by: codex
+* edited on: 20 Nov 2026
 * Stata v.19.5
 
 * does
@@ -27,8 +28,9 @@
 	save		"`paired'"
 
 	loc			products ARC2 CHIRPS CPC ERA5 MERRA-2 TAMSAT
-	loc			heading size(12pt) color("38 43 47") pos(11)
-	loc			subhead size(9pt) color("74 82 89") pos(11)
+* Place the smaller, regular-weight parenthetical on the same line as its heading.
+	loc			heading size(12pt) color("38 43 47") ring(4) pos(11) span
+	loc			parenthesis size(10pt) color("38 43 47") ring(4) pos(11) span
 	loc			panel scheme(stcolor) graphregion(color(white) margin(small)) ///
 				plotregion(lstyle(none) margin(zero))
 
@@ -43,21 +45,24 @@
 		if "`instrument'" == "product" {
 			loc			fixed country outcome_var metric
 			loc			k 6
-			loc			title "A1. Across remote sensing products"
-			loc			subtitle "Within country, outcome and rainfall metric"
+			loc			title "(A) Across Remote Sensing Products"
+			loc			title_width 220pt
 			loc			labels
 			forvalues p = 1/6 {
 				loc			name : word `p' of `products'
 				loc			labels `labels' `p' "`name'"
 			}
-			loc			key legend(order(1 "25% or less" 11 "35%" 21 "45%" 31 "55%" 36 "60% or more") ///
-						rows(1) pos(6) size(8pt) symxsize(3) symysize(1.8) region(lstyle(none)))
+			loc			key legend(order(39 "≤25%" 40 "35%" 41 "45%" 42 "55%" 43 "≥60%") ///
+						title("Disagreement in 5% Significance Decisions", size(8.5pt) margin(zero)) ///
+						subtitle("Upper triangle: Year FE     Lower triangle: Year + Household FE", size(8pt) margin(zero)) ///
+						cols(5) size(8pt) pos(6) ///
+						bmargin(zero) region(lstyle(none) margin(zero)))
 		}
 		else {
 			loc			fixed country outcome_var product
 			loc			k 14
-			loc			title "A2. Across rainfall metrics"
-			loc			subtitle "Within country, outcome and remote sensing product"
+			loc			title "(C) Across Rainfall Metrics"
+			loc			title_width 160pt
 			loc			labels 1(1)14
 			loc			key legend(off)
 		}
@@ -84,13 +89,14 @@
 		loc			note_n "`expected' comparisons per cell"
 		if r(min) < `expected' loc note_n "`=r(min)'-`=r(max)' comparisons per cell"
 		gen double	share = 100 * changes / comparisons
-		gen str4	cell = cond(comparisons, strtrim(string(share, "%3.0f")), "n/a")
+		gen str4	cell = cond(comparisons, strtrim(string(share, "%3.0f")) + "%", "n/a")
 		gen double	lo = row - .49
 		gen double	hi = row + .49
 
 	* Both matrices saturate at 25% and 60%. The printed share uses the full range.
 		gen byte	shade = min(60, max(25, round(share))) if comparisons
 		loc			tiles
+		loc			swatches
 		forvalues j = 25/60 {
 			loc			rgb
 			forvalues ch = 1/3 {
@@ -100,17 +106,22 @@
 			}
 			loc			tiles `tiles' (rbar lo hi col if shade == `j', ///
 						barwidth(.98) fcolor("`rgb'%100") fintensity(100) lcolor(none))
+			if "`instrument'" == "product" & inlist(`j', 25, 35, 45, 55, 60) {
+				loc			swatches `swatches' (scatteri . ., msymbol(S) ///
+							mcolor("`rgb'") mlcolor(none) msize(7pt))
+			}
 		}
 		loc			cells msymbol(none) mlabel(cell) mlabpos(0) mlabsize(8pt)
 		loc			axis labsize(8pt) labcolor("38 43 47") noticks nogrid
 		twoway		`tiles' (scatter row col if shade < 53 | missing(shade), ///
 					`cells' mlabcolor(black)) (scatter row col if ///
-					inrange(shade, 53, 60), `cells' mlabcolor(white)), `panel' ///
+					inrange(shade, 53, 60), `cells' mlabcolor(white)) `swatches', `panel' ///
 					xscale(range(.5 `=`k'+.5') noline) ///
 					yscale(reverse range(.5 `=`k'+.5') noline) ///
 					xlabel(`labels', `axis') ylabel(`labels', angle(0) `axis') ///
 					xtitle("") ytitle("") title("{bf:`title'}", `heading') ///
-					subtitle("`subtitle'  |  `note_n'", `subhead') `key' name(comp_`instrument', replace)
+					subtitle("(`note_n')", `parenthesis' margin(l=`title_width')) ///
+					`key' name(comp_`instrument', replace)
 	}
 
 
@@ -159,7 +170,7 @@
 	loc			countries Ethiopia Malawi NA Niger Nigeria Tanzania Uganda
 	loc			country : word `c' of `countries'
 	loc			product : word `p' of `products'
-	loc			outcome = cond("`y'" == "lncp_yld", "Cereal quantity", "Farm production value")
+	loc			outcome = cond("`y'" == "lncp_yld", "Quantity", "Value")
 
 * Use identical bounds on both axes, including both thresholds and all endpoints.
 	quietly summarize t_reg7, meanonly
@@ -207,10 +218,11 @@
 				xline(-1.96 1.96, `dashes') yline(-1.96 1.96, `dashes') ///
 				xtitle("Year FE  (signed t)", size(9pt)) ///
 				ytitle("Year + household FE  (signed t)", size(9pt)) ///
-				title("{bf:B. Adding household fixed effects}", `heading') ///
-				subtitle("`country'  /  `product'  /  `outcome'", `subhead') ///
+				title("{bf:(B) Adding Household FEs}", `heading') ///
+				subtitle("(`country' / `product' / `outcome')", `parenthesis' margin(l=159pt)) ///
 				legend(order(2 "Same 5% decision" 3 "Changed decision" 4 "Sign reversal") ///
-				cols(1) pos(3) size(8pt) symxsize(3) region(lstyle(none))) name(comp_arrows, replace)
+				cols(3) pos(6) span size(8pt) symxsize(3) bmargin(zero) ///
+				region(lstyle(none) margin(zero))) name(comp_arrows, replace)
 
 
 **********************************************************************
@@ -249,8 +261,7 @@
 	graph combine comp_product comp_arrows comp_metric comp_key, cols(2) ///
 				xsize(11.5) ysize(8.5) iscale(1) imargin(small) ///
 				scheme(stcolor) graphregion(color(white) margin(small)) ///
-				note("A1 and A2 show disagreement in 5% significance decisions (%). Year FE appears above the diagonal and year + household FE below it." ///
-				"In B, arrows start on the equality line. Dashed guides mark t = -1.96 and +1.96. Significance decisions use the saved p-values.", size(8.5pt)) ///
+				note("In (B), arrows start on the equality line. Dashed guides mark t = -1.96 and +1.96. Significance decisions use the saved p-values.", size(8.5pt)) ///
 				name(metric_comp, replace)
 	graph export "$xfig/metric_comp.pdf", replace
 	graph export "$xfig/metric_comp.png", width(4400) replace
