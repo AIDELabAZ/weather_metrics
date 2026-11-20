@@ -47,22 +47,21 @@
 			loc			k 6
 			loc			title "(A) Across Remote Sensing Products"
 			loc			title_width 220pt
+			loc			row_height fysize(40.53)
 			loc			labels
 			forvalues p = 1/6 {
 				loc			name : word `p' of `products'
 				loc			labels `labels' `p' "`name'"
 			}
 			loc			key legend(order(39 "≤25%" 40 "35%" 41 "45%" 42 "55%" 43 "≥60%") ///
-						title("Disagreement in 5% Significance Decisions", size(8.5pt) margin(zero)) ///
-						subtitle("Upper triangle: Year FE     Lower triangle: Year + Household FE", size(8pt) margin(zero)) ///
-						cols(5) size(8pt) pos(6) ///
-						bmargin(zero) region(lstyle(none) margin(zero)))
+						cols(5) size(8pt) pos(6) bmargin(zero) region(lstyle(none) margin(zero)))
 		}
 		else {
 			loc			fixed country outcome_var product
 			loc			k 14
 			loc			title "(C) Across Rainfall Metrics"
 			loc			title_width 160pt
+			loc			row_height
 			loc			labels 1(1)14
 			loc			key legend(off)
 		}
@@ -121,7 +120,7 @@
 					xlabel(`labels', `axis') ylabel(`labels', angle(0) `axis') ///
 					xtitle("") ytitle("") title("{bf:`title'}", `heading') ///
 					subtitle("(`note_n')", `parenthesis' margin(l=`title_width')) ///
-					`key' fysize(31) name(comp_`instrument', replace)
+					`key' `row_height' name(comp_`instrument', replace)
 	}
 
 
@@ -212,9 +211,9 @@
 				lcolor("142 149 155") lwidth(.45pt)) ///
 				(scatter label_y label_x, msymbol(none) mlabel(metric) mlabpos(3) ///
 				mlabgap(.3) mlabsize(8pt) mlabcolor("38 43 47")), `frame' ///
-				aspectratio(1) plotregion(margin(zero)) ///
-				xlabel(`lo'(`step')`hi', nogrid labsize(8pt)) ///
-				ylabel(`lo'(`step')`hi', nogrid angle(0) labsize(8pt)) ///
+				plotregion(margin(zero)) ///
+				xlabel(`lo'(`step')`hi', nogrid labsize(8pt) tlength(3pt) labgap(2pt)) ///
+				ylabel(`lo'(`step')`hi', nogrid angle(0) labsize(8pt) tlength(3pt) labgap(2pt)) ///
 				xline(-1.96 1.96, `dashes') yline(-1.96 1.96, `dashes') ///
 				xtitle("Year FE  (signed t)", size(9pt)) ///
 				ytitle("Year + household FE  (signed t)", size(9pt)) ///
@@ -256,10 +255,17 @@
 				text(0 2 "{bf:Rainfall metric}", place(e) size(9pt)) ///
 				text(0 12 "{bf:Year FE}" 0 16 "{bf:+ Household FE}", place(w) size(9pt)) ///
 				yline(.5, lcolor("177 184 190") lwidth(.6pt) lpattern(solid)) ///
-				title("{bf:Metric key and signed t-statistics}", `heading') name(comp_key, replace)
+				title("{bf:Metric key and signed t-statistics}", `heading') ///
+				fysize(28.73) name(comp_key, replace)
 
-	graph combine comp_product comp_metric comp_arrows comp_key, cols(2) ///
-				xsize(11.5) ysize(9.8) iscale(1) imargin(small) ///
+* On the 11.5 x 9.25 inch page the two row heights give A its original
+* 211.5-point heatmap and give B equal physical lengths on both axes.
+	loc			column cols(1) iscale(1) imargin(l=6pt r=6pt t=6pt b=6pt) ///
+				scheme(stcolor) graphregion(color(white) margin(zero))
+	graph combine comp_product comp_metric, `column' name(comp_heatmaps, replace)
+	graph combine comp_arrows comp_key, `column' name(comp_example, replace)
+	graph combine comp_heatmaps comp_example, rows(1) ///
+				xsize(11.5) ysize(9.25) iscale(1) imargin(zero) ///
 				scheme(stcolor) graphregion(color(white) margin(small)) ///
 				name(metric_comp, replace)
 	graph export "$xfig/metric_comp.pdf", replace
