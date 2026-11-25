@@ -30,7 +30,8 @@ import fixed_label_classifier
 import sankey_iv_clustering as sic
 
 ROOT = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit"
-FIGURES_DIR = os.path.join(ROOT, "writing", "figures")
+# Figures go to each model's output/ folder (beside the HTML), not writing/figures/: the paper Sankeys there
+# are made by model_sankeys.py (32B Solo categories); these older-classifier versions are for comparison only.
 
 # SANKEY_BACKBONE=qwen3-8b uses the results scored on HPC (analysis/hpc/,
 # merged into the local cache) — the 8B models never load on the Mac.
@@ -68,9 +69,9 @@ def set_paths(key, subdir):
         stem += "_" + os.environ["SANKEY_BACKBONE"]
     sic.MERGED_CSV = os.path.join(out_dir, f"{base}_output.csv")
     sic.OUTPUT_HTML_ENDOG = os.path.join(out_dir, f"sankey_{stem}_rainfall_endog.html")
-    sic.OUTPUT_PNG_ENDOG = os.path.join(FIGURES_DIR, f"sankey_{stem}_rainfall_endog.png")
-    sic.OUTPUT_PNG_WIDE_ENDOG = os.path.join(FIGURES_DIR, f"sankey_{stem}_rainfall_endog_wide.png")
-    sic.OUTPUT_EPS_ENDOG = os.path.join(FIGURES_DIR, f"sankey_{stem}_rainfall_endog.eps")
+    sic.OUTPUT_PNG_ENDOG = os.path.join(out_dir, f"sankey_{stem}_rainfall_endog.png")
+    sic.OUTPUT_PNG_WIDE_ENDOG = os.path.join(out_dir, f"sankey_{stem}_rainfall_endog_wide.png")
+    sic.OUTPUT_EPS_ENDOG = os.path.join(out_dir, f"sankey_{stem}_rainfall_endog.eps")
     sic.CLUSTER_SUMMARY_ENDOG = os.path.join(out_dir, f"cluster_{stem}_summary_endog.csv")
     sic.REJECTED_ENTRIES_CSV = os.path.join(out_dir, f"rejected_entries_{stem}.csv")
     sic.RELATIONSHIPS_RAW_ENDOG_CSV = os.path.join(out_dir, f"relationships_raw_endog_{stem}.csv")

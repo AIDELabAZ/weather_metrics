@@ -313,6 +313,9 @@ _CONCEPT_PROMPTS.update(v1=_concept_prompt_v1, v2=_concept_prompt_v2, v3=_concep
 BARE_RAINFALL = {
     "rainfall", "rainfalls", "rain", "precipitation",
     "rainfall squared", "rainfall square", "precipitation squared", "precipitation square",
+    # Same thing with units, a role word, or a subscript/truncation (lags are NOT bare: user decision).
+    "precip", "precipi", "precipi,t", "rainfalli", "rainfall (mm)", "precipitation (mm)",
+    "amount of rainfall", "rainfall amount", "rainfall iv",
 }
 
 

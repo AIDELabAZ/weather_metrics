@@ -1,16 +1,17 @@
 {
   "title": "Taxonomy of Rainfall Measures",
-  "note": "Categories group specific rainfall variables according to the substantive feature of precipitation they measure rather than solely by units, aggregation period, or functional form. Variables measured over different temporal windows, such as monthly, seasonal, growing-season, or annual rainfall, remain in the same category when they capture the same substantive rainfall concept. Mathematical transformations are assigned separate categories when they change the substantive interpretation of the measure, as with deviations from normal, standardized anomalies, percentile measures, and one- or two-sided extreme events. Lagged rainfall measures are classified according to their underlying construction rather than assigned to a separate category. Cumulative or recurrent exposure remains distinct because it summarizes a history of rainfall shocks across multiple prior periods rather than a particular lagged realization. Named rainfall indices are distinguished from conventional standardized anomalies. Other is reserved for clearly identified and sufficiently specified measures that do not fit any predefined rainfall category, including identifiable non-rainfall measures. Unclassifiable is reserved for entries whose meaning or construction cannot be determined sufficiently from the extracted text and any supplied definition or context to assign a substantive rainfall category or establish that the measure falls outside the taxonomy. This includes unexplained codes, generic labels, incomplete fragments, uninterpretable or corrupted text, and rainfall measures with unspecified construction. A low classifier score alone does not determine either residual category.",
+  "note": "Categories group rainfall variables according to the substantive feature of precipitation they most plausibly measure, rather than solely by units, aggregation period, or functional form. Assign a substantive category whenever the variable has an interpretable meaning, even if the paper or extracted text does not specify the exact construction. Use the variable name, any available definitions or context, and conventional usage in the economics literature; do not require technical details that authors may not report. For example, an unqualified \"rainfall shock\" or \"precipitation shock\" defaults to Two-sided rainfall extremes, because the generic term conventionally covers unusually wet and unusually dry realizations. Override that default when context or wording identifies a different construction (such as a standardized anomaly, signed deviation, or explicitly one-sided shock). A generic rainfall level without further construction details should normally be assigned to Total rainfall rather than Unclassifiable, unless context points to Mean rainfall or another category. Monthly, seasonal, growing-season, and annual measures remain in the same category when they capture the same substantive concept. Transformations receive separate categories when their meaning is identifiable. Lagged rainfall measures are classified by their underlying substantive construction; cumulative or recurrent exposure remains separate because it aggregates shocks across multiple prior periods. Named rainfall indices remain distinct from conventional standardized anomalies. Other is an exceptional last resort for clearly interpretable measures genuinely unrelated to all defined rainfall categories, including identifiable non-rainfall measures. Unclassifiable is reserved for genuinely uninterpretable text, unexplained codes, corrupted strings, and empty or content-free placeholders (for example, \"x1\" or \"driving factor\") when context cannot establish what is being measured. Missing construction details, ambiguity between plausible rainfall categories, or a low model score are not by themselves reasons to use Other or Unclassifiable.",
   "categories": [
     {
       "category": "Total rainfall",
-      "description": "Raw accumulated precipitation over a specified period, rather than an average across observations or a historical reference period",
+      "description": "Raw accumulated precipitation over a specified period, rather than an average across observations or a historical reference period. Unqualified rainfall-level names default here when there is no evidence of a mean, anomaly, or other construction.",
       "examples": [
         "Total annual rainfall",
         "total rainy-season precipitation",
         "total growing-season precipitation",
         "monthly precipitation total",
-        "accumulated rainfall"
+        "accumulated rainfall",
+        "Rainfall (unspecified level measure)"
       ]
     },
     {
@@ -88,12 +89,14 @@
     },
     {
       "category": "Two-sided rainfall extremes",
-      "description": "Measures that jointly identify or categorize unusually wet and unusually dry realizations, rather than retaining only one tail of the rainfall distribution",
+      "description": "Measures that jointly identify or categorize unusually wet and unusually dry realizations, rather than retaining only one tail of the rainfall distribution. Includes the generic economics-literature terms \"rainfall shock\" and \"precipitation shock\" when no more specific construction is stated; this is a classification convention, not an assertion that the underlying measure uses particular cutoffs or units.",
       "examples": [
         "Above or below one standard deviation",
         "below the 20th or above the 80th percentile",
         "high/normal/low rainfall classification",
-        "negative/normal/positive rainfall shock classification"
+        "negative/normal/positive rainfall shock classification",
+        "Rainfall shock (construction unspecified)",
+        "Precipitation shock (construction unspecified)"
       ]
     },
     {
@@ -226,7 +229,7 @@
     },
     {
       "category": "Other",
-      "description": "Clearly identified and sufficiently specified measures that do not fit any preceding rainfall category, including identifiable non-rainfall measures. Excludes entries whose meaning or construction is too incomplete or ambiguous to assess category fit.",
+      "description": "Exceptional last-resort category for clearly interpretable measures that genuinely do not correspond to any substantive rainfall category, including identifiable non-rainfall measures. Do not use merely because a rainfall measure has an unspecified construction or could plausibly match more than one rainfall category.",
       "examples": [
         "Covariance between monthly rainfall and monthly temperature",
         "Wind speed",
@@ -235,14 +238,13 @@
     },
     {
       "category": "Unclassifiable",
-      "description": "Extracted strings that do not identify an interpretable measure, or that lack enough information about its construction to distinguish among the preceding rainfall categories. Includes gibberish, uninterpretable or corrupted text, unexplained codes or abbreviations, generic labels, and incomplete fragments when no supplied definition or context resolves their meaning.",
+      "description": "Genuinely uninterpretable or content-free extracted strings for which neither the name nor available context identifies a meaningful measured variable: gibberish or corrupted text, unexplained variable codes or abbreviations, and generic placeholders such as \"driving factor\". An interpretable rainfall measure is not Unclassifiable merely because its precise calculation or construction is unspecified.",
       "examples": [
-        "âˆ†lnmp",
-        "x1",
-        "vul",
-        "Driving factor",
-        "Rainfall shock with unspecified construction",
-        "Rainfall with no indication of whether it is a total, mean, anomaly, or another measure"
+        "âˆ†lnmp (uninterpretable corrupted string)",
+        "x1 (unexplained code)",
+        "vul (unexplained abbreviation)",
+        "Driving factor (no variable identified)",
+        "Unreadable or corrupted text"
       ]
     }
   ]

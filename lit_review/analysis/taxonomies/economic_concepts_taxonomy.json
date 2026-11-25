@@ -1,6 +1,6 @@
 {
   "title": "Taxonomy of Economic Concepts",
-  "note": "Categories map specific endogenous-variable names to a fixed set of economic concepts. Classification is based on the economic object represented by the variable rather than the paper's broader topic, sector, population, functional form, or empirical transformation. For example, farm income is classified as income, agricultural employment as labor markets and employment, agricultural exports as trade and international integration, and government health expenditure as public finance and government activity. The JEL codes provide conceptual anchors based on the American Economic Association's Journal of Economic Literature classification system; they are not themselves the classification output. Other is reserved for clearly identified economic variables whose substantive concept does not fit any predefined category. Unclassifiable is reserved for entries that do not provide enough information to identify a specific economic variable from the extracted text and any supplied definition or context. First assess whether the variable can be interpreted; then assess category fit. Unexplained codes, generic labels, incomplete fragments, and uninterpretable or corrupted text are Unclassifiable when their meaning cannot be resolved from the available information. A low classifier score alone does not determine either residual category.",
+  "note": "Categories map specific endogenous-variable names to a fixed set of economic concepts. Classification is based on the economic object represented by the variable, not the paper's broader topic, sector, population, functional form, or empirical transformation. Assign the most plausible substantive concept whenever the variable name and available context give an interpretable economic meaning, even if the exact construction is unspecified. For example, farm income is classified as income, agricultural employment as labor markets and employment, agricultural exports as trade and international integration, and government health expenditure as public finance and government activity. The JEL codes are conceptual anchors, not classification outputs. Other is an exceptional last resort, used only when a clearly interpretable economic variable genuinely does not fit any defined substantive category. Unclassifiable is limited to genuinely uninterpretable strings, unexplained codes, corrupted text, or content-free placeholders (for example, \"x1\" or \"driving factor\") whose meanings cannot be resolved from context. Missing construction details, overlap between plausible categories, and low model scores are not by themselves reasons to use either residual category.",
   "categories": [
     {
       "category": "Income & income shocks",
@@ -204,12 +204,12 @@
     },
     {
       "category": "Other",
-      "description": "Clearly identified economic variables whose substantive concept does not fit any preceding category. The meaning of the variable must be sufficiently specified to assess category fit. Excludes entries whose meaning is missing, ambiguous, corrupted, or uninterpretable.",
+      "description": "Exceptional last-resort category for a clearly interpretable economic variable whose substantive concept genuinely fits none of the preceding categories. Use the closest substantive category whenever reasonably possible; do not choose Other for an imprecisely specified or broadly described variable.",
       "jel_codes": []
     },
     {
       "category": "Unclassifiable",
-      "description": "Extracted strings that do not provide enough information to identify a specific economic variable, including gibberish, uninterpretable or corrupted text, unexplained variable codes or abbreviations, generic labels, and incomplete fragments. Examples include âˆ†lnmp, x1, vul, and Driving factor when no supplied definition or context resolves their meaning.",
+      "description": "Genuinely uninterpretable or content-free strings that do not identify any meaningful economic variable after considering available context. Includes gibberish or corrupted text, unexplained variable codes or abbreviations, and generic placeholders such as \"driving factor\". Lack of an exact operational definition does not make an otherwise recognizable economic variable Unclassifiable. Examples: âˆ†lnmp (if corrupted or uninterpretable), x1, vul (if unexplained), and Driving factor (if unspecified).",
       "jel_codes": []
     }
   ]

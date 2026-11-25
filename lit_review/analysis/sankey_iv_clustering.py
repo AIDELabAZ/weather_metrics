@@ -24,6 +24,7 @@ import hashlib
 import json
 import os
 import re
+import time
 import unicodedata
 from collections import Counter, defaultdict
 import numpy as np
@@ -52,9 +53,9 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 # One merged file per implementation. Full corpus merged files are in analysis folder. 
 MERGED_CSV             = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/analysis/rag_full_corpus.csv"
 OUTPUT_HTML_ENDOG      = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/sankey_rag_gpt_rainfall_endog.html"
-OUTPUT_PNG_ENDOG       = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_rag_gpt_rainfall_endog.png"
-OUTPUT_PNG_WIDE_ENDOG  = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_rag_gpt_rainfall_endog_wide.png"
-OUTPUT_EPS_ENDOG       = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/writing/figures/sankey_rag_gpt_rainfall_endog.eps"
+OUTPUT_PNG_ENDOG       = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/sankey_rag_gpt_rainfall_endog.png"
+OUTPUT_PNG_WIDE_ENDOG  = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/sankey_rag_gpt_rainfall_endog_wide.png"
+OUTPUT_EPS_ENDOG       = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/sankey_rag_gpt_rainfall_endog.eps"
 CLUSTER_SUMMARY_ENDOG  = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/cluster_rag_gpt_summary_endog.csv"
 # Every raw ";"-split fragment clean_entry() discarded, for manual review —
 # see the docstring on expand_column().
@@ -367,17 +368,23 @@ def expand_column(df: pd.DataFrame, col: str, requires_rainfall: bool = False) -
     """
     records = []
     rejected = []
-    for idx, row in df.iterrows():
+    # row_no / pos: which source row and which ";"-slot (counting every
+    # non-blank raw fragment, kept or rejected) an entry came from — used only
+    # by PAIR_BY_POSITION to line up the k-th rainfall IV with the k-th
+    # endogenous variable of the same row.
+    for row_no, (idx, row) in enumerate(df.iterrows()):
         val = row[col]
         if pd.isna(val):
             continue
+        pos = 0
         for part in str(val).split(";"):
             raw = part.strip()
             if not raw:
                 continue
+            pos += 1
             cleaned = clean_entry(part, requires_rainfall=requires_rainfall)
             if cleaned:
-                records.append({"paper_idx": idx, "entry": cleaned})
+                records.append({"paper_idx": idx, "entry": cleaned, "row_no": row_no, "pos": pos})
             else:
                 rejected.append({"paper_idx": idx, "raw_fragment": raw})
     return pd.DataFrame(records), pd.DataFrame(rejected)
@@ -734,6 +741,28 @@ ENDOG_EXCLUDE: set[str] = {"Unclassifiable (Endogenous Variables)", "Not Specifi
 #         links (so both sides share one inflated total).
 COUNT_INDIVIDUAL_INSTANCES = True
 
+# True → overrides the above: the unit is a RELATIONSHIP, i.e. each (rainfall
+#        IV entry, endogenous-variable entry) pair within a paper (the
+#        extraction is paper-level, so every IV is paired with every endog
+#        variable of the same paper). A relationship is kept only when BOTH
+#        ends are coded (a real category or Other); if either end is
+#        excluded (Unclassifiable / Not Specified) or was dropped by cleaning,
+#        that relationship is tossed. Each kept relationship has weight 1, so
+#        node numbers = number of relationships touching that category, and
+#        left and right totals are identical by construction.
+COUNT_RELATIONSHIPS = False
+# With COUNT_RELATIONSHIPS: keep only papers that list exactly one rainfall IV
+# and exactly one endogenous variable (counting every entry that survived
+# cleaning, coded or not), and both are coded — one relationship per paper.
+ONE_TO_ONE_ONLY = False
+# With COUNT_RELATIONSHIPS: instead of pairing every IV with every endog
+# variable, pair them by list position within each source row (1st IV -> 1st
+# endog, 2nd -> 2nd, ...). Positions are the ";"-slots of the raw text, so an
+# entry removed by cleaning keeps its slot. Unmatched leftovers on the longer
+# list are dropped; a pair with an uncoded end is dropped; an identical pair
+# produced by both rows of a paper (human + model) is counted once.
+PAIR_BY_POSITION = False
+
 # ─── PNG export dimensions ─────────────────────────────────────────────────
 # "Current" export keeps the figure's own layout size (see build_sankey's
 # layout_kwargs). "Wide" re-renders the same figure at a landscape size —
@@ -839,10 +868,132 @@ def export_wide_sankey_png(
         raise RuntimeError(f"Expected to flip {len(labels)} node labels, flipped {n_flipped} instead — "
                             "Plotly's Sankey SVG markup may have changed.")
 
-    cairosvg.svg2png(bytestring=svg.encode("utf-8"), write_to=out_path, scale=scale)
+    svg = crop_svg_to_content(svg)
+    write_bytes_retry(out_path, cairosvg.svg2png(bytestring=svg.encode("utf-8"), scale=scale))
+
+
+# ─── Figure text style ───────────────────────────────────────────────────────
+# Paper convention: figure text in title case (minor words lower-case unless
+# first), Oxford comma in lists. Applied to node labels at render time only, so
+# the taxonomy JSONs -- and the classifier cache keyed on them -- are untouched.
+DISPLAY_RENAMES = {
+    "Infrastructure, transport & urban/spatial development": "Infrastructure, transport, & spatial development",
+    "Social capital, networks, norms & attitudes": "Social capital, networks, & norms",
+}
+_MINOR_WORDS = {"a", "an", "the", "and", "or", "nor", "but", "of", "in", "on", "at", "to", "for", "by",
+                "from", "with", "as", "per", "vs", "via"}
+
+
+def _cap(word: str, first: bool) -> str:
+    if not word or not word[0].isalpha() or any(c.isupper() for c in word[1:]):
+        return word  # numbers, "&", "(n)", and acronyms such as GDP stay as they are
+    if not first and word.lower() in _MINOR_WORDS:
+        return word.lower()
+    return word[0].upper() + word[1:]
+
+
+def display_label(name: str) -> str:
+    """Category name as printed on a figure: renamed, Oxford comma, title case."""
+    name = DISPLAY_RENAMES.get(name, name)
+    if "," in name:  # a list of three or more: "A, B & C" -> "A, B, & C"
+        name = re.sub(r"(?<!,) & ", ", & ", name)
+    out, first = [], True
+    for token in re.split(r"(\s+)", name):
+        if token.isspace() or not token:
+            out.append(token)
+            continue
+        lead = re.match(r"^[(\"']*", token).group(0)  # "(Rainfall" -> cap the word after "("
+        # hyphen / slash parts each get capitalised: Long-Run, Wet/Dry
+        parts = re.split(r"([-/])", token[len(lead):])
+        parts = [p if p in "-/" else _cap(p, first and i == 0 or i > 0) for i, p in enumerate(parts)]
+        out.append(lead + "".join(parts))
+        first = False
+    return "".join(out)
+
+
+# Crop the finished SVG to what is actually drawn (plus this many px), so the
+# label-width estimate's slack and Plotly's margins don't leave white borders.
+CROP_PAD_PX = 6
+_SVG_ROOT_RE = re.compile(r"<svg\b[^>]*>")
+
+
+def crop_svg_to_content(svg: str, pad: int = CROP_PAD_PX) -> str:
+    from PIL import Image, ImageChops
+    import io
+    img = Image.open(io.BytesIO(cairosvg.svg2png(bytestring=svg.encode("utf-8"), scale=1))).convert("RGBA")
+    flat = Image.new("RGB", img.size, "white")
+    flat.paste(img, mask=img.split()[3])
+    bbox = ImageChops.difference(flat, Image.new("RGB", img.size, "white")).getbbox()
+    if not bbox:
+        return svg
+    x0, y0 = max(bbox[0] - pad, 0), max(bbox[1] - pad, 0)
+    x1, y1 = min(bbox[2] + pad, img.width), min(bbox[3] + pad, img.height)
+    w, h = x1 - x0, y1 - y0
+    root = _SVG_ROOT_RE.search(svg).group(0)
+    new_root = re.sub(r'\s(width|height|viewBox)="[^"]*"', "", root)
+    new_root = new_root[:-1].rstrip("/") + f' width="{w}" height="{h}" viewBox="{x0} {y0} {w} {h}">'
+    if root.endswith("/>"):
+        new_root = new_root[:-1] + "/>"
+    return svg.replace(root, new_root, 1)
+
+
+def write_bytes_retry(path: str, data: bytes, attempts: int = 5) -> None:
+    """Write rendered bytes to path, retrying: cairo/kaleido streaming straight
+    into a OneDrive file can fail with a transient EAGAIN / ETIMEDOUT."""
+    for attempt in range(attempts):
+        try:
+            with open(path, "wb") as f:
+                f.write(data)
+            return
+        except OSError as e:
+            if attempt == attempts - 1:
+                raise
+            print(f"  write failed ({e}); retrying...")
+            time.sleep(3)
+
+
+# True → the regular (portrait) PNG/EPS also get node labels outside the
+# diagram (left of the left nodes, right of the right nodes) instead of
+# Plotly's default inside placement over the flows. The canvas is widened by
+# the label margins so the flow area keeps OUTSIDE_LABELS_CHORD_WIDTH px.
+OUTSIDE_LABELS = False
+OUTSIDE_LABELS_CHORD_WIDTH = 520
+
+
+def outside_label_svg(fig: go.Figure, n_left: int, font_size: int = 13, thickness: int = 18,
+                      chord_width: int = OUTSIDE_LABELS_CHORD_WIDTH) -> str:
+    """SVG of `fig` (a copy — it is modified) with every node label flipped
+    to the outer side of its node, margins sized to the longest label."""
+    labels = list(fig.data[0].node.label)
+    left_labels, right_labels = labels[:n_left], labels[n_left:]
+    gap, buffer = 3.25, 12
+    margin_l = int(max((_estimate_label_px(l, font_size) for l in left_labels), default=0) + gap + buffer)
+    margin_r = int(max((_estimate_label_px(l, font_size) for l in right_labels), default=0) + gap + buffer)
+    fig.update_layout(font_size=font_size, width=margin_l + margin_r + chord_width,
+                      margin=dict(l=margin_l, r=margin_r, t=fig.layout.margin.t, b=fig.layout.margin.b))
+    fig.data[0].node.thickness = thickness
+    svg = fig.to_image(format="svg").decode("utf-8")
+
+    def _flip(m: re.Match) -> str:
+        pre, anchor, mid, dx, dy = m.groups()
+        new_anchor = "end" if anchor == "start" else "start"
+        return (f'<text class="node-label"{pre}text-anchor="{new_anchor}"{mid}'
+                f'transform="translate({thickness - float(dx):.3f},{dy})"')
+
+    svg, n_flipped = _NODE_LABEL_RE.subn(_flip, svg)
+    if n_flipped != len(labels):
+        raise RuntimeError(f"Expected to flip {len(labels)} node labels, flipped {n_flipped} instead — "
+                           "Plotly's Sankey SVG markup may have changed.")
+    return crop_svg_to_content(svg)
 
 
 # ─── Sankey ────────────────────────────────────────────────────────────────
+# Filled by build_sankey in COUNT_RELATIONSHIPS mode (non-positional): one dict
+# per drawn link -- paper, both entries, both categories -- i.e. the data the
+# figure is drawn from. Callers can save it after main().
+LAST_LINKS: list[dict] = []
+
+
 def build_sankey(
     left_df: pd.DataFrame,
     right_df: pd.DataFrame,
@@ -860,7 +1011,89 @@ def build_sankey(
     # surfaced on link hover (only populated in the instance-level branch).
     link_papers: dict[tuple[str, str], int] = defaultdict(int)
 
-    if COUNT_INDIVIDUAL_INSTANCES:
+    if COUNT_RELATIONSHIPS and PAIR_BY_POSITION:
+        def slots(df, col):
+            d = df.dropna(subset=["pos"])
+            return {(r.paper_idx, int(r.row_no), int(r.pos)): (r.entry, r[col]) for _, r in d.iterrows()}
+
+        L, R = slots(left_df, left_label_col), slots(right_df, right_label_col)
+        papers = set(paper_index)
+        flows = defaultdict(int)
+        left_totals = defaultdict(int)
+        right_totals = defaultdict(int)
+        seen = set()
+        link_paper_sets: dict[tuple[str, str], set] = defaultdict(set)
+        n_matched = n_uncoded = n_dup = 0
+        for key in sorted(set(L) & set(R), key=str):
+            if key[0] not in papers:
+                continue
+            (le, l), (re_, r) = L[key], R[key]
+            n_matched += 1
+            if l in left_exclude or r in right_exclude:
+                n_uncoded += 1
+                continue
+            if (key[0], le, re_) in seen:
+                n_dup += 1
+                continue
+            seen.add((key[0], le, re_))
+            flows[(l, r)] += 1
+            left_totals[l] += 1
+            right_totals[r] += 1
+            link_paper_sets[(l, r)].add(key[0])
+        link_papers.update({k: len(v) for k, v in link_paper_sets.items()})
+        n_left_only = len([k for k in L if k[0] in papers and k not in R])
+        n_right_only = len([k for k in R if k[0] in papers and k not in L])
+        print(f"  Positional pairs: {n_matched} matched slots; dropped {n_uncoded} with an uncoded end "
+              f"and {n_dup} duplicate pairs (same pair from human + model row); kept "
+              f"{sum(flows.values())} from {len({k[0] for k in seen})} papers. Unmatched leftovers: "
+              f"{n_left_only} rainfall IVs, {n_right_only} endogenous variables (cleaned entries "
+              f"with no partner at the same position).")
+    elif COUNT_RELATIONSHIPS:
+        def entries_by_paper(df, col, exclude):
+            d = df.drop_duplicates(["paper_idx", "entry"])
+            all_ = d.groupby("paper_idx")[col].apply(list).to_dict()
+            k = d[~d[col].isin(exclude)]
+            kept = k.groupby("paper_idx")[col].apply(list).to_dict()
+            kept_entries = k.groupby("paper_idx")["entry"].apply(list).to_dict()  # aligned with kept
+            return all_, kept, kept_entries
+
+        left_all, left_map, left_ents = entries_by_paper(left_df, left_label_col, left_exclude)
+        right_all, right_map, right_ents = entries_by_paper(right_df, right_label_col, right_exclude)
+        LAST_LINKS.clear()
+
+        flows = defaultdict(int)
+        left_totals = defaultdict(int)
+        right_totals = defaultdict(int)
+        n_all = n_kept = n_papers_1to1 = n_papers_1to1_coded = 0
+        for paper_idx in paper_index:
+            n_all += len(left_all.get(paper_idx, [])) * len(right_all.get(paper_idx, []))
+            l_inst = left_map.get(paper_idx, [])
+            r_inst = right_map.get(paper_idx, [])
+            if ONE_TO_ONE_ONLY:
+                if len(l_inst) == 1 and len(r_inst) == 1:
+                    n_papers_1to1_coded += 1
+                if len(left_all.get(paper_idx, [])) != 1 or len(right_all.get(paper_idx, [])) != 1:
+                    continue
+                if l_inst and r_inst:
+                    n_papers_1to1 += 1
+            for le, l in zip(left_ents.get(paper_idx, []), l_inst):
+                for re_, r in zip(right_ents.get(paper_idx, []), r_inst):
+                    flows[(l, r)] += 1
+                    left_totals[l] += 1
+                    right_totals[r] += 1
+                    n_kept += 1
+                    LAST_LINKS.append({"paper_key": paper_idx, "rainfall_iv": le, "rainfall_category": l,
+                                       "endogenous_variable": re_, "endogenous_category": r})
+            for pair in {(l, r) for l in l_inst for r in r_inst}:
+                link_papers[pair] += 1
+        print(f"  Relationships (IV x endog pairs within paper): {n_all} total, {n_kept} complete "
+              f"(kept), {n_all - n_kept} with an uncoded end (dropped). Papers with no surviving "
+              f"entry at all on a side (e.g. text removed by cleaning) contribute no pairs.")
+        if ONE_TO_ONE_ONLY:
+            print(f"  One-to-one only: {n_papers_1to1} papers with exactly 1 rainfall IV and 1 endogenous "
+                  f"variable, both coded (would be {n_papers_1to1_coded} if 1:1 were judged on coded "
+                  f"entries only).")
+    elif COUNT_INDIVIDUAL_INSTANCES:
         # One label per distinct entry a paper lists on each side (de-duped per
         # paper on cleaned text). left_totals / right_totals are then the exact
         # instance counts per category and are what gets printed. Link weight:
@@ -941,8 +1174,8 @@ def build_sankey(
     all_nodes   = left_nodes + right_nodes
     node_idx    = {n: i for i, n in enumerate(all_nodes)}
     labeled_nodes = (
-        [f"{n} ({left_totals[n]})"  for n in left_nodes] +
-        [f"{n} ({right_totals[n]})" for n in right_nodes]
+        [f"{display_label(n)} ({left_totals[n]})"  for n in left_nodes] +
+        [f"{display_label(n)} ({right_totals[n]})" for n in right_nodes]
     )
 
     sources = [node_idx[l] for l, _ in flows]
@@ -1274,12 +1507,15 @@ def main():
         skip_broadening=True,
     )
 
+    # Any output path set to None is skipped (the thesis script keeps only the
+    # figure and its link data).
     rejected_all = pd.concat([rain_rejected, endog_rejected], ignore_index=True)
-    rejected_all.to_csv(REJECTED_ENTRIES_CSV, index=False)
-    print(f"\nRejected raw fragments (review for real data dropped by cleaning) → "
-          f"{REJECTED_ENTRIES_CSV} ({len(rejected_all)} rows)")
+    if REJECTED_ENTRIES_CSV:
+        rejected_all.to_csv(REJECTED_ENTRIES_CSV, index=False)
+        print(f"\nRejected raw fragments (review for real data dropped by cleaning) → "
+              f"{REJECTED_ENTRIES_CSV} ({len(rejected_all)} rows)")
 
-    if CATEGORIZER == "fixed":
+    if CATEGORIZER == "fixed" and CLASSIFIER_AUDIT_CSV:
         audit_all = pd.concat([rain_audit, endog_audit], ignore_index=True)
         audit_all.to_csv(CLASSIFIER_AUDIT_CSV, index=False)
         print(f"Fixed-label classifier audit → {CLASSIFIER_AUDIT_CSV} ({len(audit_all)} rows)")
@@ -1292,13 +1528,14 @@ def main():
                                ).to_csv(shares_csv, index=False)
         print(f"Other / Unclassifiable shares → {shares_csv}")
 
-    summary_endog = build_summary(
-        ("endog", endog_exp, "endog_cluster_id", "endog_cluster_label"),
-        ("rain",  rain_exp,  "rain_cluster_id",  "rain_cluster_label"),
-    )
-    summary_endog.to_csv(CLUSTER_SUMMARY_ENDOG, index=False)
-    print(f"Endogenous variable cluster summary → {CLUSTER_SUMMARY_ENDOG}")
-    print("Review it, add label overrides above, and rerun.")
+    if CLUSTER_SUMMARY_ENDOG:
+        summary_endog = build_summary(
+            ("endog", endog_exp, "endog_cluster_id", "endog_cluster_label"),
+            ("rain",  rain_exp,  "rain_cluster_id",  "rain_cluster_label"),
+        )
+        summary_endog.to_csv(CLUSTER_SUMMARY_ENDOG, index=False)
+        print(f"Endogenous variable cluster summary → {CLUSTER_SUMMARY_ENDOG}")
+        print("Review it, add label overrides above, and rerun.")
 
     print("\nBuilding Sankey: Rainfall → Endogenous Variables...")
     fig_endog, left_nodes_endog = build_sankey(
@@ -1311,21 +1548,31 @@ def main():
         node_pad=50,
         show_title=False,
     )
-    fig_endog.write_html(OUTPUT_HTML_ENDOG)
-    print(f"Sankey → {OUTPUT_HTML_ENDOG}")
-    fig_endog.write_image(OUTPUT_PNG_ENDOG, scale=2)
-    print(f"Sankey → {OUTPUT_PNG_ENDOG}")
-    # Kaleido v1 dropped EPS export, so render SVG and convert with cairosvg.
-    cairosvg.svg2eps(bytestring=fig_endog.to_image(format="svg"), write_to=OUTPUT_EPS_ENDOG)
-    print(f"Sankey → {OUTPUT_EPS_ENDOG}")
+    if OUTPUT_HTML_ENDOG:
+        fig_endog.write_html(OUTPUT_HTML_ENDOG)
+        print(f"Sankey → {OUTPUT_HTML_ENDOG}")
+    if OUTSIDE_LABELS:
+        svg = outside_label_svg(go.Figure(fig_endog), len(left_nodes_endog))
+        for path, render in ((OUTPUT_PNG_ENDOG, lambda b: cairosvg.svg2png(bytestring=b, scale=2)),
+                             (OUTPUT_EPS_ENDOG, lambda b: cairosvg.svg2eps(bytestring=b))):
+            write_bytes_retry(path, render(svg.encode("utf-8")))
+            print(f"Sankey → {path}  (labels outside)")
+    else:
+        # Kaleido v1 dropped EPS export, so render SVG (cropped to content) and convert with cairosvg.
+        svg = crop_svg_to_content(fig_endog.to_image(format="svg").decode("utf-8")).encode("utf-8")
+        write_bytes_retry(OUTPUT_PNG_ENDOG, cairosvg.svg2png(bytestring=svg, scale=2))
+        print(f"Sankey → {OUTPUT_PNG_ENDOG}")
+        write_bytes_retry(OUTPUT_EPS_ENDOG, cairosvg.svg2eps(bytestring=svg))
+        print(f"Sankey → {OUTPUT_EPS_ENDOG}")
 
     # Re-render the same figure at landscape dimensions for the wide PNG —
     # done last since it mutates fig_endog's layout in place. Node labels are
     # pushed outside the diagram (left of the left nodes, right of the right
     # nodes) so they clear the flow bands — see export_wide_sankey_png.
-    fig_endog.update_layout(width=WIDE_PNG_WIDTH, height=WIDE_PNG_HEIGHT)
-    export_wide_sankey_png(fig_endog, left_nodes_endog, OUTPUT_PNG_WIDE_ENDOG, scale=2)
-    print(f"Sankey (wide) → {OUTPUT_PNG_WIDE_ENDOG}")
+    if OUTPUT_PNG_WIDE_ENDOG:
+        fig_endog.update_layout(width=WIDE_PNG_WIDTH, height=WIDE_PNG_HEIGHT)
+        export_wide_sankey_png(fig_endog, left_nodes_endog, OUTPUT_PNG_WIDE_ENDOG, scale=2)
+        print(f"Sankey (wide) → {OUTPUT_PNG_WIDE_ENDOG}")
 
 
 if __name__ == "__main__":

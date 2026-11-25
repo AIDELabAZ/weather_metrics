@@ -34,8 +34,12 @@ from sankey_taxonomy import unclassifiable_label
 
 BACKBONE = os.environ.get("OVERVIEW_BACKBONE", "qwen3-8b")
 GATE = os.environ.get("OVERVIEW_GATE", "concept")
-EXCLUDE_RUNS = {"claude"}
-RUNS = {k: d for k, d in full.BASELINES.items() if k not in EXCLUDE_RUNS}
+EXCLUDE_RUNS: set[str] = set()
+# Claude was added last (Nov 2026, after the 32B arms were run on the other
+# six): pipeline_comparison takes a pair's paper context from the first run in
+# this order that extracted it, so appending keeps existing context unchanged.
+_ORDER = [k for k in full.BASELINES if k != "claude"] + ["claude"]
+RUNS = {k: full.BASELINES[k] for k in _ORDER if k not in EXCLUDE_RUNS}
 # Default setting (8B + concept gate) writes to classifier/8b/; any other
 # setting gets a descriptive folder name so it can't overwrite 8b/.
 _DEFAULT = BACKBONE == "qwen3-8b" and GATE == "concept"
@@ -43,6 +47,10 @@ OUT_NAME = "8b" if _DEFAULT else f"overview_{BACKBONE}_{GATE}_full_corpus"
 OUT_DIR = os.path.join("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/analysis/classifier",
                        OUT_NAME)
 SIDE_FILES = {"Rainfall Metrics": "entries_rainfall.csv", "Endogenous Variables": "entries_endogenous.csv"}
+# SANKEY_RELATIONSHIPS=1: count links as within-paper rainfall-IV x endogenous pairs with both ends coded
+# (sic.COUNT_RELATIONSHIPS; a paper with 4 IVs and 1 endogenous variable gives 4 links), labels outside the
+# diagram, and write *_relationships files beside the instance-count ones instead of replacing them.
+RELATIONSHIPS = os.environ.get("SANKEY_RELATIONSHIPS") == "1"
 
 
 def occurrences() -> dict[str, dict[str, Counter]]:
@@ -126,7 +134,13 @@ One row per unique entry, most frequent first.
 
 ## Sankeys
 `sankeys/sankey_full_<run>.png` (+ `_wide.png`): Other is shown, Unclassifiable is excluded; its share is in
-`sankeys/details/residual_shares_full_<run>.csv`.
+`sankeys/details/residual_shares_full_<run>.csv`. These count each side's entries independently, so the two
+sides' totals can differ.
+
+`sankeys/sankey_full_<run>_relationships.png` (+ `_wide.png`): links are within-paper rainfall-IV x endogenous
+pairs with both ends in a shown category (a paper with 4 IVs and 1 endogenous variable gives 4 links); pairs with
+an Unclassifiable / Not Specified end are dropped, so both sides sum to the same total. Labels sit outside the
+diagram.
 """
 
 GATE_NOTES = {
@@ -144,6 +158,7 @@ GATE_NOTES = {
 
 def run_sankeys() -> None:
     flc.BACKBONE, flc.GATE = BACKBONE, GATE
+    sic.COUNT_RELATIONSHIPS = sic.OUTSIDE_LABELS = RELATIONSHIPS
     folder = os.path.join(OUT_DIR, "sankeys")
     details = os.path.join(folder, "details")
     os.makedirs(details, exist_ok=True)
@@ -151,7 +166,7 @@ def run_sankeys() -> None:
         full.set_paths(key, subdir)
         if not os.path.exists(sic.MERGED_CSV):
             continue
-        stem = f"full_{key}"
+        stem = f"full_{key}" + ("_relationships" if RELATIONSHIPS else "")
         sic.OUTPUT_PNG_ENDOG = os.path.join(folder, f"sankey_{stem}.png")
         sic.OUTPUT_PNG_WIDE_ENDOG = os.path.join(folder, f"sankey_{stem}_wide.png")
         sic.OUTPUT_HTML_ENDOG = os.path.join(details, f"sankey_{stem}.html")
@@ -161,6 +176,10 @@ def run_sankeys() -> None:
         sic.RELATIONSHIPS_RAW_ENDOG_CSV = os.path.join(details, f"relationships_raw_endog_{stem}.csv")
         sic.RELATIONSHIPS_CATEGORIZED_ENDOG_CSV = os.path.join(details, f"relationships_categorized_endog_{stem}.csv")
         sic.CLASSIFIER_AUDIT_CSV = os.path.join(details, f"classifier_audit_{stem}.csv")
+        # OneDrive turns an EPS that is being overwritten into a 0-byte "dataless" placeholder, so remove
+        # just this one first (not the whole folder: instance and relationship versions share it).
+        if os.path.exists(sic.OUTPUT_EPS_ENDOG):
+            os.remove(sic.OUTPUT_EPS_ENDOG)
         print(f"\n===== Sankey {BACKBONE} / {GATE} / {stem} =====", flush=True)
         sic.main()
 
