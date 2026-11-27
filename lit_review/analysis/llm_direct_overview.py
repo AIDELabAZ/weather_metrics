@@ -150,13 +150,12 @@ Runs: {", ".join(RUNS)}. Same unique entries as `../8b/`.
 One step per unique entry. Qwen3-32B (4-bit MLX, run locally, thinking off, greedy) gets the entire taxonomy JSON
 (guidance note, every category's description, examples and JEL anchors, Other and Unclassifiable included) and
 the entry name, and answers with a short reason, a category and a runner-up. No embedding, reranker, gate or
-rule lists. The taxonomy JSONs are the updated ones (Nov 16).
+rule lists. The taxonomy is `analysis/taxonomies/*.json`.
 
 One rule overrides the LLM, the same one the 8b pipeline uses: on the rainfall side, bare names with no
 construction ("rainfall", "precipitation", "rainfall squared", "rainfall (mm)", ...; list in
 `fixed_label_classifier.BARE_RAINFALL`) are Unclassifiable. Logged, lagged, dummy and period-specific rainfall
-are kept. (The Nov 16
-JSON note says such names default to Total rainfall; this rule deliberately departs from it.)
+are kept. (The taxonomy note says such names default to Total rainfall; this rule deliberately departs from it.)
 The LLM's own answer is in `32b_category`; `rule` says when the override fired.
 
 ## Entry files
@@ -165,7 +164,7 @@ The LLM's own answer is in `32b_category`; `rule` says when the override fired.
 | entry | Cleaned entry as extracted |
 | category | Final category (Other / Unclassifiable carry the side suffix, as in 8b/) |
 | 32b_category | Qwen3-32B's own choice, before the bare-rainfall rule |
-| 8b_category | Final label from the most recent 8b pipeline run (`../8b/`, made with the **previous** taxonomy JSONs) |
+| 8b_category | Final label from the 8b pipeline (`../8b/`) |
 | rule | "bare rainfall" when the rule overrode the LLM, else blank |
 | category_prob | Model's probability of the category it wrote (product of its token probabilities); low = close call |
 | runner_up | Next most plausible category, per the model |
@@ -174,11 +173,6 @@ The LLM's own answer is in `32b_category`; `rule` says when the override fired.
 | agrees_with_8b | category == 8b_category |
 
 `summary.csv`: unique entries and occurrence shares per category, both classifiers side by side.
-
-## Caveat when comparing to 8b/
-8b/ was classified with the Nov 13 JSONs. The Nov 16 JSONs changed the rules (e.g. bare "rainfall" now defaults
-to Total rainfall, "rainfall shock" to Two-sided extremes, Other is a last resort), so some disagreements come from
-the taxonomy, not the method.
 
 ## Sankeys
 `sankeys/sankey_full_<run>.png` (+ `_wide.png`): Other shown, Unclassifiable excluded (share in

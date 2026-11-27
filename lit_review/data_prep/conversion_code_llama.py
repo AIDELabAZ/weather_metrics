@@ -3,7 +3,7 @@ import json
 import os
 import random
 
-# Exact system instruction from finetune_gemini.py — must match inference verbatim
+# Exact system instruction from archive/gemini/finetune_gemini.py — must match inference verbatim
 SYSTEM_INSTRUCTION = (
     "You are an AI assistant that is an expert in analysis of economic literature. "
     "You interpret complex content and extract specific information, especially about "
@@ -16,7 +16,7 @@ SYSTEM_INSTRUCTION = (
     "For binary questions with justification requests, always start with 0 or 1"
 )
 
-# Question texts copied verbatim from finetune_gemini.py
+# Question texts copied verbatim from archive/gemini/finetune_gemini.py
 QUESTIONS = [
     {
         "key": "Title",

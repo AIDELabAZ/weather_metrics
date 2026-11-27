@@ -13,8 +13,7 @@ for each classifier size (GATE_SIZES, default 8B only):
 
 The category choice (reranker argmax over the real categories + Other) is
 identical under both approaches, so differences come only from the gate.
-No hand review is applied (classifier_manual_review.csv doesn't exist for
-the new taxonomy), so every label here is the classifier's own output.
+No hand review is applied, so every label here is the classifier's own output.
 
 Writes everything to <OneDrive>/weather_iv_lit/analysis/classifier/gate_comparison_<X>_vs_<Y>/
 (gate_comparison/ for the original A-vs-B run):

@@ -4,9 +4,10 @@ zero-shot / RAG / SFT, GPT-6.1 Sol, Llama 4 Maverick, Gemma 4 26B, Claude Opus
 5.5), categorized with the 32B Solo classifier (Qwen3-32B, taxonomy + decision
 rules, entry name only).
 
-Same sample as the agreement tables (model_agreement_tables.py): the 3,840
-papers with model-generated labels (full corpus + common held-out evaluation
-set), so each Sankey covers exactly the rainfall-IV papers counted in Panel A.
+Same sample as the agreement tables (model_agreement_tables.py: gpt_agree.tex,
+frontier_agree.tex): the 3,821 papers with model-generated labels (full corpus +
+common held-out evaluation set, each paper once), so each Sankey covers exactly
+the rainfall-IV papers counted in Panel A of those tables.
 Same drawing as writing/thesis/sankey_final: one link per within-paper
 rainfall-IV x endogenous pair with both ends in a shown category, labels outside.
 
@@ -40,6 +41,10 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     frames = {k: mat.load(k) for k in mat.MODELS}
     common = sorted(set.intersection(*[set(f.index) for f in frames.values()]))
+    # Same deduplicated papers as the *_dedup agreement tables: of two filenames that differ only in punctuation
+    # (one paper stored twice), keep the corpus copy and drop the other, rather than merging the copies.
+    common = mat.dedupe(common)
+    print(f"Sample: {len(common)} papers (deduplicated)")
     labels = mat.solo_labels()
 
     def lookup(unique_entries, side_name, *a, **k):

@@ -45,7 +45,7 @@ SIDE_INTRO = {
 }
 PROMPT_VERSION = "direct-v1"
 
-# --rules: the hand-written decision rules (Nov 18), appended after the categories. Bare rainfall ("rainfall",
+# --rules: the hand-written decision rules, appended after the categories. Bare rainfall ("rainfall",
 # "precipitation", ...) is NOT in the prompt: it is handled after the model by the BARE_RAINFALL filter, as in
 # 32b_direct, so the model's behaviour on everything else stays as close to 32b_direct as possible.
 RULES = {

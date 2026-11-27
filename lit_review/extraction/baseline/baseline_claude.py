@@ -2,10 +2,10 @@
 baseline_claude.py
 
 Zero-shot baseline for Claude: identical prompts, questions, dependency logic,
-PDF extraction, and parsing as baseline_gpt.py / baseline_gemini.py, but calls
+PDF extraction, and parsing as baseline_gpt.py, but calls
 Claude Opus 5.5 through the Anthropic API (Anthropic Python SDK).
 
-Like baseline_sol.py (and unlike the temperature-0 GPT-4.1 / Gemini / Gemma
+Like baseline_sol.py (and unlike the temperature-0 GPT-4.1 / Gemma
 runs), Claude Opus 5.5 does not accept a temperature setting and always
 reasons (adaptive thinking) before answering, so outputs are not
 deterministic run to run. Reasoning depth is pinned explicitly with

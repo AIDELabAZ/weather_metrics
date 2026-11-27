@@ -1,22 +1,22 @@
 """
-This script is used to generate sankey diagrams which help us visualize potential
-exclusion restriction violations present in our corpus. First, model generated outputs 
-from a single extraction pipeline are collected. Looking only at rows that have ≥1 rainfall insturmental variable 
-identified, text is normalized and if any papers match (e.g., different versions or an
-accidental duplicate) only one instance is kept. Every cell entry in the rainfall IV 
-and endogenous variable columns are split and ; separeted, including those cells with
-more than 1 entry. Entries are further cleaned, dropping equations, strings of notation,
-and sentence fragments. For each side of the sankey, all unique entries are sent in
-a single LLM call tasked with classifying each into broader categories. For example,
-rainfall shocks, deviations in annual rainfall, and rainfall deviations from long term average 
-might all be classified as rainfall deviations and anomalies. The categorized counts are
-then built into a sankey, where node counts are the literal instance counts of that variable. 
-A single paper may contribute 2 different rainfall IVs, in which case each instance is 
-classified accordingly. 
+Builds rainfall-IV -> endogenous-variable Sankey diagrams from one extraction
+run's output, to show which economic variables rainfall instruments are used for.
 
-Remember to change pathnames before running on different model outputs and set environmental API key. 
+Steps:
+  1. Keep the papers flagged as using a rainfall IV. Papers whose filenames
+     match after normalization (different versions, accidental duplicates)
+     are merged into one paper.
+  2. Split every rainfall-IV and endogenous-variable cell on ";" and clean each
+     entry, dropping equations, notation strings and sentence fragments.
+  3. Assign each unique entry a category. CATEGORIZER = "fixed" (default) uses
+     the fixed taxonomy in analysis/taxonomies/ (fixed_label_classifier.py);
+     "llm" asks an OpenAI model to build categories (needs OPENAI_API_KEY).
+  4. Draw the Sankey. By default each entry counts once on its own side
+     (COUNT_INDIVIDUAL_INSTANCES); COUNT_RELATIONSHIPS instead draws one link per
+     within-paper rainfall-IV x endogenous pair with both ends categorized.
 
-Run model_eval.r first to generate full corpus files.
+The input and output paths below are module constants; scripts such as
+model_sankeys.py and classifier_overview.py set them before calling main().
 """
 
 import ctypes.util
@@ -191,9 +191,8 @@ _STOP_PHRASES = [
 _NORMALIZATIONS = [
     # log/ln unification
     (re.compile(r"\bln\b"),             "log"),
-    # "log(x)" / "log ( x )" → "log x", consuming BOTH parens together — the
-    # fallback regex right below this one used to be the only rule here, and
-    # it only ever consumed the opening "(", leaving a dangling ")" behind
+    # "log(x)" / "log ( x )" → "log x", consuming BOTH parens together so the
+    # fallback below doesn't leave a dangling ")" behind
     # (e.g. "log(rainfall)" -> "log rainfall)").
     (re.compile(r"\blog\s*\(\s*([^()]*?)\s*\)"), r"log \1"),
     # Fallback for a truncated "log(" with no closing paren in this fragment.
@@ -203,8 +202,8 @@ _NORMALIZATIONS = [
     (re.compile(r"\bppt\b"),            "precipitation"),
     # "rain fall" (extraction split it across a space) / "rainfall" → one
     # term, consumed together first so the standalone-"rain" fallback right
-    # below doesn't leave the original "fall" behind as a duplicate (the old
-    # bug: "rain fall" -> "rainfall fall").
+    # below doesn't leave the original "fall" behind as a duplicate
+    # (otherwise "rain fall" -> "rainfall fall").
     (re.compile(r"\brain\s*fall\b"),    "rainfall"),
     (re.compile(r"\brain\b"),           "rainfall"),
     # time-scale normalization
@@ -213,7 +212,7 @@ _NORMALIZATIONS = [
     (re.compile(r"\bmon(?:thly)?\b"),   "monthly"),
     (re.compile(r"\bwk|week(?:ly)?\b"), "weekly"),
     # common abbrevs
-    # Skip when "per capita" already follows (the old bug: "gdp per capita" ->
+    # Skip when "per capita" already follows (otherwise "gdp per capita" ->
     # "gdp per capita per capita").
     (re.compile(r"\bgdp\b(?!\s*per\s*capita)"), "gdp per capita"),
     (re.compile(r"\bcpi\b"),            "consumer price index"),
@@ -716,11 +715,11 @@ def build_summary(*sides) -> pd.DataFrame:
 # contributes to neither side's counts, not just a hidden/renamed node. A
 # paper with a MIX of real and noise/missing entries keeps its real ones;
 # only the excluded label's rows are dropped.
-# With the Nov 2026 taxonomy, Other is a legitimate, legible variable that
-# fits no category, so it is shown as its own node. Unclassifiable (gibberish,
-# codes, fragments) is excluded; its share of all entries is reported instead
-# (report_residual_shares). With CATEGORIZER = "llm", Other is still the junk
-# bucket — add it back here if you switch.
+# In the fixed taxonomy, Other is a legitimate, legible variable that fits no
+# category, so it is shown as its own node. Unclassifiable (gibberish, codes,
+# fragments) is excluded; its share of all entries is reported instead
+# (report_residual_shares). With CATEGORIZER = "llm", Other is the junk bucket
+# and belongs in these sets.
 RAIN_EXCLUDE:  set[str] = {"Unclassifiable (Rainfall Metrics)", "Not Specified (Rainfall Metrics)"}
 ENDOG_EXCLUDE: set[str] = {"Unclassifiable (Endogenous Variables)", "Not Specified (Endogenous Variables)"}
 
@@ -1482,10 +1481,10 @@ def main():
     rain_df_raw = load_rainfall_papers(MERGED_CSV)
     print(f"Rainfall IV papers (deduped): {rain_df_raw.index.nunique()}")
 
-    # TEMP: broadening pass (second LLM call, gpt-4.1) disabled to see the
-    # diagram with only the first classification call + the non-LLM
-    # near-duplicate-name merge. Delete skip_broadening=True (or set False)
-    # on both calls below to revert.
+    # The broadening pass (a second LLM call, gpt-4.1, CATEGORIZER = "llm" only)
+    # is skipped: categories come from the first classification call plus the
+    # non-LLM near-duplicate-name merge. Set skip_broadening=False on both calls
+    # below to run it.
     rain_exp, rain_rejected, rain_audit = process_side(
         rain_df_raw,
         col="Rainfall Instrument",

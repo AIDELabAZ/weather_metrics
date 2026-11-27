@@ -35,3 +35,17 @@ __pycache__/
 lit_review/analysis/.pipeline_test/
 lit_review/analysis/.llm_direct_cache.json
 lit_review/analysis/.llm_direct_entries.json
+
+# R session and IDE files
+.RData
+.Rapp.history
+.idea/
+
+# Run logs, watchdog scripts and SLURM job output
+lit_review/logs/
+*.out
+
+# Superseded intermediate files
+lit_review/analysis/output/
+lit_review/analysis/hpc/hpc_cache_2stage.json
+lit_review/analysis/hpc/local_cache_backup_pre_hpc.json

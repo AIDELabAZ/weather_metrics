@@ -9,7 +9,7 @@ load the 8B models.
 Replace `<netid>` and `<PI_GROUP>` throughout. Your PI group is the name `va` prints
 on Puma.
 
-## 0. Mac: export the entries (already done 2026-11-06; rerun if the extraction CSVs or cleaning change)
+## 0. Mac: export the entries (rerun whenever the extraction CSVs or the cleaning change)
 ```bash
 cd ~/Documents/GitHub/weather_metrics/lit_review
 DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib python3 analysis/hpc/export_classifier_entries.py
@@ -44,10 +44,8 @@ squeue -u <netid>                                      # check status
 tail -f classify_<jobid>.out
 ```
 The log prints the share of entries labelled Other and Unclassifiable for each side.
-Since the Nov 2026 taxonomy switch (taxonomies/*.json, METHOD "residuals-v1") every
-backbone, 0.6B included, is scored from scratch: the cache key changed, so nothing
-from earlier runs is reused. For the bge robustness check, add its model IDs to
-`setup_env.sh` and run `classify.slurm qwen3-0.6b qwen3-4b qwen3-8b bge`.
+Only entries missing from the cache are scored. The cache key includes the taxonomy
+and the prompts, so editing either rescores every entry.
 
 ## 4. Mac: fetch, merge and rebuild the Sankeys
 ```bash
@@ -61,8 +59,8 @@ for b in qwen3-4b qwen3-8b; do
 done
 ```
 With `SANKEY_BACKBONE` set, outputs get a suffix, for example
-`sankey_full_baseline_sol_qwen3-8b_rainfall_endog.png`. Your current 0.6B figures
-(no suffix) are not touched.
+`sankey_full_baseline_sol_qwen3-8b_rainfall_endog.png`; runs without `SANKEY_BACKBONE`
+write files without a suffix.
 If a Sankey run logs `[qwen3-8b] scoring N new entries`, some entries were missing from
 the HPC run. It will then try to load the 8B model on the Mac. Stop it (Ctrl-C), then
 redo steps 0, 1 and 3.

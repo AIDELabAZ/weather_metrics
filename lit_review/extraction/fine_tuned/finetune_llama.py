@@ -401,7 +401,7 @@ _endpoint = None
 def get_endpoint():
     """
     Llama tuned models on Vertex AI deploy behind a standard prediction Endpoint
-    (not the Gemini-specific `google-genai` client used for finetune_gemini.py).
+    (not the Gemini-specific `google-genai` client used for archive/gemini/finetune_gemini.py).
 
     UNCONFIRMED — verify before running: query_model_with_history() below sends
     the same multi-turn `contents` + `system_instruction` shape used in the

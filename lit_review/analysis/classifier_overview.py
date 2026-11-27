@@ -35,9 +35,9 @@ from sankey_taxonomy import unclassifiable_label
 BACKBONE = os.environ.get("OVERVIEW_BACKBONE", "qwen3-8b")
 GATE = os.environ.get("OVERVIEW_GATE", "concept")
 EXCLUDE_RUNS: set[str] = set()
-# Claude was added last (Nov 2026, after the 32B arms were run on the other
-# six): pipeline_comparison takes a pair's paper context from the first run in
-# this order that extracted it, so appending keeps existing context unchanged.
+# Claude comes last: pipeline_comparison takes a pair's paper context from the
+# first run in this order that extracted it, and the cached 32B context-arm
+# results were produced with this order.
 _ORDER = [k for k in full.BASELINES if k != "claude"] + ["claude"]
 RUNS = {k: full.BASELINES[k] for k in _ORDER if k not in EXCLUDE_RUNS}
 # Default setting (8B + concept gate) writes to classifier/8b/; any other

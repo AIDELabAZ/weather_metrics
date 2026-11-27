@@ -5,7 +5,7 @@
 ### excluded from training, cleans/normalizes/merges them by filename, and reports:
 ###   - confusion matrices for the binary identification fields
 ###   - cross-encoder semantic similarity for the free-text fields
-### Call evaluate_model() once per model's output CSV (gemini, gpt, llama, gemma, ...).
+### Call evaluate_model() once per model's output CSV (gpt, sol, gemma, llama, claude, ...).
 ############################################
 library(tidyverse)
 library(caret)
@@ -25,15 +25,13 @@ human_path <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/w
 output_root <- "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output"
 
 model_paths <- list(
-  # gemini = "",
   gpt_baseline = file.path(output_root, "gpt", "baseline", "baseline_gpt_output.csv"),
   gpt_rag      = file.path(output_root, "gpt", "rag",      "rag_gpt_output.csv"),
   gpt_finetune = file.path(output_root, "gpt", "sft",      "gpt_finetune_output.csv"),
   agentic      = file.path(output_root, "agentic",         "agentic_output.csv"),
   gpt_sol      = file.path(output_root, "gpt", "baseline_sol", "test_baseline_sol_output.csv"),
-  gemini_baseline = file.path(output_root, "gemini", "baseline", "test_baseline_gemini_output.csv"),
   gemma_baseline  = file.path(output_root, "gemma",  "baseline", "test_baseline_gemma_output.csv"),
-  # Keep this order -- palette slots 8/9 below and APPROACH_COLORS in
+  # Keep this order -- palette slots 7/8 below and APPROACH_COLORS in
   # model_comparison_figs.py follow it.
   llama_baseline  = file.path(output_root, "llama",  "baseline", "test_baseline_llama_output.csv"),
   claude_baseline = file.path(output_root, "claude", "baseline", "test_baseline_claude_output.csv")
@@ -48,7 +46,6 @@ model_output_dirs <- list(
   gpt_finetune = file.path(output_root, "gpt", "sft"),
   agentic      = file.path(output_root, "agentic"),
   gpt_sol      = file.path(output_root, "gpt", "baseline_sol"),
-  gemini_baseline = file.path(output_root, "gemini", "baseline"),
   gemma_baseline  = file.path(output_root, "gemma",  "baseline"),
   llama_baseline  = file.path(output_root, "llama",  "baseline"),
   claude_baseline = file.path(output_root, "claude", "baseline")
@@ -63,10 +60,10 @@ tex_output_path <- file.path(output_root, "gpt")
 #               (GPT-4.1 zero-shot, RAG, SFT, plus the agentic run)
 #   frontier -- appendix/robustness: our best model (GPT-4.1 SFT) against the
 #               newest zero-shot model from each family
-# Frontier keys missing from model_paths (runs still pending) are dropped.
+# intersect() keeps only the frontier keys that have an entry in model_paths.
 gpt_model_keys <- c("gpt_baseline", "gpt_rag", "gpt_finetune", "agentic")
 frontier_model_keys <- intersect(
-  c("gpt_finetune", "gpt_sol", "gemini_baseline", "gemma_baseline",
+  c("gpt_finetune", "gpt_sol", "gemma_baseline",
     "llama_baseline", "claude_baseline"),
   names(model_paths)
 )
@@ -80,7 +77,6 @@ model_display_names <- c(
   gpt_finetune = "Fine-tuned",
   agentic      = "Agentic (Claude)",
   gpt_sol      = "Zero-shot (GPT-6.1 Sol)",
-  gemini_baseline = "Zero-shot (Gemini 4 Argon)",
   gemma_baseline  = "Zero-shot (Gemma 4 26B)",
   llama_baseline  = "Zero-shot (Llama 4 Maverick)",
   claude_baseline = "Zero-shot (Claude Opus 5.5)"
@@ -92,20 +88,20 @@ model_display_names <- c(
 frontier_display_names <- c(
   gpt_finetune    = "SFT (GPT-4.1)",
   gpt_sol         = "GPT-6.1 Sol",
-  gemini_baseline = "Gemini 4 Argon",
   gemma_baseline  = "Gemma 4 26B",
   llama_baseline  = "Llama 4 Maverick",
   claude_baseline = "Claude Opus 5.5"
 )
 
 ############################################
-# Cross-encoder setup (once for the whole session)
+# Cross-encoder setup (loaded once per run)
 ############################################
-# Create env only once; comment out after first successful run:
-virtualenv_create("bert_env")
+# The Python environment is created and populated on the first run only.
+if (!virtualenv_exists("bert_env")) {
+  virtualenv_create("bert_env")
+  virtualenv_install("bert_env", c("torch", "transformers", "sentence-transformers"))
+}
 use_virtualenv("bert_env", required = TRUE)
-
-py_install(c("torch", "transformers", "sentence-transformers"))
 
 py_run_string("
 from sentence_transformers import CrossEncoder
@@ -534,7 +530,7 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
   # orange/aqua) — validated for CVD-safety at this series count.
   # Indexed by position in model_paths (not in model_keys) so a model keeps
   # its color even when others are filtered out of this plot.
-  palette <- c("#08B2E3", "#484D6D", "#57A773", "#C1666B", "#E0A458", "#8C6BB1", "#8C5A3C",
+  palette <- c("#08B2E3", "#484D6D", "#57A773", "#C1666B", "#E0A458", "#8C5A3C",
                "#D17CB0", "#3F7F8C")
   model_colors <- setNames(palette[match(model_keys, names(model_paths))], unname(model_labels[model_keys]))
 
@@ -600,8 +596,8 @@ build_similarity_density_plot <- function(results, model_keys, model_labels, out
   cat("\nSimilarity KDE grid written to:", out_path, "\n")
 }
 
-# TEMP: agentic outputs excluded from the KDE grid only (still in every other
-# table/plot below). Drop the setdiff() to put it back.
+# The agentic run is left out of the similarity density grid only; it appears in
+# every other table and plot below.
 density_model_keys <- setdiff(gpt_model_keys, "agentic")
 build_similarity_density_plot(
   results,
@@ -756,7 +752,7 @@ build_classification_scoreboard_plot <- function(results, model_keys, model_labe
 
   # Same 3-slot model palette used for the KDE density plot, so a model's
   # color means the same thing everywhere in this script's output.
-  palette      <- c("#08B2E3", "#484D6D", "#57A773", "#C1666B", "#E0A458", "#8C6BB1", "#8C5A3C",
+  palette      <- c("#08B2E3", "#484D6D", "#57A773", "#C1666B", "#E0A458", "#8C5A3C",
                     "#D17CB0", "#3F7F8C")
   model_colors <- setNames(palette[match(model_keys, names(model_paths))], unname(model_labels[model_keys]))
 
@@ -800,44 +796,19 @@ build_classification_scoreboard_plot(
 ##############################################
 # Create per-implementation full corpus files
 ##############################################
-# Each implementation has different outputs and we want to compare them
-# against each other. This section merges rows from full_[implementation]_[family].csv
-# files with those from testing in [implementation]_[family].csv 
-# which are output to /weather_iv_lit/training/data_prep_all_models
-# as [implementation]_[model]_all_papers.csv for each. 
+# Each implementation's full-corpus output is combined with its held-out test-set
+# output (rows from full_<implementation>_gpt_output.csv plus <implementation>_gpt_output.csv)
+# and written to weather_iv_lit/analysis/<implementation>_full_corpus.csv.
 
-# read in all files
-# change pathnames accordingly
 full_sft_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/full_sft_gpt_output.csv")
 full_rag_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/full_rag_gpt_output.csv")
 full_baseline_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/full_baseline_gpt_output.csv")
 test_sft_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/sft/gpt_finetune_output.csv")
 test_rag_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/rag/rag_gpt_output.csv")
 test_baseline_gpt <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/output/gpt/baseline/baseline_gpt_output.csv")
-# human_labeled <- read.csv("/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_iv_lit/training/data_prep_all_models/train_80.csv")
-
-# clean human_labeled to match column length
-#human_labeled <- human_labeled |>
-#  rename(
-#   File.Name = filename,
-#   Title = title,
-#    DOI = doi,
-#    Empirical.Analysis = emp_bin,
-#    Dependent.Variable.s. = dep_var,
-#    Endogeneity.Problem = end_bin,
-#    Endogenous.Variable.s. = end_var,
-#    Instrumental.Variable.Used = iv_bin,
-#    Instrumental.Variable.s. = iv_var,
-#   Instrumental.Variable.Rainfall = rain_bin,
-#    Rainfall.Instrument = rain_var
-#  ) |> 
-#  select(
-#    File.Name, Title, DOI, Empirical.Analysis, Dependent.Variable.s., Endogeneity.Problem, Endogenous.Variable.s.,
-#    Instrumental.Variable.Used, Instrumental.Variable.s., Instrumental.Variable.Rainfall, Rainfall.Instrument
-# )
 
 # full_baseline_gpt_output.csv never produced a row for
-# 10.5958/0974-0279.2022.00030.1 + and never separately extracted
+# 10.5958/0974-0279.2022.00030.1 and never separately extracted
 # 10.1016/j.jinteco.2013.07.008. Drop the same two
 # rows from rag/sft so all three implementations compare.
 drop_baseline_gap_rows <- function(df) {

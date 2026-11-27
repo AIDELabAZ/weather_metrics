@@ -54,7 +54,6 @@ MERGED_DIRS = {
     "gpt_finetune": os.path.join(OUTPUT_ROOT, "gpt", "sft"),
     "agentic":      os.path.join(OUTPUT_ROOT, "agentic"),
     "gpt_sol":      os.path.join(OUTPUT_ROOT, "gpt", "baseline_sol"),
-    "gemini_baseline": os.path.join(OUTPUT_ROOT, "gemini", "baseline"),
     "gemma_baseline":  os.path.join(OUTPUT_ROOT, "gemma", "baseline"),
     "llama_baseline":  os.path.join(OUTPUT_ROOT, "llama", "baseline"),
     "claude_baseline": os.path.join(OUTPUT_ROOT, "claude", "baseline"),
@@ -67,7 +66,7 @@ OUTPUT_DIR = OUTPUT_ROOT
 # ─── Families and approaches ─────────────────────────────────────────────────
 # Approach order is fixed and doubles as the color order; each approach's merged
 # CSV is MERGED_DIRS[key]/merged_data_{key}.csv. Missing files are skipped with
-# a warning so pending families can be listed here ahead of their data.
+# a warning.
 
 FAMILIES = {
     # Main text: implementations compared within one model family and vintage.
@@ -77,8 +76,7 @@ FAMILIES = {
             "gpt_baseline": "Zero-shot",
             "gpt_rag": "RAG",
             "gpt_finetune": "SFT",
-            # Agentic left out of this figure (still scored in model_eval.R):
-            # "agentic": "Agentic",
+            # The agentic run is scored in model_eval.R but not shown in this figure.
         },
         "footer": (
             "Zero-shot: gpt-4.1-2025-04-14  ·  RAG: gpt-4.1-2025-04-14 + "
@@ -86,26 +84,22 @@ FAMILIES = {
         ),
     },
     # Appendix / robustness: our best model against the newest zero-shot model
-    # in each family. Llama and Claude are skipped until their runs exist.
+    # in each family.
     "frontier": {
         "display": "Frontier",
         "approaches": {
             "gpt_finetune": "SFT (GPT-4.1)",
             "gpt_sol": "GPT-6.1 Sol",
-            "gemini_baseline": "Gemini 4 Argon",
             "gemma_baseline": "Gemma 4 26B",
             "llama_baseline": "Llama 4 Maverick",
             "claude_baseline": "Claude Opus 5.5",
         },
         "footer": (
             "SFT: ft:gpt-4.1-2025-04-14 (aide-lab)  ·  zero-shot: gpt-6.1-sol, "
-            "gemini-4-argon, gemma-4-26b-a4b-it-maas, "
+            "gemma-4-26b-a4b-it-maas, "
             "llama-4-maverick-17b-128e-instruct-maas, claude-opus-5-5"
         ),
     },
-    # "gemini": {"display": "Gemini", "approaches": {"gemini_finetune": "SFT"}, "footer": ""},
-    # "gemma":  {"display": "Gemma",  "approaches": {"gemma_finetune": "SFT"},  "footer": ""},
-    # "llama":  {"display": "Llama",  "approaches": {"llama_finetune": "SFT"},  "footer": ""},
 }
 
 # ─── Field and metric orderings (mirror model_eval.R) ────────────────────────
@@ -146,14 +140,13 @@ SURFACE = "#ffffff"
 
 # Approach colors in config order — matches the trio used in analysis/model_eval.R
 # (cyan/slate/green) so this script's figures read as the same series as the
-# existing R-generated ones. Note: the slate #484D6D is low-chroma and reads
-# close to gray, so it doesn't clear the dataviz skill's CVD-safety validator
-# the way the skill's reference trio does — kept anyway for cross-figure consistency.
-# 5th-9th (amber/purple/brown/pink/teal) are gpt_sol, gemini_baseline,
+# existing R-generated ones. The slate #484D6D is low-chroma and reads close to
+# gray; it is kept so each approach has the same color in every figure.
+# 5th-8th (amber/brown/pink/teal) are gpt_sol,
 # gemma_baseline, llama_baseline, claude_baseline, matching model_eval.R's
 # palette, which is indexed by position in model_paths (same order as
 # MERGED_DIRS above).
-APPROACH_COLORS = ["#08B2E3", "#484D6D", "#57A773", "#C1666B", "#E0A458", "#8C6BB1", "#8C5A3C",
+APPROACH_COLORS = ["#08B2E3", "#484D6D", "#57A773", "#C1666B", "#E0A458", "#8C5A3C",
                    "#D17CB0", "#3F7F8C"]
 
 MOSAIC_COLORS = {"TN": "#08B2E3", "FP": "#e34948", "FN": "#eda100", "TP": "#57A773"}
@@ -446,7 +439,7 @@ def make_family_figure(family_key, cfg):
                bbox_to_anchor=(0.05, 0.838), ncol=4, frameon=False, fontsize=7,
                handlelength=1.0, handleheight=1.0, columnspacing=1.0,
                handletextpad=1.0)
-    # Wrap long names (e.g. "Gemini 4 Argon") so adjacent narrow columns'
+    # Wrap long names (e.g. "Llama 4 Maverick") so adjacent narrow columns'
     # headers don't run together; drop the grid one line per extra header
     # line so wrapped headers clear the TN/FP/FN/TP legend above them.
     headers = [textwrap.fill(label, 10) for label in approaches]

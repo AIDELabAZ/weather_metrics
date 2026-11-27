@@ -62,13 +62,21 @@ MODELS = {
                 ("test", "claude/baseline/test_baseline_claude_output.csv")),
 }
 GROUPS = {
-    "gpt": {"keys": ["gpt", "rag_gpt", "sft_gpt"], "tex": "table3_gpt_agreement.tex",
+    "gpt": {"keys": ["gpt", "rag_gpt", "sft_gpt"], "tex": "gpt_agree.tex",
             "caption": "Cross-Implementation Agreement in Model-Labeled Rainfall-IV Records",
-            "label": "tab:full_output_agreement", "noun": "implementation"},
-    "frontier": {"keys": ["sol", "llama", "gemma", "claude"], "tex": "table_frontier_agreement.tex",
-                 "caption": "Cross-Model Agreement in Frontier-Model-Labeled Rainfall-IV Records",
-                 "label": "tab:frontier_output_agreement", "noun": "model"},
+            "label": "gpt_agree", "noun": "implementation"},
+    # GPT-4.1 SFT against the newest zero-shot model of each family; Panels C-D compare SFT with each of the others.
+    "frontier": {"keys": ["sft_gpt", "sol", "gemma", "llama", "claude"], "reference": "sft_gpt",
+                 "tex": "frontier_agree.tex",
+                 "caption": "Cross-Model Agreement in Model-Labeled Rainfall-IV Records",
+                 "label": "frontier_agree", "noun": "model"},
 }
+# Column headers of the frontier table (two lines each) and short names for its comparison columns.
+HEAD = {"sft_gpt": r"GPT-4.1\\SFT", "sol": r"GPT-6.1\\Sol", "gemma": r"Gemma 4\\26B", "llama": r"Llama 4\\Maverick",
+        "claude": r"Claude\\Opus 5.5"}
+SHORT = {"gpt": "Zero-shot", "rag_gpt": "RAG", "sft_gpt": "SFT", "sol": "Sol", "gemma": "Gemma", "llama": "Llama",
+         "claude": "Claude"}
+NUM = ["one", "two", "three", "four", "five", "six"]
 # Published Table 3 (GPT trio), used to check the rebuild.
 PUBLISHED = {"n": 3840, "pos": [160, 168, 187], "unique": [9, 14, 35], "union": 218, "all": 137,
              "exact": {2: 23, 1: 58},
@@ -109,12 +117,13 @@ def norm(s: str) -> str:
     return "; ".join(sorted(i for i in items if i))
 
 
-# AGREEMENT_DEDUPE=1: count each paper once. The 3,840 filenames include 19 papers stored twice under DOI
-# filenames that differ only in punctuation (10.1016_j.jue... / 10.1016j.jue...): 13 have one copy in the corpus
-# and one in the held-out set, 6 are doubled within the corpus. The published Table 3 counts both copies; with
-# this flag the corpus copy (else the first filename) is kept and outputs get a _dedup suffix.
-DEDUPE = os.environ.get("AGREEMENT_DEDUPE") == "1"
-SUFFIX = "_dedup" if DEDUPE else ""
+# Each paper is counted once (the paper's sample, also used by model_sankeys.py). The 3,840 filenames include 19
+# papers stored twice under DOI filenames that differ only in punctuation (10.1016_j.jue... / 10.1016j.jue...): 13
+# have one copy in the corpus and one in the held-out set, 6 are doubled within the corpus; the corpus copy (else
+# the first filename) is kept. AGREEMENT_ORIGINAL_SAMPLE=1 instead keeps all 3,840 filenames, as the published
+# Table 3 did, and writes *_original_sample outputs.
+DEDUPE = os.environ.get("AGREEMENT_ORIGINAL_SAMPLE") != "1"
+SUFFIX = "" if DEDUPE else "_original_sample"
 
 
 def dedupe(files: list[str]) -> list[str]:
@@ -201,7 +210,9 @@ def stats(group: str, frames: dict[str, pd.DataFrame]) -> tuple[dict, pd.DataFra
          "unique": [len(pos[k] - set.union(set(), *[pos[j] for j in keys if j != k])) for k in keys],
          "union": len(union), "all": len(core),
          "exact": {c: sum(v == c for v in n_pos.values()) for c in range(1, len(keys))}}
-    combos = [list(p) for p in itertools.combinations(keys, 2)] + [keys]
+    ref = GROUPS[group].get("reference")
+    combos = ([[ref, k] for k in keys if k != ref] if ref else
+              [list(p) for p in itertools.combinations(keys, 2)] + [keys])
     s["combos"] = combos
 
     def agree(cols, transform):
@@ -241,80 +252,144 @@ def pct(x, n):
     return f"{100 * x / n:.1f}"
 
 
+NOTE_COMMON = (r"Panel A counts explicit rainfall-IV labels of 1; all other codes are not counted as positive. ")
+NOTE_STRINGS = (r"In Panel C, strings are lowercased, whitespace is standardized, and semicolon-separated lists are "
+                r"sorted without removing repeated items. Missing-value strings remain literal and count as agreement "
+                r"when identical. Exact-string disagreement need not imply disagreement in meaning. Panel D reports "
+                r"agreement after assigning variables to the categories defined in Appendix~\ref{app:class}. "
+                r"Agreement requires identical sets of categories, including the residual categories Other and "
+                r"Unclassifiable. ")
+
+
+def dup_sentence() -> str:
+    return (" Papers stored under two filenames that differ only in DOI punctuation are counted once." if DEDUPE else
+            " Nineteen papers are stored under two filenames that differ only in DOI punctuation and are counted "
+            "under each.")
+
+
+def sample_noun() -> str:
+    return "unique papers" if DEDUPE else "unique filenames"
+
+
 def write_tex(group: str, s: dict) -> None:
+    (write_tex_frontier if GROUPS[group].get("reference") else write_tex_gpt)(group, s)
+    print(f"  table -> {os.path.join(OUT, GROUPS[group]['tex'].replace('.tex', f'{SUFFIX}.tex'))}")
+
+
+def _save(group: str, lines: list[str]) -> None:
+    with open(os.path.join(OUT, GROUPS[group]["tex"].replace(".tex", f"{SUFFIX}.tex")), "w") as f:
+        f.write("\n".join(lines) + "\n")
+
+
+def write_tex_gpt(group: str, s: dict) -> None:
+    """Table 3 layout (threeparttable): pairwise comparisons plus all three."""
     g, keys, n, m = GROUPS[group], s["keys"], s["n"], len(s["keys"])
     lab = [MODELS[k][0] for k in keys]
-    noun, nouns = g["noun"], g["noun"] + "s"
-    short = {"Zero-shot": "Zero-shot", "RAG": "RAG", "SFT": "SFT", "GPT-6.1 Sol": "Sol",
-             "Llama 4 Maverick": "Llama", "Gemma 4 26B": "Gemma", "Claude Opus 5.5": "Claude"}
-    combo_heads = ["--".join(short[MODELS[k][0]] for k in c) if len(c) < m else f"All {('three', 'four')[m - 3]}"
-                   for c in s["combos"]]
-    ncol = max(len(combo_heads), m) + 1
-    word = ("three", "four")[m - 3]
-    L = [r"\begin{table}[!htbp]", r"	\centering", rf"	\caption{{{g['caption']}}}", rf"	\label{{{g['label']}}}",
-         r"	\begin{threeparttable}", r"		\footnotesize",
-         rf"		\setlength{{\tabcolsep}}{{{5 if m == 3 else 4}pt}}",
-         r"		\renewcommand{\arraystretch}{1.18}", "",
-         # four models -> seven comparison columns: scale to the text width (needs graphicx)
-         *([] if m == 3 else [r"		\resizebox{\linewidth}{!}{%"]),
-         rf"		\begin{{tabular}}{{l{'r' * (ncol - 1)}}}",
-         r"			\toprule", "",
-         rf"			\multicolumn{{{ncol}}}{{l}}{{\textit{{Panel A: Rainfall-IV identification}}}} \\",
-         r"			\addlinespace[2pt]",
-         "				& " + " & ".join(lab) + " &" * (ncol - 1 - m) + r" \\", r"			\midrule"]
+    noun, nouns, word = g["noun"], g["noun"] + "s", NUM[m - 1]
+    heads = ["--".join(SHORT[k] for k in c) if len(c) < m else f"All {word}" for c in s["combos"]]
+    ncol = len(heads) + 1
     pad = " &" * (ncol - 1 - m)
-    L += [f"			Rainfall-IV papers & " + " & ".join(map(str, s["pos"])) + pad + r" \\",
-          f"			Share of common model-labeled corpus (\\%) & "
-          + " & ".join(f"{100 * p / n:.2f}" for p in s["pos"]) + pad + r" \\",
-          f"			Unique to {noun} & " + " & ".join(map(str, s["unique"])) + pad + r" \\", ""]
-    half = (ncol - 1) // 2
-    rest = ncol - 1 - half
-    L += [r"			\addlinespace[8pt]",
-          rf"			\multicolumn{{{ncol}}}{{l}}{{\textit{{Panel B: Cross-{noun} overlap in rainfall-IV identification}}}} \\",
-          r"			\addlinespace[2pt]",
-          rf"				& \multicolumn{{{half}}}{{c}}{{Papers}} & \multicolumn{{{rest}}}{{c}}{{Share of union (\%)}} \\",
-          r"			\midrule"]
-    b_rows = [(f"Identified by at least one {noun}", s["union"]), (f"Identified by all {word}", s["all"])]
-    b_rows += [(f"Identified by exactly {('one', 'two', 'three')[c - 1]}", s["exact"][c])
-               for c in range(m - 1, 0, -1)]
-    b_rows += [(f"Any disagreement across {nouns}", s["union"] - s["all"])]
-    for name, v in b_rows:
+    half, rest = (ncol - 1) // 2, ncol - 1 - (ncol - 1) // 2
+    L = [r"\begin{table}[!htbp]", r"	\centering", rf"	\caption{{{g['caption']}}}",
+         rf"	\label{{{g['label']}{SUFFIX}}}", r"	\begin{threeparttable}", r"		\footnotesize",
+         r"		\setlength{\tabcolsep}{5pt}", r"		\renewcommand{\arraystretch}{1.18}", "",
+         rf"		\begin{{tabular}}{{l{'r' * (ncol - 1)}}}", r"			\toprule", "",
+         rf"			\multicolumn{{{ncol}}}{{l}}{{\textit{{Panel A: Rainfall-IV identification}}}} \\",
+         r"			\addlinespace[2pt]", "				& " + " & ".join(lab) + pad + r" \\", r"			\midrule",
+         "			Rainfall-IV papers & " + " & ".join(map(str, s["pos"])) + pad + r" \\",
+         r"			Share of common model-labeled corpus (\%) & "
+         + " & ".join(f"{100 * p / n:.2f}" for p in s["pos"]) + pad + r" \\",
+         f"			Unique to {noun} & " + " & ".join(map(str, s["unique"])) + pad + r" \\", "",
+         r"			\addlinespace[8pt]",
+         rf"			\multicolumn{{{ncol}}}{{l}}{{\textit{{Panel B: Cross-{noun} overlap in rainfall-IV identification}}}} \\",
+         r"			\addlinespace[2pt]",
+         rf"				& \multicolumn{{{half}}}{{c}}{{Papers}} & \multicolumn{{{rest}}}{{c}}{{Share of union (\%)}} \\",
+         r"			\midrule"]
+    for name, v in panel_b_rows(s, noun, nouns):
         L.append(rf"			{name} & \multicolumn{{{half}}}{{c}}{{{v}}} & \multicolumn{{{rest}}}{{c}}{{{pct(v, s['union'])}}} \\")
-
-    def panel(title, rows):
-        out = ["", r"			\addlinespace[8pt]",
-               rf"			\multicolumn{{{ncol}}}{{l}}{{\textit{{{title}}}}} \\", r"			\addlinespace[2pt]",
-               "				& " + " & ".join(combo_heads) + r" \\", r"			\midrule"]
-        for name, vals in rows.items():
-            out.append(f"			{name} & " + " & ".join(f"{v} ({pct(v, s['all'])})" for v in vals) + r" \\")
-        return out
-
-    L += panel(f"Panel C: Exact agreement conditional on rainfall-IV identification by all {word}", s["C"])
-    L += panel(f"Panel D: Category agreement conditional on rainfall-IV identification by all {word}", s["D"])
-    L += ["", r"			\bottomrule", r"		\end{tabular}" + ("" if m == 3 else "}"), "",
-          r"		\begin{tablenotes}[flushleft]", r"			\footnotesize",
-          rf"			\item \textit{{Note:}} The sample contains {n:,} "
-          + ("unique papers" if DEDUPE else "unique filenames") + " with model-generated labels from all "
-          rf"{word} {nouns}: the full-corpus extraction plus the papers of the common held-out evaluation set. "
-          + ("" if DEDUPE else "Nineteen papers are stored under two filenames that differ only in DOI punctuation "
-                               "and are counted under each. ")
-          + r"The "
-          r"non-held-out human-reference records are not included. Panel A counts explicit rainfall-IV labels of 1; all "
-          rf"other codes are not counted as positive. Panel B reports overlap among the {s['union']} papers labeled "
-          rf"positive by at least one {noun}. Panels C and D report agreement among the {s['all']} papers labeled "
-          r"positive by all " + word + r", with percentages of that sample in parentheses. In Panel C, strings are "
-          r"lowercased, whitespace is standardized, and semicolon-separated lists are sorted without removing repeated "
-          r"items. Missing-value strings remain literal and count as agreement when identical. Exact-string "
-          r"disagreement need not imply disagreement in meaning. In Panel D, each rainfall instrument and endogenous "
-          r"variable is assigned a taxonomy category by Qwen3-32B (taxonomy and decision rules in the prompt), and two "
-          rf"{nouns} agree when they give a paper the same set of categories (Other and Unclassifiable count as "
-          r"categories). The last row of each panel requires agreement on both rainfall instruments and endogenous "
-          r"variables, not their within-paper pairings."
-          + (r" Papers stored under two filenames that differ only in DOI punctuation are counted once."
-             if DEDUPE else ""),
+    for p, title in (("C", "Exact"), ("D", "Category")):
+        L += ["", r"			\addlinespace[8pt]",
+              rf"			\multicolumn{{{ncol}}}{{l}}{{\textit{{Panel {p}: {title} agreement conditional on rainfall-IV "
+              r"identification}} \\", r"			\addlinespace[2pt]",
+              "				& " + " & ".join(heads) + r" \\", r"			\midrule"]
+        L += [f"			{name} & " + " & ".join(f"{v} ({pct(v, s['all'])})" for v in vals) + r" \\"
+              for name, vals in s[p].items()]
+    L += ["", r"			\bottomrule", r"		\end{tabular}", "", r"		\begin{tablenotes}[flushleft]", r"			\footnotesize",
+          rf"			\item \textit{{Note:}} The sample contains {n:,} {sample_noun()} with model-generated labels from "
+          rf"all {word} {nouns}: the full-corpus extraction plus the papers of the common held-out evaluation set. "
+          r"The non-held-out human-reference records are not included. " + NOTE_COMMON
+          + rf"Panel B reports overlap among the {s['union']} papers labeled positive by at least one {noun}. "
+          rf"Panels C and D report agreement among the {s['all']} papers labeled positive by all {word}, with "
+          r"percentages of that sample in parentheses. " + NOTE_STRINGS
+          + r"The last row of each panel requires agreement on both rainfall instruments and endogenous variables, "
+          r"not their within-paper pairings." + dup_sentence(),
           r"		\end{tablenotes}", r"	\end{threeparttable}", r"\end{table}"]
-    with open(os.path.join(OUT, g["tex"].replace(".tex", f"{SUFFIX}.tex")), "w") as f:
-        f.write("\n".join(L) + "\n")
+    _save(group, L)
+
+
+def panel_b_rows(s: dict, noun: str, nouns: str) -> list[tuple[str, int]]:
+    m = len(s["keys"])
+    rows = [(f"Identified by at least one {noun}", s["union"]), (f"Identified by all {NUM[m - 1]}", s["all"])]
+    rows += [(f"Identified by exactly {NUM[c - 1]}", s["exact"][c]) for c in range(m - 1, 0, -1)]
+    return rows + [(f"Any disagreement across {nouns}", s["union"] - s["all"])]
+
+
+def write_tex_frontier(group: str, s: dict) -> None:
+    """Frontier layout (minipage, two tabulars): GPT-4.1 SFT compared with each other model in Panels C-D."""
+    g, keys, n, m = GROUPS[group], s["keys"], s["n"], len(s["keys"])
+    ref = g["reference"]
+    others = [k for k in keys if k != ref]
+    word = NUM[m - 1]
+    w_a = 0.60 / m  # Panel A/B model columns share 60% of the width; the label column takes 40%
+    w_c = 0.60 / len(others)
+    half, rest = m // 2, m - m // 2
+    mc = lambda span, text: rf"\multicolumn{{{span}}}{{@{{}}c@{{}}}}{{{text}}}"
+    share_head = r"Share of union (\%)"
+    L = [r"\begin{table}[!htbp]", r"    \centering", rf"    \caption{{{g['caption']}}}",
+         rf"    \label{{{g['label']}{SUFFIX}}}", r"    \begin{minipage}{\linewidth}", r"        \footnotesize",
+         r"        \setlength{\tabcolsep}{4pt}", r"        \renewcommand{\arraystretch}{1.00}",
+         r"        \setlength{\parskip}{0pt}", "",
+         rf"        \noindent\begin{{tabular}}{{@{{}}p{{0.40\linewidth}}*{{{m}}}{{@{{}}>{{\centering\arraybackslash}}"
+         rf"p{{{w_a:.2f}\linewidth}}}}@{{}}}}",
+         r"            \toprule", "",
+         rf"            \multicolumn{{{m + 1}}}{{@{{}}l@{{}}}}{{\textit{{Panel A: Rainfall-IV identification}}}} \\",
+         r"            \addlinespace[1pt]"]
+    L += ["                & " + "\n                & ".join(rf"\shortstack[c]{{{HEAD[k]}}}" for k in keys) + r" \\",
+          r"            \midrule",
+          "            Rainfall-IV papers & " + " & ".join(map(str, s["pos"])) + r" \\",
+          r"            Share of common model-labeled corpus (\%) & "
+          + " & ".join(f"{100 * p / n:.2f}" for p in s["pos"]) + r" \\",
+          "            Unique to model & " + " & ".join(map(str, s["unique"])) + r" \\", "",
+          r"            \addlinespace[4pt]",
+          rf"            \multicolumn{{{m + 1}}}{{@{{}}l@{{}}}}{{\textit{{Panel B: Cross-model overlap in rainfall-IV "
+          r"identification}} \\", r"            \addlinespace[1pt]",
+          f"                & {mc(half, 'Papers')} & {mc(rest, share_head)} " + r"\\", r"            \midrule"]
+    L += [f"            {name} & {mc(half, v)} & {mc(rest, pct(v, s['union']))} " + r"\\"
+          for name, v in panel_b_rows(s, "model", "models")]
+    L += ["", r"        \end{tabular}\par\vspace{4pt}",
+          rf"        \noindent\begin{{tabular}}{{@{{}}p{{0.40\linewidth}}*{{{len(others)}}}{{@{{}}>{{\centering"
+          rf"\arraybackslash}}p{{{w_c:.2f}\linewidth}}}}@{{}}}}"]
+    heads = " & ".join(f"{SHORT[ref]}--{SHORT[k]}" for k in others)
+    for i, (p, title) in enumerate((("C", "Exact"), ("D", "Category"))):
+        L += ([] if i == 0 else ["", r"            \addlinespace[4pt]"])
+        L += [rf"            \multicolumn{{{len(others) + 1}}}{{@{{}}l@{{}}}}{{\textit{{Panel {p}: {title} agreement "
+              r"conditional on rainfall-IV identification}} \\", r"            \addlinespace[1pt]",
+              f"                & {heads} " + r"\\", r"            \midrule"]
+        L += [f"            {name} & " + " & ".join(f"{v} ({pct(v, s['all'])})" for v in vals) + r" \\"
+              for name, vals in s[p].items()]
+    L += ["", r"            \bottomrule", r"        \end{tabular}", "", r"        \par\smallskip", r"        \footnotesize",
+          r"        \raggedright",
+          rf"        \noindent\textit{{Note:}} The sample contains {n:,} {sample_noun()} with model-generated labels from "
+          rf"all {word} models: the full-corpus extraction plus the papers of the common held-out evaluation set. "
+          r"The non-held-out "
+          r"human-reference records are not included. " + NOTE_COMMON
+          + rf"Panel B reports overlap among the {s['union']} papers labeled positive by at least one model. Panels C "
+          rf"and D compare GPT-4.1 SFT to each of the {NUM[len(others) - 1]} other models among the {s['all']} papers "
+          rf"labeled positive by all {word}, with percentages of that sample in parentheses. " + NOTE_STRINGS
+          + r"The last row of Panels C and D requires agreement on both rainfall instruments and endogenous "
+          r"variables, not their within-paper pairings." + dup_sentence(),
+          r"    \end{minipage}", r"\end{table}"]
+    _save(group, L)
 
 
 def long_stats(group: str, s: dict) -> list[dict]:

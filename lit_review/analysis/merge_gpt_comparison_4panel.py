@@ -22,7 +22,7 @@ MERGED_DIRS, where model_eval.R writes them. Panel d's KDE PNGs are read from
 writing/figures/, so copy model_eval.R's fresh similarity_kdensities*.png
 (from output/gpt/ and output/frontier/) there before running this.
 
-Run with: /Users/kieran/.virtualenvs/bert_env/bin/python3 analysis/merge_gpt_comparison_4panel.py
+Run with: /opt/anaconda3/bin/python3 analysis/merge_gpt_comparison_4panel.py
 """
 
 import os
@@ -51,8 +51,8 @@ FIGURES_DIR = (
 
 # Per comparison set: panel d's KDE source images (regular 3 x 2 grid and the
 # wide 2 x 3 one, both written by model_eval.R's build_similarity_density_plot)
-# and whether a missing merged CSV is an error (gpt) or a pending run that is
-# skipped (frontier). Output filenames are prefixed with the set's key.
+# and whether a missing merged CSV is an error (gpt) or is skipped with a
+# warning (frontier). Output filenames are prefixed with the set's key.
 COMPARISONS = {
     "gpt": {
         "kde": os.path.join(FIGURES_DIR, "similarity_kdensities.png"),

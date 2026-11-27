@@ -1,7 +1,6 @@
 """
 Rainfall-IV -> endogenous-variable Sankeys for the newest-model zero-shot
-baselines (GPT-6.1 Sol, Gemini 4 Argon, Gemma 4 26B, Llama 4 Maverick,
-Claude Opus 5.5).
+baselines (GPT-6.1 Sol, Gemma 4 26B, Llama 4 Maverick, Claude Opus 5.5).
 
 Runs sankey_iv_clustering.main() unchanged once per model, swapping only its
 input/output path constants. Unlike the GPT-4.1 Sankeys (built on the full
@@ -37,7 +36,6 @@ ROOT = "/Users/kieran/Library/CloudStorage/OneDrive-UniversityofArizona/weather_
 # model key -> output/ subfolder holding test_baseline_<key>_output.csv
 BASELINES = {
     "sol":    "gpt/baseline_sol",
-    "gemini": "gemini/baseline",
     "gemma":  "gemma/baseline",
     "llama":  "llama/baseline",
     "claude": "claude/baseline",

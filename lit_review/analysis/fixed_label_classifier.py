@@ -115,9 +115,8 @@ GATES = ("reranker", "judge", "concept")
 CATEGORY_METHOD = "category-v1"
 GATE_METHOD = {"reranker": "reranker-gate-v1", "judge": "judge-gate-v1", "concept": "concept-gate-v1"}
 # Real-category candidates per entry passed to the reranker (Other is always
-# added); None = every category. All ~22 are cheap to score, and the
-# embedding top-1 looked biased under the old taxonomy, so don't let
-# retrieval prune the right label.
+# added); None = every category. All ~22 are cheap to score, so the embedding
+# retrieval is never allowed to prune the right label.
 RERANK_TOP_K: int | None = None
 GATE_THRESHOLD = 0.5     # P(yes) for the gate's "can this entry be interpreted?" question
 RERANK_BATCH_SIZE = 16
@@ -306,14 +305,14 @@ def _concept_prompt_v1(side_name: str, entry: str) -> str:
 _CONCEPT_PROMPTS.update(v1=_concept_prompt_v1, v2=_concept_prompt_v2, v3=_concept_prompt_v3)
 
 
-# Rainfall names that state no construction at all (user decision, Nov 2026):
+# Rainfall names that state no construction at all:
 # the bare word, optionally squared. "log rainfall", "rainfall dummy", "lags
 # of rainfall" etc. are interpretable (log of the total, rained / didn't
 # rain, ...) and are NOT listed. Matched after lower-casing and trimming.
 BARE_RAINFALL = {
     "rainfall", "rainfalls", "rain", "precipitation",
     "rainfall squared", "rainfall square", "precipitation squared", "precipitation square",
-    # Same thing with units, a role word, or a subscript/truncation (lags are NOT bare: user decision).
+    # Same thing with units, a role word, or a subscript/truncation (lags are not bare).
     "precip", "precipi", "precipi,t", "rainfalli", "rainfall (mm)", "precipitation (mm)",
     "amount of rainfall", "rainfall amount", "rainfall iv",
 }

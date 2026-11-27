@@ -38,7 +38,7 @@ from datetime import datetime
 
 
 # Llama access (licence) is enabled on miningmeaning, not on the project
-# (311885870283) the Gemini/Gemma baselines ran on.
+# (311885870283) the Gemma baseline ran on.
 GCP_PROJECT  = "miningmeaning"
 GCP_LOCATION = "us-east5"
 VERTEX_HOST  = "us-east5-aiplatform.googleapis.com"

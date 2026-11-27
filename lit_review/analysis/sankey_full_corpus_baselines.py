@@ -1,8 +1,7 @@
 """
 Rainfall-IV -> endogenous-variable Sankeys for the newest-model zero-shot
 baselines run on the full papers/ corpus (Oct 2026): GPT-6.1 Sol, Llama 4
-Maverick, Gemma 4 26B, Claude Opus 5.5. Gemini 4 Argon was only run on the
-88-paper test set (see sankey_frontier_baselines.py).
+Maverick, Gemma 4 26B, Claude Opus 5.5.
 
 Runs sankey_iv_clustering.main() unchanged once per model, swapping only its
 input/output path constants, like sankey_frontier_baselines.py. Input is each
